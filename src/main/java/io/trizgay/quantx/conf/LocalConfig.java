@@ -11,7 +11,7 @@ public class LocalConfig {
         this.server = server;
     }
 
-    static class Server {
+    public static class Server {
         private int port;
 
         private String path;
@@ -48,7 +48,7 @@ public class LocalConfig {
 
     private Pg readWrite;
 
-    static class Pg {
+    public static class Pg {
         private Pool pool;
         private String host;
         private Integer port;
@@ -105,7 +105,7 @@ public class LocalConfig {
         }
     }
 
-    static class Pool {
+    public static class Pool {
         private Integer maxSize = 4;
         private Integer maxWaitQueueSize = -1;
         private Integer idleTimeout = 0;
