@@ -217,7 +217,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Main-Class>io.vertx.core.Launcher</Main-Class>
-                                        <Main-Verticle>io.trizgay.MainVerticle</Main-Verticle>
+                                        <Main-Verticle>io.trizgay.quantx.MainVerticle</Main-Verticle>
                                     </manifestEntries>
                                 </transformer>
                                 <transformer

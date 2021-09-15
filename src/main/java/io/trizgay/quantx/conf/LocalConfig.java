@@ -1,4 +1,4 @@
-package io.trizgay.conf;
+package io.trizgay.quantx.conf;
 
 public class LocalConfig {
     public static class Server {

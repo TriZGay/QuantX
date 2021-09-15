@@ -1,7 +1,7 @@
-package io.trizgay.http;
+package io.trizgay.quantx.http;
 
-import io.trizgay.http.handler.MonitorHandler;
-import io.trizgay.utils.Config;
+import io.trizgay.quantx.http.handler.MonitorHandler;
+import io.trizgay.quantx.utils.Config;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;

@@ -1,6 +1,6 @@
-package io.trizgay.utils;
+package io.trizgay.quantx.utils;
 
-import io.trizgay.conf.LocalConfig;
+import io.trizgay.quantx.conf.LocalConfig;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;

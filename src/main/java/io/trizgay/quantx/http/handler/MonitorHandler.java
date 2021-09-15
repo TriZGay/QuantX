@@ -1,6 +1,6 @@
-package io.trizgay.http.handler;
+package io.trizgay.quantx.http.handler;
 
-import io.trizgay.utils.Log;
+import io.trizgay.quantx.utils.Log;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;

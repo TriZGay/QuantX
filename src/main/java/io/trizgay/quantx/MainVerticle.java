@@ -1,8 +1,8 @@
-package io.trizgay;
+package io.trizgay.quantx;
 
-import io.trizgay.http.HttpVerticle;
-import io.trizgay.utils.Config;
-import io.trizgay.utils.Log;
+import io.trizgay.quantx.http.HttpVerticle;
+import io.trizgay.quantx.utils.Config;
+import io.trizgay.quantx.utils.Log;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;

@@ -1,4 +1,4 @@
-package io.trizgay.utils;
+package io.trizgay.quantx.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
