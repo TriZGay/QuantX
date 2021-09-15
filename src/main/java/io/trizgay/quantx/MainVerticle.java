@@ -1,5 +1,7 @@
 package io.trizgay.quantx;
 
+import io.trizgay.quantx.db.ReadOnlyVerticle;
+import io.trizgay.quantx.db.ReadWriteVerticle;
 import io.trizgay.quantx.http.HttpVerticle;
 import io.trizgay.quantx.utils.Config;
 import io.trizgay.quantx.utils.Log;
@@ -13,11 +15,46 @@ public class MainVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) throws Exception {
         Log.init();
         Config.initLocalConfig(vertx)
+                .compose(v -> startReadOnlyDbClient())
+                .compose(v -> startReadWriteDbClient())
                 .compose(v -> startHttpServer())
                 .onSuccess(ar -> {
                     Log.info("启动成功!");
                     startPromise.complete();
                 }).onFailure(startPromise::fail);
+    }
+
+    private Future<Void> startReadOnlyDbClient() {
+        Promise<Void> promise = Promise.promise();
+        vertx.deployVerticle(ReadOnlyVerticle.class.getName(),
+                new DeploymentOptions(),
+                ar -> {
+                    if (ar.succeeded()) {
+                        Log.info("数据库只读客户端启动成功!");
+                        promise.complete();
+                    } else {
+                        Log.error("数据库只读客户端启动失败!", ar.cause());
+                        promise.fail(ar.cause());
+                    }
+                });
+        return promise.future();
+    }
+
+    private Future<Void> startReadWriteDbClient() {
+        Promise<Void> promise = Promise.promise();
+        vertx.deployVerticle(ReadWriteVerticle.class.getName(),
+                new DeploymentOptions(),
+                ar -> {
+                    if (ar.succeeded()) {
+                        Log.info("数据库读写客户端启动成功!");
+                        promise.complete();
+                    } else {
+                        Log.error("数据库读写客户端启动失败!", ar.cause());
+                        promise.fail(ar.cause());
+                    }
+                });
+        return promise.future();
+
     }
 
     private Future<Void> startHttpServer() {
