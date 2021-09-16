@@ -31,7 +31,7 @@ public class HttpVerticle extends AbstractVerticle {
                     mainRouter.mountSubRouter(Config.localConfig().getServer().getPath(), subRouter);
                     httpServer = vertx.createHttpServer(
                             new HttpServerOptions()
-                                    .setPort(8901)
+                                    .setPort(Config.localConfig().getServer().getPort())
                                     .setHost(Config.localConfig().getServer().getHost())
                     ).requestHandler(mainRouter);
                     return httpServer.listen().mapEmpty();
