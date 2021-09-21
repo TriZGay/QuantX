@@ -18,10 +18,19 @@ public class MainVerticle extends AbstractVerticle {
                 .compose(v -> startReadOnlyDbClient())
                 .compose(v -> startReadWriteDbClient())
                 .compose(v -> startHttpServer())
+                .compose(v -> startCollector())
                 .onSuccess(ar -> {
                     Log.info("启动成功!");
                     startPromise.complete();
                 }).onFailure(startPromise::fail);
+    }
+
+    private Future<Void> startCollector() {
+        Promise<Void> promise = Promise.promise();
+        vertx.setPeriodic(2000L, ar -> {
+
+        });
+        return promise.future();
     }
 
     private Future<Void> startReadOnlyDbClient() {
