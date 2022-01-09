@@ -1,8 +1,21 @@
 openapi: 3.0.3
 info:
   version: 1.0.0
-  title:
-  description:
+  title: QuantX对外接口
+  description: QuantX的服务器端所有接口
 servers:
-  - url:
+  - url: http://localhost:8900/quantx/api
 paths:
+  /v1/updPlt:
+    put:
+      summary: 更新板块信息
+      description: 更新板块信息,成功返回200,失败返回相关错误
+      operationId: updatePlateInfo
+      x-vertx-event-bus: openapi.quantx
+      responses:
+        200:
+          description: 成功更新板块信息
+          content:
+            application/json:
+              schema:
+                type: object
