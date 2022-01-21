@@ -1,5 +1,6 @@
 package io.trizgay.quantx.http;
 
+import io.trizgay.quantx.domain.BizServiceDispatcher;
 import io.trizgay.quantx.http.controller.BizController;
 import io.trizgay.quantx.http.handler.MonitorHandler;
 import io.trizgay.quantx.utils.Config;
@@ -14,26 +15,25 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.serviceproxy.ServiceBinder;
 
+import static io.trizgay.quantx.utils.Constants.CONFIG_PG_EVENT_BUS;
 import static io.trizgay.quantx.utils.Constants.X_VERTX_EVENT_BUS;
 
 public class HttpVerticle extends AbstractVerticle {
     private HttpServer httpServer;
+    private BizServiceDispatcher dispatcher;
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
-        initOpenApi()
-                .compose(v -> startHttpServer())
-                .onComplete(startPromise);
+        initOpenApi();
+        startHttpServer().onComplete(startPromise);
     }
 
-    private Future<Void> initOpenApi() {
-        Promise<Void> promise = Promise.promise();
+    private void initOpenApi() {
         ServiceBinder serviceBinder = new ServiceBinder(vertx);
-
+        dispatcher = BizServiceDispatcher.createProxy(vertx, CONFIG_PG_EVENT_BUS);
         serviceBinder.setAddress(X_VERTX_EVENT_BUS)
-                .register(BizController.class, BizController.create());
+                .register(BizController.class, BizController.create(dispatcher));
 
-        return promise.future();
     }
 
     private Future<Void> startHttpServer() {

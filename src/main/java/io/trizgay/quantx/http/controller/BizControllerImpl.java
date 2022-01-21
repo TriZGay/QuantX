@@ -1,5 +1,6 @@
 package io.trizgay.quantx.http.controller;
 
+import io.trizgay.quantx.domain.BizServiceDispatcher;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -8,6 +9,12 @@ import io.vertx.ext.web.api.service.ServiceRequest;
 import io.vertx.ext.web.api.service.ServiceResponse;
 
 public class BizControllerImpl implements BizController {
+    private final BizServiceDispatcher dispatcher;
+
+    public BizControllerImpl(BizServiceDispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+    }
+
     @Override
     public void updatePlateInfo(ServiceRequest request,
                                 Handler<AsyncResult<ServiceResponse>> resultHandler) {

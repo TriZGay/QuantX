@@ -167,7 +167,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <skip>true</skip>
                     <argLine>-javaagent:${jetty.alpnAgent.path}</argLine>
                 </configuration>
             </plugin>

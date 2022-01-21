@@ -7,11 +7,22 @@ servers:
   - url: http://localhost:8900/quantx/api
 paths:
   /v1/updPlt:
-    put:
+    post:
       summary: 更新板块信息
       description: 更新板块信息,成功返回200,失败返回相关错误
       operationId: updatePlateInfo
       x-vertx-event-bus: openapi.quantx
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                market:
+                  type: integer
+                plateSetType:
+                  type: integer
       responses:
         200:
           description: 成功更新板块信息

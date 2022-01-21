@@ -10,35 +10,31 @@
     "isEnableEncrypt": false
   },
   "readOnly": {
-    "pg": {
-      "host": "",
-      "port": 0,
-      "db": "",
-      "user": "",
-      "password": "",
-      "pool": {
-        "maxSize": 4,
-        "maxWaitQueueSize": -1,
-        "idleTimeout": 0,
-        "poolCleanerPeriod": 1000,
-        "connectionTimeout": 30
-      }
+    "host": "",
+    "port": 0,
+    "db": "",
+    "user": "",
+    "password": "",
+    "pool": {
+      "maxSize": 4,
+      "maxWaitQueueSize": -1,
+      "idleTimeout": 0,
+      "poolCleanerPeriod": 1000,
+      "connectionTimeout": 30
     }
   },
   "readWrite": {
-    "pg": {
-      "host": "",
-      "port": 0,
-      "db": "",
-      "user": "",
-      "password": "",
-      "pool": {
-        "maxSize": 4,
-        "maxWaitQueueSize": -1,
-        "idleTimeout": 0,
-        "poolCleanerPeriod": 1000,
-        "connectionTimeout": 30
-      }
+    "host": "",
+    "port": 0,
+    "db": "",
+    "user": "",
+    "password": "",
+    "pool": {
+      "maxSize": 4,
+      "maxWaitQueueSize": -1,
+      "idleTimeout": 0,
+      "poolCleanerPeriod": 1000,
+      "connectionTimeout": 30
     }
   }
 }

@@ -2,6 +2,7 @@ package io.trizgay.quantx.conf;
 
 public class LocalConfig {
     private Server server;
+
     private FT ft;
 
     public FT getFt() {
@@ -41,7 +42,7 @@ public class LocalConfig {
             this.port = port;
         }
 
-        public boolean isEnableEncrypt() {
+        public boolean getIsEnableEncrypt() {
             return isEnableEncrypt;
         }
 
