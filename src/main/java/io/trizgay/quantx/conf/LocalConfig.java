@@ -2,6 +2,15 @@ package io.trizgay.quantx.conf;
 
 public class LocalConfig {
     private Server server;
+    private FT ft;
+
+    public FT getFt() {
+        return ft;
+    }
+
+    public void setFt(FT ft) {
+        this.ft = ft;
+    }
 
     public Server getServer() {
         return server;
@@ -9,6 +18,36 @@ public class LocalConfig {
 
     public void setServer(Server server) {
         this.server = server;
+    }
+
+    public static class FT {
+        private String url;
+        private Integer port;
+        private boolean isEnableEncrypt;
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public Integer getPort() {
+            return port;
+        }
+
+        public void setPort(Integer port) {
+            this.port = port;
+        }
+
+        public boolean isEnableEncrypt() {
+            return isEnableEncrypt;
+        }
+
+        public void setEnableEncrypt(boolean enableEncrypt) {
+            isEnableEncrypt = enableEncrypt;
+        }
     }
 
     public static class Server {
@@ -173,6 +212,7 @@ public class LocalConfig {
     public String toString() {
         return "LocalConfig{" +
                 "server=" + server +
+                ", ft=" + ft +
                 ", readOnly=" + readOnly +
                 ", readWrite=" + readWrite +
                 '}';

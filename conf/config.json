@@ -4,6 +4,11 @@
     "path": "/quantx/api",
     "host": "0.0.0.0"
   },
+  "ft": {
+    "url": "127.0.0.1",
+    "port": 11111,
+    "isEnableEncrypt": false
+  },
   "readOnly": {
     "pg": {
       "host": "",
