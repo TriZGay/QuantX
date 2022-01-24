@@ -151,6 +151,7 @@ public class LocalConfig {
         private Integer idleTimeout = 0;
         private Integer poolCleanerPeriod = 1000;
         private Integer connectionTimeout = 30;
+        private String poolName = "shardPool";
 
         public Integer getMaxSize() {
             return maxSize;
@@ -190,6 +191,14 @@ public class LocalConfig {
 
         public void setConnectionTimeout(Integer connectionTimeout) {
             this.connectionTimeout = connectionTimeout;
+        }
+
+        public String getPoolName() {
+            return poolName;
+        }
+
+        public void setPoolName(String poolName) {
+            this.poolName = poolName;
         }
     }
 

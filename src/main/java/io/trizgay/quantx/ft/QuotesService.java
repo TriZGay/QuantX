@@ -9,8 +9,8 @@ import io.trizgay.quantx.utils.Config;
 import io.trizgay.quantx.utils.Log;
 
 public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
-    private final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
     private static final String clientID = "javaclient";
+    private final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
     public QuotesService() {
         qot.setClientInfo(clientID, 1);

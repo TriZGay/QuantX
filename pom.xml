@@ -14,7 +14,7 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.doc.encoding>UTF-8</maven.doc.encoding>
-        <vertx.version>4.1.2</vertx.version>
+        <vertx.version>4.2.4</vertx.version>
         <junit-jupiter.version>5.7.0</junit-jupiter.version>
         <assertj-core.version>3.8.0</assertj-core.version>
         <jetty.alpnAgent.version>2.0.7</jetty.alpnAgent.version>

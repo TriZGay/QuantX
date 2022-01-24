@@ -15,8 +15,8 @@ public class MainVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) throws Exception {
         Log.init();
         Config.initLocalConfig(vertx)
-//                .compose(v -> startReadOnlyDbClient())
-//                .compose(v -> startReadWriteDbClient())
+                .compose(v -> startReadOnlyDbClient())
+                .compose(v -> startReadWriteDbClient())
                 .compose(v -> startHttpServer())
                 .onSuccess(ar -> {
                     Log.info("启动成功!");
@@ -54,7 +54,6 @@ public class MainVerticle extends AbstractVerticle {
                     }
                 });
         return promise.future();
-
     }
 
     private Future<Void> startHttpServer() {

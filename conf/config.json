@@ -20,21 +20,23 @@
       "maxWaitQueueSize": -1,
       "idleTimeout": 0,
       "poolCleanerPeriod": 1000,
-      "connectionTimeout": 30
+      "connectionTimeout": 30,
+      "poolName": "shardPool"
     }
   },
   "readWrite": {
-    "host": "",
-    "port": 0,
-    "db": "",
-    "user": "",
-    "password": "",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "db": "quantx",
+    "user": "postgres",
+    "password": "postgres",
     "pool": {
       "maxSize": 4,
       "maxWaitQueueSize": -1,
       "idleTimeout": 0,
       "poolCleanerPeriod": 1000,
-      "connectionTimeout": 30
+      "connectionTimeout": 30,
+      "poolName": "shardPool"
     }
   }
 }

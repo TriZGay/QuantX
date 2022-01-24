@@ -1,6 +1,7 @@
 package io.trizgay.quantx.http.controller;
 
 import io.trizgay.quantx.domain.BizServiceDispatcher;
+import io.trizgay.quantx.http.pojo.GetPlateSetRequest;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -16,7 +17,8 @@ public class BizControllerImpl implements BizController {
     }
 
     @Override
-    public void updatePlateInfo(ServiceRequest request,
+    public void updatePlateInfo(GetPlateSetRequest body,
+                                ServiceRequest request,
                                 Handler<AsyncResult<ServiceResponse>> resultHandler) {
         resultHandler.handle(Future.succeededFuture(
                 ServiceResponse.completedWithPlainText(Buffer.buffer("yes"))

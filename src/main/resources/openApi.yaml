@@ -6,7 +6,7 @@ info:
 servers:
   - url: http://localhost:8900/quantx/api
 paths:
-  /v1/updPlt:
+  /v1/plateInfo:
     post:
       summary: 更新板块信息
       description: 更新板块信息,成功返回200,失败返回相关错误
