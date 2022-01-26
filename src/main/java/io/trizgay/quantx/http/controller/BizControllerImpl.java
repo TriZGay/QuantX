@@ -1,6 +1,6 @@
 package io.trizgay.quantx.http.controller;
 
-import io.trizgay.quantx.domain.BizServiceDispatcher;
+import io.trizgay.quantx.domain.BizService;
 import io.trizgay.quantx.http.pojo.GetPlateSetRequest;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -10,10 +10,10 @@ import io.vertx.ext.web.api.service.ServiceRequest;
 import io.vertx.ext.web.api.service.ServiceResponse;
 
 public class BizControllerImpl implements BizController {
-    private final BizServiceDispatcher dispatcher;
+    private final BizService bizService;
 
-    public BizControllerImpl(BizServiceDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
+    public BizControllerImpl(BizService bizService) {
+        this.bizService = bizService;
     }
 
     @Override

@@ -84,8 +84,6 @@ public class LocalConfig {
 
     }
 
-    private Pg readOnly;
-
     private Pg readWrite;
 
     public static class Pg {
@@ -202,14 +200,6 @@ public class LocalConfig {
         }
     }
 
-    public Pg getReadOnly() {
-        return readOnly;
-    }
-
-    public void setReadOnly(Pg readOnly) {
-        this.readOnly = readOnly;
-    }
-
     public Pg getReadWrite() {
         return readWrite;
     }
@@ -223,7 +213,6 @@ public class LocalConfig {
         return "LocalConfig{" +
                 "server=" + server +
                 ", ft=" + ft +
-                ", readOnly=" + readOnly +
                 ", readWrite=" + readWrite +
                 '}';
     }

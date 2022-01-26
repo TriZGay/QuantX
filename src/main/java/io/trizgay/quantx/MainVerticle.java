@@ -1,7 +1,6 @@
 package io.trizgay.quantx;
 
-import io.trizgay.quantx.db.ReadOnlyVerticle;
-import io.trizgay.quantx.db.ReadWriteVerticle;
+import io.trizgay.quantx.db.PgDatabaseVerticle;
 import io.trizgay.quantx.http.HttpVerticle;
 import io.trizgay.quantx.utils.Config;
 import io.trizgay.quantx.utils.Log;
@@ -15,8 +14,7 @@ public class MainVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) throws Exception {
         Log.init();
         Config.initLocalConfig(vertx)
-                .compose(v -> startReadOnlyDbClient())
-                .compose(v -> startReadWriteDbClient())
+                .compose(v -> startDbVerticle())
                 .compose(v -> startHttpServer())
                 .onSuccess(ar -> {
                     Log.info("启动成功!");
@@ -24,32 +22,16 @@ public class MainVerticle extends AbstractVerticle {
                 }).onFailure(startPromise::fail);
     }
 
-    private Future<Void> startReadOnlyDbClient() {
+    private Future<Void> startDbVerticle() {
         Promise<Void> promise = Promise.promise();
-        vertx.deployVerticle(ReadOnlyVerticle.class.getName(),
+        vertx.deployVerticle(PgDatabaseVerticle.class.getName(),
                 new DeploymentOptions(),
                 ar -> {
                     if (ar.succeeded()) {
-                        Log.info("数据库只读客户端启动成功!");
+                        Log.info("Pg CLIENT 启动成功!");
                         promise.complete();
                     } else {
-                        Log.error("数据库只读客户端启动失败!", ar.cause());
-                        promise.fail(ar.cause());
-                    }
-                });
-        return promise.future();
-    }
-
-    private Future<Void> startReadWriteDbClient() {
-        Promise<Void> promise = Promise.promise();
-        vertx.deployVerticle(ReadWriteVerticle.class.getName(),
-                new DeploymentOptions(),
-                ar -> {
-                    if (ar.succeeded()) {
-                        Log.info("数据库读写客户端启动成功!");
-                        promise.complete();
-                    } else {
-                        Log.error("数据库读写客户端启动失败!", ar.cause());
+                        Log.error("Pg CLIENT 启动失败!", ar.cause());
                         promise.fail(ar.cause());
                     }
                 });

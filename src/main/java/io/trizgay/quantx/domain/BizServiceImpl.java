@@ -6,11 +6,11 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.pgclient.PgPool;
 
-public class DefaultBizServiceDispatcher implements BizServiceDispatcher {
+public class BizServiceImpl implements BizService {
     private final Vertx vertx;
     private final PgPool pool;
 
-    public DefaultBizServiceDispatcher(Vertx vertx, PgPool pool, Handler<AsyncResult<BizServiceDispatcher>> readyHandler) {
+    public BizServiceImpl(Vertx vertx, PgPool pool, Handler<AsyncResult<BizService>> readyHandler) {
         this.vertx = vertx;
         this.pool = pool;
         readyHandler.handle(Future.succeededFuture(this));

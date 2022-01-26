@@ -11,16 +11,18 @@ import io.vertx.serviceproxy.ServiceProxyBuilder;
 
 @ProxyGen
 @VertxGen
-public interface BizServiceDispatcher {
+public interface BizService {
     @GenIgnore
-    static BizServiceDispatcher create(Vertx vertx, PgPool pool, Handler<AsyncResult<BizServiceDispatcher>> readyHandler) {
-        return new DefaultBizServiceDispatcher(vertx, pool, readyHandler);
+    static BizService create(Vertx vertx,
+                             PgPool pool,
+                             Handler<AsyncResult<BizService>> readyHandler) {
+        return new BizServiceImpl(vertx, pool, readyHandler);
     }
 
     @GenIgnore
-    static BizServiceDispatcher createProxy(Vertx vertx, String address) {
+    static BizService createProxy(Vertx vertx, String address) {
         return new ServiceProxyBuilder(vertx)
                 .setAddress(address)
-                .build(BizServiceDispatcher.class);
+                .build(BizService.class);
     }
 }
