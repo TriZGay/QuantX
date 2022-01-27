@@ -4,10 +4,8 @@ import io.trizgay.quantx.db.PgDatabaseVerticle;
 import io.trizgay.quantx.http.HttpVerticle;
 import io.trizgay.quantx.utils.Config;
 import io.trizgay.quantx.utils.Log;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
+import io.vertx.core.*;
+import io.vertx.core.tracing.TracingOptions;
 
 public class MainVerticle extends AbstractVerticle {
     @Override

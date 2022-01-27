@@ -39,7 +39,10 @@ public final class DBRunner {
                 Properties properties = new Properties();
                 properties.load(loaderInputStream);
                 HashMap<String, String> sqlQueries = new HashMap<>();
-                properties.forEach((key, value) -> sqlQueries.put((String) key, (String) value));
+                properties.forEach((key, value) -> {
+                    Log.info("读取到SQL:" + key + "=" + value);
+                    sqlQueries.put((String) key, (String) value);
+                });
                 loader.complete(sqlQueries);
             } catch (IOException e) {
                 Log.error("读取sql失败", e);

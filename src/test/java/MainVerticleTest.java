@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @ExtendWith(VertxExtension.class)
 public class MainVerticleTest {
     Vertx vertx;
@@ -37,7 +39,7 @@ public class MainVerticleTest {
                             .as(BodyCodec.string())
                             .sendJson(new GetPlateSetRequest(1, 1).toJson(), context.succeeding(resp -> {
                                 context.verify(() -> {
-                                    System.out.println(resp.body());
+                                    assertThat(resp.statusCode()).isEqualTo(200);
                                     context.completeNow();
                                 });
                             }));

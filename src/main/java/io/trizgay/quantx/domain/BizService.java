@@ -1,12 +1,14 @@
 package io.trizgay.quantx.domain;
 
+import io.trizgay.quantx.db.DataFetcher;
+import io.trizgay.quantx.domain.plate.PlateInfo;
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.pgclient.PgPool;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
 
 @ProxyGen
@@ -14,9 +16,9 @@ import io.vertx.serviceproxy.ServiceProxyBuilder;
 public interface BizService {
     @GenIgnore
     static BizService create(Vertx vertx,
-                             PgPool pool,
+                             DataFetcher dataFetcher,
                              Handler<AsyncResult<BizService>> readyHandler) {
-        return new BizServiceImpl(vertx, pool, readyHandler);
+        return new BizServiceImpl(vertx, dataFetcher, readyHandler);
     }
 
     @GenIgnore
@@ -25,4 +27,7 @@ public interface BizService {
                 .setAddress(address)
                 .build(BizService.class);
     }
+
+    @Fluent
+    BizService saveOrUpdatePlateInfo(PlateInfo plateInfo, Handler<AsyncResult<Integer>> resultHandler);
 }
