@@ -8,13 +8,18 @@ import com.futu.openapi.pb.*;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.trizgay.quantx.db.DataFetcher;
+import io.trizgay.quantx.db.pojo.Plate;
 import io.trizgay.quantx.domain.plate.PlateInfo;
 import io.trizgay.quantx.utils.Config;
 import io.trizgay.quantx.utils.Log;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
     private static final String clientID = "javaclient";
@@ -143,9 +148,16 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
             Log.info("connID=" + client.getConnectID() + "查询板块信息...");
             try {
                 String plateInfoJson = JsonFormat.printer().print(rsp);
-                Log.info(plateInfoJson);
-                //TODO
-//                new JsonObject(json)
+                FTGrpcReturnResult parsedResult = new FTGrpcReturnResult(new JsonObject(plateInfoJson));
+                JsonArray plateInfoList = parsedResult.getS2c().getJsonArray("plateInfoList");
+                List<Plate> platesToDb = plateInfoList.stream()
+                        .map(JsonObject::mapFrom)
+                        .map(jsonObject -> new Plate(jsonObject.getString("name"),
+                                jsonObject.getJsonObject("plate").getInteger("market"),
+                                jsonObject.getJsonObject("plate").getString("code"))).collect(Collectors.toList());
+                mapper.insetPlateBatch(platesToDb)
+                        .onSuccess(size -> Log.info("插入板块信息条成功!"))
+                        .onFailure(err -> Log.error("插入板块信息出错!", err));
             } catch (InvalidProtocolBufferException e) {
                 Log.error("查询板块信息解析结果失败!", e);
             }

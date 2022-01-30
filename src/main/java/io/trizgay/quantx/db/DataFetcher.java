@@ -5,6 +5,7 @@ import io.trizgay.quantx.db.pojo.Plate;
 import io.vertx.core.Future;
 import io.vertx.pgclient.PgPool;
 
+import java.util.List;
 import java.util.Map;
 
 public interface DataFetcher {
@@ -13,5 +14,5 @@ public interface DataFetcher {
         return new PgService(pool, sqlMap);
     }
 
-    Future<Integer> insetOnePlate(Plate plate);
+    Future<Integer> insetPlateBatch(List<Plate> plate);
 }

@@ -13,10 +13,6 @@ import io.vertx.sqlclient.templates.annotations.TemplateParameter;
 public class Plate {
     private Long id;
 
-    @TemplateParameter(name = "plate")
-    @Column(name = "plate")
-    private String plate;
-
     @TemplateParameter(name = "name")
     @Column(name = "plate_name")
     private String name;
@@ -25,13 +21,28 @@ public class Plate {
     @Column(name = "plate_type")
     private Integer type;
 
+    @TemplateParameter(name = "market")
+    @Column(name = "market")
+    private Integer market;
+
+    @TemplateParameter(name = "code")
+    @Column(name = "code")
+    private String code;
+
     public Plate() {
     }
 
-    public Plate(String plate, String name, Integer type) {
-        this.plate = plate;
+    public Plate(String name, Integer type, Integer market, String code) {
         this.name = name;
         this.type = type;
+        this.market = market;
+        this.code = code;
+    }
+
+    public Plate(String name, Integer market, String code) {
+        this.name = name;
+        this.market = market;
+        this.code = code;
     }
 
     public Plate(JsonObject jsonObject) {
@@ -52,14 +63,6 @@ public class Plate {
         this.id = id;
     }
 
-    public String getPlate() {
-        return plate;
-    }
-
-    public void setPlate(String plate) {
-        this.plate = plate;
-    }
-
     public String getName() {
         return name;
     }
@@ -76,13 +79,30 @@ public class Plate {
         this.type = type;
     }
 
+    public Integer getMarket() {
+        return market;
+    }
+
+    public void setMarket(Integer market) {
+        this.market = market;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
     @Override
     public String toString() {
         return "Plate{" +
                 "id=" + id +
-                ", plate='" + plate + '\'' +
                 ", name='" + name + '\'' +
                 ", type=" + type +
+                ", market=" + market +
+                ", code='" + code + '\'' +
                 '}';
     }
 }
