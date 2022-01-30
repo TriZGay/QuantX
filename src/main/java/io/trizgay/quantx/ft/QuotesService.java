@@ -5,17 +5,27 @@ import com.futu.openapi.FTAPI_Conn_Qot;
 import com.futu.openapi.FTSPI_Conn;
 import com.futu.openapi.FTSPI_Qot;
 import com.futu.openapi.pb.*;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
+import io.trizgay.quantx.db.DataFetcher;
+import io.trizgay.quantx.domain.plate.PlateInfo;
 import io.trizgay.quantx.utils.Config;
 import io.trizgay.quantx.utils.Log;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 
 public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
     private static final String clientID = "javaclient";
     private final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
+    private final DataFetcher mapper;
 
-    public QuotesService() {
+    public QuotesService(DataFetcher mapper) {
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
+        this.mapper = mapper;
     }
 
     public void start() {
@@ -114,9 +124,33 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
 
     }
 
+    public void sendGetPlateSet(QotGetPlateSet.C2S getPlateSetC2s, Handler<AsyncResult<JsonObject>> resultHandler) {
+        QotGetPlateSet.Request request = QotGetPlateSet.Request.newBuilder().setC2S(getPlateSetC2s).build();
+        Integer seqNo = qot.getPlateSet(request);
+        resultHandler.handle(Future.succeededFuture(
+                new FTCommonResult(seqNo, "查询板块信息:plateSetType="
+                        + getPlateSetC2s.getPlateSetType()
+                        + ",market=" + getPlateSetC2s.getMarket()).toJson()
+        ));
+    }
+
     @Override
     public void onReply_GetPlateSet(FTAPI_Conn client, int nSerialNo, QotGetPlateSet.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            Log.error("查询板块信息失败:" + rsp.getRetMsg(),
+                    new IllegalStateException("请求序列号:" + nSerialNo + "查询板块信息失败,code:" + rsp.getRetType()));
+        } else {
+            Log.info("connID=" + client.getConnectID() + "查询板块信息...");
+            try {
+                String plateInfoJson = JsonFormat.printer().print(rsp);
+                Log.info(plateInfoJson);
+                //TODO
+//                new JsonObject(json)
+            } catch (InvalidProtocolBufferException e) {
+                Log.error("查询板块信息解析结果失败!", e);
+            }
 
+        }
     }
 
     @Override

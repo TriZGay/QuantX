@@ -1,5 +1,4 @@
 import io.trizgay.quantx.MainVerticle;
-import io.trizgay.quantx.http.HttpVerticle;
 import io.trizgay.quantx.http.pojo.GetPlateSetRequest;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.client.WebClient;
@@ -37,12 +36,17 @@ public class MainVerticleTest {
                 context.succeeding(id -> {
                     client.post(8900, "0.0.0.0", "/quantx/api/v1/plateInfo")
                             .as(BodyCodec.string())
-                            .sendJson(new GetPlateSetRequest(1, 1).toJson(), context.succeeding(resp -> {
+                            .sendJson(new GetPlateSetRequest(1, 0).toJson(), context.succeeding(resp -> {
                                 context.verify(() -> {
                                     assertThat(resp.statusCode()).isEqualTo(200);
                                     context.completeNow();
                                 });
                             }));
                 }));
+        try {
+            Thread.sleep(1000*60);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

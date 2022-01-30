@@ -2,6 +2,7 @@ package io.trizgay.quantx.domain;
 
 import io.trizgay.quantx.db.DataFetcher;
 import io.trizgay.quantx.domain.plate.PlateInfo;
+import io.trizgay.quantx.ft.client.QuoteRequestSender;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
@@ -17,8 +18,9 @@ public interface BizService {
     @GenIgnore
     static BizService create(Vertx vertx,
                              DataFetcher dataFetcher,
+                             QuoteRequestSender sender,
                              Handler<AsyncResult<BizService>> readyHandler) {
-        return new BizServiceImpl(vertx, dataFetcher, readyHandler);
+        return new BizServiceImpl(vertx, dataFetcher, sender, readyHandler);
     }
 
     @GenIgnore
@@ -29,5 +31,5 @@ public interface BizService {
     }
 
     @Fluent
-    BizService saveOrUpdatePlateInfo(PlateInfo plateInfo, Handler<AsyncResult<Integer>> resultHandler);
+    BizService saveOrUpdatePlateInfo(PlateInfo plateInfo, Handler<AsyncResult<BizCommonResult>> resultHandler);
 }
