@@ -3,6 +3,7 @@ package io.trizgay.quantx.domain;
 import io.trizgay.quantx.db.DataFetcher;
 import io.trizgay.quantx.domain.ipo.IpoInfo;
 import io.trizgay.quantx.domain.plate.PlateInfo;
+import io.trizgay.quantx.domain.security.SecurityInfo;
 import io.trizgay.quantx.ft.client.QuoteRequestSender;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
@@ -36,4 +37,7 @@ public interface BizService {
 
     @Fluent
     BizService saveOrUpdateIpoInfo(IpoInfo ipoInfo, Handler<AsyncResult<BizCommonResult>> resultHandler);
+
+    @Fluent
+    BizService saveOrUpdateSecurityList(SecurityInfo securityInfo, Handler<AsyncResult<BizCommonResult>> resultHandler);
 }

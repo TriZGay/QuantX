@@ -3,6 +3,7 @@ package io.trizgay.quantx.domain;
 import io.trizgay.quantx.db.DataFetcher;
 import io.trizgay.quantx.domain.ipo.IpoInfo;
 import io.trizgay.quantx.domain.plate.PlateInfo;
+import io.trizgay.quantx.domain.security.SecurityInfo;
 import io.trizgay.quantx.ft.client.QuoteRequestSender;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -46,6 +47,14 @@ public class BizServiceImpl implements BizService {
                 .onFailure(err -> resultHandler.handle(Future.succeededFuture(
                         new BizCommonResult(BizCommonResultCode.QUERY_IPO_INFO_FAILED, "查询IPO信息失败!" + err.getMessage())
                 )));
+        return this;
+    }
+
+    @Override
+    public BizService saveOrUpdateSecurityList(SecurityInfo securityInfo, Handler<AsyncResult<BizCommonResult>> resultHandler) {
+        sender.sendGetSecurityListRequest(securityInfo.toFTGrpcRequest())
+                .onSuccess()
+                .onFailure()
         return this;
     }
 }

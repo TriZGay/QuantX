@@ -3,6 +3,7 @@ package io.trizgay.quantx.http.controller;
 import io.trizgay.quantx.domain.BizService;
 import io.trizgay.quantx.http.pojo.PostIpoInfoRequest;
 import io.trizgay.quantx.http.pojo.PostPlateSetRequest;
+import io.trizgay.quantx.http.pojo.PostSecurityListRequest;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -25,6 +26,11 @@ public interface BizController {
 
     void updateIpoInfo(
             PostIpoInfoRequest body,
+            ServiceRequest request,
+            Handler<AsyncResult<ServiceResponse>> resultHandler);
+
+    void updateSecurityList(
+            PostSecurityListRequest body,
             ServiceRequest request,
             Handler<AsyncResult<ServiceResponse>> resultHandler);
 }

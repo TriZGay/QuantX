@@ -1,6 +1,7 @@
 package io.trizgay.quantx.ft.client;
 
 import com.futu.openapi.pb.QotGetIpoList;
+import com.futu.openapi.pb.QotGetPlateSecurity;
 import com.futu.openapi.pb.QotGetPlateSet;
 import io.trizgay.quantx.domain.plate.PlateInfo;
 import io.trizgay.quantx.ft.FTCommonResult;
@@ -39,6 +40,12 @@ public class QuoteRequestSender {
                 promise.fail(resultJson.cause());
             }
         });
+        return promise.future();
+    }
+
+    public Future<FTCommonResult> sendGetSecurityListRequest(QotGetPlateSecurity.C2S getSecurityList) {
+        Promise<FTCommonResult> promise = Promise.promise();
+
         return promise.future();
     }
 }

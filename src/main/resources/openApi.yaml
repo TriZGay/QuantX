@@ -52,3 +52,27 @@ paths:
             application/json:
               schema:
                 type: object
+  /v1/security:
+    post:
+      summary: 更新板块内股票列表
+      description: 更新板块内股票列表,成功返回200,失败返回相关错误
+      x-vertx-event-bus: openapi.quantx
+      operationId: updateSecurityList
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                market:
+                  type: integer
+                code:
+                  type: string
+      responses:
+        200:
+          description: 成功更新ipo信息
+          content:
+            application/json:
+              schema:
+                type: object
