@@ -2,6 +2,7 @@ package io.trizgay.quantx.http.controller;
 
 import io.trizgay.quantx.domain.BizCommonResult;
 import io.trizgay.quantx.domain.BizService;
+import io.trizgay.quantx.domain.ipo.IpoInfo;
 import io.trizgay.quantx.domain.plate.PlateInfo;
 import io.trizgay.quantx.http.pojo.PostIpoInfoRequest;
 import io.trizgay.quantx.http.pojo.PostPlateSetRequest;
@@ -36,7 +37,18 @@ public class BizControllerImpl implements BizController {
     }
 
     @Override
-    public void updateIpoInfo(PostIpoInfoRequest body, ServiceRequest request, Handler<AsyncResult<ServiceResponse>> resultHandler) {
-
+    public void updateIpoInfo(PostIpoInfoRequest body,
+                              ServiceRequest request,
+                              Handler<AsyncResult<ServiceResponse>> resultHandler) {
+        bizService.saveOrUpdateIpoInfo(IpoInfo.fromRequest(body), bizResult -> {
+            if (bizResult.succeeded()) {
+                BizCommonResult result = bizResult.result();
+                resultHandler.handle(Future.succeededFuture(
+                        ServiceResponse.completedWithJson(result.toJson())
+                ));
+            } else {
+                resultHandler.handle(Future.failedFuture(bizResult.cause()));
+            }
+        });
     }
 }

@@ -9,7 +9,7 @@ public class PostPlateSetRequest {
     private Integer plateSetType;
 
     public PostPlateSetRequest(JsonObject jsonObject) {
-        GetPlateSetRequestConverter.fromJson(jsonObject, this);
+        PostPlateSetRequestConverter.fromJson(jsonObject, this);
     }
 
     public PostPlateSetRequest(Integer market, Integer plateSetType) {
@@ -19,7 +19,7 @@ public class PostPlateSetRequest {
 
     public JsonObject toJson() {
         JsonObject jsonObject = new JsonObject();
-        GetPlateSetRequestConverter.toJson(this, jsonObject);
+        PostPlateSetRequestConverter.toJson(this, jsonObject);
         return jsonObject;
     }
 

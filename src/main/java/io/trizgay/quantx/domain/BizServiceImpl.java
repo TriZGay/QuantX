@@ -39,6 +39,13 @@ public class BizServiceImpl implements BizService {
 
     @Override
     public BizService saveOrUpdateIpoInfo(IpoInfo ipoInfo, Handler<AsyncResult<BizCommonResult>> resultHandler) {
+        sender.sendGetIpoInfoRequest(ipoInfo.toFTGrpcRequest())
+                .onSuccess(result -> resultHandler.handle(Future.succeededFuture(
+                        new BizCommonResult(BizCommonResultCode.QUERY_IPO_INFO_SUCCESS, "查询IPO信息成功!")
+                )))
+                .onFailure(err -> resultHandler.handle(Future.succeededFuture(
+                        new BizCommonResult(BizCommonResultCode.QUERY_IPO_INFO_FAILED, "查询IPO信息失败!" + err.getMessage())
+                )));
         return this;
     }
 }

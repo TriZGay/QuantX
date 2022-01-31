@@ -1,6 +1,8 @@
 package io.trizgay.quantx.domain.ipo;
 
+import com.futu.openapi.pb.QotGetIpoList;
 import io.trizgay.quantx.domain.market.MarketType;
+import io.trizgay.quantx.http.pojo.PostIpoInfoRequest;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
@@ -14,6 +16,16 @@ public class IpoInfo {
 
     public IpoInfo(JsonObject jsonObject) {
         IpoInfoConverter.fromJson(jsonObject, this);
+    }
+
+    public static IpoInfo fromRequest(PostIpoInfoRequest body) {
+        return new IpoInfo(MarketType.getMarket(body.getMarket()));
+    }
+
+    public QotGetIpoList.C2S toFTGrpcRequest() {
+        return QotGetIpoList.C2S.newBuilder()
+                .setMarket(this.marketType.getCode())
+                .build();
     }
 
     public JsonObject toJson() {
@@ -36,4 +48,5 @@ public class IpoInfo {
                 "marketType=" + marketType +
                 '}';
     }
+
 }

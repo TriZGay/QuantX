@@ -65,5 +65,10 @@ public class MainVerticleTest {
                                 });
                             }));
                 }));
+        try {
+            Thread.sleep(1000 * 600);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,5 +1,6 @@
 package io.trizgay.quantx.ft.client;
 
+import com.futu.openapi.pb.QotGetIpoList;
 import com.futu.openapi.pb.QotGetPlateSet;
 import io.trizgay.quantx.domain.plate.PlateInfo;
 import io.trizgay.quantx.ft.FTCommonResult;
@@ -28,4 +29,16 @@ public class QuoteRequestSender {
         return promise.future();
     }
 
+    public Future<FTCommonResult> sendGetIpoInfoRequest(QotGetIpoList.C2S getIpoListC2s) {
+        Promise<FTCommonResult> promise = Promise.promise();
+        quotesService.sendGetIpoList(getIpoListC2s, resultJson -> {
+            if (resultJson.succeeded()) {
+                JsonObject ftCommonResultJson = resultJson.result();
+                promise.complete(new FTCommonResult(ftCommonResultJson));
+            } else {
+                promise.fail(resultJson.cause());
+            }
+        });
+        return promise.future();
+    }
 }

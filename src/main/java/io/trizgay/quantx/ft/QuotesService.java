@@ -139,6 +139,14 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
         ));
     }
 
+    public void sendGetIpoList(QotGetIpoList.C2S getIpoListC2s, Handler<AsyncResult<JsonObject>> resultHandler) {
+        QotGetIpoList.Request request = QotGetIpoList.Request.newBuilder().setC2S(getIpoListC2s).build();
+        Integer seqNo = qot.getIpoList(request);
+        resultHandler.handle(Future.succeededFuture(
+                new FTCommonResult(seqNo, "查询IPO信息:market=" + getIpoListC2s.getMarket()).toJson()
+        ));
+    }
+
     @Override
     public void onReply_GetPlateSet(FTAPI_Conn client, int nSerialNo, QotGetPlateSet.Response rsp) {
         if (rsp.getRetType() != 0) {
@@ -227,7 +235,19 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
 
     @Override
     public void onReply_GetIpoList(FTAPI_Conn client, int nSerialNo, QotGetIpoList.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            Log.error("查询IPO信息失败:" + rsp.getRetMsg(),
+                    new IllegalStateException("请求序列号:" + nSerialNo + "查询IPO信息失败,code:" + rsp.getRetType()));
+        } else {
+            Log.info("connID=" + client.getConnectID() + "查询IPO信息...");
+            try {
+                String plateInfoJson = JsonFormat.printer().print(rsp);
+                Log.info(plateInfoJson);
+            } catch (InvalidProtocolBufferException e) {
+                Log.error("查询IPO信息解析结果失败!", e);
+            }
 
+        }
     }
 
     @Override
