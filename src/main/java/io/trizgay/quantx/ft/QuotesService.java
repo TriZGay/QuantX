@@ -242,6 +242,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
             Log.info("connID=" + client.getConnectID() + "查询IPO信息...");
             try {
                 String plateInfoJson = JsonFormat.printer().print(rsp);
+                //TODO 入库待完成
                 Log.info(plateInfoJson);
             } catch (InvalidProtocolBufferException e) {
                 Log.error("查询IPO信息解析结果失败!", e);
