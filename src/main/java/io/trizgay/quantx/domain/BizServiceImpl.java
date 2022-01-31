@@ -1,6 +1,7 @@
 package io.trizgay.quantx.domain;
 
 import io.trizgay.quantx.db.DataFetcher;
+import io.trizgay.quantx.domain.ipo.IpoInfo;
 import io.trizgay.quantx.domain.plate.PlateInfo;
 import io.trizgay.quantx.ft.client.QuoteRequestSender;
 import io.vertx.core.AsyncResult;
@@ -33,6 +34,11 @@ public class BizServiceImpl implements BizService {
                 .onFailure(err -> resultHandler.handle(Future.succeededFuture(
                         new BizCommonResult(BizCommonResultCode.QUERY_PLATE_INFO_FAILED, "查询板块信息失败!" + err.getMessage())
                 )));
+        return this;
+    }
+
+    @Override
+    public BizService saveOrUpdateIpoInfo(IpoInfo ipoInfo, Handler<AsyncResult<BizCommonResult>> resultHandler) {
         return this;
     }
 }

@@ -4,15 +4,15 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 @DataObject(generateConverter = true, publicConverter = false)
-public class GetPlateSetRequest {
+public class PostPlateSetRequest {
     private Integer market;
     private Integer plateSetType;
 
-    public GetPlateSetRequest(JsonObject jsonObject) {
+    public PostPlateSetRequest(JsonObject jsonObject) {
         GetPlateSetRequestConverter.fromJson(jsonObject, this);
     }
 
-    public GetPlateSetRequest(Integer market, Integer plateSetType) {
+    public PostPlateSetRequest(Integer market, Integer plateSetType) {
         this.market = market;
         this.plateSetType = plateSetType;
     }
@@ -41,7 +41,7 @@ public class GetPlateSetRequest {
 
     @Override
     public String toString() {
-        return "GetPlateSetRequest{" +
+        return "PostPlateSetRequest{" +
                 "market=" + market +
                 ", plateSetType=" + plateSetType +
                 '}';

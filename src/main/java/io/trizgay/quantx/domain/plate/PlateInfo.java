@@ -1,7 +1,8 @@
 package io.trizgay.quantx.domain.plate;
 
 import com.futu.openapi.pb.QotGetPlateSet;
-import io.trizgay.quantx.http.pojo.GetPlateSetRequest;
+import io.trizgay.quantx.domain.market.MarketType;
+import io.trizgay.quantx.http.pojo.PostPlateSetRequest;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
@@ -25,7 +26,7 @@ public class PlateInfo {
         return jsonObject;
     }
 
-    public static PlateInfo fromRequest(GetPlateSetRequest request) {
+    public static PlateInfo fromRequest(PostPlateSetRequest request) {
         return new PlateInfo(MarketType.getMarket(request.getMarket()),
                 PlateSetType.getPlateSet(request.getPlateSetType()));
     }

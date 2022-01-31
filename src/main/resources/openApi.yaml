@@ -30,3 +30,25 @@ paths:
             application/json:
               schema:
                 type: object
+  /v1/ipoInfo:
+    post:
+      summary: 更新ipo信息
+      description: 更新ipo信息,成功返回200,失败返回相关错误
+      x-vertx-event-bus: openapi.quantx
+      operationId: updateIpoInfo
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                market:
+                  type: integer
+      responses:
+        200:
+          description: 成功更新ipo信息
+          content:
+            application/json:
+              schema:
+                type: object

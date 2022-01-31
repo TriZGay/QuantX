@@ -1,4 +1,4 @@
-package io.trizgay.quantx.domain.plate;
+package io.trizgay.quantx.domain.market;
 
 public enum MarketType {
     UNKNOWN("未知市场", 0),//未知市场

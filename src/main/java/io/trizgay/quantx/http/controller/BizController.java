@@ -1,7 +1,8 @@
 package io.trizgay.quantx.http.controller;
 
 import io.trizgay.quantx.domain.BizService;
-import io.trizgay.quantx.http.pojo.GetPlateSetRequest;
+import io.trizgay.quantx.http.pojo.PostIpoInfoRequest;
+import io.trizgay.quantx.http.pojo.PostPlateSetRequest;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -18,8 +19,12 @@ public interface BizController {
     }
 
     void updatePlateInfo(
-            GetPlateSetRequest body,
+            PostPlateSetRequest body,
             ServiceRequest request,
             Handler<AsyncResult<ServiceResponse>> resultHandler);
 
+    void updateIpoInfo(
+            PostIpoInfoRequest body,
+            ServiceRequest request,
+            Handler<AsyncResult<ServiceResponse>> resultHandler);
 }

@@ -3,7 +3,8 @@ package io.trizgay.quantx.http.controller;
 import io.trizgay.quantx.domain.BizCommonResult;
 import io.trizgay.quantx.domain.BizService;
 import io.trizgay.quantx.domain.plate.PlateInfo;
-import io.trizgay.quantx.http.pojo.GetPlateSetRequest;
+import io.trizgay.quantx.http.pojo.PostIpoInfoRequest;
+import io.trizgay.quantx.http.pojo.PostPlateSetRequest;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -18,7 +19,7 @@ public class BizControllerImpl implements BizController {
     }
 
     @Override
-    public void updatePlateInfo(GetPlateSetRequest body,
+    public void updatePlateInfo(PostPlateSetRequest body,
                                 ServiceRequest request,
                                 Handler<AsyncResult<ServiceResponse>> resultHandler) {
         bizService.saveOrUpdatePlateInfo(PlateInfo.fromRequest(body), bizResult -> {
@@ -32,5 +33,10 @@ public class BizControllerImpl implements BizController {
                     }
                 }
         );
+    }
+
+    @Override
+    public void updateIpoInfo(PostIpoInfoRequest body, ServiceRequest request, Handler<AsyncResult<ServiceResponse>> resultHandler) {
+
     }
 }
