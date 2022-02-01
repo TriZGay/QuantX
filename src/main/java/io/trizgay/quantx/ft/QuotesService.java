@@ -9,8 +9,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.trizgay.quantx.db.DataFetcher;
 import io.trizgay.quantx.db.pojo.Plate;
-import io.trizgay.quantx.domain.plate.PlateInfo;
+import io.trizgay.quantx.db.pojo.Security;
 import io.trizgay.quantx.utils.Config;
+import io.trizgay.quantx.utils.DateUtils;
 import io.trizgay.quantx.utils.Log;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -18,6 +19,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -147,6 +149,14 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
         ));
     }
 
+    public void sendGetSecurity(QotGetPlateSecurity.C2S getSecurityC2s, Handler<AsyncResult<JsonObject>> resultHandler) {
+        QotGetPlateSecurity.Request request = QotGetPlateSecurity.Request.newBuilder().setC2S(getSecurityC2s).build();
+        Integer seqNo = qot.getPlateSecurity(request);
+        resultHandler.handle(Future.succeededFuture(
+                new FTCommonResult(seqNo, "查询板块股票信息:plate=" + getSecurityC2s.getPlate().toString()).toJson()
+        ));
+    }
+
     @Override
     public void onReply_GetPlateSet(FTAPI_Conn client, int nSerialNo, QotGetPlateSet.Response rsp) {
         if (rsp.getRetType() != 0) {
@@ -163,7 +173,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
                         .map(jsonObject -> new Plate(jsonObject.getString("name"),
                                 jsonObject.getJsonObject("plate").getInteger("market"),
                                 jsonObject.getJsonObject("plate").getString("code"))).collect(Collectors.toList());
-                mapper.insetPlateBatch(platesToDb)
+                mapper.insertPlateBatch(platesToDb)
                         .onSuccess(size -> Log.info("插入板块信息条成功!"))
                         .onFailure(err -> Log.error("插入板块信息出错!", err));
             } catch (InvalidProtocolBufferException e) {
@@ -175,7 +185,47 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
 
     @Override
     public void onReply_GetPlateSecurity(FTAPI_Conn client, int nSerialNo, QotGetPlateSecurity.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            Log.error("查询板块股票信息失败:" + rsp.getRetMsg(),
+                    new IllegalStateException("请求序列号:" + nSerialNo + "查询板块股票信息失败,code:" + rsp.getRetType()));
+        } else {
+            Log.info("connID=" + client.getConnectID() + "查询板块股票信息...");
+            try {
+                String plateInfoJson = JsonFormat.printer().print(rsp);
+                Log.info(plateInfoJson);
+                FTGrpcReturnResult parsedResult = new FTGrpcReturnResult(new JsonObject(plateInfoJson));
+                JsonArray staticSecurityInfos = parsedResult.getS2c().getJsonArray("staticInfoList");
+                List<Security> securities2Db = staticSecurityInfos.stream()
+                        .map(JsonObject::mapFrom)
+                        .map(jsonObject -> {
+                            JsonObject basic = jsonObject.getJsonObject("basic");
+                            JsonObject securityObj = basic.getJsonObject("security");
+                            if (basic.containsKey("listTimestamp")) {
+                            } else {
 
+                            }
+                            return new Security(
+                                    basic.getString("name"),
+                                    basic.getInteger("lotSize"),
+                                    basic.getInteger("secType"),
+                                    basic.containsKey("listTimestamp") ?
+                                            DateUtils.getDateTimeOfTimeStamp(basic.getDouble("listTimestamp").longValue()) :
+                                            DateUtils.getDateTimePattern(basic.getString("listTime")),
+                                    basic.getBoolean("delisting") ? 1 : 0,
+                                    basic.getInteger("exchType"),
+                                    basic.getString("id"),
+                                    securityObj.getInteger("market"),
+                                    securityObj.getString("code")
+                            );
+                        })
+                        .collect(Collectors.toList());
+                mapper.insertSecurityBatch(securities2Db)
+                        .onSuccess(size -> Log.info("插入板块股票信息成功!"))
+                        .onFailure(err -> Log.error("插入板块股票信息失败!", err));
+            } catch (InvalidProtocolBufferException e) {
+                Log.error("查询板块股票信息解析结果失败!", e);
+            }
+        }
     }
 
     @Override

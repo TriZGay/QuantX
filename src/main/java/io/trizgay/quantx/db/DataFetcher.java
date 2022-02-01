@@ -2,6 +2,7 @@ package io.trizgay.quantx.db;
 
 
 import io.trizgay.quantx.db.pojo.Plate;
+import io.trizgay.quantx.db.pojo.Security;
 import io.vertx.core.Future;
 import io.vertx.pgclient.PgPool;
 
@@ -14,5 +15,7 @@ public interface DataFetcher {
         return new PgService(pool, sqlMap);
     }
 
-    Future<Integer> insetPlateBatch(List<Plate> plate);
+    Future<Integer> insertPlateBatch(List<Plate> plate);
+
+    Future<Integer> insertSecurityBatch(List<Security> securities);
 }

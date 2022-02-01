@@ -53,8 +53,12 @@ public class BizServiceImpl implements BizService {
     @Override
     public BizService saveOrUpdateSecurityList(SecurityInfo securityInfo, Handler<AsyncResult<BizCommonResult>> resultHandler) {
         sender.sendGetSecurityListRequest(securityInfo.toFTGrpcRequest())
-                .onSuccess()
-                .onFailure()
+                .onSuccess(result -> resultHandler.handle(Future.succeededFuture(
+                        new BizCommonResult(BizCommonResultCode.QUERY_SECURITY_SUCCESS, "查询板块股票数据成功!")
+                )))
+                .onFailure(err -> resultHandler.handle(Future.succeededFuture(
+                        new BizCommonResult(BizCommonResultCode.QUERY_SECURITY_FAILED, "查询板块股票数据失败!" + err.getMessage())
+                )));
         return this;
     }
 }

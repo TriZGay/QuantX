@@ -45,7 +45,14 @@ public class QuoteRequestSender {
 
     public Future<FTCommonResult> sendGetSecurityListRequest(QotGetPlateSecurity.C2S getSecurityList) {
         Promise<FTCommonResult> promise = Promise.promise();
-
+        quotesService.sendGetSecurity(getSecurityList, resultJson -> {
+            if (resultJson.succeeded()) {
+                JsonObject ftCommonResultJson = resultJson.result();
+                promise.complete(new FTCommonResult(ftCommonResultJson));
+            } else {
+                promise.fail(resultJson.cause());
+            }
+        });
         return promise.future();
     }
 }

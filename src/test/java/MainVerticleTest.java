@@ -1,6 +1,7 @@
 import io.trizgay.quantx.MainVerticle;
 import io.trizgay.quantx.http.pojo.PostIpoInfoRequest;
 import io.trizgay.quantx.http.pojo.PostPlateSetRequest;
+import io.trizgay.quantx.http.pojo.PostSecurityListRequest;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
@@ -51,14 +52,35 @@ public class MainVerticleTest {
 //        }
 //    }
 
+//    @Test
+//    void postIpoInfo(VertxTestContext context) {
+//        WebClient client = WebClient.create(vertx);
+//        vertx.deployVerticle(MainVerticle.class.getName(),
+//                context.succeeding(id -> {
+//                    client.post(8900, "0.0.0.0", "/quantx/api/v1/ipoInfo")
+//                            .as(BodyCodec.string())
+//                            .sendJson(new PostIpoInfoRequest(1).toJson(), context.succeeding(resp -> {
+//                                context.verify(() -> {
+//                                    assertThat(resp.statusCode()).isEqualTo(200);
+//                                    context.completeNow();
+//                                });
+//                            }));
+//                }));
+//        try {
+//            Thread.sleep(1000 * 600);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     @Test
-    void postIpoInfo(VertxTestContext context) {
+    void postSecurityInfo(VertxTestContext context) {
         WebClient client = WebClient.create(vertx);
         vertx.deployVerticle(MainVerticle.class.getName(),
                 context.succeeding(id -> {
-                    client.post(8900, "0.0.0.0", "/quantx/api/v1/ipoInfo")
+                    client.post(8900, "0.0.0.0", "/quantx/api/v1/security")
                             .as(BodyCodec.string())
-                            .sendJson(new PostIpoInfoRequest(1).toJson(), context.succeeding(resp -> {
+                            .sendJson(new PostSecurityListRequest(1, "BK1001").toJson(), context.succeeding(resp -> {
                                 context.verify(() -> {
                                     assertThat(resp.statusCode()).isEqualTo(200);
                                     context.completeNow();
