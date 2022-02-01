@@ -200,10 +200,6 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
                         .map(jsonObject -> {
                             JsonObject basic = jsonObject.getJsonObject("basic");
                             JsonObject securityObj = basic.getJsonObject("security");
-                            if (basic.containsKey("listTimestamp")) {
-                            } else {
-
-                            }
                             return new Security(
                                     basic.getString("name"),
                                     basic.getInteger("lotSize"),
