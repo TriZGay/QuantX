@@ -32,15 +32,27 @@
     <dependencies>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-orm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-reactive</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.futunn.openapi</groupId>
-            <artifactId>futu-api</artifactId>
-            <version>6.2.2707</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../lib/FTAPI4J_6.2.2708/lib/futu-api-6.2.2707.jar</systemPath>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-flyway</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-postgresql</artifactId>
+        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.futunn.openapi</groupId>-->
+        <!--            <artifactId>futu-api</artifactId>-->
+        <!--            <version>6.2.2707</version>-->
+        <!--            <scope>system</scope>-->
+        <!--            <systemPath>${project.basedir}/../lib/FTAPI4J_6.2.2708/lib/futu-api-6.2.2707.jar</systemPath>-->
+        <!--        </dependency>-->
     </dependencies>
     <build>
         <plugins>
