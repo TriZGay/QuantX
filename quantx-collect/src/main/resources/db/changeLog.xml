@@ -16,6 +16,6 @@
         </sql>
     </changeSet>
     <changeSet id="1.1" author="futakotome">
-        <sqlFile path="./schema/V1.0.0__create_fruits.sql"/>
+        <sqlFile path="./sql/InitPlateTable.sql"/>
     </changeSet>
 </databaseChangeLog>
