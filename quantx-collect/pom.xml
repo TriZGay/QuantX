@@ -48,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-flyway</artifactId>
+            <artifactId>quarkus-liquibase</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -57,10 +57,9 @@
         <dependency>
             <groupId>com.futunn.openapi</groupId>
             <artifactId>futu-api</artifactId>
-            <version>6.2.2707</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../lib/FTAPI4J_6.2.2708/lib/futu-api-6.2.2707.jar</systemPath>
+            <version>6.2.2708</version>
         </dependency>
+
     </dependencies>
     <build>
         <plugins>
