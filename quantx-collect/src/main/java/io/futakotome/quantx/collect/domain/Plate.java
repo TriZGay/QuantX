@@ -7,7 +7,10 @@ import javax.persistence.*;
 @NamedQuery(name = "Plate.findAll", query = "select p from Plate p")
 public class Plate {
     public static final String FIND_ALL = "Plate.findAll";
+
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "t_plate_id_seq")
+    @Column(name = "id")
     private Long id;
     @Column(name = "name", length = 20)
     private String name;

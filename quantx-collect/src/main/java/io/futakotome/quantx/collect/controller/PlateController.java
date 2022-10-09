@@ -15,21 +15,31 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@RouteBase(path = "/plates", produces = "application/json", consumes = "application/json")
+@RouteBase(produces = "application/json")
 public class PlateController {
     private static final Logger LOGGER = Logger.getLogger(PlateController.class.getName());
 
     @Inject
     Mutiny.SessionFactory sessionFactory;
 
-    @Route(methods = Route.HttpMethod.GET, path = "/")
-    public Uni<List<Plate>> getAll() {
+    @Route(methods = Route.HttpMethod.GET, path = "/plates")
+    public Uni<List<Plate>> getAllAdmin() {
         return sessionFactory.withSession(session ->
                 session.createNamedQuery(Plate.FIND_ALL, Plate.class)
                         .getResultList());
     }
 
-    @Route(methods = Route.HttpMethod.POST, path = "/")
+//    @Route
+//    public Uni<List<Plate>> getAllUser1() {
+//
+//    }
+//
+//    public List<Plate> fetchAll() {
+//        return entityManager.createNamedQuery(Plate.FIND_ALL, Plate.class)
+//                .getResultList();
+//    }
+
+    @Route(methods = Route.HttpMethod.POST, path = "/plates")
     public Uni<Plate> create(@Body Plate plate, HttpServerResponse response) {
         if (plate == null || plate.getId() != null) {
             return Uni.createFrom().failure(new IllegalStateException("Plate id invalidly set on request"));
