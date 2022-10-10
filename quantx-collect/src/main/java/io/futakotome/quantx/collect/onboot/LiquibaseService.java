@@ -6,6 +6,8 @@ import io.agroal.api.configuration.AgroalDataSourceConfiguration;
 import io.agroal.api.configuration.supplier.AgroalConnectionFactoryConfigurationSupplier;
 import io.agroal.api.configuration.supplier.AgroalConnectionPoolConfigurationSupplier;
 import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplier;
+import io.agroal.api.security.NamePrincipal;
+import io.agroal.api.security.SimplePassword;
 import io.quarkus.liquibase.LiquibaseFactory;
 import io.quarkus.liquibase.runtime.LiquibaseConfig;
 import io.quarkus.runtime.StartupEvent;
@@ -18,7 +20,9 @@ import org.jboss.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class LiquibaseService {
@@ -45,8 +49,9 @@ public class LiquibaseService {
                                         .connectionFactoryConfiguration(
                                                 new AgroalConnectionFactoryConfigurationSupplier()
                                                         .jdbcUrl(url)
-                                                        .jdbcProperty("principal", this.datasourceUsername)
-                                                        .jdbcProperty("credentials", this.datasourcePwd)
+                                                        .autoCommit(false)
+                                                        .principal(new NamePrincipal(this.datasourceUsername))
+                                                        .credential(new SimplePassword(this.datasourcePwd))
                                         )
                                         .minSize(2)
                                         .maxSize(8)
@@ -56,10 +61,10 @@ public class LiquibaseService {
         );
         LiquibaseConfig liquibaseConfig = new LiquibaseConfig();
         liquibaseConfig.migrateAtStart = this.migrateAtStart;
+        liquibaseConfig.changeLogParameters = new HashMap<>();
         LiquibaseFactory factory = new LiquibaseFactory(liquibaseConfig, dataSource, "default");
         try (Liquibase liquibase = factory.createLiquibase()) {
             LOGGER.info("Liquibase migration service start.");
-            liquibase.dropAll();
             liquibase.validate();
             liquibase.update(factory.createContexts(), factory.createLabels());
             List<ChangeSetStatus> changeSetStatuses = liquibase.getChangeSetStatuses(factory.createContexts(), factory.createLabels());
