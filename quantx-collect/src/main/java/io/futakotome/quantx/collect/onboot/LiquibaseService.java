@@ -1,7 +1,6 @@
 package io.futakotome.quantx.collect.onboot;
 
 import io.agroal.api.AgroalDataSource;
-import io.agroal.api.configuration.AgroalConnectionPoolConfiguration;
 import io.agroal.api.configuration.AgroalDataSourceConfiguration;
 import io.agroal.api.configuration.supplier.AgroalConnectionFactoryConfigurationSupplier;
 import io.agroal.api.configuration.supplier.AgroalConnectionPoolConfigurationSupplier;
@@ -22,7 +21,6 @@ import javax.enterprise.event.Observes;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @ApplicationScoped
 public class LiquibaseService {

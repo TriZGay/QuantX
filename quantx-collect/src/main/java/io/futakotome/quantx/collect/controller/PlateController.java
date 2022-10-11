@@ -1,9 +1,7 @@
 package io.futakotome.quantx.collect.controller;
 
 import io.futakotome.quantx.collect.domain.Plate;
-import io.quarkus.vertx.web.Body;
-import io.quarkus.vertx.web.Route;
-import io.quarkus.vertx.web.RouteBase;
+import io.quarkus.vertx.web.*;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
@@ -24,20 +22,20 @@ public class PlateController {
 
     @Route(methods = Route.HttpMethod.GET, path = "/plates")
     public Uni<List<Plate>> getAllAdmin() {
-        return sessionFactory.withSession(session ->
+        return fetchAll("admin");
+    }
+
+    @Route(methods = Route.HttpMethod.GET, path = ":tenant/plates")
+    public Uni<List<Plate>> getAllUser1(@Param String tenant) {
+        LOGGER.infov("tenant: {0}", tenant);
+        return fetchAll(tenant);
+    }
+
+    public Uni<List<Plate>> fetchAll(String tenantId) {
+        return sessionFactory.withSession(tenantId, session ->
                 session.createNamedQuery(Plate.FIND_ALL, Plate.class)
                         .getResultList());
     }
-
-//    @Route
-//    public Uni<List<Plate>> getAllUser1() {
-//
-//    }
-//
-//    public List<Plate> fetchAll() {
-//        return entityManager.createNamedQuery(Plate.FIND_ALL, Plate.class)
-//                .getResultList();
-//    }
 
     @Route(methods = Route.HttpMethod.POST, path = "/plates")
     public Uni<Plate> create(@Body Plate plate, HttpServerResponse response) {
