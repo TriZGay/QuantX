@@ -1,15 +1,18 @@
 package io.futakotome.quantx.collect.controller;
 
 import io.futakotome.quantx.collect.domain.Plate;
-import io.quarkus.vertx.web.*;
+import io.quarkus.vertx.web.Body;
+import io.quarkus.vertx.web.Route;
+import io.quarkus.vertx.web.RouteBase;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -18,33 +21,22 @@ public class PlateController {
     private static final Logger LOGGER = Logger.getLogger(PlateController.class.getName());
 
     @Inject
-    Mutiny.SessionFactory sessionFactory;
+    EntityManager entityManager;
 
-    @Route(methods = Route.HttpMethod.GET, path = "/plates")
+    @Route(methods = Route.HttpMethod.GET, path = "/")
     public Uni<List<Plate>> getAllAdmin() {
-        return fetchAll("admin");
+        return Uni.createFrom().item(ArrayList::new);
     }
 
-    @Route(methods = Route.HttpMethod.GET, path = ":tenant/plates")
-    public Uni<List<Plate>> getAllUser1(@Param String tenant) {
-        LOGGER.infov("tenant: {0}", tenant);
-        return fetchAll(tenant);
-    }
-
-    public Uni<List<Plate>> fetchAll(String tenantId) {
-        return sessionFactory.withSession(tenantId, session ->
-                session.createNamedQuery(Plate.FIND_ALL, Plate.class)
-                        .getResultList());
-    }
-
-    @Route(methods = Route.HttpMethod.POST, path = "/plates")
+    @Route(methods = Route.HttpMethod.POST, path = "/")
     public Uni<Plate> create(@Body Plate plate, HttpServerResponse response) {
         if (plate == null || plate.getId() != null) {
             return Uni.createFrom().failure(new IllegalStateException("Plate id invalidly set on request"));
         }
-        return sessionFactory.withTransaction((session, transaction) -> session.persist(plate))
-                .invoke(() -> response.setStatusCode(201))
-                .replaceWith(plate);
+        return Uni.createFrom().item(new Plate());
+//        return sessionFactory.withTransaction((session, transaction) -> session.persist(plate))
+//                .invoke(() -> response.setStatusCode(201))
+//                .replaceWith(plate);
     }
 
     @Route(path = "/*", type = Route.HandlerType.FAILURE)
