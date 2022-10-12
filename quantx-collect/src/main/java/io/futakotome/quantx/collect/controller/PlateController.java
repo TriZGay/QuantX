@@ -5,14 +5,14 @@ import io.quarkus.vertx.web.Body;
 import io.quarkus.vertx.web.Route;
 import io.quarkus.vertx.web.RouteBase;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -21,11 +21,12 @@ public class PlateController {
     private static final Logger LOGGER = Logger.getLogger(PlateController.class.getName());
 
     @Inject
-    EntityManager entityManager;
+    Mutiny.SessionFactory sessionFactory;
 
     @Route(methods = Route.HttpMethod.GET, path = "/")
     public Uni<List<Plate>> getAll() {
-        return Uni.createFrom().item(ArrayList::new);
+        return sessionFactory.withSession(session -> session.createNamedQuery(Plate.FIND_ALL, Plate.class)
+                .getResultList());
     }
 
     @Route(methods = Route.HttpMethod.POST, path = "/")
@@ -33,11 +34,11 @@ public class PlateController {
         if (plate == null || plate.getId() != null) {
             return Uni.createFrom().failure(new IllegalStateException("Plate id invalidly set on request"));
         }
-        return Uni.createFrom().item(new Plate());
-//        return sessionFactory.withTransaction((session, transaction) -> session.persist(plate))
-//                .invoke(() -> response.setStatusCode(201))
-//                .replaceWith(plate);
+        return sessionFactory.withTransaction((session, transaction) -> session.persist(plate)
+                .invoke(() -> response.setStatusCode(201)))
+                .replaceWith(plate);
     }
+
 
     @Route(path = "/*", type = Route.HandlerType.FAILURE)
     public void error(RoutingContext routingContext) {

@@ -2,6 +2,8 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
+import javax.transaction.Transactional;
+
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
