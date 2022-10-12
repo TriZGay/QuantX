@@ -13,7 +13,7 @@ import javax.inject.Inject;
 public class CustomTenantResolver implements TenantResolver {
 
     private static final Logger LOGGER = Logger.getLogger(CustomTenantResolver.class);
-
+    private static final String tenantHeader = "X-TENANT-ID";
     @Inject
     RoutingContext routingContext;
 
@@ -24,14 +24,14 @@ public class CustomTenantResolver implements TenantResolver {
 
     @Override
     public String resolveTenantId() {
-        String path = routingContext.request().path();
+        String tenantHeaderValue = routingContext.request().headers().get(tenantHeader);
         final String tenantId;
-        if (path.startsWith("/user1")) {
+        if (tenantHeaderValue.equals("user1")) {
             tenantId = "user1";
         } else {
             tenantId = getDefaultTenantId();
         }
-        LOGGER.debugv("TenantId = {0}", tenantId);
+        LOGGER.infov("TenantId = {0}", tenantId);
         return tenantId;
     }
 }

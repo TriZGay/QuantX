@@ -9,7 +9,7 @@ public class PlateEndpointTest {
     @Test
     public void testFindAll() {
         given().when()
-                .get("/plates")
+                .get("/plates/")
                 .then()
                 .statusCode(200);
     }

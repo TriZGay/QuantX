@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@RouteBase(produces = "application/json")
+@RouteBase(path = "/plates", produces = "application/json")
 public class PlateController {
     private static final Logger LOGGER = Logger.getLogger(PlateController.class.getName());
 
@@ -24,7 +24,7 @@ public class PlateController {
     EntityManager entityManager;
 
     @Route(methods = Route.HttpMethod.GET, path = "/")
-    public Uni<List<Plate>> getAllAdmin() {
+    public Uni<List<Plate>> getAll() {
         return Uni.createFrom().item(ArrayList::new);
     }
 
