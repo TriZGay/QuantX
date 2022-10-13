@@ -1,6 +1,7 @@
 package io.futakotome.quantx.collect.controller;
 
 import io.futakotome.quantx.collect.domain.Stock;
+import io.futakotome.quantx.collect.utils.StringUtils;
 import io.quarkus.vertx.web.Body;
 import io.quarkus.vertx.web.Param;
 import io.quarkus.vertx.web.Route;
@@ -45,7 +46,7 @@ public class StockController {
                 .setParameter(7, stock.getOptionType())
                 .setParameter(8, stock.getStrikeTime())
                 .setParameter(9, stock.getStrikePrice())
-                .setParameter(10, stock.isSuspension())
+                .setParameter(10, stock.getSuspension())
                 .setParameter(11, stock.getListingDate())
                 .setParameter(12, stock.getStockId())
                 .setParameter(13, stock.isDelisting())
@@ -63,28 +64,9 @@ public class StockController {
         if (stock == null) {
             return Uni.createFrom().failure(new IllegalArgumentException("Stock update parameter was not set on request."));
         }
-        //TODO 各字段判空
+        LOGGER.infov("Updating a stock {0}", stock.toString());
         return sessionFactory.withTransaction((session, transaction) -> session.find(Stock.class, id)
-                .onItem().ifNotNull().invoke(entity -> {
-                    entity.setName(stock.getName());
-                    entity.setCode(stock.getCode());
-                    entity.setLotSize(stock.getLotSize());
-                    entity.setStockType(stock.getStockType());
-                    entity.setStockChildType(stock.getStockChildType());
-                    entity.setStockOwner(stock.getStockOwner());
-                    entity.setOptionType(stock.getOptionType());
-                    entity.setStrikeTime(stock.getStrikeTime());
-                    entity.setStrikePrice(stock.getStrikePrice());
-                    entity.setSuspension(stock.isSuspension());
-                    entity.setListingDate(stock.getListingDate());
-                    entity.setStockId(stock.getStockId());
-                    entity.setDelisting(stock.isDelisting());
-                    entity.setIndexOptionType(stock.getIndexOptionType());
-                    entity.setMainContract(stock.isMainContract());
-                    entity.setLastTradeTime(stock.getLastTradeTime());
-                    entity.setExchangeType(stock.getExchangeType());
-                    entity.setModifyDate(LocalDateTime.now());
-                })
+                .onItem().ifNotNull().invoke(entity -> entity.updateConditional(stock))
                 .onItem().ifNull().fail());
     }
 

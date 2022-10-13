@@ -1,5 +1,7 @@
 package io.futakotome.quantx.collect.domain;
 
+import io.futakotome.quantx.collect.utils.StringUtils;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -42,24 +44,24 @@ public class Stock {
     //期权行权价
     @Column(name = "strike_price")
     private Double strikePrice;
-    //期权是否停牌 true 停 false 未 停
+    //期权是否停牌 1:true 停 0:false 未 停
     @Column(name = "suspension")
-    private boolean suspension;
+    private Integer suspension;
     //上市时间
     @Column(name = "listing_date", length = 12)
     private String listingDate;
     //股票id
     @Column(name = "stock_id")
     private Long stockId;
-    //是否退市
+    //是否退市 1:true 0:false
     @Column(name = "delisting")
-    private boolean delisting;
+    private Integer delisting;
     //指数期权类型
     @Column(name = "index_option_type", length = 20)
     private String indexOptionType;
-    //是否主连合约
+    //是否主连合约 1:true 0:false
     @Column(name = "main_contract")
-    private boolean mainContract;
+    private Integer mainContract;
     // 最后交易时间
     @Column(name = "last_trade_time", length = 20)
     private String lastTradeTime;
@@ -70,6 +72,61 @@ public class Stock {
     private LocalDateTime createDate;
     @Column(name = "modify_date")
     private LocalDateTime modifyDate;
+
+    public void updateConditional(Stock stock) {
+        if (StringUtils.isNotEmpty(stock.getName())) {
+            this.setName(stock.getName());
+        }
+        if (StringUtils.isNotEmpty(stock.getCode())) {
+            this.setCode(stock.getCode());
+        }
+        if (StringUtils.isNotEmpty(stock.getLotSize())) {
+            this.setLotSize(stock.getLotSize());
+        }
+        if (StringUtils.isNotEmpty(stock.getStockType())) {
+            this.setStockType(stock.getStockType());
+        }
+        if (StringUtils.isNotEmpty(stock.getStockChildType())) {
+            this.setStockChildType(stock.getStockChildType());
+        }
+        if (StringUtils.isNotEmpty(stock.getStockOwner())) {
+            this.setStockOwner(stock.getStockOwner());
+        }
+        if (StringUtils.isNotEmpty(stock.getOptionType())) {
+            this.setOptionType(stock.getOptionType());
+        }
+        if (StringUtils.isNotEmpty(stock.getStrikeTime())) {
+            this.setStrikeTime(stock.getStrikeTime());
+        }
+        if (StringUtils.isNotEmpty(stock.getStrikePrice())) {
+            this.setStrikePrice(stock.getStrikePrice());
+        }
+        if (StringUtils.isNotEmpty(stock.getSuspension())) {
+            this.setSuspension(stock.getSuspension());
+        }
+        if (StringUtils.isNotEmpty(stock.getListingDate())) {
+            this.setListingDate(stock.getListingDate());
+        }
+        if (StringUtils.isNotEmpty(stock.getStockId())) {
+            this.setStockId(stock.getStockId());
+        }
+        if (StringUtils.isNotEmpty(stock.isDelisting())) {
+            this.setDelisting(stock.isDelisting());
+        }
+        if (StringUtils.isNotEmpty(stock.getIndexOptionType())) {
+            this.setIndexOptionType(stock.getIndexOptionType());
+        }
+        if (StringUtils.isNotEmpty(stock.isMainContract())) {
+            this.setMainContract(stock.isMainContract());
+        }
+        if (StringUtils.isNotEmpty(stock.getLastTradeTime())) {
+            this.setLastTradeTime(stock.getLastTradeTime());
+        }
+        if (StringUtils.isNotEmpty(stock.getExchangeType())) {
+            this.setExchangeType(stock.getExchangeType());
+        }
+        this.setModifyDate(LocalDateTime.now());
+    }
 
     public Long getId() {
         return id;
@@ -151,11 +208,11 @@ public class Stock {
         this.strikePrice = strikePrice;
     }
 
-    public boolean isSuspension() {
+    public Integer getSuspension() {
         return suspension;
     }
 
-    public void setSuspension(boolean suspension) {
+    public void setSuspension(Integer suspension) {
         this.suspension = suspension;
     }
 
@@ -167,11 +224,11 @@ public class Stock {
         this.listingDate = listingDate;
     }
 
-    public boolean isDelisting() {
+    public Integer isDelisting() {
         return delisting;
     }
 
-    public void setDelisting(boolean delisting) {
+    public void setDelisting(Integer delisting) {
         this.delisting = delisting;
     }
 
@@ -223,11 +280,37 @@ public class Stock {
         this.stockId = stockId;
     }
 
-    public boolean isMainContract() {
+    public Integer isMainContract() {
         return mainContract;
     }
 
-    public void setMainContract(boolean mainContract) {
+    public void setMainContract(Integer mainContract) {
         this.mainContract = mainContract;
+    }
+
+    @Override
+    public String toString() {
+        return "Stock{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", code='" + code + '\'' +
+                ", lotSize=" + lotSize +
+                ", stockType='" + stockType + '\'' +
+                ", stockChildType='" + stockChildType + '\'' +
+                ", stockOwner='" + stockOwner + '\'' +
+                ", optionType='" + optionType + '\'' +
+                ", strikeTime='" + strikeTime + '\'' +
+                ", strikePrice=" + strikePrice +
+                ", suspension=" + suspension +
+                ", listingDate='" + listingDate + '\'' +
+                ", stockId=" + stockId +
+                ", delisting=" + delisting +
+                ", indexOptionType='" + indexOptionType + '\'' +
+                ", mainContract=" + mainContract +
+                ", lastTradeTime='" + lastTradeTime + '\'' +
+                ", exchangeType='" + exchangeType + '\'' +
+                ", createDate=" + createDate +
+                ", modifyDate=" + modifyDate +
+                '}';
     }
 }
