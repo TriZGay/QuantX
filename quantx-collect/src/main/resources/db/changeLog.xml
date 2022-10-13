@@ -10,4 +10,7 @@
     <changeSet id="1" author="futakotome">
         <sqlFile path="./sql/InitPlateTable.sql"/>
     </changeSet>
+    <changeSet id="2" author="futakotome">
+        <sqlFile path="./sql/InitStockTable.sql"/>
+    </changeSet>
 </databaseChangeLog>

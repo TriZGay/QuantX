@@ -6,7 +6,6 @@ import io.quarkus.vertx.web.Param;
 import io.quarkus.vertx.web.Route;
 import io.quarkus.vertx.web.RouteBase;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
