@@ -15,10 +15,13 @@ public class Plate {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "t_plate_id_seq")
     @Column(name = "id")
     private Long id;
+    //板块名称
     @Column(name = "name", length = 20)
     private String name;
+    //板块代码
     @Column(name = "code", length = 20)
     private String code;
+    //板块id
     @Column(name = "plate_id", length = 20)
     private String plateId;
     @Column(name = "create_date")
