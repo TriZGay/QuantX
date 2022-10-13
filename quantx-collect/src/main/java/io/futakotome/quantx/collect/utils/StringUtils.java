@@ -6,14 +6,14 @@ public final class StringUtils {
     }
 
     public static boolean isNotEmpty(Integer integer) {
-        return integer != null && integer != 0;
+        return integer != null;
     }
 
     public static boolean isNotEmpty(Double d) {
-        return d != null && d != 0;
+        return d != null;
     }
 
     public static boolean isNotEmpty(Long l) {
-        return l != null && l != 0;
+        return l != null;
     }
 }
