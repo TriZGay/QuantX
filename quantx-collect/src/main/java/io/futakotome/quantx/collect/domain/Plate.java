@@ -1,6 +1,7 @@
 package io.futakotome.quantx.collect.domain;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "t_plate")
@@ -21,9 +22,9 @@ public class Plate {
     @Column(name = "plate_id", length = 20)
     private String plateId;
     @Column(name = "create_date")
-    private Long createDate;
+    private LocalDateTime createDate;
     @Column(name = "modify_date")
-    private Long modifyDate;
+    private LocalDateTime modifyDate;
 
     public Long getId() {
         return id;
@@ -57,19 +58,19 @@ public class Plate {
         this.plateId = plateId;
     }
 
-    public Long getCreateDate() {
+    public LocalDateTime getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(Long createDate) {
+    public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate;
     }
 
-    public Long getModifyDate() {
+    public LocalDateTime getModifyDate() {
         return modifyDate;
     }
 
-    public void setModifyDate(Long modifyDate) {
+    public void setModifyDate(LocalDateTime modifyDate) {
         this.modifyDate = modifyDate;
     }
 }
