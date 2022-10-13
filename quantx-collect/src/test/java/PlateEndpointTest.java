@@ -28,4 +28,23 @@ public class PlateEndpointTest {
                 .then()
                 .statusCode(201);
     }
+
+    @Test
+    public void testUpdate() {
+        given().when()
+                .body(new JsonObject()
+                        .put("name", "newName").toString())
+                .contentType("application/json")
+                .put("/plates/1")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test
+    public void testDelete() {
+        given().when()
+                .delete("/plates/1")
+                .then()
+                .statusCode(204);
+    }
 }

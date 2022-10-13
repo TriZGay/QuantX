@@ -2,6 +2,7 @@ package io.futakotome.quantx.collect.controller;
 
 import io.futakotome.quantx.collect.domain.Plate;
 import io.quarkus.vertx.web.Body;
+import io.quarkus.vertx.web.Param;
 import io.quarkus.vertx.web.Route;
 import io.quarkus.vertx.web.RouteBase;
 import io.smallrye.mutiny.Uni;
@@ -39,6 +40,25 @@ public class PlateController {
                 .replaceWith(plate);
     }
 
+    @Route(methods = Route.HttpMethod.PUT, path = "/:id")
+    public Uni<Plate> update(@Body Plate plate, @Param Long id) {
+        if (plate == null || plate.getName() == null) {
+            return Uni.createFrom().failure(new IllegalArgumentException("Plate name was not set on request."));
+        }
+        return sessionFactory.withTransaction((session, transaction) -> session.find(Plate.class, id)
+                .onItem().ifNotNull().invoke(entity -> entity.setName(plate.getName()))
+                .onItem().ifNull().fail()
+        );
+    }
+
+    @Route(methods = Route.HttpMethod.DELETE, path = "/:id")
+    public Uni<Plate> delete(@Param Long id, HttpServerResponse httpServerResponse) {
+        return sessionFactory.withTransaction((session, tx) -> session.find(Plate.class, id)
+                .onItem().ifNotNull()
+                .call(entity -> session.remove(entity)
+                        .invoke(() -> httpServerResponse.setStatusCode(204)))
+                .onItem().ifNull().fail());
+    }
 
     @Route(path = "/*", type = Route.HandlerType.FAILURE)
     public void error(RoutingContext routingContext) {
