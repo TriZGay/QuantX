@@ -5,8 +5,10 @@ import javax.persistence.*;
 @Entity
 @Table(name = "t_plate")
 @NamedQuery(name = "Plate.findAll", query = "select p from Plate p")
+@NamedNativeQuery(name = "Plate.insertOne", query = "insert into t_plate(name, code, plate_id) values (?1,?2,?3)")
 public class Plate {
     public static final String FIND_ALL = "Plate.findAll";
+    public static final String INSERT_ONE = "Plate.insertOne";
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "t_plate_id_seq")

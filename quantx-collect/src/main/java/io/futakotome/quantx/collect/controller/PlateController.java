@@ -35,8 +35,13 @@ public class PlateController {
         if (plate == null || plate.getId() != null) {
             return Uni.createFrom().failure(new IllegalStateException("Plate id invalidly set on request"));
         }
-        return sessionFactory.withTransaction((session, transaction) -> session.persist(plate)
-                .invoke(() -> response.setStatusCode(201)))
+        return sessionFactory.withTransaction((session, transaction) ->
+                session.createNamedQuery(Plate.INSERT_ONE)
+                        .setParameter(1, plate.getName())
+                        .setParameter(2, plate.getCode())
+                        .setParameter(3, plate.getPlateId())
+                        .executeUpdate()
+                        .invoke(() -> response.setStatusCode(201)))
                 .replaceWith(plate);
     }
 
