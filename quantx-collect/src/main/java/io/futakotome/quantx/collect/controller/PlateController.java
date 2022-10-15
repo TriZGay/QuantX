@@ -1,6 +1,9 @@
 package io.futakotome.quantx.collect.controller;
 
+import com.futu.openapi.pb.QotCommon;
+import com.futu.openapi.pb.QotGetPlateSet;
 import io.futakotome.quantx.collect.domain.Plate;
+import io.futakotome.quantx.collect.onboot.FutuQotService;
 import io.quarkus.vertx.web.Body;
 import io.quarkus.vertx.web.Param;
 import io.quarkus.vertx.web.Route;
@@ -22,6 +25,20 @@ public class PlateController {
 
     @Inject
     Mutiny.SessionFactory sessionFactory;
+
+    @Inject
+    FutuQotService futuQotService;
+
+    @Route(methods = Route.HttpMethod.GET, path = "/sync")
+    public void syncPlateData(RoutingContext routingContext) {
+        QotGetPlateSet.C2S c2S = QotGetPlateSet.C2S.newBuilder()
+                .setMarket(QotCommon.QotMarket.QotMarket_HK_Security_VALUE)
+                .setPlateSetType(QotCommon.PlateSetType.PlateSetType_Industry_VALUE)
+                .build();
+        QotGetPlateSet.Request request = QotGetPlateSet.Request.newBuilder().setC2S(c2S).build();
+        Integer seqNo = futuQotService.getQot().getPlateSet(request);
+        routingContext.response().setStatusCode(200).end(seqNo.toString());
+    }
 
     @Route(methods = Route.HttpMethod.GET, path = "/")
     public Uni<List<Plate>> getAll() {
