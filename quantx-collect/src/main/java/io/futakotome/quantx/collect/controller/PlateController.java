@@ -2,6 +2,7 @@ package io.futakotome.quantx.collect.controller;
 
 import com.futu.openapi.pb.QotCommon;
 import com.futu.openapi.pb.QotGetPlateSet;
+import com.google.gson.Gson;
 import io.futakotome.quantx.collect.domain.Plate;
 import io.futakotome.quantx.collect.onboot.FutuQotService;
 import io.quarkus.vertx.web.Body;
