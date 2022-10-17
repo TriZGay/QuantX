@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @RouteBase(path = "/ipo", produces = "application/json")
-public class IPOController {
+public class IPOController extends BaseController {
     private static final Logger LOGGER = Logger.getLogger(IPOController.class.getName());
 
     @Inject
@@ -33,27 +33,5 @@ public class IPOController {
     @Route(methods = Route.HttpMethod.POST, path = "/")
     public Uni<Ipo> create(@Body Ipo ipo, HttpServerResponse httpServerResponse) {
         return Uni.createFrom().failure(new NotSupportedException());
-    }
-
-    @Route(path = "/*", type = Route.HandlerType.FAILURE)
-    public void error(RoutingContext routingContext) {
-        Throwable throwable = routingContext.failure();
-        if (throwable != null) {
-            LOGGER.error("Failed to handle request ", throwable);
-            int status = routingContext.statusCode();
-            String chunk = "";
-            if (throwable instanceof NoSuchElementException) {
-                status = 404;
-            } else if (throwable instanceof IllegalArgumentException) {
-                status = 422;
-                chunk = new JsonObject().put("code", status)
-                        .put("exceptionType", throwable.getClass().getName())
-                        .put("error", throwable.getMessage())
-                        .encode();
-            }
-            routingContext.response().setStatusCode(status).end(chunk);
-        } else {
-            routingContext.next();
-        }
     }
 }

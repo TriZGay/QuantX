@@ -1,4 +1,4 @@
-package io.futakotome.quantx.collect.domain;
+package io.futakotome.quantx.collect.domain.plate;
 
 import io.futakotome.quantx.collect.utils.StringUtils;
 

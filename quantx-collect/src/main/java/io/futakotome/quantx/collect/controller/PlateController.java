@@ -2,8 +2,7 @@ package io.futakotome.quantx.collect.controller;
 
 import com.futu.openapi.pb.QotCommon;
 import com.futu.openapi.pb.QotGetPlateSet;
-import com.google.gson.Gson;
-import io.futakotome.quantx.collect.domain.Plate;
+import io.futakotome.quantx.collect.domain.plate.Plate;
 import io.futakotome.quantx.collect.onboot.FutuQotService;
 import io.quarkus.vertx.web.Body;
 import io.quarkus.vertx.web.Param;
@@ -11,17 +10,15 @@ import io.quarkus.vertx.web.Route;
 import io.quarkus.vertx.web.RouteBase;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RouteBase(path = "/plates", produces = "application/json")
-public class PlateController {
+public class PlateController extends BaseController {
     private static final Logger LOGGER = Logger.getLogger(PlateController.class.getName());
 
     @Inject
@@ -34,11 +31,11 @@ public class PlateController {
     public void syncPlateData(RoutingContext routingContext) {
         QotGetPlateSet.C2S c2S = QotGetPlateSet.C2S.newBuilder()
                 .setMarket(QotCommon.QotMarket.QotMarket_HK_Security_VALUE)
-                .setPlateSetType(QotCommon.PlateSetType.PlateSetType_Industry_VALUE)
+                .setPlateSetType(QotCommon.PlateSetType.PlateSetType_All_VALUE)
                 .build();
         QotGetPlateSet.Request request = QotGetPlateSet.Request.newBuilder().setC2S(c2S).build();
-        Integer seqNo = futuQotService.getQot().getPlateSet(request);
-        routingContext.response().setStatusCode(200).end(seqNo.toString());
+        int seqNo = futuQotService.getQot().getPlateSet(request);
+        routingContext.response().setStatusCode(200).end("succeed:" + seqNo);
     }
 
     @Route(methods = Route.HttpMethod.GET, path = "/")
@@ -53,11 +50,7 @@ public class PlateController {
             return Uni.createFrom().failure(new IllegalStateException("Plate id invalidly set on request"));
         }
         return sessionFactory.withTransaction((session, transaction) ->
-                session.createNamedQuery(Plate.INSERT_ONE)
-                        .setParameter(1, plate.getName())
-                        .setParameter(2, plate.getCode())
-                        .setParameter(3, plate.getPlateId())
-                        .executeUpdate()
+                session.persist(plate)
                         .invoke(() -> response.setStatusCode(201)))
                 .replaceWith(plate);
     }
@@ -82,25 +75,4 @@ public class PlateController {
                 .onItem().ifNull().fail());
     }
 
-    @Route(path = "/*", type = Route.HandlerType.FAILURE)
-    public void error(RoutingContext routingContext) {
-        Throwable throwable = routingContext.failure();
-        if (throwable != null) {
-            LOGGER.error("Failed to handle request ", throwable);
-            int status = routingContext.statusCode();
-            String chunk = "";
-            if (throwable instanceof NoSuchElementException) {
-                status = 404;
-            } else if (throwable instanceof IllegalArgumentException) {
-                status = 422;
-                chunk = new JsonObject().put("code", status)
-                        .put("exceptionType", throwable.getClass().getName())
-                        .put("error", throwable.getMessage())
-                        .encode();
-            }
-            routingContext.response().setStatusCode(status).end(chunk);
-        } else {
-            routingContext.next();
-        }
-    }
 }

@@ -6,18 +6,27 @@ import com.futu.openapi.FTSPI_Conn;
 import com.futu.openapi.FTSPI_Qot;
 import com.futu.openapi.pb.QotGetPlateSet;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.util.JsonFormat;
+import io.futakotome.quantx.collect.domain.plate.Plate;
+import io.futakotome.quantx.collect.domain.vo.FTResponse;
+import io.futakotome.quantx.collect.domain.vo.PlateInfo;
+import io.futakotome.quantx.collect.utils.ProtobufBeanUtils;
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class FutuQotService implements FTSPI_Qot, FTSPI_Conn {
     FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
     private static final Logger LOGGER = Logger.getLogger(FutuQotService.class.getName());
+    @Inject
+    Mutiny.SessionFactory sessionFactory;
 
     @ConfigProperty(name = "futu.gateway.address")
     String ftIp;
@@ -27,6 +36,9 @@ public class FutuQotService implements FTSPI_Qot, FTSPI_Conn {
 
     @ConfigProperty(name = "futu.gateway.encrypt")
     boolean enabledEncrypt;
+
+    @ConfigProperty(name = "futu.insert.batch-size")
+    Integer batchSize;
 
     public FutuQotService() {
         qot.setClientInfo("javaclient", 1);
@@ -62,8 +74,21 @@ public class FutuQotService implements FTSPI_Qot, FTSPI_Conn {
             LOGGER.errorv("GetPlateSetFailed: {0}", rsp.getRetMsg());
         } else {
             try {
-                String json = JsonFormat.printer().print(rsp);
-                System.out.println("获取板块列表数据: " + json);
+                FTResponse ftResponse = ProtobufBeanUtils.protobuf2Bean(FTResponse.class, rsp);
+                LOGGER.infov("GetPlateSetSucceed: {0}", ftResponse.toString());
+                List<PlateInfo> plateInfos = ftResponse.parseToPlateInfoList();
+                LOGGER.infov("Parse `s2c`: {0}", plateInfos);
+                //todo 待封装
+                sessionFactory.withTransaction(((session, transaction) ->
+                        session.setBatchSize(batchSize)
+                                .persistAll(plateInfos.stream()
+                                        .map(plateInfo -> {
+                                            PlateInfo.Plate plateVO = plateInfo.getPlate();
+                                            return new Plate(plateInfo.getName(), plateVO.getCode(), plateVO.getMarket());
+                                        })
+                                        .collect(Collectors.toList()))
+                                .invoke(integer -> LOGGER.infov("插入: {0} 条板块数据.", integer))
+                ));
             } catch (InvalidProtocolBufferException e) {
                 e.printStackTrace();
             }

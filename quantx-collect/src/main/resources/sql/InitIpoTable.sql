@@ -5,8 +5,6 @@ CREATE TABLE public.t_ipo
     security       VARCHAR(20) null,
     list_time      VARCHAR(20) null,
     list_timestamp timestamp   null,
-    create_date    timestamp   null default now(),
-    modify_date    timestamp   null,
     ipo_ex_hk_id   bigint      null
 );
 
@@ -24,9 +22,7 @@ create table public.t_ipo_ex_hk
     entrance_price      float8      not null,
     is_subscribe_status smallint    not null,
     apply_endTime       varchar(20) null,
-    apply_endTimestamp  timestamp   null,
-    create_date         timestamp   null default now(),
-    modify_date         timestamp   null
+    apply_endTimestamp  timestamp   null
 );
 
 create unique index table_ipo_hk_id_unique on public.t_ipo_ex_hk (id);
@@ -51,9 +47,7 @@ create table public.t_ipo_ex_cn
     apply_timestamp           timestamp   null,
     winning_time              varchar(20) null,
     winning_timestamp         timestamp   null,
-    is_has_won                smallint    not null,
-    create_date               timestamp   null default now(),
-    modify_date               timestamp   null
+    is_has_won                smallint    not null
 );
 create unique index table_ipo_cn_id_unique on public.t_ipo_ex_cn (id);
 alter table public.t_ipo_ex_cn
@@ -64,9 +58,7 @@ create table public.t_ipo_ex_us
     id            bigserial not null,
     ipo_price_min float8    not null,
     ipo_price_max float8    not null,
-    issue_size    bigint    not null,
-    create_date   timestamp null default now(),
-    modify_date   timestamp null
+    issue_size    bigint    not null
 );
 
 create unique index table_ipo_us_id_unique on public.t_ipo_ex_us (id);
@@ -78,9 +70,7 @@ create table public.t_ipo_ex_cn_winning
     id           bigserial   not null,
     winning_name varchar(20) not null,
     winning_info varchar(20) not null,
-    ipo_cn_id    bigint      not null,
-    create_date  timestamp   null default now(),
-    modify_date  timestamp   null
+    ipo_cn_id    bigint      not null
 );
 create unique index table_ipo_cn_winning_id_unique on public.t_ipo_ex_cn_winning (id);
 alter table public.t_ipo_ex_cn_winning

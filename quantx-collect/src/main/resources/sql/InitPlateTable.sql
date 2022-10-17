@@ -1,11 +1,9 @@
 CREATE TABLE public.t_plate
 (
-    id          bigserial   not null,
-    name        VARCHAR(20) null,
-    code        VARCHAR(20) null,
-    plate_id    VARCHAR(20) null,
-    create_date timestamp   null default now(),
-    modify_date timestamp   null
+    id     bigserial   not null,
+    name   VARCHAR(20) null,
+    code   VARCHAR(20) null,
+    market int         null
 );
 
 create unique index table_plate_id_unique on public.t_plate (id);

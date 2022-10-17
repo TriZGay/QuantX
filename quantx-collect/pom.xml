@@ -69,6 +69,10 @@
             <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-envers</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.futunn.openapi</groupId>
             <artifactId>futu-api</artifactId>
             <version>6.2.2708</version>

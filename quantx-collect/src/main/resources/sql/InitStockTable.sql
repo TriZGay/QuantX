@@ -17,9 +17,7 @@ CREATE TABLE public.t_stock
     index_option_type varchar(20) null,
     main_contract     smallint    null,
     last_trade_time   varchar(20) null,
-    exchange_type     varchar(20) null,
-    create_date       timestamp   null default now(),
-    modify_date       timestamp   null
+    exchange_type     varchar(20) null
 );
 
 create unique index table_stock_id_unique on public.t_stock (id);
