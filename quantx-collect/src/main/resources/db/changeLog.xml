@@ -13,4 +13,7 @@
     <changeSet id="2" author="futakotome">
         <sqlFile path="./sql/InitStockTable.sql"/>
     </changeSet>
+    <changeSet id="3" author="futakotome">
+        <sqlFile path="./sql/InitIpoTable.sql"/>
+    </changeSet>
 </databaseChangeLog>

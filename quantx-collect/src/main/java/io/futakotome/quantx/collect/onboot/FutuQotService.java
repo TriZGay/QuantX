@@ -59,11 +59,11 @@ public class FutuQotService implements FTSPI_Qot, FTSPI_Conn {
     @Override
     public void onReply_GetPlateSet(FTAPI_Conn client, int nSerialNo, QotGetPlateSet.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.errorv("获取板块列表失败: {0}", rsp.getRetMsg());
+            LOGGER.errorv("GetPlateSetFailed: {0}", rsp.getRetMsg());
         } else {
             try {
                 String json = JsonFormat.printer().print(rsp);
-                LOGGER.infov("获取板块列表数据: {0}", json);
+                System.out.println("获取板块列表数据: " + json);
             } catch (InvalidProtocolBufferException e) {
                 e.printStackTrace();
             }
