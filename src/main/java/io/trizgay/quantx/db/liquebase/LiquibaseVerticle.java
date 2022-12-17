@@ -65,7 +65,7 @@ public class LiquibaseVerticle extends AbstractVerticle {
     }
 
     private Future<Liquibase> liquibase(Database database) {
-        String changeLog = "classpath:/liquibase-changelog.xml";
+        String changeLog = "liquibase-changelog.xml";
         ResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor();
         return Future.succeededFuture(new Liquibase(changeLog, resourceAccessor, database));
     }
