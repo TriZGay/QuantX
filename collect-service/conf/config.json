@@ -23,5 +23,12 @@
       "connectionTimeout": 30,
       "poolName": "shardPool"
     }
+  },
+  "liquibase": {
+    "url": "jdbc:postgresql://localhost:49153/quantx",
+    "driverClass": "org.postgresql.Driver",
+    "maxPoolSize": 4,
+    "user": "postgres",
+    "password": "postgres"
   }
 }

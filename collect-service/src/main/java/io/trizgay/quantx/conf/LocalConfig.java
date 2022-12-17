@@ -1,5 +1,7 @@
 package io.trizgay.quantx.conf;
 
+import io.vertx.core.json.JsonObject;
+
 public class LocalConfig {
     private Server server;
 
@@ -206,6 +208,64 @@ public class LocalConfig {
 
     public void setReadWrite(Pg readWrite) {
         this.readWrite = readWrite;
+    }
+
+    private LiquibaseConfig liquibase;
+
+    public static class LiquibaseConfig {
+        private String url;
+        private String driverClass;
+        private Integer maxPoolSize;
+        private String user;
+        private String password;
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getDriverClass() {
+            return driverClass;
+        }
+
+        public void setDriverClass(String driverClass) {
+            this.driverClass = driverClass;
+        }
+
+        public Integer getMaxPoolSize() {
+            return maxPoolSize;
+        }
+
+        public void setMaxPoolSize(Integer maxPoolSize) {
+            this.maxPoolSize = maxPoolSize;
+        }
+
+        public String getUser() {
+            return user;
+        }
+
+        public void setUser(String user) {
+            this.user = user;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+    }
+
+    public LiquibaseConfig getLiquibase() {
+        return liquibase;
+    }
+
+    public void setLiquibase(LiquibaseConfig liquibase) {
+        this.liquibase = liquibase;
     }
 
     @Override
