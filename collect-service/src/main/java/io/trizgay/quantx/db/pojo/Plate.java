@@ -14,12 +14,8 @@ public class Plate {
     private Long id;
 
     @TemplateParameter(name = "name")
-    @Column(name = "plate_name")
+    @Column(name = "name")
     private String name;
-
-    @TemplateParameter(name = "type")
-    @Column(name = "plate_type")
-    private Integer type;
 
     @TemplateParameter(name = "market")
     @Column(name = "market")
@@ -30,13 +26,6 @@ public class Plate {
     private String code;
 
     public Plate() {
-    }
-
-    public Plate(String name, Integer type, Integer market, String code) {
-        this.name = name;
-        this.type = type;
-        this.market = market;
-        this.code = code;
     }
 
     public Plate(String name, Integer market, String code) {
@@ -71,14 +60,6 @@ public class Plate {
         this.name = name;
     }
 
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        this.type = type;
-    }
-
     public Integer getMarket() {
         return market;
     }
@@ -100,7 +81,6 @@ public class Plate {
         return "Plate{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", type=" + type +
                 ", market=" + market +
                 ", code='" + code + '\'' +
                 '}';

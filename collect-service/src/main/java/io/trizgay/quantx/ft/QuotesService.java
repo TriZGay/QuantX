@@ -132,12 +132,17 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
 
     public void sendGetPlateSet(QotGetPlateSet.C2S getPlateSetC2s, Handler<AsyncResult<JsonObject>> resultHandler) {
         QotGetPlateSet.Request request = QotGetPlateSet.Request.newBuilder().setC2S(getPlateSetC2s).build();
-        Integer seqNo = qot.getPlateSet(request);
-        resultHandler.handle(Future.succeededFuture(
-                new FTCommonResult(seqNo, "查询板块信息:plateSetType="
-                        + getPlateSetC2s.getPlateSetType()
-                        + ",market=" + getPlateSetC2s.getMarket()).toJson()
-        ));
+        try {
+            Integer seqNo = qot.getPlateSet(request);
+            Log.info("seqNo:" + seqNo + " 请求板块信息" + getPlateSetC2s.toString());
+            resultHandler.handle(Future.succeededFuture(
+                    new FTCommonResult(seqNo, "查询板块信息:plateSetType="
+                            + getPlateSetC2s.getPlateSetType()
+                            + ",market=" + getPlateSetC2s.getMarket()).toJson()
+            ));
+        } catch (Exception e) {
+            resultHandler.handle(Future.failedFuture(e));
+        }
     }
 
     public void sendGetIpoList(QotGetIpoList.C2S getIpoListC2s, Handler<AsyncResult<JsonObject>> resultHandler) {
@@ -169,11 +174,13 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot {
                 JsonArray plateInfoList = parsedResult.getS2c().getJsonArray("plateInfoList");
                 List<Plate> platesToDb = plateInfoList.stream()
                         .map(JsonObject::mapFrom)
-                        .map(jsonObject -> new Plate(jsonObject.getString("name"),
+                        .map(jsonObject -> new Plate(
+                                jsonObject.getString("name"),
                                 jsonObject.getJsonObject("plate").getInteger("market"),
-                                jsonObject.getJsonObject("plate").getString("code"))).collect(Collectors.toList());
+                                jsonObject.getJsonObject("plate").getString("code")))
+                        .collect(Collectors.toList());
                 mapper.insertPlateBatch(platesToDb)
-                        .onSuccess(size -> Log.info("插入板块信息条成功!"))
+                        .onSuccess(size -> Log.info("插入板块信息条成功!条数:" + size))
                         .onFailure(err -> Log.error("插入板块信息出错!", err));
             } catch (InvalidProtocolBufferException e) {
                 Log.error("查询板块信息解析结果失败!", e);

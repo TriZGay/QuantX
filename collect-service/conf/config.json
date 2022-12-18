@@ -10,8 +10,8 @@
     "isEnableEncrypt": false
   },
   "readWrite": {
-    "host": "127.0.0.1",
-    "port": 5432,
+    "host": "localhost",
+    "port": 49153,
     "db": "quantx",
     "user": "postgres",
     "password": "postgrespw",

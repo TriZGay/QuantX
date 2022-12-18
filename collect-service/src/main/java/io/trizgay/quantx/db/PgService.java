@@ -24,7 +24,6 @@ public class PgService implements DataFetcher {
 
     @Override
     public Future<Integer> insertPlateBatch(List<Plate> plates) {
-        Log.info("板块信息入库:" + plates.toString());
         Promise<Integer> promise = Promise.promise();
         SqlTemplate.forUpdate(pool, sqlMap.get("INSET_ONE_PLATE"))
                 .mapFrom(PlateParametersMapper.INSTANCE)
@@ -36,7 +35,6 @@ public class PgService implements DataFetcher {
 
     @Override
     public Future<Integer> insertSecurityBatch(List<Security> securities) {
-        Log.info("板块股票信息入库:" + securities);
         Promise<Integer> promise = Promise.promise();
         SqlTemplate.forUpdate(pool, sqlMap.get("INSET_ONE_SECURITY"))
                 .mapFrom(SecurityParametersMapper.INSTANCE)

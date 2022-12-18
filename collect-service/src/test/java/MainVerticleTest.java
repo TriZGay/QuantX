@@ -38,7 +38,7 @@ public class MainVerticleTest {
 //                context.succeeding(id -> {
 //                    client.post(8900, "0.0.0.0", "/quantx/api/v1/plateInfo")
 //                            .as(BodyCodec.string())
-//                            .sendJson(new PostPlateSetRequest(41, 0).toJson(), context.succeeding(resp -> {
+//                            .sendJson(new PostPlateSetRequest(22, 0).toJson(), context.succeeding(resp -> {
 //                                context.verify(() -> {
 //                                    assertThat(resp.statusCode()).isEqualTo(200);
 //                                    context.completeNow();
@@ -73,24 +73,24 @@ public class MainVerticleTest {
 //        }
 //    }
 
-    @Test
-    void postSecurityInfo(VertxTestContext context) {
-        WebClient client = WebClient.create(vertx);
-        vertx.deployVerticle(MainVerticle.class.getName(),
-                context.succeeding(id -> {
-                    client.post(8900, "0.0.0.0", "/quantx/api/v1/security")
-                            .as(BodyCodec.string())
-                            .sendJson(new PostSecurityListRequest(1, "BK1001").toJson(), context.succeeding(resp -> {
-                                context.verify(() -> {
-                                    assertThat(resp.statusCode()).isEqualTo(200);
-                                    context.completeNow();
-                                });
-                            }));
-                }));
-        try {
-            Thread.sleep(1000 * 600);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+//    @Test
+//    void postSecurityInfo(VertxTestContext context) {
+//        WebClient client = WebClient.create(vertx);
+//        vertx.deployVerticle(MainVerticle.class.getName(),
+//                context.succeeding(id -> {
+//                    client.post(8900, "0.0.0.0", "/quantx/api/v1/security")
+//                            .as(BodyCodec.string())
+//                            .sendJson(new PostSecurityListRequest(1, "BK1001").toJson(), context.succeeding(resp -> {
+//                                context.verify(() -> {
+//                                    assertThat(resp.statusCode()).isEqualTo(200);
+//                                    context.completeNow();
+//                                });
+//                            }));
+//                }));
+//        try {
+//            Thread.sleep(1000 * 600);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }
