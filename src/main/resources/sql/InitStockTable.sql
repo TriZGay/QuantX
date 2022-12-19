@@ -21,5 +21,6 @@ CREATE TABLE public.t_stock
 );
 
 create unique index table_stock_id_unique on public.t_stock (id);
+create unique index t_stock_code_uindex on public.t_stock (code);
 alter table public.t_stock
     add constraint table_stock_pk primary key (id);
