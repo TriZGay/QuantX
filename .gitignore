@@ -26,8 +26,8 @@ hs_err_pid*
 
 .idea/
 target/
-logs/
-doc/
-env/
+**/logs/
+**/doc/
+**/env/
 quantx.iml
 *.iml
