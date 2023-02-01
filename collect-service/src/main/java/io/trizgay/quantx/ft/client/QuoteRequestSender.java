@@ -3,7 +3,6 @@ package io.trizgay.quantx.ft.client;
 import com.futu.openapi.pb.QotGetIpoList;
 import com.futu.openapi.pb.QotGetPlateSecurity;
 import com.futu.openapi.pb.QotGetPlateSet;
-import io.trizgay.quantx.domain.plate.PlateInfo;
 import io.trizgay.quantx.ft.FTCommonResult;
 import io.trizgay.quantx.ft.QuotesService;
 import io.vertx.core.Future;

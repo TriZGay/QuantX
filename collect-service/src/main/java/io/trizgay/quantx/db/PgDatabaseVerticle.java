@@ -9,7 +9,8 @@ import io.vertx.core.Promise;
 import io.vertx.pgclient.PgPool;
 import io.vertx.serviceproxy.ServiceBinder;
 
-import static io.trizgay.quantx.utils.Constants.*;
+import static io.trizgay.quantx.utils.Constants.CONFIG_PG_EVENT_BUS;
+import static io.trizgay.quantx.utils.Constants.CONFIG_PG_SQL_FILE;
 
 public class PgDatabaseVerticle extends AbstractVerticle {
 
