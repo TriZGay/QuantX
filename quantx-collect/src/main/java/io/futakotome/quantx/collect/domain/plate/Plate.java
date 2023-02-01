@@ -22,7 +22,7 @@ public class Plate {
     @Column(name = "code", length = 20)
     private String code;
     //板块市场
-    @Column(name = "plate_id", length = 20)
+    @Column(name = "market", length = 20)
     private Integer market;
 
     public Plate() {
