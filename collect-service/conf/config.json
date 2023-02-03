@@ -10,11 +10,11 @@
     "isEnableEncrypt": false
   },
   "readWrite": {
-    "host": "127.0.0.1",
-    "port": 5432,
+    "host": "localhost",
+    "port": 49153,
     "db": "quantx",
     "user": "postgres",
-    "password": "postgres",
+    "password": "postgrespw",
     "pool": {
       "maxSize": 4,
       "maxWaitQueueSize": -1,
@@ -23,5 +23,12 @@
       "connectionTimeout": 30,
       "poolName": "shardPool"
     }
+  },
+  "liquibase": {
+    "url": "jdbc:postgresql://localhost:49153/quantx",
+    "driverClass": "org.postgresql.Driver",
+    "maxPoolSize": 4,
+    "user": "postgres",
+    "password": "postgrespw"
   }
 }

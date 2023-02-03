@@ -1,6 +1,7 @@
 package io.trizgay.quantx;
 
 import io.trizgay.quantx.db.PgDatabaseVerticle;
+import io.trizgay.quantx.db.liquebase.LiquibaseVerticle;
 import io.trizgay.quantx.http.HttpVerticle;
 import io.trizgay.quantx.utils.Config;
 import io.trizgay.quantx.utils.Log;
@@ -14,12 +15,29 @@ public class MainVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) throws Exception {
         Log.init();
         Config.initLocalConfig(vertx)
+                .compose(v -> startLiquibaseVerticle().compose(vertx::undeploy))
                 .compose(v -> startDbVerticle())
                 .compose(v -> startHttpServer())
                 .onSuccess(ar -> {
                     Log.info("启动成功!");
                     startPromise.complete();
                 }).onFailure(startPromise::fail);
+    }
+
+    private Future<String> startLiquibaseVerticle() {
+        Promise<String> promise = Promise.promise();
+        vertx.deployVerticle(LiquibaseVerticle.class.getName(),
+                new DeploymentOptions().setWorker(true),
+                ar -> {
+                    if (ar.succeeded()) {
+                        Log.info("执行数据库版本控制成功!");
+                        promise.complete(ar.result());
+                    } else {
+                        Log.error("执行数据库版本控制失败!", ar.cause());
+                        promise.fail(ar.cause());
+                    }
+                });
+        return promise.future();
     }
 
     private Future<Void> startDbVerticle() {

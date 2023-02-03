@@ -16,6 +16,12 @@ import java.util.Map;
 public class PgService implements DataFetcher {
     private final PgPool pool;
     private final Map<String, String> sqlMap;
+    private static final String BATCH_INSERT_PLATES = "insert into t_plate(name, code, market) " +
+            "values (#{name},#{code},#{market}) on conflict (code) do update set name=excluded.name,code=excluded.code,market=excluded.market " +
+            "where t_plate.name is distinct from excluded.name or t_plate.code is distinct from excluded.code or t_plate.market is distinct from excluded.market";
+
+    private static final String BATCH_INSERT_STOCK = "insert into t_security(name, lot_size, sec_type, list_time, de_listing,exchange_type, identity, market, code) " +
+            "values (#{name},#{lotSize},#{secType},#{listTime},#{deListing},#{exchangeType},#{identity},#{market},#{code})";
 
     public PgService(PgPool pool, Map<String, String> sqlMap) {
         this.pool = pool;
@@ -24,9 +30,8 @@ public class PgService implements DataFetcher {
 
     @Override
     public Future<Integer> insertPlateBatch(List<Plate> plates) {
-        Log.info("板块信息入库:" + plates.toString());
         Promise<Integer> promise = Promise.promise();
-        SqlTemplate.forUpdate(pool, sqlMap.get("INSET_ONE_PLATE"))
+        SqlTemplate.forUpdate(pool, BATCH_INSERT_PLATES)
                 .mapFrom(PlateParametersMapper.INSTANCE)
                 .executeBatch(plates)
                 .onSuccess(sqlResult -> promise.complete(plates.size()))
@@ -36,9 +41,8 @@ public class PgService implements DataFetcher {
 
     @Override
     public Future<Integer> insertSecurityBatch(List<Security> securities) {
-        Log.info("板块股票信息入库:" + securities);
         Promise<Integer> promise = Promise.promise();
-        SqlTemplate.forUpdate(pool, sqlMap.get("INSET_ONE_SECURITY"))
+        SqlTemplate.forUpdate(pool, BATCH_INSERT_STOCK)
                 .mapFrom(SecurityParametersMapper.INSTANCE)
                 .executeBatch(securities)
                 .onSuccess(sqlResult -> promise.complete(securities.size()))
