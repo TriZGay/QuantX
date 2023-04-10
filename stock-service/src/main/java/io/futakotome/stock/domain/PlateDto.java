@@ -1,23 +1,15 @@
 package io.futakotome.stock.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
-@Entity
-@Table(name = "t_plate")
-public class Plate {
-    @Id
+import java.util.Objects;
+public class PlateDto {
     private Long id;
 
-    @Column(name = "name")
     private String name;
 
-    @Column(name = "code", unique = true)
     private String code;
 
-    @Column(name = "market")
     private Integer market;
 
     public Long getId() {
@@ -50,5 +42,28 @@ public class Plate {
 
     public void setMarket(Integer market) {
         this.market = market;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlateDto dto = (PlateDto) o;
+        return code.equals(dto.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code);
+    }
+
+    @Override
+    public String toString() {
+        return "PlateDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", code='" + code + '\'' +
+                ", market=" + market +
+                '}';
     }
 }
