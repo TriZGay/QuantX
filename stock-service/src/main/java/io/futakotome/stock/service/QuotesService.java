@@ -11,6 +11,7 @@ import com.google.gson.JsonElement;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.stock.config.FutuConfig;
+import io.futakotome.stock.domain.MarketAggregator;
 import io.futakotome.stock.dto.PlateDto;
 import io.futakotome.stock.mapper.PlateDtoMapper;
 import org.slf4j.Logger;
@@ -23,17 +24,20 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(QuotesService.class);
     private static final Gson GSON = new Gson();
+    private static final MarketAggregator market = new MarketAggregator();
 
     private final PlateDtoMapper plateMapper;
     private final FutuConfig futuConfig;
 
     private static final String clientID = "javaclient";
-    private final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
+
+    public static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
 
     public QuotesService(PlateDtoMapper plateMapper, FutuConfig futuConfig) {
@@ -44,20 +48,9 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         this.plateMapper = plateMapper;
     }
 
-    @Scheduled(fixedRate = 10000L)
+    @Scheduled(fixedRate = 24L, timeUnit = TimeUnit.HOURS)
     public void sync() {
-        this.sendPlateInfoRequest(QotCommon.QotMarket.QotMarket_HK_Security_VALUE,
-                QotCommon.PlateSetType.PlateSetType_Industry_VALUE);
-    }
-
-    public void sendPlateInfoRequest(Integer market, Integer plateSetType) {
-        QotGetPlateSet.Request request = QotGetPlateSet.Request.newBuilder()
-                .setC2S(QotGetPlateSet.C2S.newBuilder()
-                        .setMarket(market)
-                        .setPlateSetType(plateSetType)
-                        .build()).build();
-        int seqNo = qot.getPlateSet(request);
-        LOGGER.info("SeqNo:" + seqNo + "请求板块信息:" + request.toString());
+        market.sendPlateInfoRequest();
     }
 
     @Override
