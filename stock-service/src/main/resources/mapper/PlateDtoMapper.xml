@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.stock.mapper.PlateDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.stock.dto.PlateDto">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="market" column="market" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,name,code,
+        market
+    </sql>
+    <insert id="insertBatch">
+        insert into t_plate(name,code,
+        market)
+        values
+        <foreach collection="plateDtoCollection" item="item" separator=",">
+            (#{item.name,jdbcType=VARCHAR},#{item.code,jdbcType=VARCHAR},
+            #{item.market,jdbcType=INTEGER})
+        </foreach>
+    </insert>
+</mapper>

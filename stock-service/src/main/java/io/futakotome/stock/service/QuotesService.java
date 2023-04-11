@@ -11,8 +11,8 @@ import com.google.gson.JsonElement;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.stock.config.FutuConfig;
-import io.futakotome.stock.domain.PlateDto;
-import io.futakotome.stock.mapper.PlateMapper;
+import io.futakotome.stock.dto.PlateDto;
+import io.futakotome.stock.mapper.PlateDtoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,14 +28,14 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(QuotesService.class);
     private static final Gson GSON = new Gson();
 
-    private final PlateMapper plateMapper;
+    private final PlateDtoMapper plateMapper;
     private final FutuConfig futuConfig;
 
     private static final String clientID = "javaclient";
     private final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
 
-    public QuotesService(PlateMapper plateMapper, FutuConfig futuConfig) {
+    public QuotesService(PlateDtoMapper plateMapper, FutuConfig futuConfig) {
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
@@ -94,9 +94,12 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     dto.setMarket(jsonElement.getAsJsonObject().get("plate").getAsJsonObject().get("market").getAsInt());
                     newPlates.add(dto);
                 }
-//                List<PlateDto> allPlates = plateRepository.findAll();
-//                newPlates.removeIf(allPlates::contains);
-//                plateRepository.saveAllAndFlush(newPlates);
+                List<PlateDto> allPlates = plateMapper.selectList(null);
+                newPlates.removeIf(allPlates::contains);
+                if (newPlates.size() > 0) {
+                    int insertRow = plateMapper.insertBatch(newPlates);
+                    LOGGER.info("插入条数:" + insertRow);
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询板块信息解析结果失败!", e);
             }
