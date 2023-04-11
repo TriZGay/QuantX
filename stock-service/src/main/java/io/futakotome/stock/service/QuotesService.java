@@ -16,6 +16,7 @@ import io.futakotome.stock.domain.MarketAggregator;
 import io.futakotome.stock.dto.PlateDto;
 import io.futakotome.stock.dto.StockDto;
 import io.futakotome.stock.mapper.PlateDtoMapper;
+import io.futakotome.stock.mapper.StockDtoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -23,6 +24,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +38,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private static final MarketAggregator market = new MarketAggregator();
 
     private final PlateDtoMapper plateMapper;
+    private final StockDtoMapper stockMapper;
     private final FutuConfig futuConfig;
 
     private static final String clientID = "javaclient";
@@ -42,12 +46,13 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     public static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
 
-    public QuotesService(PlateDtoMapper plateMapper, FutuConfig futuConfig) {
+    public QuotesService(PlateDtoMapper plateMapper, StockDtoMapper stockMapper, FutuConfig futuConfig) {
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
         this.futuConfig = futuConfig;
         this.plateMapper = plateMapper;
+        this.stockMapper = stockMapper;
     }
 
     @Scheduled(fixedRate = 24L, timeUnit = TimeUnit.HOURS)
@@ -77,28 +82,32 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             LOGGER.error("查询股票信息失败:" + rsp.getRetMsg(),
                     new IllegalArgumentException("请求序列号:" + nSerialNo + "查询股票信息失败,code:" + rsp.getRetType()));
         } else {
-            LOGGER.info("connID=" + client.getConnectID() + "查询股票信息...");
+            LOGGER.info("序列号:" + nSerialNo + "connID=" + client.getConnectID() + "查询股票信息...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info("股票返回:" + ftGrpcReturnResult.toString());
-                Iterator<JsonElement> statInfoIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("staticInfoList").iterator();
+                Iterator<JsonElement> stockInfoIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("staticInfoList").iterator();
                 List<StockDto> newStocks = new ArrayList<>();
-                while (statInfoIterator.hasNext()) {
-                    JsonElement jsonElement = statInfoIterator.next();
-                    JsonObject basic = jsonElement.getAsJsonObject().getAsJsonObject("basic");
+                while (stockInfoIterator.hasNext()) {
+                    JsonElement jsonElement = stockInfoIterator.next();
+                    JsonObject basic = jsonElement.getAsJsonObject().get("basic").getAsJsonObject();
                     StockDto stockDto = new StockDto();
-//                    stockDto.setName(basic.get("name").getAsString());
-//                    stockDto.setLotSize(basic.get("lotSize").getAsInt());
-//                    stockDto.setStockType(basic.get("secType").getAsInt());
-//                    stockDto.setListingDate(basic.get("listTimestamp").getAsLong());
-//                    stockDto.setDelisting(basic.get("delisting").getAsBoolean() ? 1 : 0);
-//                    stockDto.setExchangeType(basic.get(""));
-//                    stockDto.setStockId();
-//                    stockDto.setMarket();
-//                    stockDto.setCode();
+                    stockDto.setName(basic.get("name").getAsString());
+                    stockDto.setLotSize(basic.get("lotSize").getAsInt());
+                    stockDto.setStockType(basic.get("secType").getAsInt());
+                    stockDto.setListingDate(LocalDate.parse(basic.get("listTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                    stockDto.setDelisting(basic.get("delisting").getAsBoolean() ? 1 : 0);
+                    stockDto.setExchangeType(basic.get("exchType").getAsInt());
+                    stockDto.setStockId(basic.get("id").getAsString());
+                    stockDto.setPlateCode(basic.get("security").getAsJsonObject().get("market").getAsInt());
+                    stockDto.setCode(basic.get("security").getAsJsonObject().get("code").getAsString());
                     newStocks.add(stockDto);
                 }
-
+                List<StockDto> allStock = stockMapper.selectList(null);
+                newStocks.removeIf(allStock::contains);
+                if (newStocks.size() > 0) {
+                    int insertRow = stockMapper.insertBatch(newStocks);
+                    LOGGER.info("插入条数:" + insertRow);
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询股票信息解析结果失败!", e);
             }

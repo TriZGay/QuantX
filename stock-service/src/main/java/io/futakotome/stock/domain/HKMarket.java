@@ -30,8 +30,8 @@ public class HKMarket implements RequestPlateInfo, RequestStockInfo {
     @Override
     public void sendStockInfoRequest(PlateDtoMapper plateDtoMapper) {
         List<PlateDto> hkAllPlates = plateDtoMapper.searchByMarketEquals(QotCommon.QotMarket.QotMarket_HK_Security_VALUE);
-        for (PlateDto hkPlate : hkAllPlates) {
-            String plateCode = hkPlate.getCode();
+        for (int i = 0; i < hkAllPlates.size(); i++) {
+            String plateCode = hkAllPlates.get(i).getCode();
             QotGetPlateSecurity.Request request = QotGetPlateSecurity.Request.newBuilder()
                     .setC2S(QotGetPlateSecurity.C2S.newBuilder()
                             .setPlate(QotCommon.Security.newBuilder()
@@ -42,7 +42,14 @@ public class HKMarket implements RequestPlateInfo, RequestStockInfo {
                     .build();
             int seqNo = QuotesService.qot.getPlateSecurity(request);
             LOGGER.info("SeqNo:" + seqNo + "香港市场请求股票信息:" + request.toString());
+            if (i != 0 && i % 9 == 0) {
+                try {
+                    LOGGER.info("接口限制每30秒最多请求10次.sleep....");
+                    Thread.sleep(30000L);
+                } catch (InterruptedException e) {
+                    LOGGER.error("sleep失败!", e);
+                }
+            }
         }
-
     }
 }

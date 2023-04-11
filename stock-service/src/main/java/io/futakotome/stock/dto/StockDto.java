@@ -3,6 +3,7 @@ package io.futakotome.stock.dto;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @TableName(value = "t_stock")
@@ -29,7 +30,7 @@ public class StockDto implements Serializable {
 
     private Integer suspension;
 
-    private Long listingDate;
+    private LocalDate listingDate;
 
     private String stockId;
 
@@ -41,8 +42,10 @@ public class StockDto implements Serializable {
 
     private String lastTradeTime;
 
-    private String exchangeType;
-    private Integer market;
+    private Integer exchangeType;
+
+    private String plateCode;
+
     private static final long serialVersionUID = 1L;
 
     public Long getId() {
@@ -133,11 +136,11 @@ public class StockDto implements Serializable {
         this.suspension = suspension;
     }
 
-    public Long getListingDate() {
+    public LocalDate getListingDate() {
         return listingDate;
     }
 
-    public void setListingDate(Long listingDate) {
+    public void setListingDate(LocalDate listingDate) {
         this.listingDate = listingDate;
     }
 
@@ -181,20 +184,20 @@ public class StockDto implements Serializable {
         this.lastTradeTime = lastTradeTime;
     }
 
-    public String getExchangeType() {
+    public Integer getExchangeType() {
         return exchangeType;
     }
 
-    public void setExchangeType(String exchangeType) {
+    public void setExchangeType(Integer exchangeType) {
         this.exchangeType = exchangeType;
     }
 
-    public Integer getMarket() {
-        return market;
+    public String getPlateCode() {
+        return plateCode;
     }
 
-    public void setMarket(Integer market) {
-        this.market = market;
+    public void setPlateCode(String plateCode) {
+        this.plateCode = plateCode;
     }
 
     @Override
@@ -208,5 +211,30 @@ public class StockDto implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(code);
+    }
+
+    @Override
+    public String toString() {
+        return "StockDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", code='" + code + '\'' +
+                ", lotSize=" + lotSize +
+                ", stockType=" + stockType +
+                ", stockChildType=" + stockChildType +
+                ", stockOwner='" + stockOwner + '\'' +
+                ", optionType='" + optionType + '\'' +
+                ", strikeTime='" + strikeTime + '\'' +
+                ", strikePrice=" + strikePrice +
+                ", suspension=" + suspension +
+                ", listingDate=" + listingDate +
+                ", stockId='" + stockId + '\'' +
+                ", delisting=" + delisting +
+                ", indexOptionType='" + indexOptionType + '\'' +
+                ", mainContract=" + mainContract +
+                ", lastTradeTime='" + lastTradeTime + '\'' +
+                ", exchangeType=" + exchangeType +
+                ", market=" + plateCode +
+                '}';
     }
 }
