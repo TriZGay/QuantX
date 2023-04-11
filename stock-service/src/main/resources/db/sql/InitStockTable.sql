@@ -11,7 +11,7 @@ CREATE TABLE public.t_stock
     strike_time       varchar(20) null,
     strike_price      float8      null,
     suspension        smallint    null,
-    listing_date      varchar(12) null,
+    listing_date      timestamp   null,
     stock_id          bigint      null,
     delisting         smallint    null,
     index_option_type varchar(20) null,
