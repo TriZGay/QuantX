@@ -24,4 +24,12 @@
             #{item.market,jdbcType=INTEGER})
         </foreach>
     </insert>
+
+    <select id="searchByMarketEquals" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_plate
+        where
+        market = #{market,jdbcType=INTEGER}
+    </select>
 </mapper>

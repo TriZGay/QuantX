@@ -12,12 +12,13 @@ CREATE TABLE public.t_stock
     strike_price      float8      null,
     suspension        smallint    null,
     listing_date      timestamp   null,
-    stock_id          bigint      null,
+    stock_id          varchar(50) null,
     delisting         smallint    null,
     index_option_type varchar(20) null,
     main_contract     smallint    null,
     last_trade_time   varchar(20) null,
-    exchange_type     varchar(20) null
+    exchange_type     varchar(20) null,
+    market            int         null
 );
 
 create unique index table_stock_id_unique on public.t_stock (id);

@@ -1,4 +1,5 @@
 package io.futakotome.stock.mapper;
+import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Repository;
 @Mapper
 public interface PlateDtoMapper extends BaseMapper<PlateDto> {
     int insertBatch(@Param("plateDtoCollection") Collection<PlateDto> plateDtoCollection);
+
+    List<PlateDto> searchByMarketEquals(@Param("market") Integer market);
 }
 
 

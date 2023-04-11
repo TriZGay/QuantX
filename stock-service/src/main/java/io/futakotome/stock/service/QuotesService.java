@@ -4,15 +4,17 @@ import com.futu.openapi.FTAPI_Conn;
 import com.futu.openapi.FTAPI_Conn_Qot;
 import com.futu.openapi.FTSPI_Conn;
 import com.futu.openapi.FTSPI_Qot;
-import com.futu.openapi.pb.QotCommon;
+import com.futu.openapi.pb.QotGetPlateSecurity;
 import com.futu.openapi.pb.QotGetPlateSet;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.stock.config.FutuConfig;
 import io.futakotome.stock.domain.MarketAggregator;
 import io.futakotome.stock.dto.PlateDto;
+import io.futakotome.stock.dto.StockDto;
 import io.futakotome.stock.mapper.PlateDtoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +52,8 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     @Scheduled(fixedRate = 24L, timeUnit = TimeUnit.HOURS)
     public void sync() {
-        market.sendPlateInfoRequest();
+//        market.sendPlateInfoRequest();
+        market.sendStockInfoRequest(plateMapper);
     }
 
     @Override
@@ -66,6 +69,40 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onDisconnect(FTAPI_Conn client, long errCode) {
         LOGGER.info("FUTU API 关闭连接连接 onDisconnect: connID=" + client.getConnectID() + ",ret=" + errCode);
+    }
+
+    @Override
+    public void onReply_GetPlateSecurity(FTAPI_Conn client, int nSerialNo, QotGetPlateSecurity.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("查询股票信息失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询股票信息失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("connID=" + client.getConnectID() + "查询股票信息...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info("股票返回:" + ftGrpcReturnResult.toString());
+                Iterator<JsonElement> statInfoIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("staticInfoList").iterator();
+                List<StockDto> newStocks = new ArrayList<>();
+                while (statInfoIterator.hasNext()) {
+                    JsonElement jsonElement = statInfoIterator.next();
+                    JsonObject basic = jsonElement.getAsJsonObject().getAsJsonObject("basic");
+                    StockDto stockDto = new StockDto();
+//                    stockDto.setName(basic.get("name").getAsString());
+//                    stockDto.setLotSize(basic.get("lotSize").getAsInt());
+//                    stockDto.setStockType(basic.get("secType").getAsInt());
+//                    stockDto.setListingDate(basic.get("listTimestamp").getAsLong());
+//                    stockDto.setDelisting(basic.get("delisting").getAsBoolean() ? 1 : 0);
+//                    stockDto.setExchangeType(basic.get(""));
+//                    stockDto.setStockId();
+//                    stockDto.setMarket();
+//                    stockDto.setCode();
+                    newStocks.add(stockDto);
+                }
+
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("查询股票信息解析结果失败!", e);
+            }
+        }
     }
 
     @Override
