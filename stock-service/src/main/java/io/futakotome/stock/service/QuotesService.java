@@ -118,8 +118,9 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 if (any.getMarket() == 21 || any.getMarket() == 22) {
                     //沪深有可能有同一只股票
                     queryWrapper = queryWrapper.in("market", 21, 22);
+                } else {
+                    queryWrapper = queryWrapper.eq("market", any.getMarket());
                 }
-                queryWrapper = queryWrapper.eq("market", any.getMarket());
                 List<StockDto> allStock = stockMapper.selectList(queryWrapper);
                 newStocks.removeIf(allStock::contains);
                 if (newStocks.size() > 0) {
