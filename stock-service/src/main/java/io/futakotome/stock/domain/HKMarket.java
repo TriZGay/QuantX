@@ -52,5 +52,12 @@ public class HKMarket implements RequestPlateInfo, RequestStockInfo {
                 }
             }
         }
+        try {
+            LOGGER.info("香港市场请求股票信息结束.sleep....");
+            Thread.sleep(30000L);
+        } catch (InterruptedException e) {
+            LOGGER.error("sleep失败!", e);
+        }
+
     }
 }

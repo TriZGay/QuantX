@@ -51,5 +51,11 @@ public class JPMarket implements RequestPlateInfo, RequestStockInfo {
                 }
             }
         }
+        try {
+            LOGGER.info("日本市场请求股票信息结束.sleep....");
+            Thread.sleep(30000L);
+        } catch (InterruptedException e) {
+            LOGGER.error("sleep失败!", e);
+        }
     }
 }

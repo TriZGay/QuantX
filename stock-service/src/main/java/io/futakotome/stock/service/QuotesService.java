@@ -84,6 +84,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
+    @Transactional
     public void onReply_GetPlateSecurity(FTAPI_Conn client, int nSerialNo, QotGetPlateSecurity.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("查询股票信息失败:" + rsp.getRetMsg(),
@@ -113,8 +114,13 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     newStocks.add(stockDto);
                 }
                 StockDto any = newStocks.get(0);
-                List<StockDto> allStock = stockMapper.selectList(Wrappers.query(new StockDto())
-                        .eq("market", any.getMarket()));
+                QueryWrapper<StockDto> queryWrapper = Wrappers.query();
+                if (any.getMarket() == 21 || any.getMarket() == 22) {
+                    //沪深有可能有同一只股票
+                    queryWrapper = queryWrapper.in("market", 21, 22);
+                }
+                queryWrapper = queryWrapper.eq("market", any.getMarket());
+                List<StockDto> allStock = stockMapper.selectList(queryWrapper);
                 newStocks.removeIf(allStock::contains);
                 if (newStocks.size() > 0) {
                     int insertRow = stockMapper.insertBatch(newStocks);
