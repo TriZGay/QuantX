@@ -17,6 +17,7 @@ import io.futakotome.stock.dto.PlateDto;
 import io.futakotome.stock.dto.StockDto;
 import io.futakotome.stock.mapper.PlateDtoMapper;
 import io.futakotome.stock.mapper.StockDtoMapper;
+import io.futakotome.stock.utils.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -56,8 +57,12 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Scheduled(fixedRate = 24L, timeUnit = TimeUnit.HOURS)
-    public void sync() {
-//        market.sendPlateInfoRequest();
+    public void syncPlateInfo() {
+        market.sendPlateInfoRequest();
+    }
+
+    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
+    public void syncStockInfo() {
         market.sendStockInfoRequest(plateMapper);
     }
 
@@ -82,11 +87,13 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             LOGGER.error("查询股票信息失败:" + rsp.getRetMsg(),
                     new IllegalArgumentException("请求序列号:" + nSerialNo + "查询股票信息失败,code:" + rsp.getRetType()));
         } else {
-            LOGGER.info("序列号:" + nSerialNo + "connID=" + client.getConnectID() + "查询股票信息...");
+            LOGGER.info("connID=" + client.getConnectID() + "查询股票信息...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 Iterator<JsonElement> stockInfoIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("staticInfoList").iterator();
                 List<StockDto> newStocks = new ArrayList<>();
+                String plateCode = (String) CacheManager.get(String.valueOf(nSerialNo));
+                LOGGER.info("SeqNo=" + nSerialNo + "缓存的板块代码:" + plateCode);
                 while (stockInfoIterator.hasNext()) {
                     JsonElement jsonElement = stockInfoIterator.next();
                     JsonObject basic = jsonElement.getAsJsonObject().get("basic").getAsJsonObject();
@@ -98,7 +105,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     stockDto.setDelisting(basic.get("delisting").getAsBoolean() ? 1 : 0);
                     stockDto.setExchangeType(basic.get("exchType").getAsInt());
                     stockDto.setStockId(basic.get("id").getAsString());
-                    stockDto.setPlateCode(basic.get("security").getAsJsonObject().get("market").getAsInt());
+                    stockDto.setPlateCode(plateCode);
                     stockDto.setCode(basic.get("security").getAsJsonObject().get("code").getAsString());
                     newStocks.add(stockDto);
                 }

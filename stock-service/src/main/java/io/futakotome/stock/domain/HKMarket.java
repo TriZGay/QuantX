@@ -1,12 +1,12 @@
 package io.futakotome.stock.domain;
 
-import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.futu.openapi.pb.QotCommon;
 import com.futu.openapi.pb.QotGetPlateSecurity;
 import com.futu.openapi.pb.QotGetPlateSet;
 import io.futakotome.stock.dto.PlateDto;
 import io.futakotome.stock.mapper.PlateDtoMapper;
 import io.futakotome.stock.service.QuotesService;
+import io.futakotome.stock.utils.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +42,7 @@ public class HKMarket implements RequestPlateInfo, RequestStockInfo {
                     .build();
             int seqNo = QuotesService.qot.getPlateSecurity(request);
             LOGGER.info("SeqNo:" + seqNo + "香港市场请求股票信息:" + request.toString());
+            CacheManager.put(String.valueOf(seqNo), plateCode);
             if (i != 0 && i % 9 == 0) {
                 try {
                     LOGGER.info("接口限制每30秒最多请求10次.sleep....");

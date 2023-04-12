@@ -7,14 +7,14 @@ import io.futakotome.stock.mapper.StockDtoMapper;
 import org.springframework.stereotype.Service;
 
 /**
-* @author pc
-* @description 针对表【t_stock】的数据库操作Service实现
-* @createDate 2023-04-11 16:26:26
-*/
+ * @author pc
+ * @description 针对表【t_stock】的数据库操作Service实现
+ * @createDate 2023-04-11 16:26:26
+ */
 @Service
 public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
-    implements StockDtoService{
-
+        implements StockDtoService {
+    
 }
 
 
