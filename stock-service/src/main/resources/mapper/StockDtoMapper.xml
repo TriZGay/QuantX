@@ -23,7 +23,8 @@
         <result property="mainContract" column="main_contract" jdbcType="SMALLINT"/>
         <result property="lastTradeTime" column="last_trade_time" jdbcType="VARCHAR"/>
         <result property="exchangeType" column="exchange_type" jdbcType="INTEGER"/>
-        <result property="plateCode" column="market" jdbcType="VARCHAR"/>
+        <result property="plateCode" column="plate_code" jdbcType="VARCHAR"/>
+        <result property="market" column="market" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -32,7 +33,8 @@
         stock_owner,option_type,strike_time,
         strike_price,suspension,listing_date,
         stock_id,delisting,index_option_type,
-        main_contract,last_trade_time,exchange_type
+        main_contract,last_trade_time,exchange_type,
+        plate_code,market
     </sql>
     <insert id="insertBatch">
         insert into t_stock(name,code,
@@ -40,7 +42,8 @@
         stock_owner,option_type,strike_time,
         strike_price,suspension,listing_date,
         stock_id,delisting,index_option_type,
-        main_contract,last_trade_time,exchange_type,plate_code)
+        main_contract,last_trade_time,exchange_type,
+        plate_code,market)
         values
         <foreach collection="stockDtoCollection" item="item" separator=",">
             (#{item.name,jdbcType=VARCHAR},#{item.code,jdbcType=VARCHAR},
@@ -48,7 +51,8 @@
             #{item.stockOwner,jdbcType=VARCHAR},#{item.optionType,jdbcType=VARCHAR},#{item.strikeTime,jdbcType=VARCHAR},
             #{item.strikePrice,jdbcType=DECIMAL},#{item.suspension,jdbcType=NUMERIC},#{item.listingDate,jdbcType=DATE},
             #{item.stockId,jdbcType=NUMERIC},#{item.delisting,jdbcType=NUMERIC},#{item.indexOptionType,jdbcType=VARCHAR},
-            #{item.mainContract,jdbcType=NUMERIC},#{item.lastTradeTime,jdbcType=VARCHAR},#{item.exchangeType,jdbcType=INTEGER},#{item.plateCode,jdbcType=VARCHAR})
+            #{item.mainContract,jdbcType=NUMERIC},#{item.lastTradeTime,jdbcType=VARCHAR},#{item.exchangeType,jdbcType=INTEGER},
+            #{item.plateCode,jdbcType=VARCHAR},#{item.market,jdbcType=INTEGER})
         </foreach>
     </insert>
 </mapper>

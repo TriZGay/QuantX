@@ -46,6 +46,8 @@ public class StockDto implements Serializable {
 
     private String plateCode;
 
+    private Integer market;
+
     private static final long serialVersionUID = 1L;
 
     public Long getId() {
@@ -200,6 +202,14 @@ public class StockDto implements Serializable {
         this.plateCode = plateCode;
     }
 
+    public Integer getMarket() {
+        return market;
+    }
+
+    public void setMarket(Integer market) {
+        this.market = market;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -234,7 +244,8 @@ public class StockDto implements Serializable {
                 ", mainContract=" + mainContract +
                 ", lastTradeTime='" + lastTradeTime + '\'' +
                 ", exchangeType=" + exchangeType +
-                ", market=" + plateCode +
+                ", plateCode='" + plateCode + '\'' +
+                ", market=" + market +
                 '}';
     }
 }

@@ -1,5 +1,7 @@
 package io.futakotome.stock.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.futu.openapi.FTAPI_Conn;
 import com.futu.openapi.FTAPI_Conn_Qot;
 import com.futu.openapi.FTSPI_Conn;
@@ -56,10 +58,10 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         this.stockMapper = stockMapper;
     }
 
-    @Scheduled(fixedRate = 24L, timeUnit = TimeUnit.HOURS)
-    public void syncPlateInfo() {
-        market.sendPlateInfoRequest();
-    }
+//    @Scheduled(fixedRate = 24L, timeUnit = TimeUnit.HOURS)
+//    public void syncPlateInfo() {
+//        market.sendPlateInfoRequest();
+//    }
 
     @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
     public void syncStockInfo() {
@@ -107,9 +109,12 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     stockDto.setStockId(basic.get("id").getAsString());
                     stockDto.setPlateCode(plateCode);
                     stockDto.setCode(basic.get("security").getAsJsonObject().get("code").getAsString());
+                    stockDto.setMarket(basic.get("security").getAsJsonObject().get("market").getAsInt());
                     newStocks.add(stockDto);
                 }
-                List<StockDto> allStock = stockMapper.selectList(null);
+                StockDto any = newStocks.get(0);
+                List<StockDto> allStock = stockMapper.selectList(Wrappers.query(new StockDto())
+                        .eq("market", any.getMarket()));
                 newStocks.removeIf(allStock::contains);
                 if (newStocks.size() > 0) {
                     int insertRow = stockMapper.insertBatch(newStocks);

@@ -18,7 +18,8 @@ CREATE TABLE public.t_stock
     main_contract     smallint    null,
     last_trade_time   varchar(20) null,
     exchange_type     integer     null,
-    plate_code        varchar(20) null
+    plate_code        varchar(20) null,
+    market            integer     null
 );
 
 create unique index table_stock_id_unique on public.t_stock (id);

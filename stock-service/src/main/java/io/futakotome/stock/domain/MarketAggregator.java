@@ -16,7 +16,12 @@ public class MarketAggregator implements RequestPlateInfo, RequestStockInfo {
     );
 
     private static final List<RequestStockInfo> allMarketStockInfo = Arrays.asList(
-            new HKMarket()
+            new HKMarket(),
+            new BigASZMarket(),
+            new BigASHMarkert(),
+            new USMarket(),
+            new SGMarket(),
+            new JPMarket()
     );
 
     @Override
