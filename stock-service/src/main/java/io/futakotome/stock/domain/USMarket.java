@@ -5,6 +5,7 @@ import com.futu.openapi.pb.QotGetPlateSecurity;
 import com.futu.openapi.pb.QotGetPlateSet;
 import io.futakotome.stock.dto.PlateDto;
 import io.futakotome.stock.mapper.PlateDtoMapper;
+import io.futakotome.stock.mapper.StockDtoMapper;
 import io.futakotome.stock.service.QuotesService;
 import io.futakotome.stock.utils.CacheManager;
 import org.slf4j.Logger;
@@ -24,6 +25,11 @@ public class USMarket implements RequestPlateInfo, RequestStockInfo {
                         .build()).build();
         int seqNo = QuotesService.qot.getPlateSet(request);
         LOGGER.info("SeqNo:" + seqNo + "美国市场请求板块信息:" + request.toString());
+    }
+
+    @Override
+    public void sendPlateInfoRequest(StockDtoMapper stockMapper) {
+
     }
 
     @Override

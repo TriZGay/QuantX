@@ -6,10 +6,12 @@ import com.futu.openapi.FTAPI_Conn;
 import com.futu.openapi.FTAPI_Conn_Qot;
 import com.futu.openapi.FTSPI_Conn;
 import com.futu.openapi.FTSPI_Qot;
+import com.futu.openapi.pb.QotGetOwnerPlate;
 import com.futu.openapi.pb.QotGetPlateSecurity;
 import com.futu.openapi.pb.QotGetPlateSet;
 import com.futu.openapi.pb.QotGetStaticInfo;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -59,11 +61,13 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         this.stockMapper = stockMapper;
     }
 
-    @Scheduled(fixedRate = 24L, timeUnit = TimeUnit.HOURS)
+    @Deprecated
+    //    @Scheduled(fixedRate = 24L, timeUnit = TimeUnit.HOURS)
     public void syncPlateInfo() {
         market.sendPlateInfoRequest();
     }
 
+    @Deprecated
     //    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
     public void syncStockInfo() {
         market.sendStockInfoRequest(plateMapper);
@@ -72,6 +76,11 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
     public void syncStaticInfo() {
         market.sendStaticInfoRequest();
+    }
+
+    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
+    public void syncStockOwnerPlateInfo() {
+        market.sendPlateInfoRequest(stockMapper);
     }
 
     @Override
@@ -90,6 +99,31 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
+    @Transactional
+    public void onReply_GetOwnerPlate(FTAPI_Conn client, int nSerialNo, QotGetOwnerPlate.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("查询股票板块信息失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询股票板块信息失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("connID=" + client.getConnectID() + "查询股票板块信息...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                Iterator<JsonElement> iterator = ftGrpcReturnResult.getS2c().getAsJsonArray("ownerPlateList").iterator();
+                List<PlateDto> newPlate = new ArrayList<>();
+                while (iterator.hasNext()) {
+                    JsonElement jsonElement = iterator.next();
+                    JsonArray plateInfoList = jsonElement.getAsJsonObject().get("plateInfoList").getAsJsonArray();
+                    LOGGER.info(plateInfoList.toString());
+                }
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("查询股票板塊信息解析结果失败!", e);
+            }
+
+        }
+    }
+
+    @Override
+    @Transactional
     public void onReply_GetStaticInfo(FTAPI_Conn client, int nSerialNo, QotGetStaticInfo.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("查询静态信息失败:" + rsp.getRetMsg(),
@@ -131,7 +165,11 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     } else if (jsonElement.getAsJsonObject().has("optionExData")) {
                         JsonObject optionExData = jsonElement.getAsJsonObject().get("optionExData").getAsJsonObject();
                         LOGGER.warn("optionExData=" + optionExData.toString());
-
+                        try {
+                            Thread.sleep(1000000L);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
 //                        stockDto.setSuspension(optionExData.get("suspend").getAsBoolean() ? 1 : 0);
 
                     }
