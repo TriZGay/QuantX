@@ -1,11 +1,12 @@
 package io.futakotome.stock.domain;
 
+import com.futu.openapi.pb.QotCommon;
 import io.futakotome.stock.mapper.PlateDtoMapper;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class MarketAggregator implements RequestPlateInfo, RequestStockInfo {
+public class MarketAggregator implements RequestPlateInfo, RequestStockInfo, RequestStaticInfo {
     private static final List<RequestPlateInfo> allMarketPlateInfo = Arrays.asList(
             new HKMarket(),
             new BigASHMarkert(),
@@ -24,6 +25,10 @@ public class MarketAggregator implements RequestPlateInfo, RequestStockInfo {
             new JPMarket()
     );
 
+    private static final List<RequestStaticInfo> allMarketStaticInfo = Arrays.asList(
+            new HKMarket()
+    );
+
     @Override
     public void sendPlateInfoRequest() {
         for (RequestPlateInfo perMarket : allMarketPlateInfo) {
@@ -35,6 +40,13 @@ public class MarketAggregator implements RequestPlateInfo, RequestStockInfo {
     public void sendStockInfoRequest(PlateDtoMapper plateDtoMapper) {
         for (RequestStockInfo perMarket : allMarketStockInfo) {
             perMarket.sendStockInfoRequest(plateDtoMapper);
+        }
+    }
+
+    @Override
+    public void sendStaticInfoRequest() {
+        for (RequestStaticInfo perMarket : allMarketStaticInfo) {
+            perMarket.sendStaticInfoRequest();
         }
     }
 }

@@ -40,11 +40,9 @@ public class StockDto implements Serializable {
 
     private Integer mainContract;
 
-    private String lastTradeTime;
+    private LocalDate lastTradeTime;
 
     private Integer exchangeType;
-
-    private String plateCode;
 
     private Integer market;
 
@@ -178,11 +176,11 @@ public class StockDto implements Serializable {
         this.mainContract = mainContract;
     }
 
-    public String getLastTradeTime() {
+    public LocalDate getLastTradeTime() {
         return lastTradeTime;
     }
 
-    public void setLastTradeTime(String lastTradeTime) {
+    public void setLastTradeTime(LocalDate lastTradeTime) {
         this.lastTradeTime = lastTradeTime;
     }
 
@@ -192,14 +190,6 @@ public class StockDto implements Serializable {
 
     public void setExchangeType(Integer exchangeType) {
         this.exchangeType = exchangeType;
-    }
-
-    public String getPlateCode() {
-        return plateCode;
-    }
-
-    public void setPlateCode(String plateCode) {
-        this.plateCode = plateCode;
     }
 
     public Integer getMarket() {
@@ -244,7 +234,6 @@ public class StockDto implements Serializable {
                 ", mainContract=" + mainContract +
                 ", lastTradeTime='" + lastTradeTime + '\'' +
                 ", exchangeType=" + exchangeType +
-                ", plateCode='" + plateCode + '\'' +
                 ", market=" + market +
                 '}';
     }

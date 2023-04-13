@@ -8,6 +8,7 @@ import com.futu.openapi.FTSPI_Conn;
 import com.futu.openapi.FTSPI_Qot;
 import com.futu.openapi.pb.QotGetPlateSecurity;
 import com.futu.openapi.pb.QotGetPlateSet;
+import com.futu.openapi.pb.QotGetStaticInfo;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -58,14 +59,19 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         this.stockMapper = stockMapper;
     }
 
-//    @Scheduled(fixedRate = 24L, timeUnit = TimeUnit.HOURS)
-//    public void syncPlateInfo() {
-//        market.sendPlateInfoRequest();
-//    }
+    @Scheduled(fixedRate = 24L, timeUnit = TimeUnit.HOURS)
+    public void syncPlateInfo() {
+        market.sendPlateInfoRequest();
+    }
 
-    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
+    //    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
     public void syncStockInfo() {
         market.sendStockInfoRequest(plateMapper);
+    }
+
+    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
+    public void syncStaticInfo() {
+        market.sendStaticInfoRequest();
     }
 
     @Override
@@ -81,6 +87,84 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onDisconnect(FTAPI_Conn client, long errCode) {
         LOGGER.info("FUTU API 关闭连接连接 onDisconnect: connID=" + client.getConnectID() + ",ret=" + errCode);
+    }
+
+    @Override
+    public void onReply_GetStaticInfo(FTAPI_Conn client, int nSerialNo, QotGetStaticInfo.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("查询静态信息失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询静态信息失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("connID=" + client.getConnectID() + "查询静态信息...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                Iterator<JsonElement> iterator = ftGrpcReturnResult.getS2c().getAsJsonArray("staticInfoList").iterator();
+                List<StockDto> newStocks = new ArrayList<>();
+                while (iterator.hasNext()) {
+                    JsonElement jsonElement = iterator.next();
+                    StockDto stockDto = new StockDto();
+                    if (jsonElement.getAsJsonObject().has("basic")) {
+                        JsonObject basic = jsonElement.getAsJsonObject().get("basic").getAsJsonObject();
+                        stockDto.setName(basic.get("name").getAsString());
+                        stockDto.setLotSize(basic.get("lotSize").getAsInt());
+                        stockDto.setStockType(basic.get("secType").getAsInt());
+                        String listTime = basic.get("listTime").getAsString();
+                        if (listTime.length() != 0) {
+                            stockDto.setListingDate(LocalDate.parse(listTime, DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                        }
+                        stockDto.setDelisting(basic.get("delisting").getAsBoolean() ? 1 : 0);
+                        stockDto.setExchangeType(basic.get("exchType").getAsInt());
+                        stockDto.setStockId(basic.get("id").getAsString());
+                        stockDto.setCode(basic.get("security").getAsJsonObject().get("code").getAsString());
+                        stockDto.setMarket(basic.get("security").getAsJsonObject().get("market").getAsInt());
+                    } else if (jsonElement.getAsJsonObject().has("futureExData")) {
+                        JsonObject futureExData = jsonElement.getAsJsonObject().get("futureExData").getAsJsonObject();
+                        String lastTradeTime = futureExData.get("lastTradeTime").getAsString();
+                        if (lastTradeTime.length() != 0) {
+                            stockDto.setLastTradeTime(LocalDate.parse(lastTradeTime, DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                        }
+                        stockDto.setMainContract(futureExData.get("isMainContract").getAsBoolean() ? 1 : 0);
+                    } else if (jsonElement.getAsJsonObject().has("warrantExData")) {
+                        JsonObject warrantExData = jsonElement.getAsJsonObject().get("warrantExData").getAsJsonObject();
+                        stockDto.setStockChildType(warrantExData.get("type").getAsInt());
+                        stockDto.setStockOwner(warrantExData.get("owner").getAsJsonObject().get("code").getAsString());
+                    } else if (jsonElement.getAsJsonObject().has("optionExData")) {
+                        JsonObject optionExData = jsonElement.getAsJsonObject().get("optionExData").getAsJsonObject();
+                        LOGGER.warn("optionExData=" + optionExData.toString());
+
+//                        stockDto.setSuspension(optionExData.get("suspend").getAsBoolean() ? 1 : 0);
+
+                    }
+                    newStocks.add(stockDto);
+                }
+                StockDto any = newStocks.get(0);
+                QueryWrapper<StockDto> queryWrapper = Wrappers.query();
+                if (any.getMarket() == 21 || any.getMarket() == 22) {
+                    //沪深有可能有同一只股票
+                    queryWrapper = queryWrapper.in("market", 21, 22);
+                } else {
+                    queryWrapper = queryWrapper.eq("market", any.getMarket());
+                }
+                List<StockDto> allStock = stockMapper.selectList(queryWrapper);
+                newStocks.removeIf(allStock::contains);
+                int insertLength = newStocks.size();
+                int i = 0;
+                int batchLimit = 3000;
+                while (insertLength > batchLimit) {
+                    int insertRow = stockMapper.insertBatch(newStocks.subList(i, i + batchLimit));
+                    LOGGER.info("插入条数:" + insertRow);
+                    i = i + batchLimit;
+                    insertLength = insertLength - batchLimit;
+                }
+                if (insertLength > 0) {
+                    int insertRow = stockMapper.insertBatch(newStocks.subList(i, i + insertLength));
+                    LOGGER.info("插入条数:" + insertRow);
+                }
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("查询静态信息解析结果失败!", e);
+            }
+
+        }
     }
 
     @Override
@@ -108,7 +192,6 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     stockDto.setDelisting(basic.get("delisting").getAsBoolean() ? 1 : 0);
                     stockDto.setExchangeType(basic.get("exchType").getAsInt());
                     stockDto.setStockId(basic.get("id").getAsString());
-                    stockDto.setPlateCode(plateCode);
                     stockDto.setCode(basic.get("security").getAsJsonObject().get("code").getAsString());
                     stockDto.setMarket(basic.get("security").getAsJsonObject().get("market").getAsInt());
                     newStocks.add(stockDto);
