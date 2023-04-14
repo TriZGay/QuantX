@@ -3,6 +3,7 @@ package io.futakotome.stock.domain;
 import com.futu.openapi.pb.QotCommon;
 import com.futu.openapi.pb.QotGetPlateSecurity;
 import com.futu.openapi.pb.QotGetPlateSet;
+import com.futu.openapi.pb.QotGetStaticInfo;
 import io.futakotome.stock.dto.PlateDto;
 import io.futakotome.stock.mapper.PlateDtoMapper;
 import io.futakotome.stock.mapper.StockDtoMapper;
@@ -13,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class BigASZMarket implements RequestPlateInfo, RequestStockInfo {
+public class BigASZMarket implements RequestStaticInfo, RequestPlateInfo, RequestStockInfo {
     private static final Logger LOGGER = LoggerFactory.getLogger(BigASZMarket.class);
 
     @Override
@@ -63,5 +64,15 @@ public class BigASZMarket implements RequestPlateInfo, RequestStockInfo {
         } catch (InterruptedException e) {
             LOGGER.error("sleep失败!", e);
         }
+    }
+
+    @Override
+    public void sendStaticInfoRequest() {
+        QotGetStaticInfo.Request request = QotGetStaticInfo.Request.newBuilder()
+                .setC2S(QotGetStaticInfo.C2S.newBuilder()
+                        .setMarket(QotCommon.QotMarket.QotMarket_CNSZ_Security_VALUE)
+                        .build()).build();
+        int seqNo = QuotesService.qot.getStaticInfo(request);
+        LOGGER.info("SeqNo:" + seqNo + "大A深圳市场请求静态信息:" + request.toString());
     }
 }

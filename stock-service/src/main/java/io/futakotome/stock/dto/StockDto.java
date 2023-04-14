@@ -209,12 +209,12 @@ public class StockDto implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StockDto stockDto = (StockDto) o;
-        return code.equals(stockDto.code);
+        return code.equals(stockDto.code) && market.equals(stockDto.market);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(code);
+        return Objects.hash(code, market);
     }
 
     @Override

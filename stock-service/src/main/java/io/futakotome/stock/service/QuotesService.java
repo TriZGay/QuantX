@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,8 +39,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,15 +79,15 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         market.sendStockInfoRequest(plateMapper);
     }
 
-//    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
-//    public void syncStaticInfo() {
-//        market.sendStaticInfoRequest();
-//    }
-
     @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
-    public void syncStockOwnerPlateInfo() {
-        market.sendPlateInfoRequest(stockMapper);
+    public void syncStaticInfo() {
+        market.sendStaticInfoRequest();
     }
+
+//    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
+//    public void syncStockOwnerPlateInfo() {
+//        market.sendPlateInfoRequest(stockMapper);
+//    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -198,7 +195,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             LOGGER.error("查询静态信息失败:" + rsp.getRetMsg(),
                     new IllegalArgumentException("请求序列号:" + nSerialNo + "查询静态信息失败,code:" + rsp.getRetType()));
         } else {
-            LOGGER.info("connID=" + client.getConnectID() + "查询静态信息...");
+            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询静态信息...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 Iterator<JsonElement> iterator = ftGrpcReturnResult.getS2c().getAsJsonArray("staticInfoList").iterator();
