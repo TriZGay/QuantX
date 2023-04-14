@@ -1,5 +1,7 @@
 package io.futakotome.stock.dto;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
@@ -8,6 +10,7 @@ import java.util.Objects;
 
 @TableName(value = "t_stock")
 public class StockDto implements Serializable {
+    @TableId
     private Long id;
 
     private String name;
@@ -46,6 +49,7 @@ public class StockDto implements Serializable {
 
     private Integer market;
 
+    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
     public Long getId() {

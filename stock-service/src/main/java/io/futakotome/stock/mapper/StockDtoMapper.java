@@ -9,6 +9,8 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface StockDtoMapper extends BaseMapper<StockDto> {
     int insertBatch(@Param("stockDtoCollection") Collection<StockDto> stockDtoCollection);
+
+    StockDto searchOneByCode(@Param("code") String code);
 }
 
 

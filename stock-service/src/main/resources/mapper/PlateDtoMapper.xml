@@ -8,20 +8,19 @@
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
         <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="plateType" column="plate_type" jdbcType="INTEGER"/>
         <result property="market" column="market" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,name,code,
-        market
+        plate_type,market
     </sql>
-    <insert id="insertBatch">
-        insert into t_plate(name,code,
-        market)
+    <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+        insert into t_plate(name,code,plate_type,market)
         values
         <foreach collection="plateDtoCollection" item="item" separator=",">
-            (#{item.name,jdbcType=VARCHAR},#{item.code,jdbcType=VARCHAR},
-            #{item.market,jdbcType=INTEGER})
+            (#{item.name,jdbcType=VARCHAR},#{item.code,jdbcType=VARCHAR},#{item.plateType,jdbcType=INTEGER},#{item.market,jdbcType=INTEGER})
         </foreach>
     </insert>
 

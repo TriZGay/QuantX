@@ -19,13 +19,17 @@ import com.google.protobuf.util.JsonFormat;
 import io.futakotome.stock.config.FutuConfig;
 import io.futakotome.stock.domain.MarketAggregator;
 import io.futakotome.stock.dto.PlateDto;
+import io.futakotome.stock.dto.PlateStockDto;
 import io.futakotome.stock.dto.StockDto;
 import io.futakotome.stock.mapper.PlateDtoMapper;
+import io.futakotome.stock.mapper.PlateStockDtoMapper;
 import io.futakotome.stock.mapper.StockDtoMapper;
 import io.futakotome.stock.utils.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +40,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 @Service
 public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
@@ -45,6 +52,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     private final PlateDtoMapper plateMapper;
     private final StockDtoMapper stockMapper;
+    private final PlateStockDtoMapper plateStockMapper;
     private final FutuConfig futuConfig;
 
     private static final String clientID = "javaclient";
@@ -52,13 +60,14 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     public static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
 
-    public QuotesService(PlateDtoMapper plateMapper, StockDtoMapper stockMapper, FutuConfig futuConfig) {
+    public QuotesService(PlateDtoMapper plateMapper, StockDtoMapper stockMapper, PlateStockDtoMapper plateStockMapper, FutuConfig futuConfig) {
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
         this.futuConfig = futuConfig;
         this.plateMapper = plateMapper;
         this.stockMapper = stockMapper;
+        this.plateStockMapper = plateStockMapper;
     }
 
     @Deprecated
@@ -73,10 +82,10 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         market.sendStockInfoRequest(plateMapper);
     }
 
-    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
-    public void syncStaticInfo() {
-        market.sendStaticInfoRequest();
-    }
+//    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
+//    public void syncStaticInfo() {
+//        market.sendStaticInfoRequest();
+//    }
 
     @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
     public void syncStockOwnerPlateInfo() {
@@ -105,20 +114,80 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             LOGGER.error("查询股票板块信息失败:" + rsp.getRetMsg(),
                     new IllegalArgumentException("请求序列号:" + nSerialNo + "查询股票板块信息失败,code:" + rsp.getRetType()));
         } else {
-            LOGGER.info("connID=" + client.getConnectID() + "查询股票板块信息...");
+            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询股票板块信息...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 Iterator<JsonElement> iterator = ftGrpcReturnResult.getS2c().getAsJsonArray("ownerPlateList").iterator();
-                List<PlateDto> newPlate = new ArrayList<>();
                 while (iterator.hasNext()) {
                     JsonElement jsonElement = iterator.next();
                     JsonArray plateInfoList = jsonElement.getAsJsonObject().get("plateInfoList").getAsJsonArray();
-                    LOGGER.info(plateInfoList.toString());
+                    JsonObject security = jsonElement.getAsJsonObject().get("security").getAsJsonObject();
+                    List<PlateDto> newPlates = new ArrayList<>();
+                    List<PlateStockDto> newPlateStocks = new ArrayList<>();
+                    Iterator<JsonElement> plateInfoIterator = plateInfoList.iterator();
+                    while (plateInfoIterator.hasNext()) {
+                        JsonElement plateInfoJsonElement = plateInfoIterator.next();
+                        PlateDto newPlate = new PlateDto();
+                        String name = plateInfoJsonElement.getAsJsonObject().get("name").getAsString();
+                        Integer plateType = plateInfoJsonElement.getAsJsonObject().get("plateType").getAsInt();
+                        String code = plateInfoJsonElement.getAsJsonObject().get("plate").getAsJsonObject().get("code").getAsString();
+                        Integer market = plateInfoJsonElement.getAsJsonObject().get("plate").getAsJsonObject().get("market").getAsInt();
+                        newPlate.setCode(code);
+                        newPlate.setName(name);
+                        newPlate.setMarket(market);
+                        newPlate.setPlateType(plateType);
+                        newPlates.add(newPlate);
+                    }
+                    List<PlateDto> allPlate = plateMapper.selectList(null);
+                    List<Long> existPlateIds = new ArrayList<>();
+                    Iterator<PlateDto> newPlatesIterator = newPlates.iterator();
+                    while (newPlatesIterator.hasNext()) {
+                        PlateDto newPlate = newPlatesIterator.next();
+                        if (allPlate.contains(newPlate)) {
+                            //存在在库里
+                            newPlatesIterator.remove();
+                            PlateDto plateDto = allPlate.stream()
+                                    .filter(existPlate -> existPlate.getCode().equals(newPlate.getCode()))
+                                    .collect(Collectors.toList()).get(0);
+                            existPlateIds.add(plateDto.getId());
+                        }
+                    }
+                    //建立关联关系
+                    String securityCode = security.get("code").getAsString();
+                    StockDto findStock = stockMapper.searchOneByCode(securityCode);
+                    if (newPlates.size() > 0) {
+                        //板块信息有不在库里,而是新的
+                        int insertRow = plateMapper.insertBatch(newPlates);
+                        LOGGER.info("板块信息插入条数:" + insertRow);
+                        existPlateIds.addAll(newPlates.stream()
+                                .map(PlateDto::getId)
+                                .collect(Collectors.toList()));
+                        for (Long plateId : existPlateIds) {
+                            PlateStockDto plateStockDto = new PlateStockDto();
+                            plateStockDto.setPlateId(plateId);
+                            plateStockDto.setStockId(findStock.getId());
+                            newPlateStocks.add(plateStockDto);
+                        }
+                    } else {
+                        //板块信息都在库里,在库里的板块id来建立关联表
+                        for (Long plateId : existPlateIds) {
+                            PlateStockDto plateStockDto = new PlateStockDto();
+                            plateStockDto.setPlateId(plateId);
+                            plateStockDto.setStockId(findStock.getId());
+                            newPlateStocks.add(plateStockDto);
+                        }
+                    }
+                    try {
+                        int insertRow = plateStockMapper.insertBatch(newPlateStocks);
+                        LOGGER.info("插入板块-股票关系表条数:" + insertRow);
+                    } catch (DuplicateKeyException e) {
+                        LOGGER.error("批插入关系表报错", e);
+                    }
+
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询股票板塊信息解析结果失败!", e);
             }
-
         }
     }
 

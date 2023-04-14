@@ -20,5 +20,6 @@ CREATE TABLE public.t_plate_stock
 );
 
 create unique index table_plate_stock_unique on public.t_plate_stock (id);
+create unique index table_plate_stock_relation_unique on public.t_plate_stock (plate_id, stock_id);
 alter table public.t_plate_stock
     add constraint table_plate_stock_pk primary key (id);

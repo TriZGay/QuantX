@@ -11,10 +11,10 @@ import java.util.Objects;
 public class PlateDto implements Serializable {
     @TableId
     private Long id;
-
     private String name;
     private String code;
     private Integer market;
+    private Integer plateType;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
@@ -51,6 +51,14 @@ public class PlateDto implements Serializable {
         this.market = market;
     }
 
+    public Integer getPlateType() {
+        return plateType;
+    }
+
+    public void setPlateType(Integer plateType) {
+        this.plateType = plateType;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -66,16 +74,12 @@ public class PlateDto implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", name=").append(name);
-        sb.append(", code=").append(code);
-        sb.append(", market=").append(market);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
+        return "PlateDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", code='" + code + '\'' +
+                ", market=" + market +
+                ", plateType=" + plateType +
+                '}';
     }
 }
