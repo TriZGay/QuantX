@@ -1,10 +1,9 @@
 package io.futakotome.stock.domain;
 
-import com.futu.openapi.pb.QotCommon;
-import com.futu.openapi.pb.QotGetPlateSecurity;
-import com.futu.openapi.pb.QotGetPlateSet;
-import com.futu.openapi.pb.QotGetStaticInfo;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.futu.openapi.pb.*;
 import io.futakotome.stock.dto.PlateDto;
+import io.futakotome.stock.dto.StockDto;
 import io.futakotome.stock.mapper.PlateDtoMapper;
 import io.futakotome.stock.mapper.StockDtoMapper;
 import io.futakotome.stock.service.QuotesService;
@@ -13,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class USMarket implements RequestStaticInfo, RequestPlateInfo, RequestStockInfo {
     private static final Logger LOGGER = LoggerFactory.getLogger(USMarket.class);
@@ -30,7 +30,56 @@ public class USMarket implements RequestStaticInfo, RequestPlateInfo, RequestSto
 
     @Override
     public void sendPlateInfoRequest(StockDtoMapper stockMapper) {
-
+        List<StockDto> hkStocks = stockMapper.selectList(Wrappers.<StockDto>query()
+                .in("stock_type", StockType.Eqty.getCode(), StockType.Index.getCode())
+                .and(stockDtoQueryWrapper -> stockDtoQueryWrapper.eq("market", QotCommon.QotMarket.QotMarket_US_Security_VALUE)));
+        int stockSize = hkStocks.size();
+        int i = 0;
+        //一次最多请求200个股票
+        //每30秒最多10次请求,也就是30秒最多请求2000个股票
+        int requestStockLimit = 200;
+        int requestCount = 0;
+        while (stockSize > requestStockLimit) {
+            QotGetOwnerPlate.Request request = QotGetOwnerPlate.Request.newBuilder()
+                    .setC2S(QotGetOwnerPlate.C2S.newBuilder()
+                            .addAllSecurityList(hkStocks
+                                    .subList(i, i + requestStockLimit)
+                                    .stream().map(stockDto -> QotCommon.Security.newBuilder()
+                                            .setMarket(stockDto.getMarket())
+                                            .setCode(stockDto.getCode())
+                                            .build())
+                                    .collect(Collectors.toList()))
+                            .build())
+                    .build();
+            i = i + requestStockLimit;
+            stockSize = stockSize - requestStockLimit;
+            int seqNo = QuotesService.qot.getOwnerPlate(request);
+            requestCount += 1;
+            LOGGER.info("SeqNo:" + seqNo + "美国市场请求板块信息:" + request.toString() + "count:" + request);
+            if (requestCount != 0 && requestCount % 9 == 0) {
+                try {
+                    LOGGER.info("接口限制每30秒最多请求10次.sleep....");
+                    Thread.sleep(30000L);
+                } catch (InterruptedException e) {
+                    LOGGER.error("sleep失败!", e);
+                }
+            }
+        }
+        if (stockSize > 0) {
+            QotGetOwnerPlate.Request request = QotGetOwnerPlate.Request.newBuilder()
+                    .setC2S(QotGetOwnerPlate.C2S.newBuilder()
+                            .addAllSecurityList(hkStocks
+                                    .subList(i, i + stockSize)
+                                    .stream().map(stockDto -> QotCommon.Security.newBuilder()
+                                            .setMarket(stockDto.getMarket())
+                                            .setCode(stockDto.getCode())
+                                            .build())
+                                    .collect(Collectors.toList()))
+                            .build())
+                    .build();
+            int seqNo = 0;
+            LOGGER.info("SeqNo:" + seqNo + "美国市场请求板块信息:" + request.toString());
+        }
     }
 
     @Override

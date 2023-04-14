@@ -9,10 +9,10 @@ import java.util.List;
 
 public class MarketAggregator implements RequestPlateInfo, RequestStockInfo, RequestStaticInfo {
     private static final List<RequestPlateInfo> allMarketPlateInfo = Arrays.asList(
-            new HKMarket()
-//            new BigASHMarkert(),
-//            new BigASZMarket(),
-//            new USMarket(),
+            new HKMarket(),
+            new BigASHMarkert(),
+            new BigASZMarket(),
+            new USMarket()
 //            new SGMarket(),
 //            new JPMarket()
     );
@@ -21,9 +21,9 @@ public class MarketAggregator implements RequestPlateInfo, RequestStockInfo, Req
             new HKMarket(),
             new BigASZMarket(),
             new BigASHMarkert(),
-            new USMarket(),
-            new SGMarket(),
-            new JPMarket()
+            new USMarket()
+//            new SGMarket(),
+//            new JPMarket()
     );
 
     private static final List<RequestStaticInfo> allMarketStaticInfo = Arrays.asList(
