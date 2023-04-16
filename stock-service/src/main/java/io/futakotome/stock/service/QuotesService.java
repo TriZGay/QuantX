@@ -80,9 +80,9 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
 //    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
-//    public void syncStaticInfo() {
-//        market.sendStaticInfoRequest();
-//    }
+    public void syncStaticInfo() {
+        market.sendStaticInfoRequest();
+    }
 
     @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
     public void syncStockOwnerPlateInfo() {
