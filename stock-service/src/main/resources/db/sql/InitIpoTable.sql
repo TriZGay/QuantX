@@ -15,6 +15,7 @@ create table public.t_ipo_hk
 );
 
 create unique index table_ipo_hk_id_unique on public.t_ipo_hk (id);
+create unique index table_ipo_hk_code_unique on public.t_ipo_hk (code);
 alter table public.t_ipo_hk
     add constraint table_ipo_hk_pk primary key (id);
 
@@ -54,6 +55,7 @@ create table public.t_ipo_cn
 );
 
 create unique index table_ipo_cn_id_unique on public.t_ipo_cn (id);
+create unique index table_ipo_cn_code_unique on public.t_ipo_cn (code, market);
 alter table public.t_ipo_cn
     add constraint table_ipo_cn_pk primary key (id);
 
@@ -93,16 +95,25 @@ comment on column public.t_ipo_cn_ex_winning.winning_info is '中签号信息';
 
 create table public.t_ipo_us
 (
-    id            bigserial not null,
-    ipo_price_min float8    null,
-    ipo_price_max float8    null,
-    issue_size    bigint    null
+    id            bigserial    not null,
+    name          VARCHAR(150) null,
+    market        integer      null,
+    code          varchar(20)  null,
+    list_time     date         null,
+    ipo_price_min float8       null,
+    ipo_price_max float8       null,
+    issue_size    bigint       null
 );
 
 create unique index table_ipo_us_id_unique on public.t_ipo_us (id);
+create unique index table_ipo_us_code_unique on public.t_ipo_us (code);
 alter table public.t_ipo_us
     add constraint table_ipo_us_pk primary key (id);
 
+comment on column public.t_ipo_us.name is '股票名称';
+comment on column public.t_ipo_us.market is '市场';
+comment on column public.t_ipo_us.code is '股票代码';
+comment on column public.t_ipo_us.list_time is '上市日期';
 comment on column public.t_ipo_us.ipo_price_min is '最低发行价';
 comment on column public.t_ipo_us.ipo_price_max is '最高发行价';
 comment on column public.t_ipo_us.issue_size is '发行量';
