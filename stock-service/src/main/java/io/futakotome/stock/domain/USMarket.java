@@ -124,4 +124,15 @@ public class USMarket implements RequestStaticInfo, RequestPlateInfo, RequestSto
         int seqNo = QuotesService.qot.getStaticInfo(request);
         LOGGER.info("SeqNo:" + seqNo + "美国市场请求静态信息:" + request.toString());
     }
+
+    @Override
+    public void sendIpoInfoRequest() {
+        QotGetIpoList.Request request = QotGetIpoList.Request.newBuilder()
+                .setC2S(QotGetIpoList.C2S.newBuilder()
+                        .setMarket(QotCommon.QotMarket.QotMarket_US_Security_VALUE)
+                        .build())
+                .build();
+        int seqNo = QuotesService.qot.getIpoList(request);
+        LOGGER.info("SeqNo:" + seqNo + "美国市场请求IPO信息:" + request.toString());
+    }
 }

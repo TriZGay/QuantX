@@ -127,4 +127,15 @@ public class HKMarket implements RequestPlateInfo, RequestStockInfo, RequestStat
         int seqNo = QuotesService.qot.getStaticInfo(request);
         LOGGER.info("SeqNo:" + seqNo + "香港市场请求静态信息:" + request.toString());
     }
+
+    @Override
+    public void sendIpoInfoRequest() {
+        QotGetIpoList.Request request = QotGetIpoList.Request.newBuilder()
+                .setC2S(QotGetIpoList.C2S.newBuilder()
+                        .setMarket(QotCommon.QotMarket.QotMarket_HK_Security_VALUE)
+                        .build())
+                .build();
+        int seqNo = QuotesService.qot.getIpoList(request);
+        LOGGER.info("SeqNo:" + seqNo + "香港市场请求IPO信息:" + request.toString());
+    }
 }

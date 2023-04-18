@@ -33,6 +33,13 @@ public class MarketAggregator implements RequestPlateInfo, RequestStockInfo, Req
             new USMarket()
     );
 
+    private static final List<RequestStaticInfo> allMarketIpoInfo = Arrays.asList(
+            new HKMarket(),
+            new BigASHMarkert(),
+            new BigASZMarket(),
+            new USMarket()
+    );
+
     @Override
     public void sendPlateInfoRequest() {
         for (RequestPlateInfo perMarket : allMarketPlateInfo) {
@@ -58,6 +65,13 @@ public class MarketAggregator implements RequestPlateInfo, RequestStockInfo, Req
     public void sendStaticInfoRequest() {
         for (RequestStaticInfo perMarket : allMarketStaticInfo) {
             perMarket.sendStaticInfoRequest();
+        }
+    }
+
+    @Override
+    public void sendIpoInfoRequest() {
+        for (RequestStaticInfo perMarket : allMarketIpoInfo) {
+            perMarket.sendIpoInfoRequest();
         }
     }
 }

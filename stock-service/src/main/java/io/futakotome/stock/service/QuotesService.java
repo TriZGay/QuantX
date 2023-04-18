@@ -6,10 +6,7 @@ import com.futu.openapi.FTAPI_Conn;
 import com.futu.openapi.FTAPI_Conn_Qot;
 import com.futu.openapi.FTSPI_Conn;
 import com.futu.openapi.FTSPI_Qot;
-import com.futu.openapi.pb.QotGetOwnerPlate;
-import com.futu.openapi.pb.QotGetPlateSecurity;
-import com.futu.openapi.pb.QotGetPlateSet;
-import com.futu.openapi.pb.QotGetStaticInfo;
+import com.futu.openapi.pb.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -68,25 +65,28 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Deprecated
-    //    @Scheduled(fixedRate = 24L, timeUnit = TimeUnit.HOURS)
     public void syncPlateInfo() {
         market.sendPlateInfoRequest();
     }
 
     @Deprecated
-    //    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
     public void syncStockInfo() {
         market.sendStockInfoRequest(plateMapper);
     }
 
-//    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
+    //    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
     public void syncStaticInfo() {
         market.sendStaticInfoRequest();
     }
 
-    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
+    //    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
     public void syncStockOwnerPlateInfo() {
         market.sendPlateInfoRequest(stockMapper);
+    }
+
+    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
+    public void syncIpoInfo() {
+        market.sendIpoInfoRequest();
     }
 
     @Override
@@ -102,6 +102,40 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onDisconnect(FTAPI_Conn client, long errCode) {
         LOGGER.info("FUTU API 关闭连接连接 onDisconnect: connID=" + client.getConnectID() + ",ret=" + errCode);
+    }
+
+    @Override
+    @Transactional
+    public void onReply_GetIpoList(FTAPI_Conn client, int nSerialNo, QotGetIpoList.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("查询IPO信息失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询IPO信息失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询IPO信息...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                Iterator<JsonElement> iterator = ftGrpcReturnResult.getS2c().getAsJsonArray("ipoList").iterator();
+                while (iterator.hasNext()) {
+                    JsonElement jsonElement = iterator.next();
+                    JsonObject basic = jsonElement.getAsJsonObject().get("basic").getAsJsonObject();
+                    String name = basic.get("name").getAsString();
+                    Integer market = basic.get("security").getAsJsonObject().get("market").getAsInt();
+                    String code = basic.get("security").getAsJsonObject().get("code").getAsString();
+                    if (jsonElement.getAsJsonObject().has("usExData")) {
+                        //美股IPO
+                    } else if (jsonElement.getAsJsonObject().has("cnExData")) {
+                        //A股IPO
+                    } else if (jsonElement.getAsJsonObject().has("hkExData")) {
+                        //港股IPO
+                        JsonObject hkExData = jsonElement.getAsJsonObject().get("hkExData").getAsJsonObject();
+
+                    }
+                }
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("查询IPO信息解析结果失败!", e);
+            }
+
+        }
     }
 
     @Override
