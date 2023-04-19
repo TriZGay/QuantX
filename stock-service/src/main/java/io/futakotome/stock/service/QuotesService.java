@@ -31,7 +31,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,17 +79,17 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         market.sendStockInfoRequest(plateMapper);
     }
 
-        @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
+    @Scheduled(cron = "0 0 0 * * *")
     public void syncStaticInfo() {
         market.sendStaticInfoRequest();
     }
 
-//        @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
+    @Scheduled(cron = "0 0 1 * * *")
     public void syncStockOwnerPlateInfo() {
         market.sendPlateInfoRequest(stockMapper);
     }
 
-//    @Scheduled(fixedRate = 12L, timeUnit = TimeUnit.HOURS)
+    @Scheduled(cron = "0 0 2 * * *")
     public void syncIpoInfo() {
         market.sendIpoInfoRequest();
     }
