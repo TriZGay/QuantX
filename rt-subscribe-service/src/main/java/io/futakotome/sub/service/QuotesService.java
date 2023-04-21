@@ -1,9 +1,6 @@
 package io.futakotome.sub.service;
 
-import com.futu.openapi.FTAPI_Conn;
-import com.futu.openapi.FTAPI_Conn_Qot;
-import com.futu.openapi.FTSPI_Conn;
-import com.futu.openapi.FTSPI_Qot;
+import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
 import com.google.gson.Gson;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -59,7 +56,6 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                                 .collect(Collectors.toList()))
                         .setIsRegOrUnRegPush(true)
                         .setIsSubOrUnSub(true)
-                        .setIsFirstPush(true)
                         .build())
                 .build();
         int seqNo = qot.sub(request);
@@ -78,6 +74,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        FTAPI.init();
         qot.initConnect(futuConfig.getUrl(), futuConfig.getPort(), futuConfig.isEnableEncrypt());
     }
 

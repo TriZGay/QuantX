@@ -2,10 +2,7 @@ package io.futakotome.stock.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.futu.openapi.FTAPI_Conn;
-import com.futu.openapi.FTAPI_Conn_Qot;
-import com.futu.openapi.FTSPI_Conn;
-import com.futu.openapi.FTSPI_Qot;
+import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -96,6 +93,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        FTAPI.init();
         qot.initConnect(futuConfig.getUrl(), futuConfig.getPort(), futuConfig.isEnableEncrypt());
     }
 
