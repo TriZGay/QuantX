@@ -95,6 +95,21 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
+    public void onPush_Notify(FTAPI_Conn client, Notify.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取FutuD通知推送失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取FutuD通知推送失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info("FutuD通知推送" + ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("FutuD通知推送结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
     public void onReply_GetGlobalState(FTAPI_Conn client, int nSerialNo, GetGlobalState.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("获取全局市场状态失败:" + rsp.getRetMsg(),
