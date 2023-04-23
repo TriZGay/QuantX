@@ -3,15 +3,21 @@ package io.futakotome.sub.service;
 import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.sub.config.FutuConfig;
 import io.futakotome.sub.controller.SubscribeRequest;
+import io.futakotome.sub.domain.MarketState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,6 +68,16 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         LOGGER.info("发起订阅.seqNo=" + seqNo);
     }
 
+    public void sendGlobalMarketStateRequest() {
+        GetGlobalState.Request request = GetGlobalState.Request.newBuilder()
+                .setC2S(GetGlobalState.C2S.newBuilder()
+                        .setUserID(0)
+                        .build())
+                .build();
+        int seqNo = qot.getGlobalState(request);
+        LOGGER.info("查询全局市场状态.seq=" + seqNo);
+    }
+
     @Override
     public void onInitConnect(FTAPI_Conn client, long errCode, String desc) {
         LOGGER.info("FUTU API 初始化连接 onInitConnect: ret=" + errCode + ",desc=" + desc + ",connID=" + client.getConnectID());
@@ -76,6 +92,34 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         FTAPI.init();
         qot.initConnect(futuConfig.getUrl(), futuConfig.getPort(), futuConfig.isEnableEncrypt());
+    }
+
+    @Override
+    public void onReply_GetGlobalState(FTAPI_Conn client, int nSerialNo, GetGlobalState.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取全局市场状态失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取全局市场状态失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                JsonObject state = ftGrpcReturnResult.getS2c();
+                state.addProperty("marketHK", MarketState.mapFrom(state.get("marketHK").getAsInt()));
+                state.addProperty("marketUS", MarketState.mapFrom(state.get("marketUS").getAsInt()));
+                state.addProperty("marketSH", MarketState.mapFrom(state.get("marketSH").getAsInt()));
+                state.addProperty("marketSZ", MarketState.mapFrom(state.get("marketSZ").getAsInt()));
+                state.addProperty("marketHKFuture", MarketState.mapFrom(state.get("marketHKFuture").getAsInt()));
+                state.addProperty("time", LocalDateTime.ofInstant(Instant.ofEpochSecond(state.get("time").getAsLong()), ZoneId.systemDefault())
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                state.addProperty("localTime", LocalDateTime.ofInstant(Instant.ofEpochSecond(state.get("localTime").getAsLong()), ZoneId.systemDefault())
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                state.addProperty("marketUSFuture", MarketState.mapFrom(state.get("marketUSFuture").getAsInt()));
+                state.addProperty("marketSGFuture", MarketState.mapFrom(state.get("marketSGFuture").getAsInt()));
+                state.addProperty("marketJPFuture", MarketState.mapFrom(state.get("marketJPFuture").getAsInt()));
+                LOGGER.info(state.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析全局市场状态结果失败.", e);
+            }
+        }
     }
 
     @Override
