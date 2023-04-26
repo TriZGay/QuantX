@@ -292,6 +292,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     }
                     //建立关联关系
                     String securityCode = security.get("code").getAsString();
+                    //todo 尚有缺陷 code有重复(SearchOne but found 2)
                     StockDto findStock = stockMapper.searchOneByCode(securityCode);
                     if (newPlates.size() > 0) {
                         //板块信息有不在库里,而是新的
