@@ -6,3 +6,9 @@ Content-Type: application/json
 }
 
 ###
+POST http://localhost:9090/base/plates?page=2&limit=10
+Content-Type: application/json
+
+{
+  "market": 1
+}
