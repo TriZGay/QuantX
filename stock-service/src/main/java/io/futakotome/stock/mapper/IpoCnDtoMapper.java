@@ -9,6 +9,8 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface IpoCnDtoMapper extends BaseMapper<IpoCnDto> {
     int insertBatch(@Param("ipoCnDtoCollection") Collection<IpoCnDto> ipoCnDtoCollection);
+
+
 }
 
 
