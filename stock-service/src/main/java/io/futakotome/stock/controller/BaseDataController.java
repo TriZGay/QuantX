@@ -6,10 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import io.futakotome.stock.dto.IpoHkDto;
-import io.futakotome.stock.dto.IpoUsDto;
-import io.futakotome.stock.dto.PlateDto;
-import io.futakotome.stock.dto.StockDto;
+import io.futakotome.stock.dto.*;
 import io.futakotome.stock.mapper.*;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -61,10 +58,12 @@ public class BaseDataController {
         List<IpoHkDto> hkIpos = ipoHkDtoMapper.selectList(ipoHkDtoQueryWrapper);
         QueryWrapper<IpoUsDto> ipoUsDtoQueryWrapper = Wrappers.query();
         List<IpoUsDto> usIpos = ipoUsDtoMapper.selectList(ipoUsDtoQueryWrapper);
+        List<IpoCnDto> cnIpos = ipoCnDtoMapper.findAll();
         return Mono.create(stringMonoSink -> {
             JsonObject ipos = new JsonObject();
-            ipos.addProperty("hk", GSON.toJson(hkIpos));
-            ipos.addProperty("us",GSON.toJson(usIpos));
+            ipos.add("hk", GSON.toJsonTree(hkIpos).getAsJsonArray());
+            ipos.add("us", GSON.toJsonTree(usIpos).getAsJsonArray());
+            ipos.add("cn", GSON.toJsonTree(cnIpos).getAsJsonArray());
             stringMonoSink.success(
                     GSON.toJson(ipos)
             );

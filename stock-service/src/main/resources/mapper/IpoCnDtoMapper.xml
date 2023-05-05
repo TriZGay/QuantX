@@ -24,6 +24,11 @@
         <result property="applyTime" column="apply_time" jdbcType="DATE"/>
         <result property="winningTime" column="winning_time" jdbcType="DATE"/>
         <result property="isHasWon" column="is_has_won" jdbcType="SMALLINT"/>
+        <collection property="cnExWinningDtos" ofType="io.futakotome.stock.dto.IpoCnExWinningDto">
+            <id column="cn_ex_id" property="id"/>
+            <result column="winning_info" property="winningInfo"/>
+            <result column="winning_name" property="winningName"/>
+        </collection>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -54,4 +59,30 @@
             #{item.isHasWon,jdbcType=NUMERIC})
         </foreach>
     </insert>
+    <select id="findAll" resultMap="BaseResultMap">
+        select t_ipo_cn.id,
+               name,
+               market,
+               code,
+               list_time,
+               apply_code,
+               issue_size,
+               online_issue_size,
+               apply_upper_limit,
+               apply_limit_market_value,
+               is_estimate_ipo_price,
+               ipo_price,
+               industry_pe_rate,
+               is_estimate_winning_ratio,
+               winning_ratio,
+               issue_pe_rate,
+               apply_time,
+               winning_time,
+               is_has_won,
+               ticew.id as cn_ex_id,
+               ticew.winning_name,
+               ticew.winning_info
+        from t_ipo_cn
+                 left join t_ipo_cn_ex_winning ticew on t_ipo_cn.id = ticew.ipo_cn_id
+    </select>
 </mapper>

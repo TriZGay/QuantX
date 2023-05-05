@@ -1,6 +1,9 @@
 package io.futakotome.stock.mapper;
+
 import org.apache.ibatis.annotations.Param;
+
 import java.util.Collection;
+import java.util.List;
 
 import io.futakotome.stock.dto.IpoCnDto;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -10,7 +13,7 @@ import org.apache.ibatis.annotations.Mapper;
 public interface IpoCnDtoMapper extends BaseMapper<IpoCnDto> {
     int insertBatch(@Param("ipoCnDtoCollection") Collection<IpoCnDto> ipoCnDtoCollection);
 
-
+    List<IpoCnDto> findAll();
 }
 
 
