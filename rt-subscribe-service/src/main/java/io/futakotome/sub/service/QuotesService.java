@@ -1,7 +1,5 @@
 package io.futakotome.sub.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
 import com.google.common.base.Joiner;

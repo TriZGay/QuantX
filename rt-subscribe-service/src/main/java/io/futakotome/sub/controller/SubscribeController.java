@@ -1,5 +1,11 @@
 package io.futakotome.sub.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.futakotome.sub.dto.SubDto;
+import io.futakotome.sub.mapper.SubDtoMapper;
 import io.futakotome.sub.service.QuotesService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +18,33 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/sub")
 public class SubscribeController {
     private final QuotesService quotesService;
+    private final SubDtoMapper subDtoMapper;
 
-    public SubscribeController(QuotesService quotesService) {
+    public SubscribeController(QuotesService quotesService, SubDtoMapper subDtoMapper) {
         this.quotesService = quotesService;
+        this.subDtoMapper = subDtoMapper;
+    }
+
+    @PostMapping("/list")
+    public Mono<IPage<SubDto>> listSubscribeList(@RequestBody ListSubscribeRequest request,
+                                                 @RequestParam(required = false) Long page,
+                                                 @RequestParam(required = false) Long limit) {
+        QueryWrapper<SubDto> queryWrapper = Wrappers.query();
+        Page<SubDto> pagination = Page.of(1, 10);
+        if (request.getMarket() != null) {
+            queryWrapper.eq("security_market", request.getMarket());
+        }
+        if (request.getCode() != null) {
+            queryWrapper.eq("security_code", request.getCode());
+        }
+        if (page != null) {
+            pagination.setCurrent(page);
+        }
+        if (limit != null) {
+            pagination.setSize(limit);
+        }
+        return Mono.create(iPageMonoSink ->
+                iPageMonoSink.success(subDtoMapper.selectPage(pagination, queryWrapper)));
     }
 
     @GetMapping("/refresh")
