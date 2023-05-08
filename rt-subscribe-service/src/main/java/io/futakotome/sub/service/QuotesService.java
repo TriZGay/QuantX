@@ -1,23 +1,32 @@
 package io.futakotome.sub.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
+import com.google.common.base.Joiner;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.sub.config.FutuConfig;
 import io.futakotome.sub.controller.SubscribeRequest;
 import io.futakotome.sub.domain.MarketState;
+import io.futakotome.sub.dto.SubDto;
+import io.futakotome.sub.mapper.SubDtoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,8 +40,10 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     public static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
+    private final SubDtoMapper subDtoMapper;
 
-    public QuotesService(FutuConfig futuConfig) {
+    public QuotesService(FutuConfig futuConfig, SubDtoMapper subDtoMapper) {
+        this.subDtoMapper = subDtoMapper;
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
@@ -244,6 +255,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void onReply_GetSubInfo(FTAPI_Conn client, int nSerialNo, QotGetSubInfo.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("查询订阅信息失败:" + rsp.getRetMsg(),
@@ -252,7 +264,51 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询订阅信息...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
+                JsonArray connSubInfoList = ftGrpcReturnResult.getS2c().get("connSubInfoList").getAsJsonArray();
+                Iterator<JsonElement> connSubInfoListIterator = connSubInfoList.iterator();
+                Collection<SubDto> subDtoList = new ArrayList<>();
+                Map<String, List<Integer>> codeAndSubTypeMap = new HashMap<>();
+                while (connSubInfoListIterator.hasNext()) {
+                    JsonObject perConnSubInfo = connSubInfoListIterator.next().getAsJsonObject();
+                    JsonArray subInfoList = perConnSubInfo.getAsJsonArray("subInfoList");
+                    Iterator<JsonElement> subInfoIterator = subInfoList.iterator();
+                    while (subInfoIterator.hasNext()) {
+                        JsonObject perSubInfo = subInfoIterator.next().getAsJsonObject();
+                        Integer subType = perSubInfo.get("subType").getAsInt();
+                        JsonArray securityList = perSubInfo.getAsJsonArray("securityList");
+                        Iterator<JsonElement> securityIterator = securityList.iterator();
+                        while (securityIterator.hasNext()) {
+                            JsonObject perSecurity = securityIterator.next().getAsJsonObject();
+                            SubDto subDto = new SubDto();
+                            subDto.setUsedQuota(perConnSubInfo.get("usedQuota").getAsInt());
+                            subDto.setIsOwnConn(perConnSubInfo.get("isOwnConnData").getAsBoolean() ? 1 : 0);
+                            Integer market = perSecurity.get("market").getAsInt();
+                            String code = perSecurity.get("code").getAsString();
+                            subDto.setSecurityMarket(market);
+                            subDto.setSecurityCode(code);
+                            if (codeAndSubTypeMap.containsKey(code)) {
+                                List<Integer> subTypeList = codeAndSubTypeMap.get(code);
+                                subTypeList.add(subType);
+                            } else {
+                                List<Integer> subTypeList = new ArrayList<>();
+                                subTypeList.add(subType);
+                                codeAndSubTypeMap.put(code, subTypeList);
+                            }
+                            subDtoList.add(subDto);
+                        }
+                    }
+                }
+                //转换为set去重
+                subDtoList = new HashSet<>(subDtoList);
+                //填充 sub_type字段
+                subDtoList.forEach(subDto -> {
+                    List<Integer> subTypeList = codeAndSubTypeMap.get(subDto.getSecurityCode());
+                    subDto.setSubType(Joiner.on(",").join(subTypeList));
+                });
+                int deletedRow = subDtoMapper.delete(null);
+                LOGGER.info("订阅信息表删除条数." + deletedRow);
+                int insertRow = subDtoMapper.insertBatch(subDtoList);
+                LOGGER.info("订阅信息表插入条数." + insertRow);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询订阅信息解析结果失败.", e);
             }

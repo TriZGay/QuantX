@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.sub.mapper.SubDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.sub.dto.SubDto">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="securityMarket" column="security_market" jdbcType="INTEGER"/>
+            <result property="securityCode" column="security_code" jdbcType="VARCHAR"/>
+            <result property="subType" column="sub_type" jdbcType="VARCHAR"/>
+            <result property="usedQuota" column="used_quota" jdbcType="INTEGER"/>
+            <result property="isOwnConn" column="is_own_conn" jdbcType="SMALLINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,security_market,security_code,
+        sub_type,used_quota,is_own_conn
+    </sql>
+    <insert id="insertBatch">
+        insert into t_sub(security_market,security_code,
+        sub_type,used_quota,is_own_conn)
+        values
+        <foreach collection="subDtoCollection" item="item" separator=",">
+            (#{item.securityMarket,jdbcType=NUMERIC},#{item.securityCode,jdbcType=VARCHAR},
+            #{item.subType,jdbcType=VARCHAR},#{item.usedQuota,jdbcType=NUMERIC},#{item.isOwnConn,jdbcType=NUMERIC})
+        </foreach>
+    </insert>
+</mapper>
