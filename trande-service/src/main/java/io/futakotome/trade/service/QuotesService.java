@@ -2,14 +2,23 @@ package io.futakotome.trade.service;
 
 import com.futu.openapi.*;
 import com.futu.openapi.pb.TrdGetAccList;
+import com.google.common.base.Joiner;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.trade.config.FutuConfig;
+import io.futakotome.trade.dto.AccDto;
+import io.futakotome.trade.mapper.AccDtoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @Service
 public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
@@ -21,8 +30,10 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     private static final String clientID = "javaclient";
 
     public static final FTAPI_Conn_Trd trd = new FTAPI_Conn_Trd();
+    private final AccDtoMapper accDtoMapper;
 
-    public QuotesService(FutuConfig futuConfig) {
+    public QuotesService(FutuConfig futuConfig, AccDtoMapper accDtoMapper) {
+        this.accDtoMapper = accDtoMapper;
         trd.setClientInfo(clientID, 1);
         trd.setConnSpi(this);
         trd.setTrdSpi(this);
@@ -66,7 +77,59 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
             LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询交易业务账户列表...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
+                LOGGER.info(ftGrpcReturnResult.getS2c().toString());
+                Iterator<JsonElement> accListIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("accList").iterator();
+                List<AccDto> insertdDtos = new ArrayList<>();
+                while (accListIterator.hasNext()) {
+                    JsonObject accInfo = accListIterator.next().getAsJsonObject();
+                    AccDto accDto = new AccDto();
+                    if (accInfo.has("trdEnv")) {
+                        accDto.setTradeEnv(accInfo.get("trdEnv").getAsInt());
+                    }
+                    if (accInfo.has("accID")) {
+                        accDto.setAccId(accInfo.get("accID").getAsString());
+                    }
+                    if (accInfo.has("trdMarketAuthList")) {
+                        List<Integer> tempTrdMarketAuthList = new ArrayList<>();
+                        accInfo.getAsJsonArray("trdMarketAuthList").forEach(jsonElement -> tempTrdMarketAuthList.add(jsonElement.getAsInt()));
+                        accDto.setTradeMarketAuthList(Joiner.on(",").join(tempTrdMarketAuthList));
+                    }
+                    if (accInfo.has("accType")) {
+                        accDto.setAccType(accInfo.get("accType").getAsInt());
+                    }
+                    if (accInfo.has("cardNum")) {
+                        accDto.setCardNum(accInfo.get("cardNum").getAsString());
+                    }
+                    if (accInfo.has("securityFirm")) {
+                        accDto.setFirm(accInfo.get("securityFirm").getAsInt());
+                    }
+                    insertdDtos.add(accDto);
+                }
+                List<AccDto> allAcc = accDtoMapper.selectList(null);
+                List<AccDto> updateList = new ArrayList<>();
+                for (AccDto beInserted : insertdDtos) {
+                    for (AccDto existed : allAcc) {
+                        if (existed.equals(beInserted)) {
+                            //在库里
+                            existed.setTradeEnv(beInserted.getTradeEnv());
+                            existed.setAccId(beInserted.getAccId());
+                            existed.setTradeMarketAuthList(beInserted.getTradeMarketAuthList());
+                            existed.setAccType(beInserted.getAccType());
+                            existed.setCardNum(beInserted.getCardNum());
+                            existed.setFirm(beInserted.getFirm());
+                            updateList.add(existed);
+                            insertdDtos.remove(beInserted);
+                        }
+                    }
+                }
+                if (insertdDtos.size() > 0) {
+                    int insertedRow = accDtoMapper.insertBatch(insertdDtos);
+                    LOGGER.info("交易业务账户插入条数:" + insertedRow);
+                }
+                if (updateList.size() > 0) {
+                    int updateRows = accDtoMapper.updateBatch(updateList);
+                    LOGGER.info("交易业务账户修改条数:" + updateRows);
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询交易业务账户列表解析结果失败.", e);
             }

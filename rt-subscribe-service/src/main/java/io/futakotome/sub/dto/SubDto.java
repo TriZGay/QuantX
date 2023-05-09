@@ -36,7 +36,7 @@ public class SubDto implements Serializable {
         this.id = id;
     }
 
-    public Object getSecurityMarket() {
+    public Integer getSecurityMarket() {
         return securityMarket;
     }
 
@@ -60,7 +60,7 @@ public class SubDto implements Serializable {
         this.subType = subType;
     }
 
-    public Object getUsedQuota() {
+    public Integer getUsedQuota() {
         return usedQuota;
     }
 
