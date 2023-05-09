@@ -1,16 +1,16 @@
 server:
   port: 9092
-#spring:
-#  datasource:
-#    url: jdbc:postgresql://localhost:5432/quantx_stock
-#    username: postgres
-#    password: 123456
-#  liquibase:
-#    change-log: classpath:db/liquibase-changelog.xml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/quantx_trade
+    username: postgres
+    password: 123456
+  liquibase:
+    change-log: classpath:db/liquibase-changelog.xml
 ft:
   url: 127.0.0.1
   port: 11111
   isEnableEncrypt: true
-#mybatis-plus:
-#  configuration:
-#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
