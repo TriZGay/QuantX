@@ -1,7 +1,9 @@
 package io.futakotome.trade.service;
 
 import com.futu.openapi.*;
+import com.futu.openapi.pb.TrdCommon;
 import com.futu.openapi.pb.TrdGetAccList;
+import com.futu.openapi.pb.TrdGetFunds;
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -9,14 +11,17 @@ import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.trade.config.FutuConfig;
+import io.futakotome.trade.domain.Currency;
 import io.futakotome.trade.dto.AccDto;
 import io.futakotome.trade.mapper.AccDtoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,6 +35,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     private static final String clientID = "javaclient";
 
     public static final FTAPI_Conn_Trd trd = new FTAPI_Conn_Trd();
+
     private final AccDtoMapper accDtoMapper;
 
     public QuotesService(FutuConfig futuConfig, AccDtoMapper accDtoMapper) {
@@ -51,6 +57,34 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         LOGGER.info("查询交易业务账户列表.seqNo=" + seqNo);
     }
 
+    private TrdCommon.TrdHeader trdHeader(String accId, Integer tradeEnv, Integer tradeMarket) {
+        return TrdCommon.TrdHeader.newBuilder()
+                .setAccID(Long.parseLong(accId))
+                .setTrdEnv(tradeEnv)
+                .setTrdMarket(tradeMarket)
+                .build();
+    }
+
+    public void sendGetFundsRequest() {
+        List<AccDto> allAcc = accDtoMapper.selectList(null);
+        allAcc.forEach(accDto ->
+                Arrays.stream(Currency.values()).forEach(currency -> {
+                    if (!currency.getCode().equals(0)) {
+                        TrdGetFunds.Request request = TrdGetFunds.Request.newBuilder()
+                                .setC2S(TrdGetFunds.C2S.newBuilder()
+                                        .setHeader(this.trdHeader(accDto.getAccId(), accDto.getTradeEnv(),
+                                                //todo trade_market_auth_list 原则上是存 ','拼接的字符串
+                                                Integer.valueOf(accDto.getTradeMarketAuthList())))
+                                        .setCurrency(currency.getCode())
+                                        .setRefreshCache(true)
+                                        .build())
+                                .build();
+                        int seqNo = trd.getFunds(request);
+                        LOGGER.info("查询账户资金.seqNo=" + seqNo);
+                    }
+                }));
+    }
+
     @Override
     public void onInitConnect(FTAPI_Conn client, long errCode, String desc) {
         LOGGER.info("FUTU API 初始化连接 onInitConnect: ret=" + errCode + ",desc=" + desc + ",connID=" + client.getConnectID());
@@ -69,6 +103,23 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     }
 
     @Override
+    public void onReply_GetFunds(FTAPI_Conn client, int nSerialNo, TrdGetFunds.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("查询账户资金失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询账户资金失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询账户资金...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析账户资金结果失败.", e);
+            }
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void onReply_GetAccList(FTAPI_Conn client, int nSerialNo, TrdGetAccList.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("查询交易业务账户列表失败:" + rsp.getRetMsg(),
@@ -77,7 +128,6 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
             LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询交易业务账户列表...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.getS2c().toString());
                 Iterator<JsonElement> accListIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("accList").iterator();
                 List<AccDto> insertdDtos = new ArrayList<>();
                 while (accListIterator.hasNext()) {
@@ -103,11 +153,16 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                     if (accInfo.has("securityFirm")) {
                         accDto.setFirm(accInfo.get("securityFirm").getAsInt());
                     }
+                    if (accInfo.has("simAccType")) {
+                        accDto.setSimAccType(accInfo.get("simAccType").getAsInt());
+                    }
                     insertdDtos.add(accDto);
                 }
                 List<AccDto> allAcc = accDtoMapper.selectList(null);
                 List<AccDto> updateList = new ArrayList<>();
-                for (AccDto beInserted : insertdDtos) {
+                Iterator<AccDto> beInsertedIterator = insertdDtos.iterator();
+                while (beInsertedIterator.hasNext()) {
+                    AccDto beInserted = beInsertedIterator.next();
                     for (AccDto existed : allAcc) {
                         if (existed.equals(beInserted)) {
                             //在库里
@@ -117,8 +172,9 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                             existed.setAccType(beInserted.getAccType());
                             existed.setCardNum(beInserted.getCardNum());
                             existed.setFirm(beInserted.getFirm());
+                            existed.setSimAccType(beInserted.getSimAccType());
                             updateList.add(existed);
-                            insertdDtos.remove(beInserted);
+                            beInsertedIterator.remove();
                         }
                     }
                 }

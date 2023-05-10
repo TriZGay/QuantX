@@ -27,6 +27,8 @@ public class AccDto implements Serializable {
 
     private Integer firm;
 
+    private Integer simAccType;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
@@ -84,6 +86,28 @@ public class AccDto implements Serializable {
 
     public void setFirm(Integer firm) {
         this.firm = firm;
+    }
+
+    public Integer getSimAccType() {
+        return simAccType;
+    }
+
+    public void setSimAccType(Integer simAccType) {
+        this.simAccType = simAccType;
+    }
+
+    @Override
+    public String toString() {
+        return "AccDto{" +
+                "id=" + id +
+                ", tradeEnv=" + tradeEnv +
+                ", accId='" + accId + '\'' +
+                ", tradeMarketAuthList='" + tradeMarketAuthList + '\'' +
+                ", accType=" + accType +
+                ", cardNum='" + cardNum + '\'' +
+                ", firm=" + firm +
+                ", simAccType=" + simAccType +
+                '}';
     }
 
     @Override

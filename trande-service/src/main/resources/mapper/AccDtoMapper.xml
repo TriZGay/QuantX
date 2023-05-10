@@ -12,6 +12,7 @@
         <result property="accType" column="acc_type" jdbcType="INTEGER"/>
         <result property="cardNum" column="card_num" jdbcType="VARCHAR"/>
         <result property="firm" column="firm" jdbcType="INTEGER"/>
+        <result property="simAccType" column="sim_acc_type" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -22,12 +23,12 @@
     <insert id="insertBatch">
         insert into t_acc(trade_env,acc_id,
         trade_market_auth_list,acc_type,card_num,
-        firm)
+        firm,sim_acc_type)
         values
         <foreach collection="accDtoCollection" item="item" separator=",">
             (#{item.tradeEnv,jdbcType=NUMERIC},#{item.accId,jdbcType=VARCHAR},
             #{item.tradeMarketAuthList,jdbcType=VARCHAR},#{item.accType,jdbcType=NUMERIC},#{item.cardNum,jdbcType=VARCHAR},
-            #{item.firm,jdbcType=NUMERIC})
+            #{item.firm,jdbcType=NUMERIC},#{item.simAccType,jdbcType=INTEGER})
         </foreach>
     </insert>
 
@@ -39,7 +40,8 @@
             trade_market_auth_list=#{item.tradeMarketAuthList,jdbcType=VARCHAR},
             acc_type=#{item.accType,jdbcType=INTEGER},
             card_num=#{item.cardNum,jdbcType=VARCHAR},
-            firm=#{item.firm,jdbcType=INTEGER}
+            firm=#{item.firm,jdbcType=INTEGER},
+            sim_acc_type=#{item.simAccType,jdbcType=INTEGER}
             where id=#{item.id,jdbcType=BIGINT}
         </foreach>
     </update>
