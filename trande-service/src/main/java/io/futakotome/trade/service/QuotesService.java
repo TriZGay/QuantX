@@ -4,6 +4,7 @@ import com.futu.openapi.*;
 import com.futu.openapi.pb.TrdCommon;
 import com.futu.openapi.pb.TrdGetAccList;
 import com.futu.openapi.pb.TrdGetFunds;
+import com.futu.openapi.pb.TrdGetPositionList;
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -72,6 +73,25 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     }
 
     @Async
+    public void sendGetPositionRequest() {
+        List<AccDto> allAcc = accDtoMapper.selectList(null);
+        RequestCount requestCount = new RequestCount();
+        allAcc.forEach(accDto -> {
+            TrdGetPositionList.Request request = TrdGetPositionList.Request
+                    .newBuilder()
+                    .setC2S(TrdGetPositionList.C2S.newBuilder()
+                            .setHeader(this.trdHeader(accDto.getAccId(), accDto.getTradeEnv(),
+                                    Integer.valueOf(accDto.getTradeMarketAuthList())))
+                            .setRefreshCache(true)
+                            .build())
+                    .build();
+            int seqNo = trd.getPositionList(request);
+            LOGGER.info("查询账户持仓.seqNo=" + seqNo);
+            requestCount.count();
+        });
+    }
+
+    @Async
     public void sendGetFundsRequest() {
         List<AccDto> allAcc = accDtoMapper.selectList(null);
         RequestCount requestCount = new RequestCount();
@@ -109,6 +129,23 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         FTAPI.init();
         trd.initConnect(futuConfig.getUrl(), futuConfig.getPort(), futuConfig.isEnableEncrypt());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void onReply_GetPositionList(FTAPI_Conn client, int nSerialNo, TrdGetPositionList.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("查询账户持仓失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询账户持仓失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询账户持仓...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析账户持仓结果失败.", e);
+            }
+        }
     }
 
     @Override

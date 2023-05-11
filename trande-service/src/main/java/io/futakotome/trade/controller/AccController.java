@@ -31,5 +31,11 @@ public class AccController {
                 .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
     }
 
+    @GetMapping("/refreshAllPosition")
+    public Mono<ResponseEntity<String>> refreshAllPosition() {
+        quotesService.sendGetPositionRequest();
+        return Mono.just("commit succeed.")
+                .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
+    }
 
 }
