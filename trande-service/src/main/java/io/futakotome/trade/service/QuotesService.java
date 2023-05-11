@@ -13,10 +13,14 @@ import com.google.protobuf.util.JsonFormat;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.domain.Currency;
 import io.futakotome.trade.dto.AccDto;
+import io.futakotome.trade.dto.AccInfoDto;
 import io.futakotome.trade.mapper.AccDtoMapper;
+import io.futakotome.trade.mapper.AccInfoDtoMapper;
+import io.futakotome.trade.utils.RequestCount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,9 +41,11 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     public static final FTAPI_Conn_Trd trd = new FTAPI_Conn_Trd();
 
     private final AccDtoMapper accDtoMapper;
+    private final AccInfoDtoMapper accInfoDtoMapper;
 
-    public QuotesService(FutuConfig futuConfig, AccDtoMapper accDtoMapper) {
+    public QuotesService(FutuConfig futuConfig, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper) {
         this.accDtoMapper = accDtoMapper;
+        this.accInfoDtoMapper = accInfoDtoMapper;
         trd.setClientInfo(clientID, 1);
         trd.setConnSpi(this);
         trd.setTrdSpi(this);
@@ -65,8 +71,10 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 .build();
     }
 
+    @Async
     public void sendGetFundsRequest() {
         List<AccDto> allAcc = accDtoMapper.selectList(null);
+        RequestCount requestCount = new RequestCount();
         allAcc.forEach(accDto ->
                 Arrays.stream(Currency.values()).forEach(currency -> {
                     if (!currency.getCode().equals(0)) {
@@ -81,6 +89,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                                 .build();
                         int seqNo = trd.getFunds(request);
                         LOGGER.info("查询账户资金.seqNo=" + seqNo);
+                        requestCount.count();
                     }
                 }));
     }
@@ -103,6 +112,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void onReply_GetFunds(FTAPI_Conn client, int nSerialNo, TrdGetFunds.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("查询账户资金失败:" + rsp.getRetMsg(),
@@ -112,6 +122,102 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info(ftGrpcReturnResult.toString());
+                AccInfoDto accInfoDto = new AccInfoDto();
+                JsonObject header = ftGrpcReturnResult.getS2c().get("header").getAsJsonObject();
+                String accId = header.get("accID").getAsString();
+                accInfoDto.setAccId(accId);
+                JsonObject funds = ftGrpcReturnResult.getS2c().get("funds").getAsJsonObject();
+                if (funds.has("power")) {
+                    accInfoDto.setPower(funds.get("power").getAsDouble());
+                }
+                if (funds.has("totalAssets")) {
+                    accInfoDto.setTotalAssets(funds.get("totalAssets").getAsDouble());
+                }
+                if (funds.has("cash")) {
+                    accInfoDto.setCash(funds.get("cash").getAsDouble());
+                }
+                if (funds.has("marketVal")) {
+                    accInfoDto.setMarketVal(funds.get("marketVal").getAsDouble());
+                }
+                if (funds.has("frozenCash")) {
+                    accInfoDto.setFrozenCash(funds.get("frozenCash").getAsDouble());
+                }
+                if (funds.has("debtCash")) {
+                    accInfoDto.setDebtCash(funds.get("debtCash").getAsDouble());
+                }
+                if (funds.has("avlWithdrawalCash")) {
+                    accInfoDto.setAvlWithdrawalCash(funds.get("avlWithdrawalCash").getAsDouble());
+                }
+                if (funds.has("currency")) {
+                    accInfoDto.setCurrency(funds.get("currency").getAsInt());
+                }
+                if (funds.has("availableFunds")) {
+                    accInfoDto.setAvailableFunds(funds.get("availableFunds").getAsDouble());
+                }
+                if (funds.has("unrealizedPL")) {
+                    accInfoDto.setUnrealizedPl(funds.get("unrealizedPL").getAsDouble());
+                }
+                if (funds.has("realizedPL")) {
+                    accInfoDto.setRealizedPl(funds.get("realizedPL").getAsDouble());
+                }
+                if (funds.has("riskLevel")) {
+                    accInfoDto.setRiskLevel(funds.get("riskLevel").getAsInt());
+                }
+                if (funds.has("initialMargin")) {
+                    accInfoDto.setInitialMargin(funds.get("initialMargin").getAsDouble());
+                }
+                if (funds.has("maintenanceMargin")) {
+                    accInfoDto.setMaintenanceMargin(funds.get("maintenanceMargin").getAsDouble());
+                }
+                if (funds.has("cashInfoList")) {
+                    accInfoDto.setCashInfoList(funds.get("cashInfoList").getAsJsonArray().toString());
+                }
+                if (funds.has("maxPowerShort")) {
+                    accInfoDto.setMaxPowerShort(funds.get("maxPowerShort").getAsDouble());
+                }
+                if (funds.has("netCashPower")) {
+                    accInfoDto.setNetCashPower(funds.get("netCashPower").getAsDouble());
+                }
+                if (funds.has("longMv")) {
+                    accInfoDto.setLongMv(funds.get("longMv").getAsDouble());
+                }
+                if (funds.has("shortMv")) {
+                    accInfoDto.setShortMv(funds.get("shortMv").getAsDouble());
+                }
+                if (funds.has("pendingAsset")) {
+                    accInfoDto.setPendingAsset(funds.get("pendingAsset").getAsDouble());
+                }
+                if (funds.has("maxWithdrawal")) {
+                    accInfoDto.setMaxWithdrawal(funds.get("maxWithdrawal").getAsDouble());
+                }
+                if (funds.has("riskStatus")) {
+                    accInfoDto.setRiskStatus(funds.get("riskStatus").getAsInt());
+                }
+                if (funds.has("marginCallMargin")) {
+                    accInfoDto.setMarginCallMargin(funds.get("marginCallMargin").getAsDouble());
+                }
+                if (funds.has("isPdt")) {
+                    accInfoDto.setIsPdt(funds.get("isPdt").getAsBoolean() ? 1 : 0);
+                }
+                if (funds.has("pdtSeq")) {
+                    accInfoDto.setPdtSeq(funds.get("pdtSeq").getAsString());
+                }
+                if (funds.has("beginningDTBP")) {
+                    accInfoDto.setBeginningDtbp(funds.get("beginningDTBP").getAsDouble());
+                }
+                if (funds.has("remainingDTBP")) {
+                    accInfoDto.setRemainingDtbp(funds.get("remainingDTBP").getAsDouble());
+                }
+                if (funds.has("dtCallAmount")) {
+                    accInfoDto.setDtCallAmount(funds.get("dtCallAmount").getAsDouble());
+                }
+                if (funds.has("dtStatus")) {
+                    accInfoDto.setDtStatus(funds.get("dtStatus").getAsInt());
+                }
+                int insertRow = accInfoDtoMapper.insertSelective(accInfoDto);
+                if (insertRow > 0) {
+                    LOGGER.info("插入账户详细信息成功.条数:" + insertRow);
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析账户资金结果失败.", e);
             }

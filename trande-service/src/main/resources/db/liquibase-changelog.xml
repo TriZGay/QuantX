@@ -10,5 +10,7 @@
     <changeSet id="1" author="futakotome">
         <sqlFile path="db/sql/InitAccTable.sql"/>
     </changeSet>
-
+    <changeSet id="2" author="futakotome">
+        <sqlFile path="db/sql/InitAccInfoTable.sql"/>
+    </changeSet>
 </databaseChangeLog>

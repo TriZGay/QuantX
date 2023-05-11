@@ -18,7 +18,7 @@
     <sql id="Base_Column_List">
         id,trade_env,acc_id,
         trade_market_auth_list,acc_type,card_num,
-        firm
+        firm,sim_acc_type
     </sql>
     <insert id="insertBatch">
         insert into t_acc(trade_env,acc_id,
