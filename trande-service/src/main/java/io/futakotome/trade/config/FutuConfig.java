@@ -9,6 +9,15 @@ public class FutuConfig {
     private String url;
     private Integer port;
     private boolean isEnableEncrypt;
+    private String pwd;
+
+    public String getPwd() {
+        return pwd;
+    }
+
+    public void setPwd(String pwd) {
+        this.pwd = pwd;
+    }
 
     public String getUrl() {
         return url;

@@ -11,6 +11,7 @@ ft:
   url: 127.0.0.1
   port: 11111
   isEnableEncrypt: true
+  pwd: 983528987fuck.
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

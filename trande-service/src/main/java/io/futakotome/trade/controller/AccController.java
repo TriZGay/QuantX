@@ -3,9 +3,9 @@ package io.futakotome.trade.controller;
 import io.futakotome.trade.service.QuotesService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -38,4 +38,13 @@ public class AccController {
                 .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
     }
 
+    @PostMapping("/unlock")
+    public Mono<ResponseEntity<String>> unlock(@RequestBody @Validated Mono<UnlockRequest> unlockRequest) {
+        return Mono.create(responseEntityMonoSink ->
+                unlockRequest.doOnError(WebExchangeBindException.class, throwable -> responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors().toString(), HttpStatus.BAD_REQUEST)))
+                        .doOnNext(r -> {
+                            quotesService.sendUnLockRequest(r);
+                            responseEntityMonoSink.success(new ResponseEntity<>("commit succeed.", HttpStatus.OK));
+                        }).subscribe());
+    }
 }

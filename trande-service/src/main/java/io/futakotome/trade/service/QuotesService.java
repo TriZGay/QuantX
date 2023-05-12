@@ -1,10 +1,7 @@
 package io.futakotome.trade.service;
 
 import com.futu.openapi.*;
-import com.futu.openapi.pb.TrdCommon;
-import com.futu.openapi.pb.TrdGetAccList;
-import com.futu.openapi.pb.TrdGetFunds;
-import com.futu.openapi.pb.TrdGetPositionList;
+import com.futu.openapi.pb.*;
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -12,12 +9,15 @@ import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.trade.config.FutuConfig;
+import io.futakotome.trade.controller.UnlockRequest;
 import io.futakotome.trade.domain.Currency;
 import io.futakotome.trade.dto.AccDto;
 import io.futakotome.trade.dto.AccInfoDto;
 import io.futakotome.trade.mapper.AccDtoMapper;
 import io.futakotome.trade.mapper.AccInfoDtoMapper;
 import io.futakotome.trade.utils.RequestCount;
+import org.bouncycastle.jcajce.provider.digest.MD5;
+import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -70,6 +70,31 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 .setTrdEnv(tradeEnv)
                 .setTrdMarket(tradeMarket)
                 .build();
+    }
+
+    private String encodePwd2Md5(String pwd) {
+        MD5.Digest digest = new MD5.Digest();
+        digest.update(pwd.getBytes(), 0, pwd.getBytes().length);
+        byte[] md5Bytes = new byte[digest.getDigestLength()];
+        String lowerCasePwdMd5 = Hex.toHexString(md5Bytes).toLowerCase();
+        LOGGER.info("pwd md5 & lowerCase:" + lowerCasePwdMd5);
+        return lowerCasePwdMd5;
+    }
+
+    @Async
+    public void sendUnLockRequest(UnlockRequest unlockRequest) {
+        TrdUnlockTrade.C2S.Builder c2s = TrdUnlockTrade.C2S.newBuilder();
+        c2s.setUnlock(unlockRequest.getUnlock());
+        c2s.setPwdMD5(this.encodePwd2Md5(futuConfig.getPwd()));
+        if (unlockRequest.getFirm() != null) {
+            c2s.setSecurityFirm(unlockRequest.getFirm());
+        }
+        TrdUnlockTrade.Request request = TrdUnlockTrade.Request
+                .newBuilder()
+                .setC2S(c2s.build())
+                .build();
+        int seqNo = trd.unlockTrade(request);
+        LOGGER.info("账号解锁.seqNo=" + seqNo);
     }
 
     @Async
@@ -129,6 +154,29 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         FTAPI.init();
         trd.initConnect(futuConfig.getUrl(), futuConfig.getPort(), futuConfig.isEnableEncrypt());
+    }
+
+    @Override
+    public void onReply_UnlockTrade(FTAPI_Conn client, int nSerialNo, TrdUnlockTrade.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("账号解锁失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "账号解锁失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "账号解锁...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                Integer returnType = ftGrpcReturnResult.getRetType();
+                if (returnType == 0) {
+                    LOGGER.info("解锁成功.");
+                } else {
+                    LOGGER.info("解锁失败.");
+                    LOGGER.info("失败原因:" + ftGrpcReturnResult.getRetMsg());
+                }
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("账号解锁结果解析失败.", e);
+            }
+
+        }
     }
 
     @Override
