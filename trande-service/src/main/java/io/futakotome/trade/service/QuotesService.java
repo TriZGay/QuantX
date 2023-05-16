@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.trade.config.FutuConfig;
+import io.futakotome.trade.controller.OrderRequest;
 import io.futakotome.trade.controller.UnlockRequest;
 import io.futakotome.trade.domain.Currency;
 import io.futakotome.trade.dto.AccDto;
@@ -79,6 +80,28 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         String lowerCasePwdMd5 = Hex.toHexString(md5Bytes).toLowerCase();
         LOGGER.info("pwd md5 & lowerCase:" + lowerCasePwdMd5);
         return lowerCasePwdMd5;
+    }
+
+    public void sendOrderRequest(OrderRequest orderRequest) {
+        TrdPlaceOrder.C2S.Builder builder = TrdPlaceOrder.C2S.newBuilder();
+        builder.setPacketID(trd.nextPacketID());
+        builder.setHeader(this.trdHeader(orderRequest.getAccId(), orderRequest.getTradeEnv(), orderRequest.getTradeMarket()));
+        builder.setTrdSide(orderRequest.getTradeSide());
+        builder.setOrderType(orderRequest.getOrderType());
+        if (orderRequest.getSecurityMarket() != null) {
+            builder.setSecMarket(orderRequest.getSecurityMarket());
+        }
+        builder.setCode(orderRequest.getCode());
+        builder.setQty(orderRequest.getQty());
+        if (orderRequest.getPrice() != null) {
+            builder.setPrice(orderRequest.getPrice());
+        }
+        TrdPlaceOrder.Request request = TrdPlaceOrder.Request
+                .newBuilder()
+                .setC2S(builder.build())
+                .build();
+        int seqNo = trd.placeOrder(request);
+        LOGGER.info("下单!!!.seqNo=" + seqNo);
     }
 
     @Async
@@ -382,4 +405,5 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
             }
         }
     }
+
 }
