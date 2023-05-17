@@ -17,5 +17,7 @@ public @interface EnumValid {
 
     Class<?>[] target() default {};
 
-    String validField() default "getCode";
+    //不能用 'valid'作为前缀,捞一下 :)
+//    String validField() default "getCode";
+    String yanzhengField() default "getCode";
 }

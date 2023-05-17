@@ -10,7 +10,7 @@ public class UnlockRequest {
     @NotNull(message = "unlock不能为空")
     private Boolean unlock;
     @Null
-    @EnumValid(target = Firm.class, validField = "getCode", message = "券商输入错误")
+    @EnumValid(target = Firm.class, message = "券商输入错误")
     private Integer firm;
 
     public Boolean getUnlock() {

@@ -25,7 +25,7 @@ public class TradeController {
     @PostMapping("/order")
     public Mono<ResponseEntity<String>> order(@RequestBody @Validated Mono<OrderRequest> orderRequest) {
         return Mono.create(responseEntityMonoSink ->
-                orderRequest.doOnError(WebExchangeBindException.class, throwable -> responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors().toString(), HttpStatus.OK)))
+                orderRequest.doOnError(WebExchangeBindException.class, throwable -> responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors().toString(), HttpStatus.BAD_REQUEST)))
                         .doOnNext(request -> {
                             quotesService.sendOrderRequest(request);
                             responseEntityMonoSink.success(new ResponseEntity<>("order commit succeed.", HttpStatus.OK));

@@ -1,3 +1,19 @@
+POST http://localhost:9092/trade/order
+Content-Type: application/json
+
+{
+  "accId": "7098889",
+  "tradeEnv": 0,
+  "tradeMarket": 1,
+  "tradeSide": 1,
+  "orderType": 1,
+  "securityMarket": 1,
+  "code": "00700",
+  "qty": 100,
+  "price": 580
+}
+
+###
 GET http://localhost:9092/acc/refresh
 Accept: application/json
 

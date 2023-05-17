@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.trade.mapper.OrderDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.OrderDto">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="accId" column="acc_id" jdbcType="VARCHAR"/>
+        <result property="tradeEnv" column="trade_env" jdbcType="INTEGER"/>
+        <result property="tradeMarket" column="trade_market" jdbcType="INTEGER"/>
+        <result property="orderId" column="order_id" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="DATE"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,acc_id,trade_env,
+        trade_market,order_id,create_time
+    </sql>
+    <insert id="insertSelective">
+        insert into t_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="accId != null">acc_id,</if>
+            <if test="tradeEnv != null">trade_env,</if>
+            <if test="tradeMarket != null">trade_market,</if>
+            <if test="orderId != null">order_id,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="accId != null">#{accId,jdbcType=VARCHAR},</if>
+            <if test="tradeEnv != null">#{tradeEnv,jdbcType=INTEGER},</if>
+            <if test="tradeMarket != null">#{tradeMarket,jdbcType=INTEGER},</if>
+            <if test="orderId != null">#{orderId,jdbcType=VARCHAR},</if>
+            <if test="createTime != null">#{createTime,jdbcType=DATE},</if>
+        </trim>
+    </insert>
+</mapper>

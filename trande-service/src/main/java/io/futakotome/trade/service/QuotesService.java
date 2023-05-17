@@ -14,8 +14,10 @@ import io.futakotome.trade.controller.UnlockRequest;
 import io.futakotome.trade.domain.Currency;
 import io.futakotome.trade.dto.AccDto;
 import io.futakotome.trade.dto.AccInfoDto;
+import io.futakotome.trade.dto.OrderDto;
 import io.futakotome.trade.mapper.AccDtoMapper;
 import io.futakotome.trade.mapper.AccInfoDtoMapper;
+import io.futakotome.trade.mapper.OrderDtoMapper;
 import io.futakotome.trade.utils.RequestCount;
 import org.bouncycastle.jcajce.provider.digest.MD5;
 import org.bouncycastle.util.encoders.Hex;
@@ -44,10 +46,12 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
 
     private final AccDtoMapper accDtoMapper;
     private final AccInfoDtoMapper accInfoDtoMapper;
+    private final OrderDtoMapper orderDtoMapper;
 
-    public QuotesService(FutuConfig futuConfig, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper) {
+    public QuotesService(FutuConfig futuConfig, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper, OrderDtoMapper orderDtoMapper) {
         this.accDtoMapper = accDtoMapper;
         this.accInfoDtoMapper = accInfoDtoMapper;
+        this.orderDtoMapper = orderDtoMapper;
         trd.setClientInfo(clientID, 1);
         trd.setConnSpi(this);
         trd.setTrdSpi(this);
@@ -177,6 +181,33 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         FTAPI.init();
         trd.initConnect(futuConfig.getUrl(), futuConfig.getPort(), futuConfig.isEnableEncrypt());
+    }
+
+    @Override
+    public void onReply_PlaceOrder(FTAPI_Conn client, int nSerialNo, TrdPlaceOrder.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("下单失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "账号解锁失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "下单...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+                JsonObject s2c = ftGrpcReturnResult.getS2c();
+                OrderDto order = new OrderDto();
+                order.setAccId(s2c.get("header").getAsJsonObject().get("accID").getAsString());
+                order.setTradeMarket(s2c.get("header").getAsJsonObject().get("trdMarket").getAsInt());
+                order.setTradeEnv(s2c.get("header").getAsJsonObject().get("trdEnv").getAsInt());
+                order.setOrderId(s2c.get("orderID").getAsString());
+                int insertRow = orderDtoMapper.insertSelective(order);
+                if (insertRow > 0) {
+                    LOGGER.info("下单数据插入成功.条数:" + insertRow);
+                }
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("下单结果解析失败.", e);
+            }
+
+        }
     }
 
     @Override

@@ -44,7 +44,7 @@ public class EnumValidator implements ConstraintValidator<EnumValid, Object> {
     @Override
     public void initialize(EnumValid constraintAnnotation) {
         classes = constraintAnnotation.target();
-        validField = constraintAnnotation.validField();
+        validField = constraintAnnotation.yanzhengField();
     }
 
 }

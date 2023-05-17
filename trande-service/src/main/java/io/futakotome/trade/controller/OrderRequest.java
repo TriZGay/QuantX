@@ -26,7 +26,6 @@ public class OrderRequest {
             message = "输入错误,订单类型:[1(普通订单)/2(市价订单)/5(绝对限价订单)/6(竞价订单)/7(竞价限价订单)/8(特别限价订单)/9(特别限价且要求全部成交订单)/10(止损市价单)/11(止损限价单)/12(触及市价单)/13(触及限价单)/14(跟踪止损市价单)/15(跟踪止损限价单)]")
     private Integer orderType;
 
-    @Null
     @EnumValid(target = TradeSecurityMarket.class,
             message = "输入错误,证券所属市场:[1(香港市场)/2(美国市场)/31(沪股市场)/32(深股市场)/41(新加坡市场)/51(日本市场)]")
     private Integer securityMarket;
@@ -36,11 +35,11 @@ public class OrderRequest {
     private String code;
 
     @NotNull(message = "qty必填")
-    @NegativeOrZero
+//    @NegativeOrZero
     private Double qty;
 
-    @Null
-    @NegativeOrZero
+//    @Null
+//    @NegativeOrZero
     private Double price;
 
     public String getAccId() {
