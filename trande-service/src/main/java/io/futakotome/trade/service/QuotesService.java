@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
@@ -166,10 +167,26 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 }));
     }
 
+    public void sendTradeAccPushSubscribe() {
+        List<AccDto> accounts = accDtoMapper.selectList(null);
+        TrdSubAccPush.Request request = TrdSubAccPush.Request
+                .newBuilder()
+                .setC2S(TrdSubAccPush
+                        .C2S.newBuilder()
+                        .addAllAccIDList(accounts.stream()
+                                .map(accDto -> Long.parseLong(accDto.getAccId()))
+                                .collect(Collectors.toList()))
+                        .build())
+                .build();
+        int seqNo = trd.subAccPush(request);
+        LOGGER.info("交易账号发起订阅.seqNo=" + seqNo);
+    }
+
     @Override
     public void onInitConnect(FTAPI_Conn client, long errCode, String desc) {
         LOGGER.info("FUTU API 初始化连接 onInitConnect: ret=" + errCode + ",desc=" + desc + ",connID=" + client.getConnectID());
         this.sendGetAccListRequest();
+        this.sendTradeAccPushSubscribe();
     }
 
     @Override
@@ -181,6 +198,56 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         FTAPI.init();
         trd.initConnect(futuConfig.getUrl(), futuConfig.getPort(), futuConfig.isEnableEncrypt());
+    }
+
+    @Override
+    public void onReply_SubAccPush(FTAPI_Conn client, int nSerialNo, TrdSubAccPush.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("下单失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "订阅失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "订阅...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("订阅结果解析失败.", e);
+            }
+
+        }
+    }
+
+    @Override
+    public void onPush_UpdateOrder(FTAPI_Conn client, TrdUpdateOrder.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("下单失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("接收订单推送失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("connID=" + client.getConnectID() + "接收订单推送...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("接收订单推送结果解析失败.", e);
+            }
+
+        }
+    }
+
+    @Override
+    public void onPush_UpdateOrderFill(FTAPI_Conn client, TrdUpdateOrderFill.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("下单失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("接收成交推送失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("connID=" + client.getConnectID() + "接收成交推送...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("接收成交推送结果解析失败.", e);
+            }
+        }
     }
 
     @Override
