@@ -4,6 +4,7 @@ import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -18,6 +19,7 @@ import io.futakotome.trade.dto.OrderDto;
 import io.futakotome.trade.mapper.AccDtoMapper;
 import io.futakotome.trade.mapper.AccInfoDtoMapper;
 import io.futakotome.trade.mapper.OrderDtoMapper;
+import io.futakotome.trade.mapper.PositionDtoMapper;
 import io.futakotome.trade.utils.RequestCount;
 import org.bouncycastle.jcajce.provider.digest.MD5;
 import org.bouncycastle.util.encoders.Hex;
@@ -48,11 +50,13 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     private final AccDtoMapper accDtoMapper;
     private final AccInfoDtoMapper accInfoDtoMapper;
     private final OrderDtoMapper orderDtoMapper;
+    private final PositionDtoMapper positionDtoMapper;
 
-    public QuotesService(FutuConfig futuConfig, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper, OrderDtoMapper orderDtoMapper) {
+    public QuotesService(FutuConfig futuConfig, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper, OrderDtoMapper orderDtoMapper, PositionDtoMapper positionDtoMapper) {
         this.accDtoMapper = accDtoMapper;
         this.accInfoDtoMapper = accInfoDtoMapper;
         this.orderDtoMapper = orderDtoMapper;
+        this.positionDtoMapper = positionDtoMapper;
         trd.setClientInfo(clientID, 1);
         trd.setConnSpi(this);
         trd.setTrdSpi(this);
@@ -182,6 +186,22 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         LOGGER.info("交易账号发起订阅.seqNo=" + seqNo);
     }
 
+    public void sendGetTodayOrderListRequest() {
+        List<AccDto> accounts = accDtoMapper.selectList(null);
+        accounts.forEach(accDto -> {
+            TrdGetOrderList.Request request = TrdGetOrderList.Request.newBuilder()
+                    .setC2S(TrdGetOrderList.C2S.newBuilder()
+                            .setHeader(this.trdHeader(accDto.getAccId(), accDto.getTradeEnv(),
+                                    //todo trade_market_auth_list 原则上是存 ','拼接的字符串
+                                    Integer.valueOf(accDto.getTradeMarketAuthList())))
+                            .setRefreshCache(true)
+                            .build())
+                    .build();
+            int seqNo = trd.getOrderList(request);
+            LOGGER.info("查询今日订单.seqNo=" + seqNo);
+        });
+    }
+
     @Override
     public void onInitConnect(FTAPI_Conn client, long errCode, String desc) {
         LOGGER.info("FUTU API 初始化连接 onInitConnect: ret=" + errCode + ",desc=" + desc + ",connID=" + client.getConnectID());
@@ -198,6 +218,22 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         FTAPI.init();
         trd.initConnect(futuConfig.getUrl(), futuConfig.getPort(), futuConfig.isEnableEncrypt());
+    }
+
+    @Override
+    public void onReply_GetOrderList(FTAPI_Conn client, int nSerialNo, TrdGetOrderList.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("查询今日订单失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询今日订单失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询今日订单...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("查询今日订单结果解析失败.", e);
+            }
+        }
     }
 
     @Override
@@ -311,6 +347,15 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info(ftGrpcReturnResult.toString());
+                JsonObject header = ftGrpcReturnResult.getS2c().get("header").getAsJsonObject();
+                if (ftGrpcReturnResult.getS2c().has("positionList")) {
+                    JsonArray positionList = ftGrpcReturnResult.getS2c().get("positionList").getAsJsonArray();
+                    Iterator<JsonElement> positionIterator = positionList.iterator();
+                    while (positionIterator.hasNext()) {
+                        JsonElement onePosition = positionIterator.next();
+
+                    }
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析账户持仓结果失败.", e);
             }

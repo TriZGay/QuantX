@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.trade.mapper.PositionDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.PositionDto">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="positionId" column="position_id" jdbcType="BIGINT"/>
+            <result property="positionSide" column="position_side" jdbcType="INTEGER"/>
+            <result property="code" column="code" jdbcType="VARCHAR"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="qty" column="qty" jdbcType="DOUBLE"/>
+            <result property="canSellQty" column="can_sell_qty" jdbcType="DOUBLE"/>
+            <result property="price" column="price" jdbcType="DOUBLE"/>
+            <result property="costPrice" column="cost_price" jdbcType="DOUBLE"/>
+            <result property="val" column="val" jdbcType="DOUBLE"/>
+            <result property="plVal" column="pl_val" jdbcType="DOUBLE"/>
+            <result property="plRatio" column="pl_ratio" jdbcType="DOUBLE"/>
+            <result property="securityMarket" column="security_market" jdbcType="INTEGER"/>
+            <result property="tdPlVal" column="td_pl_val" jdbcType="DOUBLE"/>
+            <result property="tdTrdVal" column="td_trd_val" jdbcType="DOUBLE"/>
+            <result property="tdBuyVal" column="td_buy_val" jdbcType="DOUBLE"/>
+            <result property="tdBuyQty" column="td_buy_qty" jdbcType="DOUBLE"/>
+            <result property="tdSellVal" column="td_sell_val" jdbcType="DOUBLE"/>
+            <result property="tdSellQty" column="td_sell_qty" jdbcType="DOUBLE"/>
+            <result property="unrealizedPl" column="unrealized_pl" jdbcType="DOUBLE"/>
+            <result property="realizedPl" column="realized_pl" jdbcType="DOUBLE"/>
+            <result property="currency" column="currency" jdbcType="INTEGER"/>
+            <result property="tradeMarket" column="trade_market" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,position_id,position_side,
+        code,name,qty,
+        can_sell_qty,price,cost_price,
+        val,pl_val,pl_ratio,
+        security_market,td_pl_val,td_trd_val,
+        td_buy_val,td_buy_qty,td_sell_val,
+        td_sell_qty,unrealized_pl,realized_pl,
+        currency,trade_market
+    </sql>
+</mapper>

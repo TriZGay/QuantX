@@ -31,4 +31,11 @@ public class TradeController {
                             responseEntityMonoSink.success(new ResponseEntity<>("order commit succeed.", HttpStatus.OK));
                         }).subscribe());
     }
+
+    @PostMapping("/refreshOrder")
+    public Mono<ResponseEntity<String>> refreshOrder() {
+        quotesService.sendGetTodayOrderListRequest();
+        return Mono.just("commit succeed.")
+                .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
+    }
 }

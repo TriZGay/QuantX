@@ -1,3 +1,9 @@
+POST http://localhost:9092/trade/refreshOrder
+Content-Type: application/json
+
+{}
+
+###
 POST http://localhost:9092/trade/order
 Content-Type: application/json
 

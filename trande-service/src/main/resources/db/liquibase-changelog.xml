@@ -16,4 +16,7 @@
     <changeSet id="3" author="futakotome">
         <sqlFile path="db/sql/InitOrderTable.sql"/>
     </changeSet>
+    <changeSet id="4" author="futakotome">
+        <sqlFile path="db/sql/InitPositionTable.sql"/>
+    </changeSet>
 </databaseChangeLog>
