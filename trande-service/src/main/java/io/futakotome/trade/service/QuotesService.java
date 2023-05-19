@@ -31,6 +31,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -187,6 +191,32 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         LOGGER.info("交易账号发起订阅.seqNo=" + seqNo);
     }
 
+    public void sendGetHistoryOrderListRequest() {
+        List<AccDto> accounts = accDtoMapper.selectList(null);
+        accounts.forEach(accDto -> {
+
+            String beginTime = LocalDateTime.of(2023, 5, 15, 0, 0, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.MS"));
+            String endTime = LocalTime.MAX.atDate(LocalDate.now().minusDays(1L)).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.MS"));
+            LOGGER.info("查询历史订单:" + beginTime + "-" + endTime);
+            TrdGetHistoryOrderList.Request request = TrdGetHistoryOrderList.Request
+                    .newBuilder()
+                    .setC2S(TrdGetHistoryOrderList.C2S.newBuilder()
+                            .setHeader(this.trdHeader(accDto.getAccId(), accDto.getTradeEnv(),
+                                    //todo trade_market_auth_list 原则上是存 ','拼接的字符串
+                                    Integer.valueOf(accDto.getTradeMarketAuthList())))
+                            .setFilterConditions(TrdCommon.TrdFilterConditions.newBuilder()
+                                    //2023/05/15 开始算起
+                                    .setBeginTime(beginTime)
+                                    // 到每一天的前一天为止
+                                    .setEndTime(endTime)
+                                    .build())
+                            .build())
+                    .build();
+            int seqNo = trd.getHistoryOrderList(request);
+            LOGGER.info("查询历史订单.seqNo=" + seqNo);
+        });
+    }
+
     public void sendGetTodayOrderListRequest() {
         List<AccDto> accounts = accDtoMapper.selectList(null);
         accounts.forEach(accDto -> {
@@ -222,6 +252,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void onReply_GetOrderList(FTAPI_Conn client, int nSerialNo, TrdGetOrderList.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("查询今日订单失败:" + rsp.getRetMsg(),
@@ -231,8 +262,44 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info(ftGrpcReturnResult.toString());
+                List<OrderDto> existOrders = orderDtoMapper.selectList(null);
+                JsonObject header = ftGrpcReturnResult.getS2c().get("header").getAsJsonObject();
+                OrderDto order = new OrderDto();
+                order.setTradeEnv(header.get("trdEnv").getAsInt());
+                order.setAccId(header.get("accID").getAsString());
+                order.setTradeMarket(header.get("trdMarket").getAsInt());
+                if (ftGrpcReturnResult.getS2c().has("orderList")) {
+                    Iterator<JsonElement> orderListIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("orderList").iterator();
+                    while (orderListIterator.hasNext()) {
+                        JsonObject oneOrder = orderListIterator.next().getAsJsonObject();
+
+                        if (existOrders.contains(order)) {
+                            //在库里update
+                        } else {
+                            //不在库里新增
+                        }
+
+                    }
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询今日订单结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void onReply_GetHistoryOrderList(FTAPI_Conn client, int nSerialNo, TrdGetHistoryOrderList.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("查询历史订单失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询历史订单失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询历史订单...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析历史订单结果失败.", e);
             }
         }
     }
@@ -296,16 +363,11 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
             LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "下单...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
-                JsonObject s2c = ftGrpcReturnResult.getS2c();
-                OrderDto order = new OrderDto();
-                order.setAccId(s2c.get("header").getAsJsonObject().get("accID").getAsString());
-                order.setTradeMarket(s2c.get("header").getAsJsonObject().get("trdMarket").getAsInt());
-                order.setTradeEnv(s2c.get("header").getAsJsonObject().get("trdEnv").getAsInt());
-                order.setOrderId(s2c.get("orderID").getAsString());
-                int insertRow = orderDtoMapper.insertSelective(order);
-                if (insertRow > 0) {
-                    LOGGER.info("下单数据插入成功.条数:" + insertRow);
+                if (ftGrpcReturnResult.getRetType() == 0) {
+                    LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "下单成功!!");
+                } else {
+                    LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "下单失败:" + ftGrpcReturnResult.getRetType());
+                    LOGGER.error("失败原因:" + ftGrpcReturnResult.getRetMsg());
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("下单结果解析失败.", e);

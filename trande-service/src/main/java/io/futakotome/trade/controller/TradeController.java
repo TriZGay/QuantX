@@ -35,6 +35,7 @@ public class TradeController {
     @PostMapping("/refreshOrder")
     public Mono<ResponseEntity<String>> refreshOrder() {
         quotesService.sendGetTodayOrderListRequest();
+        quotesService.sendGetHistoryOrderListRequest();
         return Mono.just("commit succeed.")
                 .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
     }
