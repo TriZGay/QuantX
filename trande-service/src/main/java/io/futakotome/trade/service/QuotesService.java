@@ -16,6 +16,7 @@ import io.futakotome.trade.domain.Currency;
 import io.futakotome.trade.dto.AccDto;
 import io.futakotome.trade.dto.AccInfoDto;
 import io.futakotome.trade.dto.OrderDto;
+import io.futakotome.trade.dto.PositionDto;
 import io.futakotome.trade.mapper.AccDtoMapper;
 import io.futakotome.trade.mapper.AccInfoDtoMapper;
 import io.futakotome.trade.mapper.OrderDtoMapper;
@@ -347,13 +348,124 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info(ftGrpcReturnResult.toString());
+                List<PositionDto> existPositions = positionDtoMapper.selectList(null);
                 JsonObject header = ftGrpcReturnResult.getS2c().get("header").getAsJsonObject();
+                PositionDto position = new PositionDto();
+                position.setAccId(header.get("accID").getAsString());
+                position.setTradeEnv(header.get("trdEnv").getAsInt());
+                position.setAccTradeMarket(header.get("trdMarket").getAsInt());
                 if (ftGrpcReturnResult.getS2c().has("positionList")) {
                     JsonArray positionList = ftGrpcReturnResult.getS2c().get("positionList").getAsJsonArray();
                     Iterator<JsonElement> positionIterator = positionList.iterator();
                     while (positionIterator.hasNext()) {
-                        JsonElement onePosition = positionIterator.next();
-
+                        JsonObject onePosition = positionIterator.next().getAsJsonObject();
+                        if (onePosition.has("positionID")) {
+                            position.setPositionId(onePosition.get("positionID").getAsLong());
+                        }
+                        if (onePosition.has("positionSide")) {
+                            position.setPositionSide(onePosition.get("positionSide").getAsInt());
+                        }
+                        if (onePosition.has("code")) {
+                            position.setCode(onePosition.get("code").getAsString());
+                        }
+                        if (onePosition.has("name")) {
+                            position.setName(onePosition.get("name").getAsString());
+                        }
+                        if (onePosition.has("qty")) {
+                            position.setQty(onePosition.get("qty").getAsDouble());
+                        }
+                        if (onePosition.has("canSellQty")) {
+                            position.setCanSellQty(onePosition.get("canSellQty").getAsDouble());
+                        }
+                        if (onePosition.has("price")) {
+                            position.setPrice(onePosition.get("price").getAsDouble());
+                        }
+                        if (onePosition.has("costPrice")) {
+                            position.setCostPrice(onePosition.get("costPrice").getAsDouble());
+                        }
+                        if (onePosition.has("val")) {
+                            position.setVal(onePosition.get("val").getAsDouble());
+                        }
+                        if (onePosition.has("plVal")) {
+                            position.setPlVal(onePosition.get("plVal").getAsDouble());
+                        }
+                        if (onePosition.has("plRatio")) {
+                            position.setPlRatio(onePosition.get("plRatio").getAsDouble());
+                        }
+                        if (onePosition.has("secMarket")) {
+                            position.setSecurityMarket(onePosition.get("secMarket").getAsInt());
+                        }
+                        if (onePosition.has("td_plVal")) {
+                            position.setTdPlVal(onePosition.get("td_plVal").getAsDouble());
+                        }
+                        if (onePosition.has("td_trdVal")) {
+                            position.setTdTrdVal(onePosition.get("td_trdVal").getAsDouble());
+                        }
+                        if (onePosition.has("td_buyVal")) {
+                            position.setTdBuyVal(onePosition.get("td_buyVal").getAsDouble());
+                        }
+                        if (onePosition.has("td_buyQty")) {
+                            position.setTdBuyQty(onePosition.get("td_buyQty").getAsDouble());
+                        }
+                        if (onePosition.has("td_sellVal")) {
+                            position.setTdSellVal(onePosition.get("td_sellVal").getAsDouble());
+                        }
+                        if (onePosition.has("td_sellQty")) {
+                            position.setTdSellQty(onePosition.get("td_sellQty").getAsDouble());
+                        }
+                        if (onePosition.has("unrealizedPL")) {
+                            position.setUnrealizedPl(onePosition.get("unrealizedPL").getAsDouble());
+                        }
+                        if (onePosition.has("realizedPL")) {
+                            position.setRealizedPl(onePosition.get("realizedPL").getAsDouble());
+                        }
+                        if (onePosition.has("currency")) {
+                            position.setCurrency(onePosition.get("currency").getAsInt());
+                        }
+                        if (onePosition.has("trdMarket")) {
+                            position.setTradeMarket(onePosition.get("trdMarket").getAsInt());
+                        }
+                        if (existPositions.contains(position)) {
+                            //库里有 update
+                            PositionDto findOne = existPositions.stream()
+                                    .filter(exist -> exist.getPositionId().equals(position.getPositionId()))
+                                    .collect(Collectors.toList()).get(0);
+                            findOne.setTradeEnv(position.getTradeEnv());
+                            findOne.setAccId(position.getAccId());
+                            findOne.setAccTradeMarket(position.getAccTradeMarket());
+                            findOne.setPositionId(position.getPositionId());
+                            findOne.setPositionSide(position.getPositionSide());
+                            findOne.setCode(position.getCode());
+                            findOne.setName(position.getName());
+                            findOne.setQty(position.getQty());
+                            findOne.setCanSellQty(position.getCanSellQty());
+                            findOne.setPrice(position.getPrice());
+                            findOne.setCostPrice(position.getCostPrice());
+                            findOne.setVal(position.getVal());
+                            findOne.setPlVal(position.getPlVal());
+                            findOne.setPlRatio(position.getPlRatio());
+                            findOne.setSecurityMarket(position.getSecurityMarket());
+                            findOne.setTdPlVal(position.getTdPlVal());
+                            findOne.setTdTrdVal(position.getTdTrdVal());
+                            findOne.setTdBuyVal(position.getTdBuyVal());
+                            findOne.setTdBuyQty(position.getTdBuyQty());
+                            findOne.setTdSellVal(position.getTdSellVal());
+                            findOne.setTdSellQty(position.getTdSellQty());
+                            findOne.setUnrealizedPl(position.getUnrealizedPl());
+                            findOne.setRealizedPl(position.getRealizedPl());
+                            findOne.setCurrency(position.getCurrency());
+                            findOne.setTradeMarket(position.getTradeMarket());
+                            int updateRow = positionDtoMapper.updateById(findOne);
+                            if (updateRow > 0) {
+                                LOGGER.info("持仓信息修改成功.条数:" + updateRow);
+                            }
+                        } else {
+                            //库里没有新增
+                            int insertRow = positionDtoMapper.insertSelective(position);
+                            if (insertRow > 0) {
+                                LOGGER.info("持仓信息插入成功.条数:" + insertRow);
+                            }
+                        }
                     }
                 }
             } catch (InvalidProtocolBufferException e) {

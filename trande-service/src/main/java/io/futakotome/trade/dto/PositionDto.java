@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @TableName t_position
@@ -13,6 +14,12 @@ import java.io.Serializable;
 public class PositionDto implements Serializable {
     @TableId
     private Long id;
+
+    private Integer tradeEnv;
+
+    private String accId;
+
+    private Integer accTradeMarket;
 
     private Long positionId;
 
@@ -60,6 +67,30 @@ public class PositionDto implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+
+    public Integer getTradeEnv() {
+        return tradeEnv;
+    }
+
+    public void setTradeEnv(Integer tradeEnv) {
+        this.tradeEnv = tradeEnv;
+    }
+
+    public String getAccId() {
+        return accId;
+    }
+
+    public void setAccId(String accId) {
+        this.accId = accId;
+    }
+
+    public Integer getAccTradeMarket() {
+        return accTradeMarket;
+    }
+
+    public void setAccTradeMarket(Integer accTradeMarket) {
+        this.accTradeMarket = accTradeMarket;
+    }
 
     public Long getId() {
         return id;
@@ -243,5 +274,18 @@ public class PositionDto implements Serializable {
 
     public void setTradeMarket(Integer tradeMarket) {
         this.tradeMarket = tradeMarket;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PositionDto that = (PositionDto) o;
+        return positionId.equals(that.positionId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(positionId);
     }
 }

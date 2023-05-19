@@ -1,7 +1,7 @@
 package io.futakotome.trade.mapper;
 
-import io.futakotome.trade.dto.PositionDto;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import io.futakotome.trade.dto.PositionDto;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -12,7 +12,7 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface PositionDtoMapper extends BaseMapper<PositionDto> {
-
+    int insertSelective(PositionDto positionDto);
 }
 
 
