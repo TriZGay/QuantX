@@ -8,6 +8,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.futakotome.stock.dto.*;
 import io.futakotome.stock.mapper.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -16,6 +18,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/base")
 public class BaseDataController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseDataController.class);
+    private static final String PRINT_REQUEST_TEMPLATE = "{}请求参数:{},分页参数:current[{}],size[{}]";
     private static final Gson GSON = new Gson();
 
     private final StockDtoMapper stockDtoMapper;
@@ -33,19 +37,18 @@ public class BaseDataController {
     }
 
     @PostMapping("/stocks")
-    public Mono<IPage<StockDto>> listStocks(@RequestBody StockListRequest request,
-                                            @RequestParam(required = false) Long page,
-                                            @RequestParam(required = false) Long limit) {
+    public Mono<IPage<StockDto>> listStocks(@RequestBody StockListRequest request) {
+        LOGGER.info(PRINT_REQUEST_TEMPLATE, "查询股票", request.toString(),request.getCurrent(),request.getSize());
         QueryWrapper<StockDto> queryWrapper = Wrappers.query();
         Page<StockDto> pagination = Page.of(1, 10);
         if (request.getMarket() != null) {
             queryWrapper.eq("market", request.getMarket());
         }
-        if (page != null) {
-            pagination.setCurrent(page);
+        if (request.getCurrent() != null) {
+            pagination.setCurrent(request.getCurrent());
         }
-        if (limit != null) {
-            pagination.setSize(limit);
+        if (request.getSize() != null) {
+            pagination.setSize(request.getSize());
         }
         return Mono.create(iPageMonoSink ->
                 iPageMonoSink.success(stockDtoMapper.selectPage(pagination, queryWrapper))

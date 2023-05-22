@@ -1,6 +1,6 @@
 package io.futakotome.stock.controller;
 
-public class StockListRequest {
+public class StockListRequest extends PaginationRequest {
     private Integer market;
 
     public Integer getMarket() {
