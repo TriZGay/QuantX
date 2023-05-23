@@ -38,8 +38,10 @@ public class BaseDataController {
 
     @PostMapping("/stocks")
     public Mono<IPage<StockDto>> listStocks(@RequestBody StockListRequest request) {
-        LOGGER.info(PRINT_REQUEST_TEMPLATE, "查询股票", request.toString(),request.getCurrent(),request.getSize());
+        LOGGER.info(PRINT_REQUEST_TEMPLATE, "查询股票", request.toString(), request.getCurrent(), request.getSize());
         QueryWrapper<StockDto> queryWrapper = Wrappers.query();
+        //stock_type = 3 正股
+        queryWrapper.eq("stock_type", 3);
         Page<StockDto> pagination = Page.of(1, 10);
         if (request.getMarket() != null) {
             queryWrapper.eq("market", request.getMarket());

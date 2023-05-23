@@ -108,7 +108,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void onReply_GetIpoList(FTAPI_Conn client, int nSerialNo, QotGetIpoList.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("查询IPO信息失败:" + rsp.getRetMsg(),
@@ -246,7 +246,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void onReply_GetOwnerPlate(FTAPI_Conn client, int nSerialNo, QotGetOwnerPlate.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("查询股票板块信息失败:" + rsp.getRetMsg(),
