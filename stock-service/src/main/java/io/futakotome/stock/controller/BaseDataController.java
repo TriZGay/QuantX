@@ -46,6 +46,12 @@ public class BaseDataController {
         if (request.getMarket() != null) {
             queryWrapper.eq("market", request.getMarket());
         }
+        if (request.getExchangeType() != null) {
+            queryWrapper.eq("exchange_type", request.getExchangeType());
+        }
+        if (request.getDelisting() != null) {
+            queryWrapper.eq("delisting", request.getDelisting());
+        }
         if (request.getCurrent() != null) {
             pagination.setCurrent(request.getCurrent());
         }
