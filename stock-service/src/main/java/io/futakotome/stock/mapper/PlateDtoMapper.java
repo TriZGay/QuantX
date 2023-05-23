@@ -17,6 +17,8 @@ public interface PlateDtoMapper extends BaseMapper<PlateDto> {
     int insertBatch(@Param("plateDtoCollection") Collection<PlateDto> plateDtoCollection);
 
     List<PlateDto> searchByMarketEquals(@Param("market") Integer market);
+
+    List<PlateDto> searchALLByStockId(@Param("stockId") Long stockId);
 }
 
 

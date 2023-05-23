@@ -31,4 +31,10 @@
         where
         market = #{market,jdbcType=INTEGER}
     </select>
+    <select id="searchALLByStockId" resultMap="BaseResultMap">
+        select p.id, name, code, plate_type, market
+        from t_plate as p
+                 left join t_plate_stock as pt on p.id = pt.plate_id
+        where pt.stock_id = #{stockId,jdbcType=INTEGER}
+    </select>
 </mapper>

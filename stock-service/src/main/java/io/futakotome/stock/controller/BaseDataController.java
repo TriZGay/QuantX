@@ -10,6 +10,8 @@ import io.futakotome.stock.dto.*;
 import io.futakotome.stock.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -34,6 +36,15 @@ public class BaseDataController {
         this.ipoHkDtoMapper = ipoHkDtoMapper;
         this.ipoUsDtoMapper = ipoUsDtoMapper;
         this.ipoCnDtoMapper = ipoCnDtoMapper;
+    }
+
+    @GetMapping("/plate/{stockId}")
+    public Mono<ResponseEntity<List<PlateDto>>> fetchPlateByStockId(@PathVariable("stockId") Long stockId) {
+        LOGGER.info(PRINT_REQUEST_TEMPLATE, "根据股票ID查询板块", "{}", 1, Integer.MAX_VALUE);
+        return Mono.create(responseEntityMonoSink ->
+                responseEntityMonoSink.success(
+                        new ResponseEntity<>(plateDtoMapper.searchALLByStockId(stockId), HttpStatus.OK)
+                ));
     }
 
     @PostMapping("/stocks")
