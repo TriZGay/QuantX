@@ -1,5 +1,7 @@
 package io.futakotome.trade.controller;
 
+import io.futakotome.trade.dto.AccDto;
+import io.futakotome.trade.mapper.AccDtoMapper;
 import io.futakotome.trade.service.QuotesService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,13 +10,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/acc")
 public class AccController {
     private final QuotesService quotesService;
+    private final AccDtoMapper accDtoMapper;
 
-    public AccController(QuotesService quotesService) {
+    public AccController(QuotesService quotesService, AccDtoMapper accDtoMapper) {
         this.quotesService = quotesService;
+        this.accDtoMapper = accDtoMapper;
     }
 
     @GetMapping("/refresh")
@@ -46,5 +52,12 @@ public class AccController {
                             quotesService.sendUnLockRequest(r);
                             responseEntityMonoSink.success(new ResponseEntity<>("commit succeed.", HttpStatus.OK));
                         }).subscribe());
+    }
+
+    @GetMapping("/accounts")
+    public Mono<ResponseEntity<List<AccDto>>> fetchAccounts() {
+        return Mono.create(responseEntityMonoSink ->
+                responseEntityMonoSink.success(new ResponseEntity<>(accDtoMapper.selectList(null),
+                        HttpStatus.OK)));
     }
 }
