@@ -1,5 +1,7 @@
 package io.futakotome.trade.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
 import com.google.common.base.Joiner;
@@ -639,9 +641,50 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 if (funds.has("dtStatus")) {
                     accInfoDto.setDtStatus(funds.get("dtStatus").getAsInt());
                 }
-                int insertRow = accInfoDtoMapper.insertSelective(accInfoDto);
-                if (insertRow > 0) {
-                    LOGGER.info("插入账户详细信息成功.条数:" + insertRow);
+                QueryWrapper<AccInfoDto> wrapper = Wrappers.query();
+                wrapper.eq("acc_id", accInfoDto.getAccId());
+                //todo 发起请求是按币种遍历,这样会造成覆盖,但是现在初期没有所谓币种,之后再改造
+                AccInfoDto exist = accInfoDtoMapper.selectOne(wrapper);
+                if (exist != null) {
+                    exist.setAccId(accInfoDto.getAccId());
+                    exist.setPower(accInfoDto.getPower());
+                    exist.setTotalAssets(accInfoDto.getTotalAssets());
+                    exist.setCash(accInfoDto.getCash());
+                    exist.setMarketVal(accInfoDto.getMarketVal());
+                    exist.setFrozenCash(accInfoDto.getFrozenCash());
+                    exist.setDebtCash(accInfoDto.getDebtCash());
+                    exist.setAvlWithdrawalCash(accInfoDto.getAvlWithdrawalCash());
+                    exist.setCurrency(accInfoDto.getCurrency());
+                    exist.setAvailableFunds(accInfoDto.getAvailableFunds());
+                    exist.setUnrealizedPl(accInfoDto.getUnrealizedPl());
+                    exist.setRealizedPl(accInfoDto.getRealizedPl());
+                    exist.setRiskLevel(accInfoDto.getRiskLevel());
+                    exist.setInitialMargin(accInfoDto.getInitialMargin());
+                    exist.setMaintenanceMargin(accInfoDto.getMaintenanceMargin());
+                    exist.setCashInfoList(accInfoDto.getCashInfoList());
+                    exist.setMaxPowerShort(accInfoDto.getMaxPowerShort());
+                    exist.setNetCashPower(accInfoDto.getNetCashPower());
+                    exist.setLongMv(accInfoDto.getLongMv());
+                    exist.setShortMv(accInfoDto.getShortMv());
+                    exist.setPendingAsset(accInfoDto.getPendingAsset());
+                    exist.setMaxWithdrawal(accInfoDto.getMaxWithdrawal());
+                    exist.setRiskStatus(accInfoDto.getRiskStatus());
+                    exist.setMarginCallMargin(accInfoDto.getMarginCallMargin());
+                    exist.setIsPdt(accInfoDto.getIsPdt());
+                    exist.setPdtSeq(accInfoDto.getPdtSeq());
+                    exist.setBeginningDtbp(accInfoDto.getBeginningDtbp());
+                    exist.setRemainingDtbp(accInfoDto.getRemainingDtbp());
+                    exist.setDtCallAmount(accInfoDto.getDtCallAmount());
+                    exist.setDtStatus(accInfoDto.getDtStatus());
+                    int updateRow = accInfoDtoMapper.updateById(exist);
+                    if (updateRow > 0) {
+                        LOGGER.info("修改账户详细信息成功.条数:" + updateRow);
+                    }
+                } else {
+                    int insertRow = accInfoDtoMapper.insertSelective(accInfoDto);
+                    if (insertRow > 0) {
+                        LOGGER.info("插入账户详细信息成功.条数:" + insertRow);
+                    }
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析账户资金结果失败.", e);

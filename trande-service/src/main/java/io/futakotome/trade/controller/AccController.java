@@ -1,7 +1,11 @@
 package io.futakotome.trade.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.futakotome.trade.dto.AccDto;
+import io.futakotome.trade.dto.AccInfoDto;
 import io.futakotome.trade.mapper.AccDtoMapper;
+import io.futakotome.trade.mapper.AccInfoDtoMapper;
 import io.futakotome.trade.service.QuotesService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +21,12 @@ import java.util.List;
 public class AccController {
     private final QuotesService quotesService;
     private final AccDtoMapper accDtoMapper;
+    private final AccInfoDtoMapper accInfoDtoMapper;
 
-    public AccController(QuotesService quotesService, AccDtoMapper accDtoMapper) {
+    public AccController(QuotesService quotesService, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper) {
         this.quotesService = quotesService;
         this.accDtoMapper = accDtoMapper;
+        this.accInfoDtoMapper = accInfoDtoMapper;
     }
 
     @GetMapping("/refresh")
@@ -59,5 +65,14 @@ public class AccController {
         return Mono.create(responseEntityMonoSink ->
                 responseEntityMonoSink.success(new ResponseEntity<>(accDtoMapper.selectList(null),
                         HttpStatus.OK)));
+    }
+
+    @GetMapping("/info/{accId}")
+    public Mono<ResponseEntity<List<AccInfoDto>>> fetchInfoByAccId(@PathVariable("accId") String accId) {
+        return Mono.create(responseEntityMonoSink -> {
+            QueryWrapper<AccInfoDto> queryWrapper = Wrappers.query();
+            queryWrapper.eq("acc_id", accId);
+            responseEntityMonoSink.success(new ResponseEntity<>(accInfoDtoMapper.selectList(queryWrapper), HttpStatus.OK));
+        });
     }
 }
