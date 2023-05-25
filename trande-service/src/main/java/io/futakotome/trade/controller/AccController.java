@@ -6,7 +6,7 @@ import io.futakotome.trade.dto.AccDto;
 import io.futakotome.trade.dto.AccInfoDto;
 import io.futakotome.trade.mapper.AccDtoMapper;
 import io.futakotome.trade.mapper.AccInfoDtoMapper;
-import io.futakotome.trade.service.QuotesService;
+import io.futakotome.trade.service.FTTradeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,33 +19,33 @@ import java.util.List;
 @RestController
 @RequestMapping("/acc")
 public class AccController {
-    private final QuotesService quotesService;
+    private final FTTradeService FTTradeService;
     private final AccDtoMapper accDtoMapper;
     private final AccInfoDtoMapper accInfoDtoMapper;
 
-    public AccController(QuotesService quotesService, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper) {
-        this.quotesService = quotesService;
+    public AccController(FTTradeService FTTradeService, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper) {
+        this.FTTradeService = FTTradeService;
         this.accDtoMapper = accDtoMapper;
         this.accInfoDtoMapper = accInfoDtoMapper;
     }
 
     @GetMapping("/refresh")
     public Mono<ResponseEntity<String>> refreshAccInfo() {
-        quotesService.sendGetAccListRequest();
+        FTTradeService.sendGetAccListRequest();
         return Mono.just("commit succeed.")
                 .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
     }
 
     @GetMapping("/refreshAllFunds")
     public Mono<ResponseEntity<String>> refreshAllAccFunds() {
-        quotesService.sendGetFundsRequest();
+        FTTradeService.sendGetFundsRequest();
         return Mono.just("commit succeed.")
                 .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
     }
 
     @GetMapping("/refreshAllPosition")
     public Mono<ResponseEntity<String>> refreshAllPosition() {
-        quotesService.sendGetPositionRequest();
+        FTTradeService.sendGetPositionRequest();
         return Mono.just("commit succeed.")
                 .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
     }
@@ -55,7 +55,7 @@ public class AccController {
         return Mono.create(responseEntityMonoSink ->
                 unlockRequest.doOnError(WebExchangeBindException.class, throwable -> responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors().toString(), HttpStatus.BAD_REQUEST)))
                         .doOnNext(r -> {
-                            quotesService.sendUnLockRequest(r);
+                            FTTradeService.sendUnLockRequest(r);
                             responseEntityMonoSink.success(new ResponseEntity<>("commit succeed.", HttpStatus.OK));
                         }).subscribe());
     }

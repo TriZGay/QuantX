@@ -44,8 +44,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
-    private static final Logger LOGGER = LoggerFactory.getLogger(QuotesService.class);
+public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FTTradeService.class);
     private static final Gson GSON = new Gson();
 
     private final FutuConfig futuConfig;
@@ -59,7 +59,7 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     private final OrderDtoMapper orderDtoMapper;
     private final PositionDtoMapper positionDtoMapper;
 
-    public QuotesService(FutuConfig futuConfig, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper, OrderDtoMapper orderDtoMapper, PositionDtoMapper positionDtoMapper) {
+    public FTTradeService(FutuConfig futuConfig, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper, OrderDtoMapper orderDtoMapper, PositionDtoMapper positionDtoMapper) {
         this.accDtoMapper = accDtoMapper;
         this.accInfoDtoMapper = accInfoDtoMapper;
         this.orderDtoMapper = orderDtoMapper;
@@ -238,8 +238,8 @@ public class QuotesService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     @Override
     public void onInitConnect(FTAPI_Conn client, long errCode, String desc) {
         LOGGER.info("FUTU API 初始化连接 onInitConnect: ret=" + errCode + ",desc=" + desc + ",connID=" + client.getConnectID());
-        this.sendGetAccListRequest();
-        this.sendTradeAccPushSubscribe();
+//        this.sendGetAccListRequest();
+//        this.sendTradeAccPushSubscribe();
     }
 
     @Override

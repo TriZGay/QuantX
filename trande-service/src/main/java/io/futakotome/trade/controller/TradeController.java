@@ -1,6 +1,6 @@
 package io.futakotome.trade.controller;
 
-import io.futakotome.trade.service.QuotesService;
+import io.futakotome.trade.service.FTTradeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -16,10 +16,10 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/trade")
 public class TradeController {
 
-    private final QuotesService quotesService;
+    private final FTTradeService FTTradeService;
 
-    public TradeController(QuotesService quotesService) {
-        this.quotesService = quotesService;
+    public TradeController(FTTradeService FTTradeService) {
+        this.FTTradeService = FTTradeService;
     }
 
     @PostMapping("/order")
@@ -27,15 +27,15 @@ public class TradeController {
         return Mono.create(responseEntityMonoSink ->
                 orderRequest.doOnError(WebExchangeBindException.class, throwable -> responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors().toString(), HttpStatus.BAD_REQUEST)))
                         .doOnNext(request -> {
-                            quotesService.sendOrderRequest(request);
+                            FTTradeService.sendOrderRequest(request);
                             responseEntityMonoSink.success(new ResponseEntity<>("order commit succeed.", HttpStatus.OK));
                         }).subscribe());
     }
 
     @PostMapping("/refreshOrder")
     public Mono<ResponseEntity<String>> refreshOrder() {
-        quotesService.sendGetTodayOrderListRequest();
-        quotesService.sendGetHistoryOrderListRequest();
+        FTTradeService.sendGetTodayOrderListRequest();
+        FTTradeService.sendGetHistoryOrderListRequest();
         return Mono.just("commit succeed.")
                 .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
     }

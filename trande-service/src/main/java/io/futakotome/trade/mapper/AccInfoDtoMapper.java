@@ -1,11 +1,7 @@
 package io.futakotome.trade.mapper;
 
-import org.apache.ibatis.annotations.Param;
-
-import java.util.Collection;
-
-import io.futakotome.trade.dto.AccInfoDto;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import io.futakotome.trade.dto.AccInfoDto;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

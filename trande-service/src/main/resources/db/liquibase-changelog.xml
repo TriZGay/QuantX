@@ -19,4 +19,14 @@
     <changeSet id="4" author="futakotome">
         <sqlFile path="db/sql/InitPositionTable.sql"/>
     </changeSet>
+    <changeSet id="5" author="futakotome">
+        <sqlFile path="db/sql/InitPlateTable.sql"/>
+    </changeSet>
+    <changeSet id="6" author="futakotome">
+        <sqlFile path="db/sql/InitStockTable.sql"/>
+    </changeSet>
+    <changeSet id="7" author="futakotome">
+        <sqlFile path="db/sql/InitIpoTable.sql"/>
+    </changeSet>
+
 </databaseChangeLog>
