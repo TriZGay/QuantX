@@ -1,0 +1,34 @@
+package io.futakotome.trade.controller;
+
+import javax.validation.constraints.NotNull;
+
+public class SubscribeSecurity {
+    @NotNull(message = "市场不能为空")
+    private Integer market;
+    @NotNull(message = "标的代码不能为空")
+    private String code;
+
+    public SubscribeSecurity() {
+    }
+
+    public SubscribeSecurity(Integer market, String code) {
+        this.market = market;
+        this.code = code;
+    }
+
+    public Integer getMarket() {
+        return market;
+    }
+
+    public void setMarket(Integer market) {
+        this.market = market;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+}

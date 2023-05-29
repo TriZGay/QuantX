@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
+import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -11,7 +12,9 @@ import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.trade.config.FutuConfig;
+import io.futakotome.trade.controller.SubscribeRequest;
 import io.futakotome.trade.domain.MarketAggregator;
+import io.futakotome.trade.domain.MarketState;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.utils.CacheManager;
@@ -23,11 +26,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +47,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private final IpoUsDtoMapper ipoUsMapper;
     private final IpoCnDtoMapper ipoCnMapper;
     private final IpoCnExWinningDtoMapper ipoCnExWinningMapper;
+    private final SubDtoMapper subDtoMapper;
     private final FutuConfig futuConfig;
 
     private static final String clientID = "javaclient";
@@ -52,7 +57,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     public FTQotService(PlateDtoMapper plateMapper, StockDtoMapper stockMapper, PlateStockDtoMapper plateStockMapper,
                         IpoHkDtoMapper ipoHkMapper, IpoUsDtoMapper ipoUsMapper, IpoCnDtoMapper ipoCnMapper, IpoCnExWinningDtoMapper ipoCnExWinningMapper,
-                        FutuConfig futuConfig) {
+                        SubDtoMapper subDtoMapper, FutuConfig futuConfig) {
+        this.subDtoMapper = subDtoMapper;
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
@@ -91,6 +97,45 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         market.sendIpoInfoRequest();
     }
 
+    public void sendSubInfoRequest() {
+        QotGetSubInfo.Request request = QotGetSubInfo.Request.newBuilder()
+                .setC2S(QotGetSubInfo.C2S.newBuilder()
+                        .setIsReqAllConn(true)
+                        .build())
+                .build();
+        int seqNo = qot.getSubInfo(request);
+        LOGGER.info("查询订阅信息.seqNo=" + seqNo);
+    }
+
+    public void subscribeRequest(SubscribeRequest subscribeRequest) {
+        QotSub.Request request = QotSub.Request.newBuilder()
+                .setC2S(QotSub.C2S.newBuilder()
+                        .addAllSubTypeList(subscribeRequest.getSubTypeList())
+                        .addAllSecurityList(subscribeRequest.getSecurityList()
+                                .stream().map(security ->
+                                        QotCommon.Security.newBuilder()
+                                                .setMarket(security.getMarket())
+                                                .setCode(security.getCode())
+                                                .build())
+                                .collect(Collectors.toList()))
+                        .setIsRegOrUnRegPush(true)
+                        .setIsSubOrUnSub(true)
+                        .build())
+                .build();
+        int seqNo = qot.sub(request);
+        LOGGER.info("发起订阅.seqNo=" + seqNo);
+    }
+
+    public void sendGlobalMarketStateRequest() {
+        GetGlobalState.Request request = GetGlobalState.Request.newBuilder()
+                .setC2S(GetGlobalState.C2S.newBuilder()
+                        .setUserID(0)
+                        .build())
+                .build();
+        int seqNo = qot.getGlobalState(request);
+        LOGGER.info("查询全局市场状态.seq=" + seqNo);
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         FTAPI.init();
@@ -105,6 +150,216 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onDisconnect(FTAPI_Conn client, long errCode) {
         LOGGER.info("FUTU API 关闭连接连接 onDisconnect: connID=" + client.getConnectID() + ",ret=" + errCode);
+    }
+
+    @Override
+    public void onPush_Notify(FTAPI_Conn client, Notify.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取FutuD通知推送失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取FutuD通知推送失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info("FutuD通知推送" + ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("FutuD通知推送结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onReply_GetGlobalState(FTAPI_Conn client, int nSerialNo, GetGlobalState.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取全局市场状态失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取全局市场状态失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                JsonObject state = ftGrpcReturnResult.getS2c();
+                state.addProperty("marketHK", MarketState.mapFrom(state.get("marketHK").getAsInt()));
+                state.addProperty("marketUS", MarketState.mapFrom(state.get("marketUS").getAsInt()));
+                state.addProperty("marketSH", MarketState.mapFrom(state.get("marketSH").getAsInt()));
+                state.addProperty("marketSZ", MarketState.mapFrom(state.get("marketSZ").getAsInt()));
+                state.addProperty("marketHKFuture", MarketState.mapFrom(state.get("marketHKFuture").getAsInt()));
+                state.addProperty("time", LocalDateTime.ofInstant(Instant.ofEpochSecond(state.get("time").getAsLong()), ZoneId.systemDefault())
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                state.addProperty("localTime", LocalDateTime.ofInstant(Instant.ofEpochSecond(state.get("localTime").getAsLong()), ZoneId.systemDefault())
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                state.addProperty("marketUSFuture", MarketState.mapFrom(state.get("marketUSFuture").getAsInt()));
+                state.addProperty("marketSGFuture", MarketState.mapFrom(state.get("marketSGFuture").getAsInt()));
+                state.addProperty("marketJPFuture", MarketState.mapFrom(state.get("marketJPFuture").getAsInt()));
+                LOGGER.info(state.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析全局市场状态结果失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onPush_UpdateOrderBook(FTAPI_Conn client, QotUpdateOrderBook.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取摆盘推送失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取摆盘失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("摆盘结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onPush_UpdateBasicQuote(FTAPI_Conn client, QotUpdateBasicQot.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取报价推送失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取报价失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("报价推送结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onPush_UpdateKL(FTAPI_Conn client, QotUpdateKL.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取K线推送失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取K线数据失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("K线推送结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onPush_UpdateRT(FTAPI_Conn client, QotUpdateRT.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取分时推送失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取分时数据失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("分时推送结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onPush_UpdateTicker(FTAPI_Conn client, QotUpdateTicker.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取逐笔推送失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取逐笔数据失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("逐笔推送结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onPush_UpdateBroker(FTAPI_Conn client, QotUpdateBroker.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取经纪队列推送失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取经纪队列数据失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("经纪队列推送结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onReply_Sub(FTAPI_Conn client, int nSerialNo, QotSub.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("订阅失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "订阅失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info(ftGrpcReturnResult.toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("订阅解结果解析失败.", e);
+            }
+
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void onReply_GetSubInfo(FTAPI_Conn client, int nSerialNo, QotGetSubInfo.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("查询订阅信息失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询订阅信息失败,code:" + rsp.getRetType()));
+        } else {
+            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询订阅信息...");
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                JsonArray connSubInfoList = ftGrpcReturnResult.getS2c().get("connSubInfoList").getAsJsonArray();
+                Iterator<JsonElement> connSubInfoListIterator = connSubInfoList.iterator();
+                Collection<SubDto> subDtoList = new ArrayList<>();
+                Map<String, List<Integer>> codeAndSubTypeMap = new HashMap<>();
+                while (connSubInfoListIterator.hasNext()) {
+                    JsonObject perConnSubInfo = connSubInfoListIterator.next().getAsJsonObject();
+                    JsonArray subInfoList = perConnSubInfo.getAsJsonArray("subInfoList");
+                    Iterator<JsonElement> subInfoIterator = subInfoList.iterator();
+                    while (subInfoIterator.hasNext()) {
+                        JsonObject perSubInfo = subInfoIterator.next().getAsJsonObject();
+                        Integer subType = perSubInfo.get("subType").getAsInt();
+                        JsonArray securityList = perSubInfo.getAsJsonArray("securityList");
+                        Iterator<JsonElement> securityIterator = securityList.iterator();
+                        while (securityIterator.hasNext()) {
+                            JsonObject perSecurity = securityIterator.next().getAsJsonObject();
+                            SubDto subDto = new SubDto();
+                            subDto.setUsedQuota(perConnSubInfo.get("usedQuota").getAsInt());
+                            subDto.setIsOwnConn(perConnSubInfo.get("isOwnConnData").getAsBoolean() ? 1 : 0);
+                            Integer market = perSecurity.get("market").getAsInt();
+                            String code = perSecurity.get("code").getAsString();
+                            subDto.setSecurityMarket(market);
+                            subDto.setSecurityCode(code);
+                            if (codeAndSubTypeMap.containsKey(code)) {
+                                List<Integer> subTypeList = codeAndSubTypeMap.get(code);
+                                subTypeList.add(subType);
+                            } else {
+                                List<Integer> subTypeList = new ArrayList<>();
+                                subTypeList.add(subType);
+                                codeAndSubTypeMap.put(code, subTypeList);
+                            }
+                            subDtoList.add(subDto);
+                        }
+                    }
+                }
+                //转换为set去重
+                subDtoList = new HashSet<>(subDtoList);
+                //填充 sub_type字段
+                subDtoList.forEach(subDto -> {
+                    List<Integer> subTypeList = codeAndSubTypeMap.get(subDto.getSecurityCode());
+                    subDto.setSubType(Joiner.on(",").join(subTypeList));
+                });
+                int deletedRow = subDtoMapper.delete(null);
+                LOGGER.info("订阅信息表删除条数." + deletedRow);
+                int insertRow = subDtoMapper.insertBatch(subDtoList);
+                LOGGER.info("订阅信息表插入条数." + insertRow);
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("查询订阅信息解析结果失败.", e);
+            }
+        }
     }
 
     @Override
