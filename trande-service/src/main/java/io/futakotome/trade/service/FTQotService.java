@@ -18,13 +18,20 @@ import io.futakotome.trade.domain.MarketState;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.utils.CacheManager;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.socket.WebSocketMessage;
+import org.springframework.web.reactive.socket.WebSocketSession;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -32,6 +39,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,14 +65,13 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     public static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
-
     public FTQotService(PlateDtoMapper plateMapper, StockDtoMapper stockMapper, PlateStockDtoMapper plateStockMapper,
                         IpoHkDtoMapper ipoHkMapper, IpoUsDtoMapper ipoUsMapper, IpoCnDtoMapper ipoCnMapper, IpoCnExWinningDtoMapper ipoCnExWinningMapper,
                         SubDtoMapper subDtoMapper, FutuConfig futuConfig) {
-        this.subDtoMapper = subDtoMapper;
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
+        this.subDtoMapper = subDtoMapper;
         this.futuConfig = futuConfig;
         this.plateMapper = plateMapper;
         this.stockMapper = stockMapper;
@@ -749,5 +759,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             }
         }
 
+    }
+
+    public WebSocketMessage pushNotify(WebSocketSession session) {
+        return session.textMessage();
     }
 }
