@@ -1,22 +1,37 @@
 package io.futakotome.trade.config;
 
 import io.futakotome.trade.controller.ReactiveWebSocketNotifyServerHandler;
-import io.futakotome.trade.listener.ReactiveWebSocketListener;
-import io.futakotome.trade.service.FTQotService;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
-public class ReactiveWebSocketFTHandlerMapping extends SimpleUrlHandlerMapping {
+@Configuration
+public class ReactiveWebSocketFTHandlerMapping {
+    private final ReactiveWebSocketNotifyServerHandler handler;
 
-    public ReactiveWebSocketFTHandlerMapping(FTQotService ftQotService, ReactiveWebSocketListener listener) {
-        Map<String, WebSocketHandler> handlerMap = new HashMap<>();
-        handlerMap.put("/websocket/**", new ReactiveWebSocketNotifyServerHandler(ftQotService, listener));
-        setUrlMap(handlerMap);
-        setOrder(100);
+    public ReactiveWebSocketFTHandlerMapping(ReactiveWebSocketNotifyServerHandler handler) {
+        this.handler = handler;
+    }
+
+    @Bean
+    public HandlerMapping webSocketHandlerMapping() {
+        Map<String, WebSocketHandler> urlMap = new HashMap<>() {{
+            put("/websocket/**", handler);
+        }};
+        SimpleUrlHandlerMapping simpleUrlHandlerMapping = new SimpleUrlHandlerMapping();
+        simpleUrlHandlerMapping.setOrder(1);
+        simpleUrlHandlerMapping.setUrlMap(urlMap);
+        return simpleUrlHandlerMapping;
+    }
+
+    @Bean
+    public WebSocketHandlerAdapter handlerAdapter() {
+        return new WebSocketHandlerAdapter();
     }
 }

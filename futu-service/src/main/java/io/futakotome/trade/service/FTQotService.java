@@ -16,22 +16,17 @@ import io.futakotome.trade.controller.SubscribeRequest;
 import io.futakotome.trade.domain.MarketAggregator;
 import io.futakotome.trade.domain.MarketState;
 import io.futakotome.trade.dto.*;
+import io.futakotome.trade.listener.Message;
+import io.futakotome.trade.listener.NotifyMessage;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.utils.CacheManager;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.socket.WebSocketMessage;
-import org.springframework.web.reactive.socket.WebSocketSession;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -39,10 +34,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,6 +41,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(FTQotService.class);
     private static final Gson GSON = new Gson();
     private static final MarketAggregator market = new MarketAggregator();
+
+    private final MessageService messageService;
 
     private final PlateDtoMapper plateMapper;
     private final StockDtoMapper stockMapper;
@@ -61,16 +54,19 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private final SubDtoMapper subDtoMapper;
     private final FutuConfig futuConfig;
 
+    private String sessionId;
+
     private static final String clientID = "javaclient";
 
     public static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
-    public FTQotService(PlateDtoMapper plateMapper, StockDtoMapper stockMapper, PlateStockDtoMapper plateStockMapper,
+    public FTQotService(MessageService messageService, PlateDtoMapper plateMapper, StockDtoMapper stockMapper, PlateStockDtoMapper plateStockMapper,
                         IpoHkDtoMapper ipoHkMapper, IpoUsDtoMapper ipoUsMapper, IpoCnDtoMapper ipoCnMapper, IpoCnExWinningDtoMapper ipoCnExWinningMapper,
                         SubDtoMapper subDtoMapper, FutuConfig futuConfig) {
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
+        this.messageService = messageService;
         this.subDtoMapper = subDtoMapper;
         this.futuConfig = futuConfig;
         this.plateMapper = plateMapper;
@@ -159,7 +155,12 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     @Override
     public void onDisconnect(FTAPI_Conn client, long errCode) {
-        LOGGER.info("FUTU API 关闭连接连接 onDisconnect: connID=" + client.getConnectID() + ",ret=" + errCode);
+        LOGGER.info("FUTU API 关闭连接 onDisconnect: connID=" + client.getConnectID() + ",ret=" + errCode);
+        messageService.onNext(new NotifyMessage("FUTU API 关闭连接"), this.sessionId);
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     @Override
@@ -171,6 +172,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info("FutuD通知推送" + ftGrpcReturnResult.toString());
+                messageService.onNext(new NotifyMessage(ftGrpcReturnResult.toString()), this.sessionId);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("FutuD通知推送结果解析失败.", e);
             }
@@ -759,9 +761,5 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             }
         }
 
-    }
-
-    public WebSocketMessage pushNotify(WebSocketSession session) {
-        return session.textMessage();
     }
 }
