@@ -12,11 +12,11 @@ import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.trade.config.FutuConfig;
-import io.futakotome.trade.controller.SubscribeRequest;
+import io.futakotome.trade.controller.vo.SubscribeRequest;
 import io.futakotome.trade.domain.MarketAggregator;
 import io.futakotome.trade.domain.MarketState;
 import io.futakotome.trade.dto.*;
-import io.futakotome.trade.listener.Message;
+import io.futakotome.trade.listener.MessageContent;
 import io.futakotome.trade.listener.NotifyMessage;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.utils.CacheManager;
@@ -144,19 +144,32 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        this.connect();
+    }
+
+    public void connect() {
         FTAPI.init();
         qot.initConnect(futuConfig.getUrl(), futuConfig.getPort(), futuConfig.isEnableEncrypt());
+    }
+
+    public void disconnect() {
+        qot.close();
     }
 
     @Override
     public void onInitConnect(FTAPI_Conn client, long errCode, String desc) {
         LOGGER.info("FUTU API 初始化连接 onInitConnect: ret=" + errCode + ",desc=" + desc + ",connID=" + client.getConnectID());
+        messageService.onNext(new NotifyMessage(
+                GSON.toJson(new MessageContent(errCode, "FUTU API 连接成功"), MessageContent.class)
+        ), this.sessionId);
     }
 
     @Override
     public void onDisconnect(FTAPI_Conn client, long errCode) {
         LOGGER.info("FUTU API 关闭连接 onDisconnect: connID=" + client.getConnectID() + ",ret=" + errCode);
-        messageService.onNext(new NotifyMessage("FUTU API 关闭连接"), this.sessionId);
+        messageService.onNext(new NotifyMessage(
+                GSON.toJson(new MessageContent(errCode, "FUTU API 关闭连接成功"))
+        ), this.sessionId);
     }
 
     public void setSessionId(String sessionId) {
@@ -172,7 +185,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info("FutuD通知推送" + ftGrpcReturnResult.toString());
-                messageService.onNext(new NotifyMessage(ftGrpcReturnResult.toString()), this.sessionId);
+//                messageService.onNext(new NotifyMessage(ftGrpcReturnResult.toString()), this.sessionId);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("FutuD通知推送结果解析失败.", e);
             }

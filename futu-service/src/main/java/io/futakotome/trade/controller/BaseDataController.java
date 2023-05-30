@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.futakotome.trade.controller.vo.PlateListRequest;
+import io.futakotome.trade.controller.vo.StockListRequest;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.mapper.*;
 import org.slf4j.Logger;

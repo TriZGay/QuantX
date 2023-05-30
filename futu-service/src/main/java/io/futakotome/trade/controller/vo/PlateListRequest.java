@@ -1,4 +1,4 @@
-package io.futakotome.trade.controller;
+package io.futakotome.trade.controller.vo;
 
 public class PlateListRequest {
     private Integer market;

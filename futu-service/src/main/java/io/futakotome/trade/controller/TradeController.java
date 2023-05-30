@@ -1,5 +1,6 @@
 package io.futakotome.trade.controller;
 
+import io.futakotome.trade.controller.vo.OrderRequest;
 import io.futakotome.trade.service.FTTradeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

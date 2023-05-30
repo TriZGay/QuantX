@@ -1,4 +1,4 @@
-package io.futakotome.trade.controller;
+package io.futakotome.trade.controller.vo;
 
 public class StockListRequest extends PaginationRequest {
     private Integer market;

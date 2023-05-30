@@ -23,4 +23,18 @@ public class GlobalMarketController {
         return Mono.just("commit succeed.")
                 .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
     }
+
+    @GetMapping("/connect")
+    public Mono<ResponseEntity<String>> connect2FT() {
+        ftQotService.connect();
+        return Mono.just("commit succeed.")
+                .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
+    }
+
+    @GetMapping("/disconnect")
+    public Mono<ResponseEntity<String>> disconnect2FT() {
+        ftQotService.disconnect();
+        return Mono.just("ocmmit succeed.")
+                .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
+    }
 }

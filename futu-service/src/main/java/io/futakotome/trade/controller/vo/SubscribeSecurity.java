@@ -1,4 +1,4 @@
-package io.futakotome.trade.controller;
+package io.futakotome.trade.controller.vo;
 
 import javax.validation.constraints.NotNull;
 
