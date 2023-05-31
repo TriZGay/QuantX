@@ -16,7 +16,6 @@ import io.futakotome.trade.controller.vo.SubscribeRequest;
 import io.futakotome.trade.domain.MarketAggregator;
 import io.futakotome.trade.domain.MarketState;
 import io.futakotome.trade.dto.*;
-import io.futakotome.trade.listener.MessageContent;
 import io.futakotome.trade.listener.NotifyMessage;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.utils.CacheManager;
@@ -159,17 +158,13 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onInitConnect(FTAPI_Conn client, long errCode, String desc) {
         LOGGER.info("FUTU API 初始化连接 onInitConnect: ret=" + errCode + ",desc=" + desc + ",connID=" + client.getConnectID());
-        messageService.onNext(new NotifyMessage(
-                GSON.toJson(new MessageContent(errCode, "FUTU API 连接成功"), MessageContent.class)
-        ), this.sessionId);
+        messageService.onNext(new NotifyMessage(Long.toString(errCode), "FUTU API 连接成功"), this.sessionId);
     }
 
     @Override
     public void onDisconnect(FTAPI_Conn client, long errCode) {
         LOGGER.info("FUTU API 关闭连接 onDisconnect: connID=" + client.getConnectID() + ",ret=" + errCode);
-        messageService.onNext(new NotifyMessage(
-                GSON.toJson(new MessageContent(errCode, "FUTU API 关闭连接成功"))
-        ), this.sessionId);
+        messageService.onNext(new NotifyMessage(Long.toString(errCode), "FUTU API 关闭连接成功"), this.sessionId);
     }
 
     public void setSessionId(String sessionId) {
@@ -185,7 +180,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info("FutuD通知推送" + ftGrpcReturnResult.toString());
-//                messageService.onNext(new NotifyMessage(ftGrpcReturnResult.toString()), this.sessionId);
+                messageService.onNext(new NotifyMessage(String.valueOf(client.getConnectID()), "ConnectId:" + client.getConnectID() + "收到通知" + ftGrpcReturnResult.toString()), this.sessionId);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("FutuD通知推送结果解析失败.", e);
             }
@@ -675,7 +670,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 newStocks.removeIf(allStock::contains);
                 int insertLength = newStocks.size();
                 int i = 0;
-                int batchLimit = 3000;
+                int batchLimit = 200;
                 while (insertLength > batchLimit) {
                     int insertRow = stockMapper.insertBatch(newStocks.subList(i, i + batchLimit));
                     LOGGER.info("插入条数:" + insertRow);
@@ -686,6 +681,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     int insertRow = stockMapper.insertBatch(newStocks.subList(i, i + insertLength));
                     LOGGER.info("插入条数:" + insertRow);
                 }
+                messageService.onNext(new NotifyMessage(String.valueOf(nSerialNo), "nSerialNo=" + nSerialNo + "同步成功"), this.sessionId);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询静态信息解析结果失败!", e);
             }

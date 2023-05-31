@@ -1,6 +1,7 @@
 package io.futakotome.trade.listener;
 
 public class NotifyMessage implements Message {
+    private String code;
     private String content;
 
     @Override
@@ -8,7 +9,8 @@ public class NotifyMessage implements Message {
         return MessageType.NOTIFY;
     }
 
-    public NotifyMessage(String content) {
+    public NotifyMessage(String code, String content) {
+        this.code = code;
         this.content = content;
     }
 
@@ -18,5 +20,13 @@ public class NotifyMessage implements Message {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }
