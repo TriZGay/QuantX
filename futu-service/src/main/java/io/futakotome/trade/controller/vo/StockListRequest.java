@@ -4,6 +4,15 @@ public class StockListRequest extends PaginationRequest {
     private Integer market;
     private Integer exchangeType;
     private Integer delisting;
+    private Integer stockType;
+
+    public Integer getStockType() {
+        return stockType;
+    }
+
+    public void setStockType(Integer stockType) {
+        this.stockType = stockType;
+    }
 
     public Integer getExchangeType() {
         return exchangeType;
