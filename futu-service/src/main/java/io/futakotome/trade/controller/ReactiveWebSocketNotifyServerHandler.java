@@ -9,6 +9,7 @@ import io.futakotome.trade.service.MessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
@@ -32,7 +33,8 @@ public class ReactiveWebSocketNotifyServerHandler implements WebSocketHandler {
 
     @Override
     public Mono<Void> handle(WebSocketSession session) {
-        String sessionId = getSessionId(session.getHandshakeInfo().getUri());
+        String sessionId = session.getId();
+//        getSessionId(session.getHandshakeInfo().getUri());
 
         Flux<WebSocketMessage> messages = messageService.getMessages(sessionId)
                 .map(session::textMessage);
@@ -41,7 +43,13 @@ public class ReactiveWebSocketNotifyServerHandler implements WebSocketHandler {
                 .doOnNext(webSocketMessage ->
                         onMessage(webSocketMessage.getPayloadAsText(), sessionId));
 
-        return session.send(messages).and(reading);
+        Mono<CloseStatus> printCloseStatus = session.closeStatus()
+                .doOnNext(closeStatus ->
+                        LOGGER.info("连接状态:{},{}", closeStatus.getCode(),
+                                closeStatus.getReason()));
+
+        return session.send(messages).and(reading)
+                .and(printCloseStatus);
     }
 
     private void onMessage(String payload, String sessionId) {
