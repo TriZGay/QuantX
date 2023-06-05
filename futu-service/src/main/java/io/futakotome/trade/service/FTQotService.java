@@ -208,7 +208,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 state.addProperty("marketUSFuture", MarketState.mapFrom(state.get("marketUSFuture").getAsInt()));
                 state.addProperty("marketSGFuture", MarketState.mapFrom(state.get("marketSGFuture").getAsInt()));
                 state.addProperty("marketJPFuture", MarketState.mapFrom(state.get("marketJPFuture").getAsInt()));
-                LOGGER.info(state.toString());
                 messageService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), state.toString()), this.sessionId);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析全局市场状态结果失败.", e);
@@ -315,6 +314,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info(ftGrpcReturnResult.toString());
+                messageService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "订阅成功"), this.sessionId);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("订阅解结果解析失败.", e);
             }
