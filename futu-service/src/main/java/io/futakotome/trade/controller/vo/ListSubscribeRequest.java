@@ -1,6 +1,6 @@
 package io.futakotome.trade.controller.vo;
 
-public class ListSubscribeRequest {
+public class ListSubscribeRequest extends PaginationRequest  {
     private Integer market;
     private String code;
 

@@ -128,6 +128,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                         .build())
                 .build();
         int seqNo = qot.sub(request);
+        //下面订阅成功之后再拿出来插入订阅信息
+        CacheManager.put(String.valueOf(seqNo), subscribeRequest);
         LOGGER.info("发起订阅.seqNo=" + seqNo);
     }
 
@@ -313,8 +315,28 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
-                messageService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "订阅成功"), this.sessionId);
+                Object cacheValue = CacheManager.get(String.valueOf(nSerialNo));
+                if (cacheValue instanceof SubscribeRequest) {
+                    List<SubDto> toAddList = new ArrayList<>();
+                    ((SubscribeRequest) cacheValue).getSecurityList()
+                            .forEach(subscribeSecurity -> ((SubscribeRequest) cacheValue).getSubTypeList()
+                                    .forEach(subType -> {
+                                        SubDto toAddSub = new SubDto();
+                                        toAddSub.setSecurityCode(subscribeSecurity.getCode());
+                                        toAddSub.setSecurityName(subscribeSecurity.getName());
+                                        toAddSub.setSecurityMarket(subscribeSecurity.getMarket());
+                                        toAddSub.setSecurityType(subscribeSecurity.getType());
+                                        toAddSub.setSubType(subType);
+                                        toAddList.add(toAddSub);
+                                    }));
+                    //新增时候会判断是否存在,对已存在的数据不会更新
+                    List<SubDto> existSubList = subDtoMapper.selectList(null);
+                    toAddList.removeIf(existSubList::contains);
+                    int insertRow = subDtoMapper.insertBatch(toAddList);
+                    if (insertRow > 0) {
+                        messageService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "订阅成功"), this.sessionId);
+                    }
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("订阅解结果解析失败.", e);
             }
@@ -332,51 +354,52 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询订阅信息...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                JsonArray connSubInfoList = ftGrpcReturnResult.getS2c().get("connSubInfoList").getAsJsonArray();
-                Iterator<JsonElement> connSubInfoListIterator = connSubInfoList.iterator();
-                Collection<SubDto> subDtoList = new ArrayList<>();
-                Map<String, List<Integer>> codeAndSubTypeMap = new HashMap<>();
-                while (connSubInfoListIterator.hasNext()) {
-                    JsonObject perConnSubInfo = connSubInfoListIterator.next().getAsJsonObject();
-                    JsonArray subInfoList = perConnSubInfo.getAsJsonArray("subInfoList");
-                    Iterator<JsonElement> subInfoIterator = subInfoList.iterator();
-                    while (subInfoIterator.hasNext()) {
-                        JsonObject perSubInfo = subInfoIterator.next().getAsJsonObject();
-                        Integer subType = perSubInfo.get("subType").getAsInt();
-                        JsonArray securityList = perSubInfo.getAsJsonArray("securityList");
-                        Iterator<JsonElement> securityIterator = securityList.iterator();
-                        while (securityIterator.hasNext()) {
-                            JsonObject perSecurity = securityIterator.next().getAsJsonObject();
-                            SubDto subDto = new SubDto();
-                            subDto.setUsedQuota(perConnSubInfo.get("usedQuota").getAsInt());
-                            subDto.setIsOwnConn(perConnSubInfo.get("isOwnConnData").getAsBoolean() ? 1 : 0);
-                            Integer market = perSecurity.get("market").getAsInt();
-                            String code = perSecurity.get("code").getAsString();
-                            subDto.setSecurityMarket(market);
-                            subDto.setSecurityCode(code);
-                            if (codeAndSubTypeMap.containsKey(code)) {
-                                List<Integer> subTypeList = codeAndSubTypeMap.get(code);
-                                subTypeList.add(subType);
-                            } else {
-                                List<Integer> subTypeList = new ArrayList<>();
-                                subTypeList.add(subType);
-                                codeAndSubTypeMap.put(code, subTypeList);
+                if (ftGrpcReturnResult.getS2c().has("connSubInfoList")) {
+                    JsonArray connSubInfoList = ftGrpcReturnResult.getS2c().get("connSubInfoList").getAsJsonArray();
+                    Iterator<JsonElement> connSubInfoListIterator = connSubInfoList.iterator();
+                    List<SubDto> subDtoList = new ArrayList<>();
+//                    Map<String, List<Integer>> codeAndSubTypeMap = new HashMap<>();
+                    while (connSubInfoListIterator.hasNext()) {
+                        JsonObject perConnSubInfo = connSubInfoListIterator.next().getAsJsonObject();
+                        JsonArray subInfoList = perConnSubInfo.getAsJsonArray("subInfoList");
+                        Iterator<JsonElement> subInfoIterator = subInfoList.iterator();
+                        while (subInfoIterator.hasNext()) {
+                            JsonObject perSubInfo = subInfoIterator.next().getAsJsonObject();
+                            Integer subType = perSubInfo.get("subType").getAsInt();
+                            JsonArray securityList = perSubInfo.getAsJsonArray("securityList");
+                            Iterator<JsonElement> securityIterator = securityList.iterator();
+                            while (securityIterator.hasNext()) {
+                                JsonObject perSecurity = securityIterator.next().getAsJsonObject();
+                                SubDto subDto = new SubDto();
+//                                subDto.setUsedQuota(perConnSubInfo.get("usedQuota").getAsInt());
+//                                subDto.setIsOwnConn(perConnSubInfo.get("isOwnConnData").getAsBoolean() ? 1 : 0);
+                                subDto.setSecurityMarket(perSecurity.get("market").getAsInt());
+                                subDto.setSecurityCode(perSecurity.get("code").getAsString());
+                                subDto.setSubType(subType);
+//                                if (codeAndSubTypeMap.containsKey(code)) {
+//                                    List<Integer> subTypeList = codeAndSubTypeMap.get(code);
+//                                    subTypeList.add(subType);
+//                                } else {
+//                                    List<Integer> subTypeList = new ArrayList<>();
+//                                    subTypeList.add(subType);
+//                                    codeAndSubTypeMap.put(code, subTypeList);
+//                                }
+                                subDtoList.add(subDto);
                             }
-                            subDtoList.add(subDto);
                         }
                     }
+//                    //转换为set去重
+//                    subDtoList = new HashSet<>(subDtoList);
+//                    //填充 sub_type字段
+//                    subDtoList.forEach(subDto -> {
+//                        List<Integer> subTypeList = codeAndSubTypeMap.get(subDto.getSecurityCode());
+//                        subDto.setSubType(Joiner.on(",").join(subTypeList));
+//                    });
+                    int deletedRow = subDtoMapper.delete(null);
+                    LOGGER.info("订阅信息表删除条数." + deletedRow);
+                    int insertRow = subDtoMapper.insertBatch(subDtoList);
+                    LOGGER.info("订阅信息表插入条数." + insertRow);
                 }
-                //转换为set去重
-                subDtoList = new HashSet<>(subDtoList);
-                //填充 sub_type字段
-                subDtoList.forEach(subDto -> {
-                    List<Integer> subTypeList = codeAndSubTypeMap.get(subDto.getSecurityCode());
-                    subDto.setSubType(Joiner.on(",").join(subTypeList));
-                });
-                int deletedRow = subDtoMapper.delete(null);
-                LOGGER.info("订阅信息表删除条数." + deletedRow);
-                int insertRow = subDtoMapper.insertBatch(subDtoList);
-                LOGGER.info("订阅信息表插入条数." + insertRow);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询订阅信息解析结果失败.", e);
             }

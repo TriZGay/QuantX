@@ -19,11 +19,11 @@ public class SubDto implements Serializable {
 
     private String securityCode;
 
-    private String subType;
+    private String securityName;
 
-    private Integer usedQuota;
+    private Integer securityType;
 
-    private Integer isOwnConn;
+    private Integer subType;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
@@ -52,28 +52,28 @@ public class SubDto implements Serializable {
         this.securityCode = securityCode;
     }
 
-    public String getSubType() {
+    public Integer getSubType() {
         return subType;
     }
 
-    public void setSubType(String subType) {
+    public void setSubType(Integer subType) {
         this.subType = subType;
     }
 
-    public Integer getUsedQuota() {
-        return usedQuota;
+    public String getSecurityName() {
+        return securityName;
     }
 
-    public void setUsedQuota(Integer usedQuota) {
-        this.usedQuota = usedQuota;
+    public void setSecurityName(String securityName) {
+        this.securityName = securityName;
     }
 
-    public Integer getIsOwnConn() {
-        return isOwnConn;
+    public Integer getSecurityType() {
+        return securityType;
     }
 
-    public void setIsOwnConn(Integer isOwnConn) {
-        this.isOwnConn = isOwnConn;
+    public void setSecurityType(Integer securityType) {
+        this.securityType = securityType;
     }
 
     @Override
@@ -81,23 +81,11 @@ public class SubDto implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SubDto subDto = (SubDto) o;
-        return securityMarket.equals(subDto.securityMarket) && securityCode.equals(subDto.securityCode);
+        return securityMarket.equals(subDto.securityMarket) && securityCode.equals(subDto.securityCode) && subType.equals(subDto.subType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(securityMarket, securityCode);
-    }
-
-    @Override
-    public String toString() {
-        return "SubDto{" +
-                "id=" + id +
-                ", securityMarket=" + securityMarket +
-                ", securityCode='" + securityCode + '\'' +
-                ", subType='" + subType + '\'' +
-                ", usedQuota=" + usedQuota +
-                ", isOwnConn=" + isOwnConn +
-                '}';
+        return Objects.hash(securityMarket, securityCode, subType);
     }
 }

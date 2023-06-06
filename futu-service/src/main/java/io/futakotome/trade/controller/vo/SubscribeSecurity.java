@@ -7,6 +7,10 @@ public class SubscribeSecurity {
     private Integer market;
     @NotNull(message = "标的代码不能为空")
     private String code;
+    @NotNull(message = "名称不能为空")
+    private String name;
+    @NotNull(message = "类型不能为空")
+    private Integer type;
 
     public SubscribeSecurity() {
     }
@@ -30,5 +34,21 @@ public class SubscribeSecurity {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 }

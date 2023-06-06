@@ -28,22 +28,14 @@ public class SubscribeController {
     }
 
     @PostMapping("/list")
-    public Mono<IPage<SubDto>> listSubscribeList(@RequestBody ListSubscribeRequest request,
-                                                 @RequestParam(required = false) Long page,
-                                                 @RequestParam(required = false) Long limit) {
+    public Mono<IPage<SubDto>> listSubscribeList(@RequestBody ListSubscribeRequest request) {
         QueryWrapper<SubDto> queryWrapper = Wrappers.query();
         Page<SubDto> pagination = Page.of(1, 10);
-        if (request.getMarket() != null) {
-            queryWrapper.eq("security_market", request.getMarket());
+        if (request.getCurrent() != null) {
+            pagination.setCurrent(request.getCurrent());
         }
-        if (request.getCode() != null) {
-            queryWrapper.eq("security_code", request.getCode());
-        }
-        if (page != null) {
-            pagination.setCurrent(page);
-        }
-        if (limit != null) {
-            pagination.setSize(limit);
+        if (request.getSize() != null) {
+            pagination.setSize(request.getSize());
         }
         return Mono.create(iPageMonoSink ->
                 iPageMonoSink.success(subDtoMapper.selectPage(pagination, queryWrapper)));
