@@ -332,9 +332,11 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     //新增时候会判断是否存在,对已存在的数据不会更新
                     List<SubDto> existSubList = subDtoMapper.selectList(null);
                     toAddList.removeIf(existSubList::contains);
-                    int insertRow = subDtoMapper.insertBatch(toAddList);
-                    if (insertRow > 0) {
-                        messageService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "订阅成功"), this.sessionId);
+                    if (toAddList.size() > 0) {
+                        int insertRow = subDtoMapper.insertBatch(toAddList);
+                        if (insertRow > 0) {
+                            messageService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "订阅成功"), this.sessionId);
+                        }
                     }
                 }
             } catch (InvalidProtocolBufferException e) {
@@ -395,10 +397,11 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 //                        List<Integer> subTypeList = codeAndSubTypeMap.get(subDto.getSecurityCode());
 //                        subDto.setSubType(Joiner.on(",").join(subTypeList));
 //                    });
-                    int deletedRow = subDtoMapper.delete(null);
-                    LOGGER.info("订阅信息表删除条数." + deletedRow);
-                    int insertRow = subDtoMapper.insertBatch(subDtoList);
-                    LOGGER.info("订阅信息表插入条数." + insertRow);
+                    //todo 同步订阅信息
+//                    int deletedRow = subDtoMapper.delete(null);
+//                    LOGGER.info("订阅信息表删除条数." + deletedRow);
+//                    int insertRow = subDtoMapper.insertBatch(subDtoList);
+//                    LOGGER.info("订阅信息表插入条数." + insertRow);
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询订阅信息解析结果失败.", e);

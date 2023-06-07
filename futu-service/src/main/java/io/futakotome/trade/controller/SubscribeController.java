@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.futakotome.trade.controller.vo.ListSubscribeRequest;
+import io.futakotome.trade.controller.vo.PaginationRequest;
 import io.futakotome.trade.controller.vo.SubscribeRequest;
 import io.futakotome.trade.dto.SubDto;
 import io.futakotome.trade.mapper.SubDtoMapper;
