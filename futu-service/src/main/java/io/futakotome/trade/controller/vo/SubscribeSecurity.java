@@ -1,6 +1,7 @@
 package io.futakotome.trade.controller.vo;
 
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 public class SubscribeSecurity {
     @NotNull(message = "市场不能为空")
@@ -50,5 +51,18 @@ public class SubscribeSecurity {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SubscribeSecurity that = (SubscribeSecurity) o;
+        return market.equals(that.market) && code.equals(that.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(market, code);
     }
 }

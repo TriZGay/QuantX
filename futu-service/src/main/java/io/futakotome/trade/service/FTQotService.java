@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
-import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -13,12 +12,14 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.SubscribeRequest;
+import io.futakotome.trade.controller.vo.SubscribeSecurity;
 import io.futakotome.trade.domain.MarketAggregator;
 import io.futakotome.trade.domain.MarketState;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.listener.NotifyMessage;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.utils.CacheManager;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -34,6 +35,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 @Service
 public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
@@ -146,6 +149,28 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         this.connect();
+        this.subscribeOnStartup();
+    }
+
+    private void subscribeOnStartup() {
+        List<SubDto> subscribeInfos = this.subDtoMapper.selectList(null);
+        if (subscribeInfos.size() > 0) {
+            Map<SubscribeSecurity, List<Integer>> groupBySecurity = subscribeInfos.stream().collect(
+                    toMap(subDto -> new SubscribeSecurity(subDto.getSecurityMarket(), subDto.getSecurityCode()),
+                            subDto -> {
+                                List<Integer> subType = new ArrayList<>();
+                                subType.add(subDto.getSubType());
+                                return subType;
+                            },
+                            (u1, u2) -> {
+                                u1.addAll(u2);
+                                return u1;
+                            }));
+            groupBySecurity.keySet()
+                    .forEach(subscribeSecurity ->
+                            this.subscribeRequest(new SubscribeRequest(Collections.singletonList(subscribeSecurity),
+                                    groupBySecurity.get(subscribeSecurity))));
+        }
     }
 
     public void connect() {
@@ -360,7 +385,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     JsonArray connSubInfoList = ftGrpcReturnResult.getS2c().get("connSubInfoList").getAsJsonArray();
                     Iterator<JsonElement> connSubInfoListIterator = connSubInfoList.iterator();
                     List<SubDto> subDtoList = new ArrayList<>();
-//                    Map<String, List<Integer>> codeAndSubTypeMap = new HashMap<>();
                     while (connSubInfoListIterator.hasNext()) {
                         JsonObject perConnSubInfo = connSubInfoListIterator.next().getAsJsonObject();
                         JsonArray subInfoList = perConnSubInfo.getAsJsonArray("subInfoList");
@@ -378,30 +402,24 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                                 subDto.setSecurityMarket(perSecurity.get("market").getAsInt());
                                 subDto.setSecurityCode(perSecurity.get("code").getAsString());
                                 subDto.setSubType(subType);
-//                                if (codeAndSubTypeMap.containsKey(code)) {
-//                                    List<Integer> subTypeList = codeAndSubTypeMap.get(code);
-//                                    subTypeList.add(subType);
-//                                } else {
-//                                    List<Integer> subTypeList = new ArrayList<>();
-//                                    subTypeList.add(subType);
-//                                    codeAndSubTypeMap.put(code, subTypeList);
-//                                }
                                 subDtoList.add(subDto);
                             }
                         }
                     }
-//                    //转换为set去重
-//                    subDtoList = new HashSet<>(subDtoList);
-//                    //填充 sub_type字段
-//                    subDtoList.forEach(subDto -> {
-//                        List<Integer> subTypeList = codeAndSubTypeMap.get(subDto.getSecurityCode());
-//                        subDto.setSubType(Joiner.on(",").join(subTypeList));
-//                    });
-                    //todo 同步订阅信息
-//                    int deletedRow = subDtoMapper.delete(null);
-//                    LOGGER.info("订阅信息表删除条数." + deletedRow);
-//                    int insertRow = subDtoMapper.insertBatch(subDtoList);
-//                    LOGGER.info("订阅信息表插入条数." + insertRow);
+                    List<SubDto> existSubscribeInfo = subDtoMapper.selectList(null);
+                    //差集,新增数据
+                    Collection<SubDto> subtractForInsert = CollectionUtils.subtract(subDtoList, existSubscribeInfo);
+                    if (subtractForInsert.size() > 0) {
+                        int insertRow = subDtoMapper.insertBatch(subtractForInsert);
+                        LOGGER.info("订阅信息表插入条数." + insertRow);
+                    }
+                    //差集,删除数据
+                    Collection<SubDto> subtractForDel = CollectionUtils.subtract(existSubscribeInfo, subDtoList);
+                    if (subtractForDel.size() > 0) {
+                        int delRow = subDtoMapper.deleteBatchIds(subtractForDel
+                                .stream().map(SubDto::getId).collect(Collectors.toList()));
+                        LOGGER.info("订阅信息表删除条数." + delRow);
+                    }
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询订阅信息解析结果失败.", e);

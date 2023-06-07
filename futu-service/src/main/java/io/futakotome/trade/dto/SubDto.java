@@ -88,4 +88,16 @@ public class SubDto implements Serializable {
     public int hashCode() {
         return Objects.hash(securityMarket, securityCode, subType);
     }
+
+    @Override
+    public String toString() {
+        return "SubDto{" +
+                "id=" + id +
+                ", securityMarket=" + securityMarket +
+                ", securityCode='" + securityCode + '\'' +
+                ", securityName='" + securityName + '\'' +
+                ", securityType=" + securityType +
+                ", subType=" + subType +
+                '}';
+    }
 }
