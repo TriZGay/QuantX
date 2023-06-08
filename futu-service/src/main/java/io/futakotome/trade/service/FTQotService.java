@@ -18,6 +18,7 @@ import io.futakotome.trade.domain.MarketState;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.listener.NotifyMessage;
 import io.futakotome.trade.listener.RealTimeBaseQuoteMessage;
+import io.futakotome.trade.listener.vo.BasicQuoteMessageContent;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.utils.CacheManager;
 import org.apache.commons.collections4.CollectionUtils;
@@ -267,9 +268,14 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info("报价推送" + ftGrpcReturnResult.toString());
-                RealTimeBaseQuoteMessage message = new RealTimeBaseQuoteMessage();
-                message.setUpdateTime("okok");
-                messageService.onNext(message, this.sessionId);
+                Iterator<JsonElement> basicQotIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("basicQotList").iterator();
+                while (basicQotIterator.hasNext()) {
+                    JsonObject oneBasicQotInfo = basicQotIterator.next().getAsJsonObject();
+                    BasicQuoteMessageContent messageContent = GSON.fromJson(oneBasicQotInfo, BasicQuoteMessageContent.class);
+                    RealTimeBaseQuoteMessage message = new RealTimeBaseQuoteMessage(messageContent);
+                    messageService.onNext(message, this.sessionId);
+                }
+
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("报价推送结果解析失败.", e);
             }

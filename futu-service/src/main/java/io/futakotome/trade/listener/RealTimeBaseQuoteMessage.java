@@ -1,18 +1,24 @@
 package io.futakotome.trade.listener;
 
+import io.futakotome.trade.listener.vo.BasicQuoteMessageContent;
+
 public class RealTimeBaseQuoteMessage implements Message {
-    private String updateTime;
+    private BasicQuoteMessageContent content;
+
+    public RealTimeBaseQuoteMessage(BasicQuoteMessageContent content) {
+        this.content = content;
+    }
 
     @Override
     public MessageType getType() {
         return MessageType.RT_BASIC_QUOTE;
     }
 
-    public String getUpdateTime() {
-        return updateTime;
+    public BasicQuoteMessageContent getContent() {
+        return content;
     }
 
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
+    public void setContent(BasicQuoteMessageContent content) {
+        this.content = content;
     }
 }
