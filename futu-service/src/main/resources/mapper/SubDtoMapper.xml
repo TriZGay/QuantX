@@ -25,4 +25,10 @@
              #{item.securityName,jdbcType=VARCHAR},#{item.securityType,jdbcType=INTEGER},#{item.subType,jdbcType=INTEGER})
         </foreach>
     </insert>
+    <delete id="deleteBySecurityCodeAndSubType">
+        delete
+        from t_sub
+        where security_code = #{securityCode,jdbcType=VARCHAR}
+          AND sub_type = #{subType,jdbcType=NUMERIC}
+    </delete>
 </mapper>

@@ -11,6 +11,8 @@ public class SubscribeRequest {
     @NotNull
     private List<Integer> subTypeList;
 
+    private Boolean unsub;
+
     public SubscribeRequest() {
     }
 
@@ -33,5 +35,13 @@ public class SubscribeRequest {
 
     public void setSubTypeList(List<Integer> subTypeList) {
         this.subTypeList = subTypeList;
+    }
+
+    public Boolean isUnsub() {
+        return unsub;
+    }
+
+    public void setUnsub(Boolean unsub) {
+        this.unsub = unsub;
     }
 }

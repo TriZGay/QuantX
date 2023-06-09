@@ -49,6 +49,17 @@ public class SubscribeController {
                 .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
     }
 
+    @PostMapping("/cancel")
+    public Mono<ResponseEntity<String>> cancelSubscribe(@RequestBody @Validated Mono<SubscribeRequest> cancelRequest) {
+        return Mono.create(responseEntityMonoSink -> {
+            cancelRequest.doOnError(WebExchangeBindException.class, throwable -> responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors().toString(), HttpStatus.BAD_REQUEST)))
+                    .doOnNext(r -> {
+                        ftQotService.cancelSubscribe(r);
+                        responseEntityMonoSink.success(new ResponseEntity<>("cancel succeed.", HttpStatus.OK));
+                    }).subscribe();
+        });
+    }
+
     @PostMapping("/")
     public Mono<ResponseEntity<String>> subscribe(@RequestBody @Validated Mono<SubscribeRequest> request) {
         return Mono.create(responseEntityMonoSink ->

@@ -117,6 +117,26 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         LOGGER.info("查询订阅信息.seqNo=" + seqNo);
     }
 
+    public void cancelSubscribe(SubscribeRequest subscribeRequest) {
+        QotSub.Request request = QotSub.Request.newBuilder()
+                .setC2S(QotSub.C2S.newBuilder()
+                        .addAllSubTypeList(subscribeRequest.getSubTypeList())
+                        .addAllSecurityList(subscribeRequest.getSecurityList()
+                                .stream().map(security ->
+                                        QotCommon.Security.newBuilder()
+                                                .setMarket(security.getMarket())
+                                                .setCode(security.getCode())
+                                                .build())
+                                .collect(Collectors.toList()))
+                        .setIsSubOrUnSub(false)
+                        .build())
+                .build();
+        int seqNo = qot.sub(request);
+        //下面订阅成功之后再拿出来插入订阅信息
+        CacheManager.put(String.valueOf(seqNo), subscribeRequest);
+        LOGGER.info("取消订阅.seqNo=" + seqNo);
+    }
+
     public void subscribeRequest(SubscribeRequest subscribeRequest) {
         QotSub.Request request = QotSub.Request.newBuilder()
                 .setC2S(QotSub.C2S.newBuilder()
@@ -352,25 +372,37 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 Object cacheValue = CacheManager.get(String.valueOf(nSerialNo));
                 if (cacheValue instanceof SubscribeRequest) {
-                    List<SubDto> toAddList = new ArrayList<>();
-                    ((SubscribeRequest) cacheValue).getSecurityList()
-                            .forEach(subscribeSecurity -> ((SubscribeRequest) cacheValue).getSubTypeList()
-                                    .forEach(subType -> {
-                                        SubDto toAddSub = new SubDto();
-                                        toAddSub.setSecurityCode(subscribeSecurity.getCode());
-                                        toAddSub.setSecurityName(subscribeSecurity.getName());
-                                        toAddSub.setSecurityMarket(subscribeSecurity.getMarket());
-                                        toAddSub.setSecurityType(subscribeSecurity.getType());
-                                        toAddSub.setSubType(subType);
-                                        toAddList.add(toAddSub);
-                                    }));
-                    //新增时候会判断是否存在,对已存在的数据不会更新
-                    List<SubDto> existSubList = subDtoMapper.selectList(null);
-                    toAddList.removeIf(existSubList::contains);
-                    if (toAddList.size() > 0) {
-                        int insertRow = subDtoMapper.insertBatch(toAddList);
-                        if (insertRow > 0) {
-                            messageService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "订阅成功"), this.sessionId);
+                    if (((SubscribeRequest) cacheValue).isUnsub() != null && ((SubscribeRequest) cacheValue).isUnsub()) {
+                        ((SubscribeRequest) cacheValue).getSecurityList()
+                                .forEach(subscribeSecurity -> ((SubscribeRequest) cacheValue).getSubTypeList()
+                                        .forEach(subType -> {
+                                            int delRow = subDtoMapper.deleteBySecurityCodeAndSubType(subscribeSecurity.getCode(), subType);
+                                            if (delRow > 0) {
+                                                messageService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "取消订阅成功"), this.sessionId);
+                                            }
+                                        }));
+
+                    } else {
+                        List<SubDto> toAddList = new ArrayList<>();
+                        ((SubscribeRequest) cacheValue).getSecurityList()
+                                .forEach(subscribeSecurity -> ((SubscribeRequest) cacheValue).getSubTypeList()
+                                        .forEach(subType -> {
+                                            SubDto toAddSub = new SubDto();
+                                            toAddSub.setSecurityCode(subscribeSecurity.getCode());
+                                            toAddSub.setSecurityName(subscribeSecurity.getName());
+                                            toAddSub.setSecurityMarket(subscribeSecurity.getMarket());
+                                            toAddSub.setSecurityType(subscribeSecurity.getType());
+                                            toAddSub.setSubType(subType);
+                                            toAddList.add(toAddSub);
+                                        }));
+                        //新增时候会判断是否存在,对已存在的数据不会更新
+                        List<SubDto> existSubList = subDtoMapper.selectList(null);
+                        toAddList.removeIf(existSubList::contains);
+                        if (toAddList.size() > 0) {
+                            int insertRow = subDtoMapper.insertBatch(toAddList);
+                            if (insertRow > 0) {
+                                messageService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "订阅成功"), this.sessionId);
+                            }
                         }
                     }
                 }

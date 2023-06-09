@@ -17,6 +17,8 @@ import java.util.Collection;
 @Mapper
 public interface SubDtoMapper extends BaseMapper<SubDto> {
     int insertBatch(@Param("subDtoCollection") Collection<SubDto> subDtoCollection);
+
+    int deleteBySecurityCodeAndSubType(@Param("securityCode") String securityCode, @Param("subType") Integer subType);
 }
 
 
