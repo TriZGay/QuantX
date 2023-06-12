@@ -7,6 +7,10 @@ spring:
     password: 123456
   liquibase:
     change-log: classpath:db/liquibase-changelog.xml
+rocketmq:
+  name-server: 172.29.84.46:9876
+  producer:
+    group: rocket-produce
 ft:
   url: 127.0.0.1
   port: 11111
