@@ -31,9 +31,10 @@
         </dependency>
         <dependency>
             <groupId>com.clickhouse</groupId>
-            <!-- or clickhouse-grpc-client if you prefer gRPC -->
-            <artifactId>clickhouse-http-client</artifactId>
+            <artifactId>clickhouse-jdbc</artifactId>
             <version>0.4.6</version>
+            <!-- use uber jar with all dependencies included, change classifier to http for smaller jar -->
+            <classifier>all</classifier>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
