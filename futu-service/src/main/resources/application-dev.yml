@@ -10,7 +10,7 @@ spring:
 rocketmq:
   name-server: 172.29.84.46:9876
   producer:
-    group: rocket-produce
+    group: ft-rt-producer
 ft:
   url: 127.0.0.1
   port: 11111
