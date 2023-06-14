@@ -10,6 +10,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
+import io.futakotome.common.MessageCommon;
+import io.futakotome.common.message.RTBasicQuoteMessage;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.SubscribeRequest;
 import io.futakotome.trade.controller.vo.SubscribeSecurity;
@@ -22,6 +24,9 @@ import io.futakotome.trade.listener.vo.BasicQuoteMessageContent;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.utils.CacheManager;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -57,7 +62,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private final IpoCnExWinningDtoMapper ipoCnExWinningMapper;
     private final SubDtoMapper subDtoMapper;
     private final FutuConfig futuConfig;
-
+    private final RocketMQTemplate rocketMQTemplate;
     private String sessionId;
 
     private static final String clientID = "javaclient";
@@ -66,7 +71,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     public FTQotService(MessageService messageService, PlateDtoMapper plateMapper, StockDtoMapper stockMapper, PlateStockDtoMapper plateStockMapper,
                         IpoHkDtoMapper ipoHkMapper, IpoUsDtoMapper ipoUsMapper, IpoCnDtoMapper ipoCnMapper, IpoCnExWinningDtoMapper ipoCnExWinningMapper,
-                        SubDtoMapper subDtoMapper, FutuConfig futuConfig) {
+                        SubDtoMapper subDtoMapper, FutuConfig futuConfig, RocketMQTemplate rocketMQTemplate) {
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
@@ -80,6 +85,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         this.ipoUsMapper = ipoUsMapper;
         this.ipoCnMapper = ipoCnMapper;
         this.ipoCnExWinningMapper = ipoCnExWinningMapper;
+        this.rocketMQTemplate = rocketMQTemplate;
     }
 
     @Deprecated
@@ -294,6 +300,36 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     BasicQuoteMessageContent messageContent = GSON.fromJson(oneBasicQotInfo, BasicQuoteMessageContent.class);
                     RealTimeBaseQuoteMessage message = new RealTimeBaseQuoteMessage(messageContent);
                     messageService.onNext(message, this.sessionId);
+                    RTBasicQuoteMessage rtBasicQuoteMessage = new RTBasicQuoteMessage();
+                    rtBasicQuoteMessage.setMarket(messageContent.getSecurity().getMarket());
+                    rtBasicQuoteMessage.setCode(messageContent.getSecurity().getCode());
+                    rtBasicQuoteMessage.setSuspended(messageContent.isSuspended());
+                    rtBasicQuoteMessage.setListTime(messageContent.getListTime());
+                    rtBasicQuoteMessage.setPriceSpread(messageContent.getPriceSpread());
+                    rtBasicQuoteMessage.setUpdateTime(messageContent.getUpdateTime());
+                    rtBasicQuoteMessage.setHighPrice(messageContent.getHighPrice());
+                    rtBasicQuoteMessage.setOpenPrice(messageContent.getOpenPrice());
+                    rtBasicQuoteMessage.setLowPrice(messageContent.getLowPrice());
+                    rtBasicQuoteMessage.setCurPrice(messageContent.getCurPrice());
+                    rtBasicQuoteMessage.setLastClosePrice(messageContent.getLastClosePrice());
+                    rtBasicQuoteMessage.setVolume(messageContent.getVolume());
+                    rtBasicQuoteMessage.setTurnover(messageContent.getTurnover());
+                    rtBasicQuoteMessage.setTurnoverRate(messageContent.getTurnoverRate());
+                    rtBasicQuoteMessage.setAmplitude(messageContent.getAmplitude());
+                    rtBasicQuoteMessage.setDarkStatus(messageContent.getDarkStatus());
+                    rtBasicQuoteMessage.setSecStatus(messageContent.getSecStatus());
+                    rocketMQTemplate.asyncSend(MessageCommon.RT_BASIC_QUO_TOPIC, rtBasicQuoteMessage, new SendCallback() {
+                        @Override
+                        public void onSuccess(SendResult sendResult) {
+                            LOGGER.info("实时报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                                    sendResult.getSendStatus());
+                        }
+
+                        @Override
+                        public void onException(Throwable throwable) {
+                            LOGGER.error("实时报价信息投递失败", throwable);
+                        }
+                    });
                 }
 
             } catch (InvalidProtocolBufferException e) {
