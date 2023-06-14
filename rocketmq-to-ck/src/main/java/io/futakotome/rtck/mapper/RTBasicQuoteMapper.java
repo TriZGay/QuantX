@@ -22,7 +22,7 @@ public class RTBasicQuoteMapper {
 
     public boolean insertOne(RTBasicQuoteDto basicQuoteDto) {
         LOGGER.info("实时报价入库:{}", basicQuoteDto.toString());
-        try (Connection connection = dataSource.getConnection("default", "123456")) {
+        try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "insert into t_indies_basic_quote_raw " +
                             "select market , code , is_suspended , list_time , price_spread , high_price , open_price , low_price , cur_price , last_close_price , volume , turnover , turnover_rate , dark_status , sec_status ,update_time" +
