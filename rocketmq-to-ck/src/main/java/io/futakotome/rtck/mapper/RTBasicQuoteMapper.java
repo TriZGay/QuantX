@@ -25,8 +25,8 @@ public class RTBasicQuoteMapper {
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "insert into t_indies_basic_quote_raw " +
-                            "select market , code , is_suspended , list_time , price_spread , high_price , open_price , low_price , cur_price , last_close_price , volume , turnover , turnover_rate , dark_status , sec_status ,update_time" +
-                            " from input('market Int8 , code String , is_suspended UInt8 , list_time Date, price_spread Float64, high_price Float64, open_price Float64, low_price Float64, cur_price Float64, last_close_price Float64, volume Int64 ,turnover Float64 , turnover_rate Float64 , dark_status UInt8 , sec_status UInt8 ,update_time DateTime64(3)') ")) {
+                            "select market , code , is_suspended , list_time , price_spread , high_price , open_price , low_price , cur_price , last_close_price , volume , turnover , turnover_rate , amplitude , dark_status , sec_status ,update_time" +
+                            " from input('market Int8 , code String , is_suspended UInt8 , list_time Date, price_spread Float64, high_price Float64, open_price Float64, low_price Float64, cur_price Float64, last_close_price Float64, volume Int64 ,turnover Float64 , turnover_rate Float64 ,amplitude Float64 , dark_status UInt8 , sec_status UInt8 ,update_time DateTime64(3)') ")) {
                 preparedStatement.setInt(1, basicQuoteDto.getMarket());
                 preparedStatement.setString(2, basicQuoteDto.getCode());
                 preparedStatement.setInt(3, basicQuoteDto.getIsSuspended());
@@ -40,9 +40,10 @@ public class RTBasicQuoteMapper {
                 preparedStatement.setLong(11, basicQuoteDto.getVolume());
                 preparedStatement.setDouble(12, basicQuoteDto.getTurnover());
                 preparedStatement.setDouble(13, basicQuoteDto.getTurnoverRate());
-                preparedStatement.setInt(14, basicQuoteDto.getDarkStatus());
-                preparedStatement.setInt(15, basicQuoteDto.getSecStatus());
-                preparedStatement.setObject(16, basicQuoteDto.getUpdateTime());
+                preparedStatement.setDouble(14,basicQuoteDto.getAmplitude());
+                preparedStatement.setInt(15, basicQuoteDto.getDarkStatus());
+                preparedStatement.setInt(16, basicQuoteDto.getSecStatus());
+                preparedStatement.setObject(17, basicQuoteDto.getUpdateTime());
                 return preparedStatement.executeUpdate() > 0;
             }
         } catch (SQLException throwables) {
