@@ -34,8 +34,6 @@ public class RTBasicQuoteListener implements RocketMQListener<RTBasicQuoteMessag
         dto.setHighPrice(rtBasicQuoteMessage.getHighPrice());
         dto.setMarket(rtBasicQuoteMessage.getMarket());
         dto.setCode(rtBasicQuoteMessage.getCode());
-        dto.setIsSuspended(rtBasicQuoteMessage.isSuspended() ? 1 : 0);
-        dto.setListTime(rtBasicQuoteMessage.getListTime());
         dto.setPriceSpread(rtBasicQuoteMessage.getPriceSpread());
         dto.setOpenPrice(rtBasicQuoteMessage.getOpenPrice());
         dto.setLowPrice(rtBasicQuoteMessage.getLowPrice());

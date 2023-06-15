@@ -3,8 +3,6 @@ package io.futakotome.common.message;
 public class RTBasicQuoteMessage {
     private Integer market;
     private String code;
-    private boolean isSuspended;
-    private String listTime;
     private Double priceSpread;
     private String updateTime;
     private Double highPrice;
@@ -33,22 +31,6 @@ public class RTBasicQuoteMessage {
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public boolean isSuspended() {
-        return isSuspended;
-    }
-
-    public void setSuspended(boolean suspended) {
-        isSuspended = suspended;
-    }
-
-    public String getListTime() {
-        return listTime;
-    }
-
-    public void setListTime(String listTime) {
-        this.listTime = listTime;
     }
 
     public Double getPriceSpread() {

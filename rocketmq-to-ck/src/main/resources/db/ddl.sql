@@ -4,8 +4,6 @@ create table if not exists quantx.t_indies_basic_quote_raw
 (
     market           Int8,
     code             String,
-    is_suspended     UInt8,
-    list_time        Date,
     price_spread     Float64,
     high_price       Float64,
     open_price       Float64,

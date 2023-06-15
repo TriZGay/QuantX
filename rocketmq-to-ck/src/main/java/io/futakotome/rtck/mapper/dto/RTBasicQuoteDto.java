@@ -3,8 +3,6 @@ package io.futakotome.rtck.mapper.dto;
 public class RTBasicQuoteDto {
     private Integer market;
     private String code;
-    private Integer isSuspended;
-    private String listTime;
     private Double priceSpread;
     private Double highPrice;
     private Double openPrice;
@@ -91,22 +89,6 @@ public class RTBasicQuoteDto {
         this.code = code;
     }
 
-    public Integer getIsSuspended() {
-        return isSuspended;
-    }
-
-    public void setIsSuspended(Integer isSuspended) {
-        this.isSuspended = isSuspended;
-    }
-
-    public String getListTime() {
-        return listTime;
-    }
-
-    public void setListTime(String listTime) {
-        this.listTime = listTime;
-    }
-
     public Double getPriceSpread() {
         return priceSpread;
     }
@@ -160,8 +142,6 @@ public class RTBasicQuoteDto {
         return "RTBasicQuoteDto{" +
                 "market=" + market +
                 ", code='" + code + '\'' +
-                ", isSuspended=" + isSuspended +
-                ", listTime='" + listTime + '\'' +
                 ", priceSpread=" + priceSpread +
                 ", highPrice=" + highPrice +
                 ", openPrice=" + openPrice +

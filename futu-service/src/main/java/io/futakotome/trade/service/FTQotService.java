@@ -303,8 +303,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     RTBasicQuoteMessage rtBasicQuoteMessage = new RTBasicQuoteMessage();
                     rtBasicQuoteMessage.setMarket(messageContent.getSecurity().getMarket());
                     rtBasicQuoteMessage.setCode(messageContent.getSecurity().getCode());
-                    rtBasicQuoteMessage.setSuspended(messageContent.isSuspended());
-                    rtBasicQuoteMessage.setListTime(messageContent.getListTime());
                     rtBasicQuoteMessage.setPriceSpread(messageContent.getPriceSpread());
                     rtBasicQuoteMessage.setUpdateTime(messageContent.getUpdateTime());
                     rtBasicQuoteMessage.setHighPrice(messageContent.getHighPrice());
