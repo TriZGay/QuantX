@@ -22,8 +22,8 @@ class RTBasicQuoteMapperTest {
         dto.setHighPrice(19547.58);
         dto.setMarket(21);
         dto.setCode("000001");
-        dto.setIsSuspended(1);
-        dto.setListTime("1970-01-01");
+//        dto.setIsSuspended(1);
+//        dto.setListTime("1970-01-01");
         dto.setPriceSpread(0.01);
         dto.setOpenPrice(19547.58);
         dto.setLowPrice(19547.58);
