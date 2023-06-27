@@ -38,9 +38,10 @@ public class RTBasicQuoteMapper {
                 preparedStatement.setLong(9, basicQuoteDto.getVolume());
                 preparedStatement.setDouble(10, basicQuoteDto.getTurnover());
                 preparedStatement.setDouble(11, basicQuoteDto.getTurnoverRate());
-                preparedStatement.setDouble(12,basicQuoteDto.getAmplitude());
-                preparedStatement.setInt(13, basicQuoteDto.getDarkStatus());
-                preparedStatement.setInt(14, basicQuoteDto.getSecStatus());
+                preparedStatement.setDouble(12, basicQuoteDto.getAmplitude());
+                //类型是无符号8位整数,所以库里是255
+                preparedStatement.setInt(13, basicQuoteDto.getDarkStatus() == null ? -1 : basicQuoteDto.getDarkStatus());
+                preparedStatement.setInt(14, basicQuoteDto.getSecStatus() == null ? -1 : basicQuoteDto.getSecStatus());
                 preparedStatement.setObject(15, basicQuoteDto.getUpdateTime());
                 return preparedStatement.executeUpdate() > 0;
             }
