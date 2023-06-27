@@ -17,6 +17,7 @@ import io.futakotome.trade.controller.vo.SubscribeRequest;
 import io.futakotome.trade.controller.vo.SubscribeSecurity;
 import io.futakotome.trade.domain.MarketAggregator;
 import io.futakotome.trade.domain.MarketState;
+import io.futakotome.trade.domain.StockType;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.listener.NotifyMessage;
 import io.futakotome.trade.listener.RealTimeBaseQuoteMessage;
@@ -51,7 +52,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private static final Gson GSON = new Gson();
     private static final MarketAggregator market = new MarketAggregator();
 
-    private final MessageService messageService;
+    private final MessageService webSocketService;
 
     private final PlateDtoMapper plateMapper;
     private final StockDtoMapper stockMapper;
@@ -69,13 +70,13 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     public static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
-    public FTQotService(MessageService messageService, PlateDtoMapper plateMapper, StockDtoMapper stockMapper, PlateStockDtoMapper plateStockMapper,
+    public FTQotService(MessageService webSocketService, PlateDtoMapper plateMapper, StockDtoMapper stockMapper, PlateStockDtoMapper plateStockMapper,
                         IpoHkDtoMapper ipoHkMapper, IpoUsDtoMapper ipoUsMapper, IpoCnDtoMapper ipoCnMapper, IpoCnExWinningDtoMapper ipoCnExWinningMapper,
                         SubDtoMapper subDtoMapper, FutuConfig futuConfig, RocketMQTemplate rocketMQTemplate) {
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
-        this.messageService = messageService;
+        this.webSocketService = webSocketService;
         this.subDtoMapper = subDtoMapper;
         this.futuConfig = futuConfig;
         this.plateMapper = plateMapper;
@@ -213,13 +214,13 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onInitConnect(FTAPI_Conn client, long errCode, String desc) {
         LOGGER.info("FUTU API 初始化连接 onInitConnect: ret=" + errCode + ",desc=" + desc + ",connID=" + client.getConnectID());
-        messageService.onNext(new NotifyMessage(Long.toString(errCode), "FUTU API 连接成功"), this.sessionId);
+        webSocketService.onNext(new NotifyMessage(Long.toString(errCode), "FUTU API 连接成功"), this.sessionId);
     }
 
     @Override
     public void onDisconnect(FTAPI_Conn client, long errCode) {
         LOGGER.info("FUTU API 关闭连接 onDisconnect: connID=" + client.getConnectID() + ",ret=" + errCode);
-        messageService.onNext(new NotifyMessage(Long.toString(errCode), "FUTU API 关闭连接成功"), this.sessionId);
+        webSocketService.onNext(new NotifyMessage(Long.toString(errCode), "FUTU API 关闭连接成功"), this.sessionId);
     }
 
     public void setSessionId(String sessionId) {
@@ -235,7 +236,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info("FutuD通知推送" + ftGrpcReturnResult.toString());
-                messageService.onNext(new NotifyMessage(String.valueOf(client.getConnectID()), "ConnectId:" + client.getConnectID() + "收到通知" + ftGrpcReturnResult.toString()), this.sessionId);
+                webSocketService.onNext(new NotifyMessage(String.valueOf(client.getConnectID()), "ConnectId:" + client.getConnectID() + "收到通知" + ftGrpcReturnResult.toString()), this.sessionId);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("FutuD通知推送结果解析失败.", e);
             }
@@ -263,7 +264,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 state.addProperty("marketUSFuture", MarketState.mapFrom(state.get("marketUSFuture").getAsInt()));
                 state.addProperty("marketSGFuture", MarketState.mapFrom(state.get("marketSGFuture").getAsInt()));
                 state.addProperty("marketJPFuture", MarketState.mapFrom(state.get("marketJPFuture").getAsInt()));
-                messageService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), state.toString()), this.sessionId);
+                webSocketService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), state.toString()), this.sessionId);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析全局市场状态结果失败.", e);
             }
@@ -285,6 +286,46 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    private void sendBasicQuoteMessage(BasicQuoteMessageContent basicQuoteMessageContent) {
+        QueryWrapper<StockDto> queryWrapper = Wrappers.query();
+        queryWrapper.eq("market", basicQuoteMessageContent.getSecurity().getMarket());
+        queryWrapper.eq("code", basicQuoteMessageContent.getSecurity().getCode());
+        StockDto stockDto = stockMapper.selectOne(queryWrapper);
+        RTBasicQuoteMessage rtBasicQuoteMessage = new RTBasicQuoteMessage();
+        rtBasicQuoteMessage.setMarket(basicQuoteMessageContent.getSecurity().getMarket());
+        rtBasicQuoteMessage.setCode(basicQuoteMessageContent.getSecurity().getCode());
+        rtBasicQuoteMessage.setPriceSpread(basicQuoteMessageContent.getPriceSpread());
+        rtBasicQuoteMessage.setUpdateTime(basicQuoteMessageContent.getUpdateTime());
+        rtBasicQuoteMessage.setHighPrice(basicQuoteMessageContent.getHighPrice());
+        rtBasicQuoteMessage.setOpenPrice(basicQuoteMessageContent.getOpenPrice());
+        rtBasicQuoteMessage.setLowPrice(basicQuoteMessageContent.getLowPrice());
+        rtBasicQuoteMessage.setCurPrice(basicQuoteMessageContent.getCurPrice());
+        rtBasicQuoteMessage.setLastClosePrice(basicQuoteMessageContent.getLastClosePrice());
+        rtBasicQuoteMessage.setVolume(basicQuoteMessageContent.getVolume());
+        rtBasicQuoteMessage.setTurnover(basicQuoteMessageContent.getTurnover());
+        rtBasicQuoteMessage.setTurnoverRate(basicQuoteMessageContent.getTurnoverRate());
+        rtBasicQuoteMessage.setAmplitude(basicQuoteMessageContent.getAmplitude());
+        rtBasicQuoteMessage.setDarkStatus(basicQuoteMessageContent.getDarkStatus());
+        rtBasicQuoteMessage.setSecStatus(basicQuoteMessageContent.getSecStatus());
+        if (stockDto.getStockType().equals(StockType.Eqty.getCode())) {
+            //正股
+        } else if (stockDto.getStockType().equals(StockType.Index.getCode())) {
+            //指数
+            rocketMQTemplate.asyncSend(MessageCommon.RT_BASIC_QUO_TOPIC_INDEX, rtBasicQuoteMessage, new SendCallback() {
+                @Override
+                public void onSuccess(SendResult sendResult) {
+                    LOGGER.info("实时指数报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                            sendResult.getSendStatus());
+                }
+
+                @Override
+                public void onException(Throwable throwable) {
+                    LOGGER.error("实时指数报价信息投递失败", throwable);
+                }
+            });
+        }
+    }
+
     @Override
     public void onPush_UpdateBasicQuote(FTAPI_Conn client, QotUpdateBasicQot.Response rsp) {
         if (rsp.getRetType() != 0) {
@@ -299,35 +340,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     JsonObject oneBasicQotInfo = basicQotIterator.next().getAsJsonObject();
                     BasicQuoteMessageContent messageContent = GSON.fromJson(oneBasicQotInfo, BasicQuoteMessageContent.class);
                     RealTimeBaseQuoteMessage message = new RealTimeBaseQuoteMessage(messageContent);
-                    messageService.onNext(message, this.sessionId);
-                    RTBasicQuoteMessage rtBasicQuoteMessage = new RTBasicQuoteMessage();
-                    rtBasicQuoteMessage.setMarket(messageContent.getSecurity().getMarket());
-                    rtBasicQuoteMessage.setCode(messageContent.getSecurity().getCode());
-                    rtBasicQuoteMessage.setPriceSpread(messageContent.getPriceSpread());
-                    rtBasicQuoteMessage.setUpdateTime(messageContent.getUpdateTime());
-                    rtBasicQuoteMessage.setHighPrice(messageContent.getHighPrice());
-                    rtBasicQuoteMessage.setOpenPrice(messageContent.getOpenPrice());
-                    rtBasicQuoteMessage.setLowPrice(messageContent.getLowPrice());
-                    rtBasicQuoteMessage.setCurPrice(messageContent.getCurPrice());
-                    rtBasicQuoteMessage.setLastClosePrice(messageContent.getLastClosePrice());
-                    rtBasicQuoteMessage.setVolume(messageContent.getVolume());
-                    rtBasicQuoteMessage.setTurnover(messageContent.getTurnover());
-                    rtBasicQuoteMessage.setTurnoverRate(messageContent.getTurnoverRate());
-                    rtBasicQuoteMessage.setAmplitude(messageContent.getAmplitude());
-                    rtBasicQuoteMessage.setDarkStatus(messageContent.getDarkStatus());
-                    rtBasicQuoteMessage.setSecStatus(messageContent.getSecStatus());
-                    rocketMQTemplate.asyncSend(MessageCommon.RT_BASIC_QUO_TOPIC, rtBasicQuoteMessage, new SendCallback() {
-                        @Override
-                        public void onSuccess(SendResult sendResult) {
-                            LOGGER.info("实时报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-                                    sendResult.getSendStatus());
-                        }
+                    webSocketService.onNext(message, this.sessionId);
+                    sendBasicQuoteMessage(messageContent);
 
-                        @Override
-                        public void onException(Throwable throwable) {
-                            LOGGER.error("实时报价信息投递失败", throwable);
-                        }
-                    });
                 }
 
             } catch (InvalidProtocolBufferException e) {
@@ -412,7 +427,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                                         .forEach(subType -> {
                                             int delRow = subDtoMapper.deleteBySecurityCodeAndSubType(subscribeSecurity.getCode(), subType);
                                             if (delRow > 0) {
-                                                messageService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "取消订阅成功"), this.sessionId);
+                                                webSocketService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "取消订阅成功"), this.sessionId);
                                             }
                                         }));
 
@@ -435,7 +450,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                         if (toAddList.size() > 0) {
                             int insertRow = subDtoMapper.insertBatch(toAddList);
                             if (insertRow > 0) {
-                                messageService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "订阅成功"), this.sessionId);
+                                webSocketService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "订阅成功"), this.sessionId);
                             }
                         }
                     }
@@ -802,7 +817,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     int insertRow = stockMapper.insertBatch(newStocks.subList(i, i + insertLength));
                     LOGGER.info("插入条数:" + insertRow);
                 }
-                messageService.onNext(new NotifyMessage(String.valueOf(nSerialNo), "nSerialNo=" + nSerialNo + "同步成功"), this.sessionId);
+                webSocketService.onNext(new NotifyMessage(String.valueOf(nSerialNo), "nSerialNo=" + nSerialNo + "同步成功"), this.sessionId);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询静态信息解析结果失败!", e);
             }

@@ -10,10 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static io.futakotome.common.MessageCommon.RT_BASIC_QUO_CONSUMER_GROUP;
-import static io.futakotome.common.MessageCommon.RT_BASIC_QUO_TOPIC;
+import static io.futakotome.common.MessageCommon.RT_BASIC_QUO_TOPIC_INDEX;
 
 @Component
-@RocketMQMessageListener(consumerGroup = RT_BASIC_QUO_CONSUMER_GROUP, topic = RT_BASIC_QUO_TOPIC)
+@RocketMQMessageListener(consumerGroup = RT_BASIC_QUO_CONSUMER_GROUP, topic = RT_BASIC_QUO_TOPIC_INDEX)
 public class RTBasicQuoteListener implements RocketMQListener<RTBasicQuoteMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTBasicQuoteListener.class);
     private final RTBasicQuoteMapper mapper;
@@ -40,8 +40,8 @@ public class RTBasicQuoteListener implements RocketMQListener<RTBasicQuoteMessag
         dto.setCurPrice(rtBasicQuoteMessage.getCurPrice());
         dto.setLastClosePrice(rtBasicQuoteMessage.getLastClosePrice());
         dto.setUpdateTime(rtBasicQuoteMessage.getUpdateTime());
-        if (mapper.insertOne(dto)) {
-            LOGGER.info("实时报价入库成功.");
+        if (mapper.insertOneIndexBasicQuote(dto)) {
+            LOGGER.info("指数实时报价入库成功.");
         }
     }
 }

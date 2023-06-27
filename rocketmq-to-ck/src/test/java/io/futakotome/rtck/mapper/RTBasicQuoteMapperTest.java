@@ -30,6 +30,6 @@ class RTBasicQuoteMapperTest {
         dto.setCurPrice(19547.58);
         dto.setLastClosePrice(3246.1364);
         dto.setUpdateTime("2023-06-14 09:52:17.260");
-        assertTrue(mapper.insertOne(dto));
+        assertTrue(mapper.insertOneIndexBasicQuote(dto));
     }
 }

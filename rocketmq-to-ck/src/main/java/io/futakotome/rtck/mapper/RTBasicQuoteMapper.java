@@ -20,8 +20,8 @@ public class RTBasicQuoteMapper {
         this.dataSource = dataSource;
     }
 
-    public boolean insertOne(RTBasicQuoteDto basicQuoteDto) {
-        LOGGER.info("实时报价入库:{}", basicQuoteDto.toString());
+    public boolean insertOneIndexBasicQuote(RTBasicQuoteDto basicQuoteDto) {
+        LOGGER.info("指数实时报价入库:{}", basicQuoteDto.toString());
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "insert into t_indies_basic_quote_raw " +
@@ -46,7 +46,7 @@ public class RTBasicQuoteMapper {
                 return preparedStatement.executeUpdate() > 0;
             }
         } catch (SQLException throwables) {
-            LOGGER.error("实时报价插入失败", throwables);
+            LOGGER.error("指数实时报价插入失败", throwables);
             return false;
         }
     }
