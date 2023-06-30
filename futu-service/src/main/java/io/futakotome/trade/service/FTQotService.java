@@ -287,10 +287,18 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     private void sendBasicQuoteMessage(BasicQuoteMessageContent basicQuoteMessageContent) {
-        QueryWrapper<StockDto> queryWrapper = Wrappers.query();
-        queryWrapper.eq("market", basicQuoteMessageContent.getSecurity().getMarket());
-        queryWrapper.eq("code", basicQuoteMessageContent.getSecurity().getCode());
-        StockDto stockDto = stockMapper.selectOne(queryWrapper);
+        String cacheKey = basicQuoteMessageContent.getSecurity().getMarket() + "+" + basicQuoteMessageContent.getSecurity().getCode();
+        StockDto stockDto;
+        Object cachedStock = CacheManager.get(cacheKey);
+        if (cachedStock instanceof StockDto) {
+            stockDto = (StockDto) cachedStock;
+        } else {
+            QueryWrapper<StockDto> queryWrapper = Wrappers.query();
+            queryWrapper.eq("market", basicQuoteMessageContent.getSecurity().getMarket());
+            queryWrapper.eq("code", basicQuoteMessageContent.getSecurity().getCode());
+            stockDto = stockMapper.selectOne(queryWrapper);
+            CacheManager.put(cacheKey, stockDto);
+        }
         RTBasicQuoteMessage rtBasicQuoteMessage = new RTBasicQuoteMessage();
         rtBasicQuoteMessage.setMarket(basicQuoteMessageContent.getSecurity().getMarket());
         rtBasicQuoteMessage.setCode(basicQuoteMessageContent.getSecurity().getCode());
