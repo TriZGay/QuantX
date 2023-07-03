@@ -331,6 +331,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     LOGGER.error("实时指数报价信息投递失败", throwable);
                 }
             });
+        } else if (stockDto.getStockType().equals(StockType.Future.getCode())) {
+            //期货
         }
     }
 
@@ -427,10 +429,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                Object cacheValue = CacheManager.get(String.valueOf(nSerialNo));
-                if (cacheValue instanceof SubscribeRequest) {
-                    if (((SubscribeRequest) cacheValue).isUnsub() != null && ((SubscribeRequest) cacheValue).isUnsub()) {
-                        ((SubscribeRequest) cacheValue).getSecurityList()
+                        Object cacheValue = CacheManager.get(String.valueOf(nSerialNo));
+                        if (cacheValue instanceof SubscribeRequest) {
+                            if (((SubscribeRequest) cacheValue).isUnsub() != null && ((SubscribeRequest) cacheValue).isUnsub()) {
+                                ((SubscribeRequest) cacheValue).getSecurityList()
                                 .forEach(subscribeSecurity -> ((SubscribeRequest) cacheValue).getSubTypeList()
                                         .forEach(subType -> {
                                             int delRow = subDtoMapper.deleteBySecurityCodeAndSubType(subscribeSecurity.getCode(), subType);
