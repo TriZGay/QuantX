@@ -14,11 +14,11 @@ import static io.futakotome.common.MessageCommon.RT_BASIC_QUO_TOPIC_INDEX;
 
 @Component
 @RocketMQMessageListener(consumerGroup = RT_BASIC_QUO_CONSUMER_GROUP, topic = RT_BASIC_QUO_TOPIC_INDEX)
-public class RTBasicQuoteListener implements RocketMQListener<RTBasicQuoteMessage> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RTBasicQuoteListener.class);
+public class RTIndiesBasicQuoteListener implements RocketMQListener<RTBasicQuoteMessage> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RTIndiesBasicQuoteListener.class);
     private final RTBasicQuoteMapper mapper;
 
-    public RTBasicQuoteListener(RTBasicQuoteMapper mapper) {
+    public RTIndiesBasicQuoteListener(RTBasicQuoteMapper mapper) {
         this.mapper = mapper;
     }
 

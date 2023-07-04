@@ -317,6 +317,18 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         rtBasicQuoteMessage.setSecStatus(basicQuoteMessageContent.getSecStatus());
         if (stockDto.getStockType().equals(StockType.Eqty.getCode())) {
             //正股
+            rocketMQTemplate.asyncSend(MessageCommon.RT_BASIC_QUO_TOPIC_STOCK, rtBasicQuoteMessage, new SendCallback() {
+                @Override
+                public void onSuccess(SendResult sendResult) {
+                    LOGGER.info("实时正股报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                            sendResult.getSendStatus());
+                }
+
+                @Override
+                public void onException(Throwable throwable) {
+                    LOGGER.error("实时正股报价信息投递失败", throwable);
+                }
+            });
         } else if (stockDto.getStockType().equals(StockType.Index.getCode())) {
             //指数
             rocketMQTemplate.asyncSend(MessageCommon.RT_BASIC_QUO_TOPIC_INDEX, rtBasicQuoteMessage, new SendCallback() {
@@ -429,10 +441,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                        Object cacheValue = CacheManager.get(String.valueOf(nSerialNo));
-                        if (cacheValue instanceof SubscribeRequest) {
-                            if (((SubscribeRequest) cacheValue).isUnsub() != null && ((SubscribeRequest) cacheValue).isUnsub()) {
-                                ((SubscribeRequest) cacheValue).getSecurityList()
+                Object cacheValue = CacheManager.get(String.valueOf(nSerialNo));
+                if (cacheValue instanceof SubscribeRequest) {
+                    if (((SubscribeRequest) cacheValue).isUnsub() != null && ((SubscribeRequest) cacheValue).isUnsub()) {
+                        ((SubscribeRequest) cacheValue).getSecurityList()
                                 .forEach(subscribeSecurity -> ((SubscribeRequest) cacheValue).getSubTypeList()
                                         .forEach(subType -> {
                                             int delRow = subDtoMapper.deleteBySecurityCodeAndSubType(subscribeSecurity.getCode(), subType);
