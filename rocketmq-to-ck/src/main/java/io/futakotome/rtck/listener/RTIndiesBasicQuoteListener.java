@@ -9,11 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static io.futakotome.common.MessageCommon.RT_BASIC_QUO_CONSUMER_GROUP;
+import static io.futakotome.common.MessageCommon.RT_BASIC_QUO_CONSUMER_GROUP_INDIES;
 import static io.futakotome.common.MessageCommon.RT_BASIC_QUO_TOPIC_INDEX;
 
 @Component
-@RocketMQMessageListener(consumerGroup = RT_BASIC_QUO_CONSUMER_GROUP, topic = RT_BASIC_QUO_TOPIC_INDEX)
+@RocketMQMessageListener(consumerGroup = RT_BASIC_QUO_CONSUMER_GROUP_INDIES, topic = RT_BASIC_QUO_TOPIC_INDEX)
 public class RTIndiesBasicQuoteListener implements RocketMQListener<RTBasicQuoteMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTIndiesBasicQuoteListener.class);
     private final RTBasicQuoteMapper mapper;
