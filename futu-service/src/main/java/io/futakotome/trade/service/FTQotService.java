@@ -345,6 +345,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             });
         } else if (stockDto.getStockType().equals(StockType.Future.getCode())) {
             //期货
+
         }
     }
 
