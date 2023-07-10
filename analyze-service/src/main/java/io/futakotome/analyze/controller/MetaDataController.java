@@ -1,0 +1,35 @@
+package io.futakotome.analyze.controller;
+
+import io.futakotome.analyze.mapper.MetaDataMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/meta")
+public class MetaDataController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetaDataController.class);
+    private final MetaDataMapper metaDataMapper;
+
+    public MetaDataController(MetaDataMapper metaDataMapper) {
+        this.metaDataMapper = metaDataMapper;
+    }
+
+    @GetMapping("/indiesCodes")
+    public Mono<ResponseEntity<Map<String, String>>> indiesCodes() {
+        return Mono.create(responseEntityMonoSink -> {
+            List<String> codes = metaDataMapper.indiesDistinctCodes();
+            Map<String, String> kv = new HashMap<>();
+            codes.forEach(code -> kv.put(code, code));
+            responseEntityMonoSink.success(ResponseEntity.ok(kv));
+        });
+    }
+}
