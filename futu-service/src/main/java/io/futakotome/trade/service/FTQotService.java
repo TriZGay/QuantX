@@ -382,7 +382,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
+                LOGGER.info("K线推送" + ftGrpcReturnResult.toString());
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("K线推送结果解析失败.", e);
             }
@@ -397,7 +397,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
+                LOGGER.info("分时推送" + ftGrpcReturnResult.toString());
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("分时推送结果解析失败.", e);
             }
@@ -412,7 +412,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
+                LOGGER.info("逐笔推送" + ftGrpcReturnResult.toString());
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("逐笔推送结果解析失败.", e);
             }
@@ -427,7 +427,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
+                LOGGER.info("经纪队列推送" + ftGrpcReturnResult.toString());
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("经纪队列推送结果解析失败.", e);
             }

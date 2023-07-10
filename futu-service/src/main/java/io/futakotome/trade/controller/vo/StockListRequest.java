@@ -5,6 +5,15 @@ public class StockListRequest extends PaginationRequest {
     private Integer exchangeType;
     private Integer delisting;
     private Integer stockType;
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Integer getStockType() {
         return stockType;

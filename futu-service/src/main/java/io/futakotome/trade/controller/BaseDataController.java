@@ -54,6 +54,9 @@ public class BaseDataController {
         LOGGER.info(PRINT_REQUEST_TEMPLATE, "查询股票", request.toString(), request.getCurrent(), request.getSize());
         QueryWrapper<StockDto> queryWrapper = Wrappers.query();
         Page<StockDto> pagination = Page.of(1, 10);
+        if (request.getName() != null) {
+            queryWrapper.like("name", request.getName());
+        }
         if (request.getStockType() != null) {
             queryWrapper.eq("stock_type", request.getStockType());
         }
