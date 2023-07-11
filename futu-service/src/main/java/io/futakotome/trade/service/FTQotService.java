@@ -12,15 +12,18 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.RTBasicQuoteMessage;
+import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.SubscribeRequest;
 import io.futakotome.trade.controller.vo.SubscribeSecurity;
+import io.futakotome.trade.domain.KLType;
 import io.futakotome.trade.domain.MarketAggregator;
 import io.futakotome.trade.domain.MarketState;
 import io.futakotome.trade.domain.StockType;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.listener.NotifyMessage;
-import io.futakotome.trade.listener.RealTimeBaseQuoteMessage;
+import io.futakotome.trade.listener.vo.KLMessageContent;
+import io.futakotome.trade.listener.vo.RealTimeBaseQuoteMessage;
 import io.futakotome.trade.listener.vo.BasicQuoteMessageContent;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.utils.CacheManager;
@@ -286,6 +289,55 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    private void sendKLMessage(KLMessageContent klMessageContent) {
+        if (!klMessageContent.getBlank()) {
+            //内容不为空才发
+            RTKLMessage message = new RTKLMessage();
+            message.setMarket(klMessageContent.getMarket());
+            message.setCode(klMessageContent.getCode());
+            message.setHighPrice(klMessageContent.getHighPrice());
+            message.setOpenPrice(klMessageContent.getOpenPrice());
+            message.setLowPrice(klMessageContent.getLowPrice());
+            message.setLastClosePrice(klMessageContent.getLastClosePrice());
+            message.setVolume(klMessageContent.getVolume());
+            message.setTurnover(klMessageContent.getTurnover());
+            message.setTurnoverRate(klMessageContent.getTurnoverRate());
+            message.setPe(klMessageContent.getPe());
+            message.setChangeRate(klMessageContent.getChangeRate());
+            message.setUpdateTime(klMessageContent.getTime());
+
+            if (klMessageContent.getKlType().equals(KLType.DAY.getCode())) {
+                //日K
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_DAY_TOPIC, message, new SendCallback() {
+                    @Override
+                    public void onSuccess(SendResult sendResult) {
+                        LOGGER.info("日K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                                sendResult.getSendStatus());
+                    }
+
+                    @Override
+                    public void onException(Throwable throwable) {
+                        LOGGER.error("日K线数据投递失败", throwable);
+                    }
+                });
+            } else if (klMessageContent.getKlType().equals(KLType.MIN_5.getCode())) {
+                //5分K
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_5_TOPIC, message, new SendCallback() {
+                    @Override
+                    public void onSuccess(SendResult sendResult) {
+                        LOGGER.info("5分K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                                sendResult.getSendStatus());
+                    }
+
+                    @Override
+                    public void onException(Throwable throwable) {
+                        LOGGER.error("5分K线数据投递失败", throwable);
+                    }
+                });
+            }
+        }
+    }
+
     private void sendBasicQuoteMessage(BasicQuoteMessageContent basicQuoteMessageContent) {
         String cacheKey = basicQuoteMessageContent.getSecurity().getMarket() + "+" + basicQuoteMessageContent.getSecurity().getCode();
         StockDto stockDto;
@@ -357,7 +409,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info("报价推送" + ftGrpcReturnResult.toString());
                 Iterator<JsonElement> basicQotIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("basicQotList").iterator();
                 while (basicQotIterator.hasNext()) {
                     JsonObject oneBasicQotInfo = basicQotIterator.next().getAsJsonObject();
@@ -365,7 +416,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     RealTimeBaseQuoteMessage message = new RealTimeBaseQuoteMessage(messageContent);
                     webSocketService.onNext(message, this.sessionId);
                     sendBasicQuoteMessage(messageContent);
-
                 }
 
             } catch (InvalidProtocolBufferException e) {
@@ -383,6 +433,21 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info("K线推送" + ftGrpcReturnResult.toString());
+                Integer klType = ftGrpcReturnResult.getS2c().get("klType").getAsInt();
+                Integer rehabType = ftGrpcReturnResult.getS2c().get("rehabType").getAsInt();
+                Integer market = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("market").getAsInt();
+                String code = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("code").getAsString();
+                Iterator<JsonElement> klListIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("klList").iterator();
+                while (klListIterator.hasNext()) {
+                    JsonObject kl = klListIterator.next().getAsJsonObject();
+                    KLMessageContent klMessageContent = GSON.fromJson(kl, KLMessageContent.class);
+                    klMessageContent.setKlType(klType);
+                    klMessageContent.setRehabType(rehabType);
+                    klMessageContent.setMarket(market);
+                    klMessageContent.setCode(code);
+                    //todo ws传回前端
+                    sendKLMessage(klMessageContent);
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("K线推送结果解析失败.", e);
             }

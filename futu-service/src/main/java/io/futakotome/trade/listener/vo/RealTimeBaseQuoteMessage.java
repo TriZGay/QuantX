@@ -1,6 +1,7 @@
-package io.futakotome.trade.listener;
+package io.futakotome.trade.listener.vo;
 
-import io.futakotome.trade.listener.vo.BasicQuoteMessageContent;
+import io.futakotome.trade.listener.Message;
+import io.futakotome.trade.listener.MessageType;
 
 public class RealTimeBaseQuoteMessage implements Message {
     private BasicQuoteMessageContent content;
