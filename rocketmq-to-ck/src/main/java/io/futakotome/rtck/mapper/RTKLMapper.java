@@ -27,21 +27,22 @@ public class RTKLMapper {
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "insert into " + tableName +
-                            " select market,code,high_price,open_price,low_price,last_close_price,volume,turnover,turnoverRate,pe,change_rate,update_time " +
-                            " from input('market Int8 ,code String,high_price Float64,open_price Float64,low_price Float64,last_close_price Float64,volume Int64,turnover Float64,turnoverRate Float64, pe Float64,change_rate Float64 ,update_time DateTime64(3)')"
+                            " select market,code,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnoverRate,pe,change_rate,update_time " +
+                            " from input('market Int8 ,code String,high_price Float64,open_price Float64,low_price Float64,close_price Float64,last_close_price Float64,volume Int64,turnover Float64,turnoverRate Float64, pe Float64,change_rate Float64 ,update_time DateTime64(3)')"
             )) {
                 preparedStatement.setInt(1, dto.getMarket());
                 preparedStatement.setString(2, dto.getCode());
                 preparedStatement.setDouble(3, dto.getHighPrice());
                 preparedStatement.setDouble(4, dto.getOpenPrice());
                 preparedStatement.setDouble(5, dto.getLowPrice());
-                preparedStatement.setDouble(6, dto.getLastClosePrice());
-                preparedStatement.setLong(7, dto.getVolume());
-                preparedStatement.setDouble(8, dto.getTurnover());
-                preparedStatement.setDouble(9, dto.getTurnoverRate());
-                preparedStatement.setDouble(10, dto.getPe());
-                preparedStatement.setDouble(11, dto.getChangeRate() == null ? -1 : dto.getChangeRate());
-                preparedStatement.setString(12, dto.getUpdateTime());
+                preparedStatement.setDouble(6, dto.getClosePrice());
+                preparedStatement.setDouble(7, dto.getLastClosePrice());
+                preparedStatement.setLong(8, dto.getVolume());
+                preparedStatement.setDouble(9, dto.getTurnover());
+                preparedStatement.setDouble(10, dto.getTurnoverRate());
+                preparedStatement.setDouble(11, dto.getPe());
+                preparedStatement.setDouble(12, dto.getChangeRate() == null ? -1 : dto.getChangeRate());
+                preparedStatement.setString(13, dto.getUpdateTime());
                 return preparedStatement.executeUpdate() > 0;
             }
         } catch (SQLException throwables) {

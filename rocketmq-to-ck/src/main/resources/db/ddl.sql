@@ -1,5 +1,20 @@
 create database if not exists quantx;
 
+create table if not exists quantx.t_ticker_raw
+(
+    market           Int8,
+    code             String,
+    sequence         Int64,
+    ticker_direction Int8,
+    price            Float64,
+    volume           Int64,
+    turnover         Float64,
+    ticker_type      Int8,
+    type_sign        Int8,
+    update_time      DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (sequence, update_time);
+
 create table if not exists quantx.t_kl_min_5_raw
 (
     market           Int8,
@@ -7,6 +22,7 @@ create table if not exists quantx.t_kl_min_5_raw
     high_price       Float64,
     open_price       Float64,
     low_price        Float64,
+    close_price      Float64,
     last_close_price Float64,
     volume           Int64,
     turnover         Float64,
@@ -24,6 +40,7 @@ create table if not exists quantx.t_kl_day_raw
     high_price       Float64,
     open_price       Float64,
     low_price        Float64,
+    close_price      Float64,
     last_close_price Float64,
     volume           Int64,
     turnover         Float64,

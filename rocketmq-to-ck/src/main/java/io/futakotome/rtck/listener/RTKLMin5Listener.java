@@ -28,6 +28,7 @@ public class RTKLMin5Listener implements RocketMQListener<RTKLMessage> {
         dto.setHighPrice(rtklMessage.getHighPrice());
         dto.setOpenPrice(rtklMessage.getOpenPrice());
         dto.setLowPrice(rtklMessage.getLowPrice());
+        dto.setClosePrice(rtklMessage.getClosePrice());
         dto.setLastClosePrice(rtklMessage.getLastClosePrice());
         dto.setVolume(rtklMessage.getVolume());
         dto.setTurnover(rtklMessage.getTurnover());

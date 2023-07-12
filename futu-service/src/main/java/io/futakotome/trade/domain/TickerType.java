@@ -1,6 +1,6 @@
 package io.futakotome.trade.domain;
 
-public enum TickType {
+public enum TickerType {
     UNKNOWN(0, "未知"),
     AUTO_MATCH(1, "自动对盘"),
     LATE(2, "开始前成交盘"),
@@ -37,7 +37,7 @@ public enum TickType {
     private Integer code;
     private String name;
 
-    TickType(Integer code, String name) {
+    TickerType(Integer code, String name) {
         this.code = code;
         this.name = name;
     }

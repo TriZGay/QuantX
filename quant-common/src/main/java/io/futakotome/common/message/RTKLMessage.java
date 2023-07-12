@@ -6,6 +6,7 @@ public class RTKLMessage {
     private Double highPrice;
     private Double openPrice;
     private Double lowPrice;
+    private Double closePrice;
     private Double lastClosePrice;
     private Long volume;
     private Double turnover;
@@ -13,6 +14,14 @@ public class RTKLMessage {
     private Double pe;
     private Double changeRate;
     private String updateTime;
+
+    public Double getClosePrice() {
+        return closePrice;
+    }
+
+    public void setClosePrice(Double closePrice) {
+        this.closePrice = closePrice;
+    }
 
     public Integer getMarket() {
         return market;

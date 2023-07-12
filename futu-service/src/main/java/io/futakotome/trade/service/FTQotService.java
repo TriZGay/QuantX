@@ -13,6 +13,7 @@ import com.google.protobuf.util.JsonFormat;
 import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.RTBasicQuoteMessage;
 import io.futakotome.common.message.RTKLMessage;
+import io.futakotome.common.message.RTTickerMessage;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.SubscribeRequest;
 import io.futakotome.trade.controller.vo.SubscribeSecurity;
@@ -25,6 +26,7 @@ import io.futakotome.trade.listener.NotifyMessage;
 import io.futakotome.trade.listener.vo.KLMessageContent;
 import io.futakotome.trade.listener.vo.RealTimeBaseQuoteMessage;
 import io.futakotome.trade.listener.vo.BasicQuoteMessageContent;
+import io.futakotome.trade.listener.vo.RealTimeTickerMessageContent;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.utils.CacheManager;
 import org.apache.commons.collections4.CollectionUtils;
@@ -289,6 +291,33 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    private void sendRTTickerMessage(RealTimeTickerMessageContent content) {
+        RTTickerMessage message = new RTTickerMessage();
+        message.setMarket(content.getMarket());
+        message.setCode(content.getCode());
+        message.setSequence(content.getSequence());
+        message.setTickerDirection(content.getDir());
+        message.setPrice(content.getPrice());
+        message.setVolume(content.getVolume());
+        message.setTurnover(content.getTurnover());
+        message.setTickerType(content.getType());
+        message.setTypeSign(content.getTypeSign());
+        message.setUpdateTime(content.getTime());
+        rocketMQTemplate.asyncSend(MessageCommon.RT_TICKER_TOPIC, message, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                LOGGER.info("逐笔数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        sendResult.getSendStatus());
+            }
+
+            @Override
+            public void onException(Throwable throwable) {
+                LOGGER.error("逐笔数据投递失败", throwable);
+            }
+        });
+
+    }
+
     private void sendKLMessage(KLMessageContent klMessageContent) {
         if (!klMessageContent.getBlank()) {
             //内容不为空才发
@@ -298,6 +327,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             message.setHighPrice(klMessageContent.getHighPrice());
             message.setOpenPrice(klMessageContent.getOpenPrice());
             message.setLowPrice(klMessageContent.getLowPrice());
+            message.setClosePrice(klMessageContent.getClosePrice());
             message.setLastClosePrice(klMessageContent.getLastClosePrice());
             message.setVolume(klMessageContent.getVolume());
             message.setTurnover(klMessageContent.getTurnover());
@@ -432,7 +462,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info("K线推送" + ftGrpcReturnResult.toString());
                 Integer klType = ftGrpcReturnResult.getS2c().get("klType").getAsInt();
                 Integer rehabType = ftGrpcReturnResult.getS2c().get("rehabType").getAsInt();
                 Integer market = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("market").getAsInt();
@@ -477,7 +506,17 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info("逐笔推送" + ftGrpcReturnResult.toString());
+                Integer market = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("market").getAsInt();
+                String code = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("code").getAsString();
+                Iterator<JsonElement> tickerIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("tickerList").iterator();
+                while (tickerIterator.hasNext()) {
+                    JsonObject ticker = tickerIterator.next().getAsJsonObject();
+                    //todo ws推送到前端
+                    RealTimeTickerMessageContent content = GSON.fromJson(ticker, RealTimeTickerMessageContent.class);
+                    content.setMarket(market);
+                    content.setCode(code);
+                    sendRTTickerMessage(content);
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("逐笔推送结果解析失败.", e);
             }
