@@ -19,23 +19,23 @@ public enum TickerType {
     MARKET_CENTER_CLOSE_PRICE(15, "中央收市价"),
     NEXT_DAY(16, "隔日交易"),
     MARKET_CENTER_OPENING(17, "中央开盘价交易"),
-    PRIOR_REFERENCE_PRICE(18,"前参考价"),
-    MARKET_CENTER_OPEN_PRICE(19,"中央开盘价"),
-    SELLER(20,"卖方"),
-    T(21,"T 类交易(盘前和盘后交易)"),
-    EXTENDED_TRADING_HOURS(22,"延长交易时段"),
-    CONTINGENT(23,"合单交易"),
-    AVG_PRICE(24,"平均价成交"),
-    OTC_SOLD(25,"场外售出"),
-    ODD_LOT_CROSS_MARKET(26,"碎股跨市场交易"),
-    DERIVATIVELY_PRICED(27,"衍生工具定价"),
-    REOPENING_PRICED(28,"再开盘定价"),
-    CLOSING_PRICED(29,"收盘定价"),
-    COMPREHENSIVE_DELAY_PRICE(30,"综合延迟价格"),
-    OVERSEAS(31,"交易的一方不是香港交易所的成员，属于场外交易");
+    PRIOR_REFERENCE_PRICE(18, "前参考价"),
+    MARKET_CENTER_OPEN_PRICE(19, "中央开盘价"),
+    SELLER(20, "卖方"),
+    T(21, "T 类交易(盘前和盘后交易)"),
+    EXTENDED_TRADING_HOURS(22, "延长交易时段"),
+    CONTINGENT(23, "合单交易"),
+    AVG_PRICE(24, "平均价成交"),
+    OTC_SOLD(25, "场外售出"),
+    ODD_LOT_CROSS_MARKET(26, "碎股跨市场交易"),
+    DERIVATIVELY_PRICED(27, "衍生工具定价"),
+    REOPENING_PRICED(28, "再开盘定价"),
+    CLOSING_PRICED(29, "收盘定价"),
+    COMPREHENSIVE_DELAY_PRICE(30, "综合延迟价格"),
+    OVERSEAS(31, "交易的一方不是香港交易所的成员，属于场外交易");
 
-    private Integer code;
-    private String name;
+    private final Integer code;
+    private final String name;
 
     TickerType(Integer code, String name) {
         this.code = code;
@@ -49,4 +49,4 @@ public enum TickerType {
     public String getName() {
         return name;
     }
-    }
+}

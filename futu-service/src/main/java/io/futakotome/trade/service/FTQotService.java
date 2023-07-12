@@ -11,10 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.common.MessageCommon;
-import io.futakotome.common.message.RTBasicQuoteMessage;
-import io.futakotome.common.message.RTKLMessage;
-import io.futakotome.common.message.RTTickerMessage;
-import io.futakotome.common.message.RTTimeShareMessage;
+import io.futakotome.common.message.*;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.SubscribeRequest;
 import io.futakotome.trade.controller.vo.SubscribeSecurity;
@@ -282,11 +279,36 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
+                LOGGER.info("摆盘" + ftGrpcReturnResult.toString());
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("摆盘结果解析失败.", e);
             }
         }
+    }
+
+    private void sendBrokersMessage(BrokerMessageContent content) {
+        RTBrokerMessage brokerMessage = new RTBrokerMessage();
+        brokerMessage.setMarket(content.getMarket());
+        brokerMessage.setCode(content.getCode());
+        brokerMessage.setBrokerId(content.getId());
+        brokerMessage.setBrokerName(content.getName());
+        brokerMessage.setBrokerPos(content.getPos());
+        brokerMessage.setAskOrBid(content.getAskOrBid());
+        brokerMessage.setOrderId(content.getOrderID());
+        brokerMessage.setVolume(content.getVolume());
+
+        rocketMQTemplate.asyncSend(MessageCommon.RT_BROKER_TOPIC, brokerMessage, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                LOGGER.info("经纪队列数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        sendResult.getSendStatus());
+            }
+
+            @Override
+            public void onException(Throwable throwable) {
+                LOGGER.error("经纪队列数据投递失败", throwable);
+            }
+        });
     }
 
     private void sendTimeShareMessage(TimeShareMessageContent content) {
@@ -518,7 +540,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info("分时推送" + ftGrpcReturnResult.toString());
                 Integer market = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("market").getAsInt();
                 String code = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("code").getAsString();
                 Iterator<JsonElement> rtIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("rtList").iterator();
@@ -570,6 +591,30 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info("经纪队列推送" + ftGrpcReturnResult.toString());
+                Integer market = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("market").getAsInt();
+                String code = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("code").getAsString();
+                if (ftGrpcReturnResult.getS2c().has("brokerAskList")) {
+                    Iterator<JsonElement> askIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("brokerAskList").iterator();
+                    while (askIterator.hasNext()) {
+                        JsonObject ask = askIterator.next().getAsJsonObject();
+                        BrokerMessageContent askBrokerMessageContent = GSON.fromJson(ask, BrokerMessageContent.class);
+                        askBrokerMessageContent.setMarket(market);
+                        askBrokerMessageContent.setCode(code);
+                        askBrokerMessageContent.setAskOrBid(1);//1卖,2买
+                        sendBrokersMessage(askBrokerMessageContent);
+                    }
+                }
+                if (ftGrpcReturnResult.getS2c().has("brokerBidList")) {
+                    Iterator<JsonElement> bidIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("brokerBidList").iterator();
+                    while (bidIterator.hasNext()) {
+                        JsonObject bid = bidIterator.next().getAsJsonObject();
+                        BrokerMessageContent bidMessageContent = GSON.fromJson(bid, BrokerMessageContent.class);
+                        bidMessageContent.setMarket(market);
+                        bidMessageContent.setCode(code);
+                        bidMessageContent.setAskOrBid(2);
+                        sendBrokersMessage(bidMessageContent);
+                    }
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("经纪队列推送结果解析失败.", e);
             }

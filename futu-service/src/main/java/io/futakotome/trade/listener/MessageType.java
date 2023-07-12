@@ -6,7 +6,8 @@ public enum MessageType {
     RT_BASIC_QUOTE,
     RT_KL,
     RT_TICKER,
-    RT_TIME_SHARE;
+    RT_TIME_SHARE,
+    RT_BROKERS;
 
     MessageType() {
     }

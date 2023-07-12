@@ -1,5 +1,18 @@
 create database if not exists quantx;
 
+create table if not exists quantx.t_brokers_raw
+(
+    market      Int8,
+    code        String,
+    broker_id   Int64,
+    broker_name String,
+    broker_pos  Int8,
+    ask_or_bid  Int8,
+    order_id    Int64,
+    volume      Int64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, broker_id);
+
 create table if not exists quantx.t_timeshare_raw
 (
     market           Int8,
