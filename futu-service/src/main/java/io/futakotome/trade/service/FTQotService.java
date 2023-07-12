@@ -14,6 +14,7 @@ import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.RTBasicQuoteMessage;
 import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.common.message.RTTickerMessage;
+import io.futakotome.common.message.RTTimeShareMessage;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.SubscribeRequest;
 import io.futakotome.trade.controller.vo.SubscribeSecurity;
@@ -23,10 +24,7 @@ import io.futakotome.trade.domain.MarketState;
 import io.futakotome.trade.domain.StockType;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.listener.NotifyMessage;
-import io.futakotome.trade.listener.vo.KLMessageContent;
-import io.futakotome.trade.listener.vo.RealTimeBaseQuoteMessage;
-import io.futakotome.trade.listener.vo.BasicQuoteMessageContent;
-import io.futakotome.trade.listener.vo.RealTimeTickerMessageContent;
+import io.futakotome.trade.listener.vo.*;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.utils.CacheManager;
 import org.apache.commons.collections4.CollectionUtils;
@@ -291,6 +289,35 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    private void sendTimeShareMessage(TimeShareMessageContent content) {
+        if (!content.getBlank()) {
+            //非空才发
+            RTTimeShareMessage message = new RTTimeShareMessage();
+            message.setMarket(content.getMarket());
+            message.setCode(content.getCode());
+            message.setMinute(content.getMinute());
+            message.setPrice(content.getPrice());
+            message.setLastClosePrice(content.getLastClosePrice());
+            message.setAvgPrice(content.getAvgPrice());
+            message.setVolume(content.getVolume());
+            message.setTurnover(content.getTurnover());
+            message.setUpdateTime(content.getTime());
+
+            rocketMQTemplate.asyncSend(MessageCommon.RT_TIMESHARE_TOPIC, message, new SendCallback() {
+                @Override
+                public void onSuccess(SendResult sendResult) {
+                    LOGGER.info("分时数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                            sendResult.getSendStatus());
+                }
+
+                @Override
+                public void onException(Throwable throwable) {
+                    LOGGER.error("分时数据投递失败", throwable);
+                }
+            });
+        }
+    }
+
     private void sendRTTickerMessage(RealTimeTickerMessageContent content) {
         RTTickerMessage message = new RTTickerMessage();
         message.setMarket(content.getMarket());
@@ -492,6 +519,17 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info("分时推送" + ftGrpcReturnResult.toString());
+                Integer market = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("market").getAsInt();
+                String code = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("code").getAsString();
+                Iterator<JsonElement> rtIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("rtList").iterator();
+                while (rtIterator.hasNext()) {
+                    JsonObject rt = rtIterator.next().getAsJsonObject();
+                    //todo ws推到前端
+                    TimeShareMessageContent content = GSON.fromJson(rt, TimeShareMessageContent.class);
+                    content.setMarket(market);
+                    content.setCode(code);
+                    sendTimeShareMessage(content);
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("分时推送结果解析失败.", e);
             }

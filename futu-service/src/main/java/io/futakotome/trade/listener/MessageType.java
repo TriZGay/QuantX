@@ -5,7 +5,8 @@ public enum MessageType {
     JOIN_IN,
     RT_BASIC_QUOTE,
     RT_KL,
-    RT_TICKER;
+    RT_TICKER,
+    RT_TIME_SHARE;
 
     MessageType() {
     }

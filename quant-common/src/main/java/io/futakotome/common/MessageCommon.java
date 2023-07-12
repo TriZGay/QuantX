@@ -7,6 +7,9 @@ public interface MessageCommon {
     String RT_KL_DAY_CONSUMER_GROUP = "rt_kld_consumer_group";
     String RT_KL_MIN_5_CONSUMER_GROUP = "rt_klm5_consumer_group";
     String RT_TICKER_CONSUMER_GROUP = "rt_ticker_consumer_group";
+    String RT_TIMESHARE_CONSUMER_GROUP = "rt_timeshare_consumer_group";
+    //分时
+    String RT_TIMESHARE_TOPIC = "rt_timeshare_topic";
     //逐笔
     String RT_TICKER_TOPIC = "rt_ticker_topic";
     //指数报价

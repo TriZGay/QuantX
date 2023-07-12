@@ -1,5 +1,19 @@
 create database if not exists quantx;
 
+create table if not exists quantx.t_timeshare_raw
+(
+    market           Int8,
+    code             String,
+    minute           Int32,
+    price            Float64,
+    last_close_price Float64,
+    avg_price        Float64,
+    volume           Int64,
+    turnover         Float64,
+    update_time      DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, update_time);
+
 create table if not exists quantx.t_ticker_raw
 (
     market           Int8,
