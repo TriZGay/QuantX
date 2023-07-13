@@ -42,7 +42,169 @@ create table if not exists quantx.t_ticker_raw
 ) ENGINE = MergeTree
       PRIMARY KEY (sequence, update_time);
 
+create table if not exists quantx.t_kl_min_60_raw
+(
+    market           Int8,
+    code             String,
+    high_price       Float64,
+    open_price       Float64,
+    low_price        Float64,
+    close_price      Float64,
+    last_close_price Float64,
+    volume           Int64,
+    turnover         Float64,
+    turnover_rate    Float64,
+    pe               Float64,
+    change_rate      Float64,
+    update_time      DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, update_time);
+
+create table if not exists quantx.t_kl_min_30_raw
+(
+    market           Int8,
+    code             String,
+    high_price       Float64,
+    open_price       Float64,
+    low_price        Float64,
+    close_price      Float64,
+    last_close_price Float64,
+    volume           Int64,
+    turnover         Float64,
+    turnover_rate    Float64,
+    pe               Float64,
+    change_rate      Float64,
+    update_time      DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, update_time);
+
+create table if not exists quantx.t_kl_min_15_raw
+(
+    market           Int8,
+    code             String,
+    high_price       Float64,
+    open_price       Float64,
+    low_price        Float64,
+    close_price      Float64,
+    last_close_price Float64,
+    volume           Int64,
+    turnover         Float64,
+    turnover_rate    Float64,
+    pe               Float64,
+    change_rate      Float64,
+    update_time      DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, update_time);
+
 create table if not exists quantx.t_kl_min_5_raw
+(
+    market           Int8,
+    code             String,
+    high_price       Float64,
+    open_price       Float64,
+    low_price        Float64,
+    close_price      Float64,
+    last_close_price Float64,
+    volume           Int64,
+    turnover         Float64,
+    turnover_rate    Float64,
+    pe               Float64,
+    change_rate      Float64,
+    update_time      DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, update_time);
+
+create table if not exists quantx.t_kl_min_3_raw
+(
+    market           Int8,
+    code             String,
+    high_price       Float64,
+    open_price       Float64,
+    low_price        Float64,
+    close_price      Float64,
+    last_close_price Float64,
+    volume           Int64,
+    turnover         Float64,
+    turnover_rate    Float64,
+    pe               Float64,
+    change_rate      Float64,
+    update_time      DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, update_time);
+
+create table if not exists quantx.t_kl_min_1_raw
+(
+    market           Int8,
+    code             String,
+    high_price       Float64,
+    open_price       Float64,
+    low_price        Float64,
+    close_price      Float64,
+    last_close_price Float64,
+    volume           Int64,
+    turnover         Float64,
+    turnover_rate    Float64,
+    pe               Float64,
+    change_rate      Float64,
+    update_time      DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, update_time);
+
+create table if not exists quantx.t_kl_year_raw
+(
+    market           Int8,
+    code             String,
+    high_price       Float64,
+    open_price       Float64,
+    low_price        Float64,
+    close_price      Float64,
+    last_close_price Float64,
+    volume           Int64,
+    turnover         Float64,
+    turnover_rate    Float64,
+    pe               Float64,
+    change_rate      Float64,
+    update_time      DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, update_time);
+
+create table if not exists quantx.t_kl_quarter_raw
+(
+    market           Int8,
+    code             String,
+    high_price       Float64,
+    open_price       Float64,
+    low_price        Float64,
+    close_price      Float64,
+    last_close_price Float64,
+    volume           Int64,
+    turnover         Float64,
+    turnover_rate    Float64,
+    pe               Float64,
+    change_rate      Float64,
+    update_time      DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, update_time);
+
+create table if not exists quantx.t_kl_month_raw
+(
+    market           Int8,
+    code             String,
+    high_price       Float64,
+    open_price       Float64,
+    low_price        Float64,
+    close_price      Float64,
+    last_close_price Float64,
+    volume           Int64,
+    turnover         Float64,
+    turnover_rate    Float64,
+    pe               Float64,
+    change_rate      Float64,
+    update_time      DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, update_time);
+
+create table if not exists quantx.t_kl_week_raw
 (
     market           Int8,
     code             String,
