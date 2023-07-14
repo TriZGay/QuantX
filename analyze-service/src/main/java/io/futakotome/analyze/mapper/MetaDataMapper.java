@@ -21,6 +21,24 @@ public class MetaDataMapper {
         this.dataSource = dataSource;
     }
 
+    public List<Object> dayKDistinctCodes() {
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    "select distinct (market,code) from t_kl_day_raw"
+            )) {
+                List<Object> codes = new ArrayList<>();
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    codes.add(resultSet.getArray(1).getArray());
+                }
+                return codes;
+            }
+        } catch (SQLException throwables) {
+            LOGGER.error("查询日K META数据出错", throwables);
+            return null;
+        }
+    }
+
     public List<String> indiesDistinctCodes() {
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement("select distinct code from t_indies_basic_quote_raw")) {

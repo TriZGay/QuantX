@@ -23,6 +23,12 @@ public class MetaDataController {
         this.metaDataMapper = metaDataMapper;
     }
 
+    @GetMapping("/dayKCodes")
+    public Mono<ResponseEntity<List<Object>>> dayKCodes() {
+        return Mono.create(responseEntityMonoSink ->
+                responseEntityMonoSink.success(ResponseEntity.ok(metaDataMapper.dayKDistinctCodes())));
+    }
+
     @GetMapping("/indiesCodes")
     public Mono<ResponseEntity<Map<String, String>>> indiesCodes() {
         return Mono.create(responseEntityMonoSink -> {
