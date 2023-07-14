@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -23,6 +24,21 @@ public class KLineController {
 
     public KLineController(KLineMapper mapper) {
         this.mapper = mapper;
+    }
+
+    @PostMapping("/min15K")
+    public Mono<ResponseEntity<?>> min15K(@RequestBody @Validated Mono<KLineRequest> requestMono) {
+        return Mono.create(responseEntityMonoSink -> {
+            requestMono.doOnError(WebExchangeBindException.class, throwables ->
+                    responseEntityMonoSink.success(
+                            new ResponseEntity<>("参数校验失败:" + throwables.getFieldErrors(), HttpStatus.BAD_REQUEST)
+                    )).doOnNext(request -> {
+                LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), request.getStart(), request.getEnd());
+                responseEntityMonoSink.success(
+                        ResponseEntity.ok(mapper.queryMin15KConditional(request))
+                );
+            }).subscribe();
+        });
     }
 
     @PostMapping("/dayK")

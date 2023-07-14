@@ -23,6 +23,12 @@ public class MetaDataController {
         this.metaDataMapper = metaDataMapper;
     }
 
+    @GetMapping("/min15Codes")
+    public Mono<ResponseEntity<List<Object>>> min15Codes() {
+        return Mono.create(responseEntityMonoSink ->
+                responseEntityMonoSink.success(ResponseEntity.ok(metaDataMapper.min15KDistinctCodes())));
+    }
+
     @GetMapping("/dayKCodes")
     public Mono<ResponseEntity<List<Object>>> dayKCodes() {
         return Mono.create(responseEntityMonoSink ->

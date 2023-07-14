@@ -23,6 +23,43 @@ public class KLineMapper {
         this.dataSource = dataSource;
     }
 
+    public List<KLineDto> queryMin15KConditional(KLineRequest request) {
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    "select market,code,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
+                            " from t_kl_min_15_raw" +
+                            " prewhere code = ? and (update_time > ?) and (update_time < ?)"
+            )) {
+                List<KLineDto> kLineDtos = new ArrayList<>();
+                preparedStatement.setString(1, request.getCode());
+                preparedStatement.setString(2, request.getStart());
+                preparedStatement.setString(3, request.getEnd());
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    KLineDto kLineDto = new KLineDto();
+                    kLineDto.setMarket(resultSet.getInt(1));
+                    kLineDto.setCode(resultSet.getString(2));
+                    kLineDto.setHighPrice(resultSet.getDouble(3));
+                    kLineDto.setOpenPrice(resultSet.getDouble(4));
+                    kLineDto.setLowPrice(resultSet.getDouble(5));
+                    kLineDto.setClosePrice(resultSet.getDouble(6));
+                    kLineDto.setLastClosePrice(resultSet.getDouble(7));
+                    kLineDto.setVolume(resultSet.getLong(8));
+                    kLineDto.setTurnover(resultSet.getDouble(9));
+                    kLineDto.setTurnoverRate(resultSet.getDouble(10));
+                    kLineDto.setPe(resultSet.getDouble(11));
+                    kLineDto.setChangeRate(resultSet.getDouble(12));
+                    kLineDto.setUpdateTime(resultSet.getString(13));
+                    kLineDtos.add(kLineDto);
+                }
+                return kLineDtos;
+            }
+        } catch (SQLException throwables) {
+            LOGGER.error("查询15分K出错", throwables);
+            return null;
+        }
+    }
+
     public List<KLineDto> queryDayKConditional(KLineRequest request) {
         try (Connection connection = dataSource.getConnection()) {
             List<KLineDto> kLineDtos = new ArrayList<>();
