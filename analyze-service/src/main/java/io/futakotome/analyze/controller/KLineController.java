@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.WebExchangeBindException;
-import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -35,7 +34,7 @@ public class KLineController {
                     )).doOnNext(request -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), request.getStart(), request.getEnd());
                 responseEntityMonoSink.success(
-                        ResponseEntity.ok(mapper.queryMin15KConditional(request))
+                        ResponseEntity.ok(mapper.queryKLineCommon(request, KLineMapper.KL_MIN_15_TABLE_NAME))
                 );
             }).subscribe();
         });
@@ -49,7 +48,7 @@ public class KLineController {
                                 new ResponseEntity<>("参数校验失败:" + throwables.getFieldErrors(), HttpStatus.BAD_REQUEST)
                         )).doOnNext(request -> {
                     LOGGER.info(PRINT_REQUEST_TEMPLATE, request.toString(), request.getStart(), request.getEnd());
-                    responseEntityMonoSink.success(ResponseEntity.ok(mapper.queryDayKConditional(request)));
+                    responseEntityMonoSink.success(ResponseEntity.ok(mapper.queryKLineCommon(request, KLineMapper.KL_DAY_TABLE_NAME)));
                 }).subscribe());
     }
 }
