@@ -25,6 +25,7 @@ public class RTKLMonthListener implements RocketMQListener<RTKLMessage> {
         RTKLDto dto = new RTKLDto();
         dto.setMarket(rtklMessage.getMarket());
         dto.setCode(rtklMessage.getCode());
+        dto.setRehabType(rtklMessage.getRehabType());
         dto.setHighPrice(rtklMessage.getHighPrice());
         dto.setOpenPrice(rtklMessage.getOpenPrice());
         dto.setLowPrice(rtklMessage.getLowPrice());

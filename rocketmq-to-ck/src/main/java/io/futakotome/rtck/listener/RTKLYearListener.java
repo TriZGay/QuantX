@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RocketMQMessageListener(consumerGroup = MessageCommon.RT_KL_YEAR_CONSUMER_GROUP, topic = MessageCommon.RT_KL_YEAR_TOPIC)
 public class RTKLYearListener implements RocketMQListener<RTKLMessage> {
-    private static final Logger LOGGER= LoggerFactory.getLogger(RTKLYearListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RTKLYearListener.class);
     private final RTKLMapper mapper;
 
     public RTKLYearListener(RTKLMapper mapper) {
@@ -25,6 +25,7 @@ public class RTKLYearListener implements RocketMQListener<RTKLMessage> {
         RTKLDto dto = new RTKLDto();
         dto.setMarket(rtklMessage.getMarket());
         dto.setCode(rtklMessage.getCode());
+        dto.setRehabType(rtklMessage.getRehabType());
         dto.setHighPrice(rtklMessage.getHighPrice());
         dto.setOpenPrice(rtklMessage.getOpenPrice());
         dto.setLowPrice(rtklMessage.getLowPrice());

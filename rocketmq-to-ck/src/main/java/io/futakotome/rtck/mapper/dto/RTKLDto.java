@@ -3,6 +3,7 @@ package io.futakotome.rtck.mapper.dto;
 public class RTKLDto {
     private Integer market;
     private String code;
+    private Integer rehabType;
     private Double highPrice;
     private Double openPrice;
     private Double lowPrice;
@@ -14,6 +15,14 @@ public class RTKLDto {
     private Double pe;
     private Double changeRate;
     private String updateTime;
+
+    public Integer getRehabType() {
+        return rehabType;
+    }
+
+    public void setRehabType(Integer rehabType) {
+        this.rehabType = rehabType;
+    }
 
     public Double getClosePrice() {
         return closePrice;
@@ -124,6 +133,7 @@ public class RTKLDto {
         return "RTKLDto{" +
                 "market=" + market +
                 ", code='" + code + '\'' +
+                ", rehabType=" + rehabType +
                 ", highPrice=" + highPrice +
                 ", openPrice=" + openPrice +
                 ", lowPrice=" + lowPrice +

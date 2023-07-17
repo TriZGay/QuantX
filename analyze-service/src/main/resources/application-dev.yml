@@ -1,6 +1,6 @@
 server:
   port: 9091
 ck:
-  url: jdbc:ch://172.17.145.51:8123/quantx
+  url: jdbc:ch://172.17.152.149:8123/quantx
   user: default
   password: 123456

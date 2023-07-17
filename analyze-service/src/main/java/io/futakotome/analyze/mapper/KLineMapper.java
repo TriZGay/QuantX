@@ -26,9 +26,10 @@ public class KLineMapper {
     public List<KLineDto> queryMin15KConditional(KLineRequest request) {
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "select market,code,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
+                    "select market,code,high_price,open_price,low_price,close_price,last_close_price,sum(volume) as volume,sum(turnover) as turnover,update_time" +
                             " from t_kl_min_15_raw" +
-                            " prewhere code = ? and (update_time > ?) and (update_time < ?)"
+                            " prewhere code = ? and (update_time > ?) and (update_time < ?)" +
+                            " group by market,code,high_price,open_price,low_price,close_price,last_close_price,update_time"
             )) {
                 List<KLineDto> kLineDtos = new ArrayList<>();
                 preparedStatement.setString(1, request.getCode());
@@ -46,10 +47,11 @@ public class KLineMapper {
                     kLineDto.setLastClosePrice(resultSet.getDouble(7));
                     kLineDto.setVolume(resultSet.getLong(8));
                     kLineDto.setTurnover(resultSet.getDouble(9));
-                    kLineDto.setTurnoverRate(resultSet.getDouble(10));
-                    kLineDto.setPe(resultSet.getDouble(11));
-                    kLineDto.setChangeRate(resultSet.getDouble(12));
-                    kLineDto.setUpdateTime(resultSet.getString(13));
+//                    kLineDto.setTurnoverRate(resultSet.getDouble(10));
+//                    kLineDto.setPe(resultSet.getDouble(11));
+//                    kLineDto.setChangeRate(resultSet.getDouble(12));
+//                    kLineDto.setUpdateTime(resultSet.getString(13));
+                    kLineDto.setUpdateTime(resultSet.getString(10));
                     kLineDtos.add(kLineDto);
                 }
                 return kLineDtos;

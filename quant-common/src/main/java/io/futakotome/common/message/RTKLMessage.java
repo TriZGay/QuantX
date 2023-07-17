@@ -3,6 +3,7 @@ package io.futakotome.common.message;
 public class RTKLMessage {
     private Integer market;
     private String code;
+    private Integer rehabType;
     private Double highPrice;
     private Double openPrice;
     private Double lowPrice;
@@ -14,6 +15,14 @@ public class RTKLMessage {
     private Double pe;
     private Double changeRate;
     private String updateTime;
+
+    public Integer getRehabType() {
+        return rehabType;
+    }
+
+    public void setRehabType(Integer rehabType) {
+        this.rehabType = rehabType;
+    }
 
     public Double getClosePrice() {
         return closePrice;

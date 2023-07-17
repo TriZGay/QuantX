@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -15,10 +17,7 @@ import io.futakotome.common.message.*;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.SubscribeRequest;
 import io.futakotome.trade.controller.vo.SubscribeSecurity;
-import io.futakotome.trade.domain.KLType;
-import io.futakotome.trade.domain.MarketAggregator;
-import io.futakotome.trade.domain.MarketState;
-import io.futakotome.trade.domain.StockType;
+import io.futakotome.trade.domain.*;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.listener.NotifyMessage;
 import io.futakotome.trade.listener.vo.*;
@@ -145,21 +144,53 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     public void subscribeRequest(SubscribeRequest subscribeRequest) {
-        QotSub.Request request = QotSub.Request.newBuilder()
-                .setC2S(QotSub.C2S.newBuilder()
-                        .addAllSubTypeList(subscribeRequest.getSubTypeList())
-                        .addAllSecurityList(subscribeRequest.getSecurityList()
-                                .stream().map(security ->
-                                        QotCommon.Security.newBuilder()
-                                                .setMarket(security.getMarket())
-                                                .setCode(security.getCode())
-                                                .build())
-                                .collect(Collectors.toList()))
-                        .setIsRegOrUnRegPush(true)
-                        .setIsSubOrUnSub(true)
-                        .build())
-                .build();
-        int seqNo = qot.sub(request);
+        QotSub.Request.Builder requestBuilder = QotSub.Request.newBuilder();
+        if (CollectionUtils.intersection(subscribeRequest.getSubTypeList(),
+                Arrays.asList(
+                        SubType.KL_1MIN.getCode(),
+                        SubType.KL_3MIN.getCode(),
+                        SubType.KL_15MIN.getCode(),
+                        SubType.KL_30MIN.getCode(),
+                        SubType.KL_60MIN.getCode(),
+                        SubType.KL_DAY.getCode(),
+                        SubType.KL_WEEK.getCode(),
+                        SubType.KL_MONTH.getCode(),
+                        SubType.KL_QUARTER.getCode(),
+                        SubType.KL_YEAR.getCode()
+                )).size() != 0) {
+            //K线订阅类型默认 前、无、后复权都订阅
+            requestBuilder.setC2S(QotSub.C2S.newBuilder()
+                    .addAllSubTypeList(subscribeRequest.getSubTypeList())
+                    .addAllRegPushRehabTypeList(Arrays.asList(
+                            RehabType.NONE.getCode(),
+                            RehabType.FORWARD.getCode(),
+                            RehabType.BACKWARD.getCode()
+                    ))
+                    .addAllSecurityList(subscribeRequest.getSecurityList()
+                            .stream().map(security ->
+                                    QotCommon.Security.newBuilder()
+                                            .setMarket(security.getMarket())
+                                            .setCode(security.getCode())
+                                            .build())
+                            .collect(Collectors.toList()))
+                    .setIsRegOrUnRegPush(true)
+                    .setIsSubOrUnSub(true)
+                    .build());
+        } else {
+            requestBuilder.setC2S(QotSub.C2S.newBuilder()
+                    .addAllSubTypeList(subscribeRequest.getSubTypeList())
+                    .addAllSecurityList(subscribeRequest.getSecurityList()
+                            .stream().map(security ->
+                                    QotCommon.Security.newBuilder()
+                                            .setMarket(security.getMarket())
+                                            .setCode(security.getCode())
+                                            .build())
+                            .collect(Collectors.toList()))
+                    .setIsRegOrUnRegPush(true)
+                    .setIsSubOrUnSub(true)
+                    .build());
+        }
+        int seqNo = qot.sub(requestBuilder.build());
         //下面订阅成功之后再拿出来插入订阅信息
         CacheManager.put(String.valueOf(seqNo), subscribeRequest);
         LOGGER.info("发起订阅.seqNo=" + seqNo);
@@ -373,6 +404,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             RTKLMessage message = new RTKLMessage();
             message.setMarket(klMessageContent.getMarket());
             message.setCode(klMessageContent.getCode());
+            message.setRehabType(klMessageContent.getRehabType());
             message.setHighPrice(klMessageContent.getHighPrice());
             message.setOpenPrice(klMessageContent.getOpenPrice());
             message.setLowPrice(klMessageContent.getLowPrice());
