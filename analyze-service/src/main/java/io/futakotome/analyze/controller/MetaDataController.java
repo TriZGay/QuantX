@@ -30,6 +30,12 @@ public class MetaDataController {
                 responseEntityMonoSink.success(ResponseEntity.ok(metaDataMapper.kLineDistinctCodesCommon(KLineMapper.KL_MIN_1_TABLE_NAME))));
     }
 
+    @GetMapping("/min3Codes")
+    public Mono<ResponseEntity<List<Object>>> min3Codes() {
+        return Mono.create(responseEntityMonoSink ->
+                responseEntityMonoSink.success(ResponseEntity.ok(metaDataMapper.kLineDistinctCodesCommon(KLineMapper.KL_MIN_3_TABLE_NAME))));
+    }
+
     @GetMapping("/min15Codes")
     public Mono<ResponseEntity<List<Object>>> min15Codes() {
         return Mono.create(responseEntityMonoSink ->
