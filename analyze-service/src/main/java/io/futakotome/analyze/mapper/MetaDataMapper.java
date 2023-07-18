@@ -21,10 +21,10 @@ public class MetaDataMapper {
         this.dataSource = dataSource;
     }
 
-    public List<Object> min15KDistinctCodes() {
+    public List<Object> kLineDistinctCodesCommon(String tableName) {
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "select distinct (market,code) from t_kl_min_15_raw"
+                    "select distinct (market,code) from " + tableName
             )) {
                 ResultSet resultSet = preparedStatement.executeQuery();
                 List<Object> codes = new ArrayList<>();
@@ -34,25 +34,7 @@ public class MetaDataMapper {
                 return codes;
             }
         } catch (SQLException throwables) {
-            LOGGER.error("查询15分K META数据失败", throwables);
-            return null;
-        }
-    }
-
-    public List<Object> dayKDistinctCodes() {
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "select distinct (market,code) from t_kl_day_raw"
-            )) {
-                List<Object> codes = new ArrayList<>();
-                ResultSet resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()) {
-                    codes.add(resultSet.getArray(1).getArray());
-                }
-                return codes;
-            }
-        } catch (SQLException throwables) {
-            LOGGER.error("查询日K META数据出错", throwables);
+            LOGGER.error("查询K线元数据失败", throwables);
             return null;
         }
     }

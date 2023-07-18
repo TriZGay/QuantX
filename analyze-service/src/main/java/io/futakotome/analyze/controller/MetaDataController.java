@@ -1,5 +1,6 @@
 package io.futakotome.analyze.controller;
 
+import io.futakotome.analyze.mapper.KLineMapper;
 import io.futakotome.analyze.mapper.MetaDataMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,16 +24,22 @@ public class MetaDataController {
         this.metaDataMapper = metaDataMapper;
     }
 
+    @GetMapping("/min1Codes")
+    public Mono<ResponseEntity<List<Object>>> min1Codes() {
+        return Mono.create(responseEntityMonoSink ->
+                responseEntityMonoSink.success(ResponseEntity.ok(metaDataMapper.kLineDistinctCodesCommon(KLineMapper.KL_MIN_1_TABLE_NAME))));
+    }
+
     @GetMapping("/min15Codes")
     public Mono<ResponseEntity<List<Object>>> min15Codes() {
         return Mono.create(responseEntityMonoSink ->
-                responseEntityMonoSink.success(ResponseEntity.ok(metaDataMapper.min15KDistinctCodes())));
+                responseEntityMonoSink.success(ResponseEntity.ok(metaDataMapper.kLineDistinctCodesCommon(KLineMapper.KL_MIN_15_TABLE_NAME))));
     }
 
     @GetMapping("/dayKCodes")
     public Mono<ResponseEntity<List<Object>>> dayKCodes() {
         return Mono.create(responseEntityMonoSink ->
-                responseEntityMonoSink.success(ResponseEntity.ok(metaDataMapper.dayKDistinctCodes())));
+                responseEntityMonoSink.success(ResponseEntity.ok(metaDataMapper.kLineDistinctCodesCommon(KLineMapper.KL_DAY_TABLE_NAME))));
     }
 
     @GetMapping("/indiesCodes")
