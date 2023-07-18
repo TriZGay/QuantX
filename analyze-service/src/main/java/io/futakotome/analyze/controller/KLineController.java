@@ -25,6 +25,21 @@ public class KLineController {
         this.mapper = mapper;
     }
 
+    @PostMapping("/weekK")
+    public Mono<ResponseEntity<?>> weekK(@RequestBody @Validated Mono<KLineRequest> requestMono) {
+        return Mono.create(responseEntityMonoSink -> {
+            requestMono.doOnError(WebExchangeBindException.class, throwables ->
+                    responseEntityMonoSink.success(
+                            new ResponseEntity<>("参数校验失败:" + throwables.getFieldErrors(), HttpStatus.BAD_REQUEST)
+                    )).doOnNext(request -> {
+                LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), request.getStart(), request.getEnd());
+                responseEntityMonoSink.success(
+                        ResponseEntity.ok(mapper.queryKLineCommon(request, KLineMapper.KL_WEEK_TABLE_NAME))
+                );
+            }).subscribe();
+        });
+    }
+
     @PostMapping("/min60K")
     public Mono<ResponseEntity<?>> min60K(@RequestBody @Validated Mono<KLineRequest> requestMono) {
         return Mono.create(responseEntityMonoSink -> {

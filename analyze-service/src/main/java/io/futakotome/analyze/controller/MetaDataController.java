@@ -24,12 +24,17 @@ public class MetaDataController {
         this.metaDataMapper = metaDataMapper;
     }
 
+    @GetMapping("/weekKCodes")
+    public Mono<ResponseEntity<List<Object>>> weekKCodes() {
+        return Mono.create(responseEntityMonoSink ->
+                responseEntityMonoSink.success(ResponseEntity.ok(metaDataMapper.kLineDistinctCodesCommon(KLineMapper.KL_WEEK_TABLE_NAME))));
+    }
+
     @GetMapping("/min60Codes")
     public Mono<ResponseEntity<List<Object>>> min60Codes() {
         return Mono.create(responseEntityMonoSink ->
                 responseEntityMonoSink.success(ResponseEntity.ok(metaDataMapper.kLineDistinctCodesCommon(KLineMapper.KL_MIN_60_TABLE_NAME))));
     }
-
 
     @GetMapping("/min30Codes")
     public Mono<ResponseEntity<List<Object>>> min30Codes() {
