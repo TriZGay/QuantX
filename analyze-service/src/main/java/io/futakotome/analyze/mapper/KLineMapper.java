@@ -17,13 +17,13 @@ import java.util.List;
 @Component
 public class KLineMapper {
     public static final String KL_DAY_TABLE_NAME = "t_kl_day_raw";
-    public static final String KL_MIN_5_TABLE_NAME = "t_kl_min_5_raw";
     public static final String KL_WEEK_TABLE_NAME = "t_kl_week_raw";
     public static final String KL_MONTH_TABLE_NAME = "t_kl_month_raw";
     public static final String KL_QUARTER_TABLE_NAME = "t_kl_quarter_raw";
     public static final String KL_YEAR_TABLE_NAME = "t_kl_year_raw";
     public static final String KL_MIN_1_TABLE_NAME = "t_kl_min_1_raw";
     public static final String KL_MIN_3_TABLE_NAME = "t_kl_min_3_raw";
+    public static final String KL_MIN_5_TABLE_NAME = "t_kl_min_5_raw";
     public static final String KL_MIN_15_TABLE_NAME = "t_kl_min_15_raw";
     public static final String KL_MIN_30_TABLE_NAME = "t_kl_min_30_raw";
     public static final String KL_MIN_60_TABLE_NAME = "t_kl_min_60_raw";
