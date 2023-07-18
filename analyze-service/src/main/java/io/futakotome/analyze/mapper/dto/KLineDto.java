@@ -3,6 +3,7 @@ package io.futakotome.analyze.mapper.dto;
 public class KLineDto {
     private Integer market;
     private String code;
+    private Integer rehabType;
     private Double highPrice;
     private Double openPrice;
     private Double lowPrice;
@@ -14,6 +15,23 @@ public class KLineDto {
     private Double pe;
     private Double changeRate;
     private String updateTime;
+    private String addTime;
+
+    public String getAddTime() {
+        return addTime;
+    }
+
+    public void setAddTime(String addTime) {
+        this.addTime = addTime;
+    }
+
+    public Integer getRehabType() {
+        return rehabType;
+    }
+
+    public void setRehabType(Integer rehabType) {
+        this.rehabType = rehabType;
+    }
 
     public Integer getMarket() {
         return market;
