@@ -24,6 +24,12 @@ public class MetaDataController {
         this.metaDataMapper = metaDataMapper;
     }
 
+    @GetMapping("/monthKCodes")
+    public Mono<ResponseEntity<List<Object>>> monthKCodes() {
+        return Mono.create(responseEntityMonoSink ->
+                responseEntityMonoSink.success(ResponseEntity.ok(metaDataMapper.kLineDistinctCodesCommon(KLineMapper.KL_MONTH_TABLE_NAME))));
+    }
+
     @GetMapping("/weekKCodes")
     public Mono<ResponseEntity<List<Object>>> weekKCodes() {
         return Mono.create(responseEntityMonoSink ->
