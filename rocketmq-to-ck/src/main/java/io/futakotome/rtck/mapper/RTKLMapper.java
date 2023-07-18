@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @Component
 public class RTKLMapper {
@@ -36,8 +39,8 @@ public class RTKLMapper {
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "insert into " + tableName +
-                            " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnoverRate,pe,change_rate,update_time " +
-                            " from input('market Int8 ,code String,rehab_type Int8,high_price Float64,open_price Float64,low_price Float64,close_price Float64,last_close_price Float64,volume Int64,turnover Float64,turnoverRate Float64, pe Float64,change_rate Float64 ,update_time DateTime64(3)')"
+                            " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnoverRate,pe,change_rate,update_time,add_time " +
+                            " from input('market Int8 ,code String,rehab_type Int8,high_price Float64,open_price Float64,low_price Float64,close_price Float64,last_close_price Float64,volume Int64,turnover Float64,turnoverRate Float64, pe Float64,change_rate Float64 ,update_time DateTime64(3),add_time DateTime64(3)')"
             )) {
                 preparedStatement.setInt(1, dto.getMarket());
                 preparedStatement.setString(2, dto.getCode());
@@ -53,6 +56,7 @@ public class RTKLMapper {
                 preparedStatement.setDouble(12, dto.getPe());
                 preparedStatement.setDouble(13, dto.getChangeRate() == null ? -1 : dto.getChangeRate());
                 preparedStatement.setString(14, dto.getUpdateTime());
+                preparedStatement.setString(15, LocalDateTime.now(ZoneId.of("Asia/Shanghai")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
                 return preparedStatement.executeUpdate() > 0;
             }
         } catch (SQLException throwables) {

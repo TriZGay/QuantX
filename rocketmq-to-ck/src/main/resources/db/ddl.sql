@@ -57,7 +57,8 @@ create table if not exists quantx.t_kl_min_60_raw
     turnover_rate    Float64,
     pe               Float64,
     change_rate      Float64,
-    update_time      DateTime64
+    update_time      DateTime64,
+    add_time         DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
 
@@ -76,7 +77,8 @@ create table if not exists quantx.t_kl_min_30_raw
     turnover_rate    Float64,
     pe               Float64,
     change_rate      Float64,
-    update_time      DateTime64
+    update_time      DateTime64,
+    add_time         DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
 
@@ -95,7 +97,8 @@ create table if not exists quantx.t_kl_min_15_raw
     turnover_rate    Float64,
     pe               Float64,
     change_rate      Float64,
-    update_time      DateTime64
+    update_time      DateTime64,
+    add_time         DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
 
@@ -114,7 +117,8 @@ create table if not exists quantx.t_kl_min_5_raw
     turnover_rate    Float64,
     pe               Float64,
     change_rate      Float64,
-    update_time      DateTime64
+    update_time      DateTime64,
+    add_time         DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
 
@@ -133,7 +137,8 @@ create table if not exists quantx.t_kl_min_3_raw
     turnover_rate    Float64,
     pe               Float64,
     change_rate      Float64,
-    update_time      DateTime64
+    update_time      DateTime64,
+    add_time         DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
 
@@ -152,7 +157,8 @@ create table if not exists quantx.t_kl_min_1_raw
     turnover_rate    Float64,
     pe               Float64,
     change_rate      Float64,
-    update_time      DateTime64
+    update_time      DateTime64,
+    add_time         DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
 
@@ -171,7 +177,8 @@ create table if not exists quantx.t_kl_year_raw
     turnover_rate    Float64,
     pe               Float64,
     change_rate      Float64,
-    update_time      DateTime64
+    update_time      DateTime64,
+    add_time         DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
 
@@ -190,7 +197,8 @@ create table if not exists quantx.t_kl_quarter_raw
     turnover_rate    Float64,
     pe               Float64,
     change_rate      Float64,
-    update_time      DateTime64
+    update_time      DateTime64,
+    add_time         DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
 
@@ -209,7 +217,8 @@ create table if not exists quantx.t_kl_month_raw
     turnover_rate    Float64,
     pe               Float64,
     change_rate      Float64,
-    update_time      DateTime64
+    update_time      DateTime64,
+    add_time         DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
 
@@ -228,7 +237,8 @@ create table if not exists quantx.t_kl_week_raw
     turnover_rate    Float64,
     pe               Float64,
     change_rate      Float64,
-    update_time      DateTime64
+    update_time      DateTime64,
+    add_time         DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
 
@@ -247,7 +257,8 @@ create table if not exists quantx.t_kl_day_raw
     turnover_rate    Float64,
     pe               Float64,
     change_rate      Float64,
-    update_time      DateTime64
+    update_time      DateTime64,
+    add_time         DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
 
