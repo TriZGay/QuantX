@@ -18,36 +18,41 @@
 
 package org.myorg.quickstart;
 
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 public class DataStreamJob {
 
-	public static void main(String[] args) throws Exception {
-		// Sets up the execution environment, which is the main entry point
-		// to building Flink applications.
-		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    public static void main(String[] args) throws Exception {
+        // Sets up the execution environment, which is the main entry point
+        // to building Flink applications.
+        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-		/*
-		 * Here, you can start creating your execution plan for Flink.
-		 *
-		 * Start with getting some data from the environment, like
-		 * 	env.fromSequence(1, 10);
-		 *
-		 * then, transform the resulting DataStream<Long> using operations
-		 * like
-		 * 	.filter()
-		 * 	.flatMap()
-		 * 	.window()
-		 * 	.process()
-		 *
-		 * and many more.
-		 * Have a look at the programming guide:
-		 *
-		 * https://nightlies.apache.org/flink/flink-docs-stable/
-		 *
-		 */
+        DataStream<Long> dataStream = env.fromSequence(1, 10);
+        dataStream.map((MapFunction<Long, Object>) Math::exp);
+        dataStream.print();
+        /*
+         * Here, you can start creating your execution plan for Flink.
+         *
+         * Start with getting some data from the environment, like
+         * 	env.fromSequence(1, 10);
+         *
+         * then, transform the resulting DataStream<Long> using operations
+         * like
+         * 	.filter()
+         * 	.flatMap()
+         * 	.window()
+         * 	.process()
+         *
+         * and many more.
+         * Have a look at the programming guide:
+         *
+         * https://nightlies.apache.org/flink/flink-docs-stable/
+         *
+         */
 
-		// Execute program, beginning computation.
-		env.execute("Flink Java API Skeleton");
-	}
+        // Execute program, beginning computation.
+        env.execute("Flink Java API Skeleton");
+    }
 }
