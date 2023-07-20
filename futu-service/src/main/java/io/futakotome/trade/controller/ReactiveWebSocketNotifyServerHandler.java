@@ -19,24 +19,22 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 
 @Component
-public class ReactiveWebSocketNotifyServerHandler implements WebSocketHandler {
+public class ReactiveWebSocketNotifyServerHandler extends AbstractWebSocketServerHandler implements WebSocketHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactiveWebSocketNotifyServerHandler.class);
-    private final ObjectMapper objectMapper;
-    private final ReactiveWebSocketListener listener;
-    private final MessageService messageService;
 
-    public ReactiveWebSocketNotifyServerHandler(ObjectMapper objectMapper, ReactiveWebSocketListener listener, MessageService messageService) {
-        this.objectMapper = objectMapper;
-        this.listener = listener;
-        this.messageService = messageService;
+    protected ReactiveWebSocketNotifyServerHandler(ObjectMapper objectMapper, ReactiveWebSocketListener listener, MessageService messageService) {
+        super(objectMapper, listener, messageService);
     }
 
     @Override
     public Mono<Void> handle(WebSocketSession session) {
         String sessionId = session.getId();
 //        getSessionId(session.getHandshakeInfo().getUri());
+        String path = session.getHandshakeInfo().getUri().getPath();
+        LOGGER.info("Ws path : {}.sessionId : {}", path, sessionId);
 
-        Flux<WebSocketMessage> messages = messageService.getMessages(sessionId)
+        Flux<WebSocketMessage> messages = getMessageService()
+                .getMessages(sessionId)
                 .map(session::textMessage);
 
         Flux<WebSocketMessage> reading = session.receive()
@@ -52,16 +50,4 @@ public class ReactiveWebSocketNotifyServerHandler implements WebSocketHandler {
                 .and(printCloseStatus);
     }
 
-    private void onMessage(String payload, String sessionId) {
-        try {
-            Message message = objectMapper.readValue(payload, Message.class);
-            listener.onMessage(message, sessionId);
-        } catch (JsonProcessingException e) {
-            LOGGER.error("处理消息出错.", e);
-        }
-    }
-
-    private String getSessionId(URI wsUri) {
-        return wsUri.getQuery().split("=")[1];
-    }
 }

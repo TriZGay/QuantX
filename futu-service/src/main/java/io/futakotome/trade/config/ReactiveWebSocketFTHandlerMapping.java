@@ -1,5 +1,6 @@
 package io.futakotome.trade.config;
 
+import io.futakotome.trade.controller.ReactiveWebSocketKLineServerHandler;
 import io.futakotome.trade.controller.ReactiveWebSocketNotifyServerHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,16 +14,19 @@ import java.util.Map;
 
 @Configuration
 public class ReactiveWebSocketFTHandlerMapping {
-    private final ReactiveWebSocketNotifyServerHandler handler;
+    private final ReactiveWebSocketNotifyServerHandler notifyHandler;
+    private final ReactiveWebSocketKLineServerHandler kLineHandler;
 
-    public ReactiveWebSocketFTHandlerMapping(ReactiveWebSocketNotifyServerHandler handler) {
-        this.handler = handler;
+    public ReactiveWebSocketFTHandlerMapping(ReactiveWebSocketNotifyServerHandler notifyHandler, ReactiveWebSocketKLineServerHandler kLineHandler) {
+        this.notifyHandler = notifyHandler;
+        this.kLineHandler = kLineHandler;
     }
 
     @Bean
     public HandlerMapping webSocketHandlerMapping() {
         Map<String, WebSocketHandler> urlMap = new HashMap<>() {{
-            put("/websocket/**", handler);
+            put("/websocket/notify", notifyHandler);
+            put("/websocket/kl", kLineHandler);
         }};
         SimpleUrlHandlerMapping simpleUrlHandlerMapping = new SimpleUrlHandlerMapping();
         simpleUrlHandlerMapping.setOrder(1);
