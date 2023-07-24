@@ -275,21 +275,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                JsonObject state = ftGrpcReturnResult.getS2c();
-                state.addProperty("marketHK", MarketState.mapFrom(state.get("marketHK").getAsInt()));
-                state.addProperty("marketUS", MarketState.mapFrom(state.get("marketUS").getAsInt()));
-                state.addProperty("marketSH", MarketState.mapFrom(state.get("marketSH").getAsInt()));
-                state.addProperty("marketSZ", MarketState.mapFrom(state.get("marketSZ").getAsInt()));
-                state.addProperty("marketHKFuture", MarketState.mapFrom(state.get("marketHKFuture").getAsInt()));
-                state.addProperty("time", LocalDateTime.ofInstant(Instant.ofEpochSecond(state.get("time").getAsLong()), ZoneId.systemDefault())
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                state.addProperty("localTime", LocalDateTime.ofInstant(Instant.ofEpochSecond(state.get("localTime").getAsLong()), ZoneId.systemDefault())
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                state.addProperty("marketUSFuture", MarketState.mapFrom(state.get("marketUSFuture").getAsInt()));
-                state.addProperty("marketSGFuture", MarketState.mapFrom(state.get("marketSGFuture").getAsInt()));
-                state.addProperty("marketJPFuture", MarketState.mapFrom(state.get("marketJPFuture").getAsInt()));
+                MarketStateVo marketStateVo = GSON.fromJson(ftGrpcReturnResult.getS2c(), MarketStateVo.class);
+                sendMarketStateMessage(marketStateVo);
 
-//                webSocketService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), state.toString()), this.sessionId);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析全局市场状态结果失败.", e);
             }
@@ -309,6 +297,35 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 LOGGER.error("摆盘结果解析失败.", e);
             }
         }
+    }
+
+    private void sendMarketStateMessage(MarketStateVo marketStateVo) {
+        MarketStateMessage marketStateMessage = new MarketStateMessage();
+        marketStateMessage.setMarketHK(MarketState.mapFrom(marketStateVo.getMarketHK()));
+        marketStateMessage.setMarketUS(MarketState.mapFrom(marketStateVo.getMarketUS()));
+        marketStateMessage.setMarketSH(MarketState.mapFrom(marketStateVo.getMarketSH()));
+        marketStateMessage.setMarketSZ(MarketState.mapFrom(marketStateVo.getMarketSZ()));
+        marketStateMessage.setMarketHKFuture(MarketState.mapFrom(marketStateVo.getMarketHKFuture()));
+        marketStateMessage.setTime(LocalDateTime.ofInstant(Instant.ofEpochSecond(marketStateVo.getTime()), ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        marketStateMessage.setLocalTime(LocalDateTime.ofInstant(Instant.ofEpochSecond(marketStateVo.getLocalTime()), ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        marketStateMessage.setMarketUSFuture(MarketState.mapFrom(marketStateVo.getMarketUSFuture()));
+        marketStateMessage.setMarketSGFuture(MarketState.mapFrom(marketStateVo.getMarketSGFuture()));
+        marketStateMessage.setMarketJPFuture(MarketState.mapFrom(marketStateVo.getMarketJPFuture()));
+
+        rocketMQTemplate.asyncSend(MessageCommon.MARKET_STATE_TOPIC, marketStateMessage, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                LOGGER.info("全局市场状态投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        sendResult.getSendStatus());
+            }
+
+            @Override
+            public void onException(Throwable throwable) {
+                LOGGER.error("全局市场状态投递失败", throwable);
+            }
+        });
     }
 
     private void sendNotifyMessage(String notifyContent) {

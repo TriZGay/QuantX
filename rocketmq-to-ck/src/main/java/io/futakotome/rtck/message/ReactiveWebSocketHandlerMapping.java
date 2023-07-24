@@ -14,12 +14,16 @@ import java.util.Map;
 public class ReactiveWebSocketHandlerMapping {
     public static final String NOTIFY_PATH = "/websocket/notify";
     public static final String KLINE_PATH = "/websocket/kl";
+    public static final String MARKET_STATE_PATH = "/websocket/ms";
+
     private final ReactiveWebSocketNotifyServerHandler notifyHandler;
     private final ReactiveWebSocketKLineServerHandler kLineHandler;
+    private final ReactiveWebSocketMarketStateServerHandler marketStateServerHandler;
 
-    public ReactiveWebSocketHandlerMapping(ReactiveWebSocketNotifyServerHandler notifyHandler, ReactiveWebSocketKLineServerHandler kLineHandler) {
+    public ReactiveWebSocketHandlerMapping(ReactiveWebSocketNotifyServerHandler notifyHandler, ReactiveWebSocketKLineServerHandler kLineHandler, ReactiveWebSocketMarketStateServerHandler marketStateServerHandler) {
         this.notifyHandler = notifyHandler;
         this.kLineHandler = kLineHandler;
+        this.marketStateServerHandler = marketStateServerHandler;
     }
 
     @Bean
@@ -27,6 +31,7 @@ public class ReactiveWebSocketHandlerMapping {
         Map<String, WebSocketHandler> urlMap = new HashMap<>() {{
             put(NOTIFY_PATH, notifyHandler);
             put(KLINE_PATH, kLineHandler);
+            put(MARKET_STATE_PATH, marketStateServerHandler);
         }};
         SimpleUrlHandlerMapping simpleUrlHandlerMapping = new SimpleUrlHandlerMapping();
         simpleUrlHandlerMapping.setOrder(1);

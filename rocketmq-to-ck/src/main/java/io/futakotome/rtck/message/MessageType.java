@@ -3,6 +3,7 @@ package io.futakotome.rtck.message;
 public enum MessageType {
     NOTIFY,
     JOIN_IN,
+    MARKET_STATE,
     RT_BASIC_QUOTE,
     RT_KL,
     RT_TICKER,
