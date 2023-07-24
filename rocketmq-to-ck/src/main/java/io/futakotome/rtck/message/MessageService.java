@@ -1,8 +1,7 @@
-package io.futakotome.trade.service;
+package io.futakotome.rtck.message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.futakotome.trade.listener.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

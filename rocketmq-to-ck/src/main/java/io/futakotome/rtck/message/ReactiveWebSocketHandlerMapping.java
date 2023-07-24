@@ -1,7 +1,5 @@
-package io.futakotome.trade.config;
+package io.futakotome.rtck.message;
 
-import io.futakotome.trade.controller.ReactiveWebSocketKLineServerHandler;
-import io.futakotome.trade.controller.ReactiveWebSocketNotifyServerHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.HandlerMapping;
@@ -13,11 +11,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class ReactiveWebSocketFTHandlerMapping {
+public class ReactiveWebSocketHandlerMapping {
+    public static final String NOTIFY_PATH = "/websocket/notify";
+    public static final String KLINE_PATH = "/websocket/kl";
     private final ReactiveWebSocketNotifyServerHandler notifyHandler;
     private final ReactiveWebSocketKLineServerHandler kLineHandler;
 
-    public ReactiveWebSocketFTHandlerMapping(ReactiveWebSocketNotifyServerHandler notifyHandler, ReactiveWebSocketKLineServerHandler kLineHandler) {
+    public ReactiveWebSocketHandlerMapping(ReactiveWebSocketNotifyServerHandler notifyHandler, ReactiveWebSocketKLineServerHandler kLineHandler) {
         this.notifyHandler = notifyHandler;
         this.kLineHandler = kLineHandler;
     }
@@ -25,8 +25,8 @@ public class ReactiveWebSocketFTHandlerMapping {
     @Bean
     public HandlerMapping webSocketHandlerMapping() {
         Map<String, WebSocketHandler> urlMap = new HashMap<>() {{
-            put("/websocket/notify", notifyHandler);
-            put("/websocket/kl", kLineHandler);
+            put(NOTIFY_PATH, notifyHandler);
+            put(KLINE_PATH, kLineHandler);
         }};
         SimpleUrlHandlerMapping simpleUrlHandlerMapping = new SimpleUrlHandlerMapping();
         simpleUrlHandlerMapping.setOrder(1);

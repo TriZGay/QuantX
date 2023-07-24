@@ -1,4 +1,4 @@
-package io.futakotome.trade.listener;
+package io.futakotome.rtck.message;
 
 public enum MessageType {
     NOTIFY,

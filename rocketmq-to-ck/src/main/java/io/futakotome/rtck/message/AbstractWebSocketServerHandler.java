@@ -1,10 +1,7 @@
-package io.futakotome.trade.controller;
+package io.futakotome.rtck.message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.futakotome.trade.listener.Message;
-import io.futakotome.trade.listener.ReactiveWebSocketListener;
-import io.futakotome.trade.service.MessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,10 +17,10 @@ public abstract class AbstractWebSocketServerHandler {
         this.messageService = messageService;
     }
 
-    protected void onMessage(String payload, String sessionId) {
+    protected void onMessage(String payload, String session) {
         try {
             Message message = objectMapper.readValue(payload, Message.class);
-            listener.onMessage(message, sessionId);
+            listener.onMessage(message, session);
         } catch (JsonProcessingException e) {
             LOGGER.error("处理消息出错.", e);
         }

@@ -1,4 +1,4 @@
-package io.futakotome.trade.listener.vo;
+package io.futakotome.trade.message;
 
 public class BrokerMessageContent {
     private Integer market;

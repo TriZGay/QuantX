@@ -19,7 +19,6 @@ import io.futakotome.trade.dto.AccDto;
 import io.futakotome.trade.dto.AccInfoDto;
 import io.futakotome.trade.dto.OrderDto;
 import io.futakotome.trade.dto.PositionDto;
-import io.futakotome.trade.listener.NotifyMessage;
 import io.futakotome.trade.mapper.AccDtoMapper;
 import io.futakotome.trade.mapper.AccInfoDtoMapper;
 import io.futakotome.trade.mapper.OrderDtoMapper;
@@ -59,15 +58,13 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     private final AccInfoDtoMapper accInfoDtoMapper;
     private final OrderDtoMapper orderDtoMapper;
     private final PositionDtoMapper positionDtoMapper;
-    private final MessageService webSocketService;
     private String sessionId;
 
-    public FTTradeService(FutuConfig futuConfig, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper, OrderDtoMapper orderDtoMapper, PositionDtoMapper positionDtoMapper, MessageService webSocketService) {
+    public FTTradeService(FutuConfig futuConfig, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper, OrderDtoMapper orderDtoMapper, PositionDtoMapper positionDtoMapper) {
         this.accDtoMapper = accDtoMapper;
         this.accInfoDtoMapper = accInfoDtoMapper;
         this.orderDtoMapper = orderDtoMapper;
         this.positionDtoMapper = positionDtoMapper;
-        this.webSocketService = webSocketService;
         trd.setClientInfo(clientID, 1);
         trd.setConnSpi(this);
         trd.setTrdSpi(this);
@@ -242,13 +239,13 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     @Override
     public void onInitConnect(FTAPI_Conn client, long errCode, String desc) {
         LOGGER.info("FUTU API 初始化连接 onInitConnect: ret=" + errCode + ",desc=" + desc + ",connID=" + client.getConnectID());
-        webSocketService.onNext(new NotifyMessage(Long.toString(errCode), "FUTU API交易连接初始化."), this.sessionId);
+//        webSocketService.onNext(new NotifyMessage(Long.toString(errCode), "FUTU API交易连接初始化."), this.sessionId);
     }
 
     @Override
     public void onDisconnect(FTAPI_Conn client, long errCode) {
         LOGGER.info("FUTU API 关闭连接连接 onDisconnect: connID=" + client.getConnectID() + ",ret=" + errCode);
-        webSocketService.onNext(new NotifyMessage(Long.toString(errCode), "FUTU API交易连接关闭."), this.sessionId);
+//        webSocketService.onNext(new NotifyMessage(Long.toString(errCode), "FUTU API交易连接关闭."), this.sessionId);
     }
 
     @Override
@@ -411,7 +408,7 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         if (rsp.getRetType() != 0) {
             LOGGER.error("查询账户持仓失败:" + rsp.getRetMsg(),
                     new IllegalArgumentException("请求序列号:" + nSerialNo + "查询账户持仓失败,code:" + rsp.getRetType()));
-            webSocketService.onNext(new NotifyMessage(String.valueOf(nSerialNo), "查询账户持仓失败" + rsp.getRetMsg()), this.sessionId);
+//            webSocketService.onNext(new NotifyMessage(String.valueOf(nSerialNo), "查询账户持仓失败" + rsp.getRetMsg()), this.sessionId);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
@@ -525,20 +522,20 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                             int updateRow = positionDtoMapper.updateById(findOne);
                             if (updateRow > 0) {
                                 LOGGER.info("持仓信息修改成功.条数:" + updateRow);
-                                webSocketService.onNext(new NotifyMessage(String.valueOf(updateRow), "持仓信息修改成功.条数:" + updateRow), this.sessionId);
+//                                webSocketService.onNext(new NotifyMessage(String.valueOf(updateRow), "持仓信息修改成功.条数:" + updateRow), this.sessionId);
                             } else {
                                 LOGGER.info("持仓信息已最新");
-                                webSocketService.onNext(new NotifyMessage(String.valueOf(0), "持仓信息已最新"), this.sessionId);
+//                                webSocketService.onNext(new NotifyMessage(String.valueOf(0), "持仓信息已最新"), this.sessionId);
                             }
                         } else {
                             //库里没有新增
                             int insertRow = positionDtoMapper.insertSelective(position);
                             if (insertRow > 0) {
                                 LOGGER.info("持仓信息插入成功.条数:" + insertRow);
-                                webSocketService.onNext(new NotifyMessage(String.valueOf(insertRow), "持仓信息插入成功.条数:" + insertRow), this.sessionId);
+//                                webSocketService.onNext(new NotifyMessage(String.valueOf(insertRow), "持仓信息插入成功.条数:" + insertRow), this.sessionId);
                             } else {
                                 LOGGER.info("持仓信息插入失败");
-                                webSocketService.onNext(new NotifyMessage(String.valueOf(0), "持仓信息插入失败"), this.sessionId);
+//                                webSocketService.onNext(new NotifyMessage(String.valueOf(0), "持仓信息插入失败"), this.sessionId);
                             }
                         }
                     }
@@ -777,7 +774,4 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         }
     }
 
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-    }
 }

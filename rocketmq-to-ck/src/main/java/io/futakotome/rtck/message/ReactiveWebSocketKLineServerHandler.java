@@ -1,4 +1,4 @@
-package io.futakotome.trade.controller;
+package io.futakotome.rtck.message;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketHandler;

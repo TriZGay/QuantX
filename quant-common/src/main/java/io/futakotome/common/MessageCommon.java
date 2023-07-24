@@ -18,6 +18,7 @@ public interface MessageCommon {
     String RT_TICKER_CONSUMER_GROUP = "rt_ticker_consumer_group";
     String RT_TIMESHARE_CONSUMER_GROUP = "rt_timeshare_consumer_group";
     String RT_BROKER_CONSUMER_GROUP = "rt_broker_consumer_group";
+    String NOTIFY_CONSUMER_GROUP = "notify_consumer_group";
     //经纪人队列
     String RT_BROKER_TOPIC = "rt_broker_topic";
     //分时
@@ -28,17 +29,18 @@ public interface MessageCommon {
     String RT_BASIC_QUO_TOPIC_INDEX = "rtbo_topic_index";
     //正股报价
     String RT_BASIC_QUO_TOPIC_STOCK = "rtbo_topic_stock";
-    //日K
+    //K
     String RT_KL_DAY_TOPIC = "rt_kld_topic";
     String RT_KL_WEEK_TOPIC = "rt_klw_topic";
     String RT_KL_MONTH_TOPIC = "rt_klm_topic";
     String RT_KL_QUARTER_TOPIC = "rt_klq_topic";
     String RT_KL_YEAR_TOPIC = "rt_kly_topic";
-    //5分K
     String RT_KL_MIN_1_TOPIC = "rt_klm1_topic";
     String RT_KL_MIN_3_TOPIC = "rt_klm3_topic";
     String RT_KL_MIN_5_TOPIC = "rt_klm5_topic";
     String RT_KL_MIN_15_TOPIC = "rt_klm15_topic";
     String RT_KL_MIN_30_TOPIC = "rt_klm30_topic";
     String RT_KL_MIN_60_TOPIC = "rt_klm60_topic";
+    //通知
+    String NOTIFY_TOPIC = "notify_topic";
 }
