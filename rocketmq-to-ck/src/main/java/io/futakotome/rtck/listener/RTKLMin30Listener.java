@@ -4,6 +4,9 @@ import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.rtck.mapper.RTKLMapper;
 import io.futakotome.rtck.mapper.dto.RTKLDto;
+import io.futakotome.rtck.message.MessageService;
+import io.futakotome.rtck.message.ReactiveWebSocketHandlerMapping;
+import io.futakotome.rtck.message.RealTimeKLMessage;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.slf4j.Logger;
@@ -15,9 +18,11 @@ import org.springframework.stereotype.Component;
 public class RTKLMin30Listener implements RocketMQListener<RTKLMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTKLMin30Listener.class);
     private final RTKLMapper mapper;
+    private final MessageService messageService;
 
-    public RTKLMin30Listener(RTKLMapper mapper) {
+    public RTKLMin30Listener(RTKLMapper mapper, MessageService messageService) {
         this.mapper = mapper;
+        this.messageService = messageService;
     }
 
     @Override
@@ -39,6 +44,27 @@ public class RTKLMin30Listener implements RocketMQListener<RTKLMessage> {
         dto.setUpdateTime(rtklMessage.getUpdateTime());
         if (mapper.insertOne(dto, RTKLMapper.KL_MIN_30_TABLE_NAME)) {
             LOGGER.info("30分K数据入库成功");
+            sendKLineWsMessage(rtklMessage);
         }
+    }
+
+    private void sendKLineWsMessage(RTKLMessage rtklMessage) {
+        RealTimeKLMessage realTimeKLMessage = new RealTimeKLMessage();
+        realTimeKLMessage.setMarket(rtklMessage.getMarket());
+        realTimeKLMessage.setCode(rtklMessage.getCode());
+        realTimeKLMessage.setRehabType(rtklMessage.getRehabType());
+        realTimeKLMessage.setHighPrice(rtklMessage.getHighPrice());
+        realTimeKLMessage.setOpenPrice(rtklMessage.getOpenPrice());
+        realTimeKLMessage.setLowPrice(rtklMessage.getLowPrice());
+        realTimeKLMessage.setClosePrice(rtklMessage.getClosePrice());
+        realTimeKLMessage.setLastClosePrice(rtklMessage.getLastClosePrice());
+        realTimeKLMessage.setVolume(rtklMessage.getVolume());
+        realTimeKLMessage.setTurnover(rtklMessage.getTurnover());
+        realTimeKLMessage.setTurnoverRate(rtklMessage.getTurnoverRate());
+        realTimeKLMessage.setPe(rtklMessage.getPe());
+        realTimeKLMessage.setChangeRate(rtklMessage.getChangeRate());
+        realTimeKLMessage.setUpdateTime(rtklMessage.getUpdateTime());
+        LOGGER.info("WebSocket消息:{}", realTimeKLMessage.toString());
+        messageService.onNext(realTimeKLMessage, ReactiveWebSocketHandlerMapping.KLINE_PATH);
     }
 }
