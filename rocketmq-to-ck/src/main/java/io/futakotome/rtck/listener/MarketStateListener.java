@@ -25,15 +25,15 @@ public class MarketStateListener implements RocketMQListener<MarketStateMessage>
     public void onMessage(MarketStateMessage marketStateMessage) {
         MarketStateWsMessage wsMessage = new MarketStateWsMessage();
         wsMessage.setMarketHK(marketStateMessage.getMarketHK());
-        wsMessage.setMarketUS(wsMessage.getMarketUS());
-        wsMessage.setMarketSH(wsMessage.getMarketSH());
-        wsMessage.setMarketSZ(wsMessage.getMarketSZ());
-        wsMessage.setMarketHKFuture(wsMessage.getMarketHKFuture());
-        wsMessage.setTime(wsMessage.getTime());
-        wsMessage.setLocalTime(wsMessage.getLocalTime());
-        wsMessage.setMarketUSFuture(wsMessage.getMarketUSFuture());
-        wsMessage.setMarketSGFuture(wsMessage.getMarketSGFuture());
-        wsMessage.setMarketJPFuture(wsMessage.getMarketJPFuture());
+        wsMessage.setMarketUS(marketStateMessage.getMarketUS());
+        wsMessage.setMarketSH(marketStateMessage.getMarketSH());
+        wsMessage.setMarketSZ(marketStateMessage.getMarketSZ());
+        wsMessage.setMarketHKFuture(marketStateMessage.getMarketHKFuture());
+        wsMessage.setTime(marketStateMessage.getTime());
+        wsMessage.setLocalTime(marketStateMessage.getLocalTime());
+        wsMessage.setMarketUSFuture(marketStateMessage.getMarketUSFuture());
+        wsMessage.setMarketSGFuture(marketStateMessage.getMarketSGFuture());
+        wsMessage.setMarketJPFuture(marketStateMessage.getMarketJPFuture());
         LOGGER.info("WebSocket消息:{}", wsMessage.toString());
         messageService.onNext(wsMessage, ReactiveWebSocketHandlerMapping.MARKET_STATE_PATH);
     }

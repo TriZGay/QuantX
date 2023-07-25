@@ -91,4 +91,20 @@ public class MarketStateVo {
     public void setMarketJPFuture(Integer marketJPFuture) {
         this.marketJPFuture = marketJPFuture;
     }
+
+    @Override
+    public String toString() {
+        return "MarketStateVo{" +
+                "marketHK=" + marketHK +
+                ", marketUS=" + marketUS +
+                ", marketSH=" + marketSH +
+                ", marketSZ=" + marketSZ +
+                ", marketHKFuture=" + marketHKFuture +
+                ", time=" + time +
+                ", localTime=" + localTime +
+                ", marketUSFuture=" + marketUSFuture +
+                ", marketSGFuture=" + marketSGFuture +
+                ", marketJPFuture=" + marketJPFuture +
+                '}';
+    }
 }

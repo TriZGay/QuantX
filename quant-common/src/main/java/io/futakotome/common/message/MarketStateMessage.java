@@ -91,4 +91,20 @@ public class MarketStateMessage {
     public void setMarketJPFuture(String marketJPFuture) {
         this.marketJPFuture = marketJPFuture;
     }
+
+    @Override
+    public String toString() {
+        return "MarketStateMessage{" +
+                "marketHK='" + marketHK + '\'' +
+                ", marketUS='" + marketUS + '\'' +
+                ", marketSH='" + marketSH + '\'' +
+                ", marketSZ='" + marketSZ + '\'' +
+                ", marketHKFuture='" + marketHKFuture + '\'' +
+                ", time='" + time + '\'' +
+                ", localTime='" + localTime + '\'' +
+                ", marketUSFuture='" + marketUSFuture + '\'' +
+                ", marketSGFuture='" + marketSGFuture + '\'' +
+                ", marketJPFuture='" + marketJPFuture + '\'' +
+                '}';
+    }
 }

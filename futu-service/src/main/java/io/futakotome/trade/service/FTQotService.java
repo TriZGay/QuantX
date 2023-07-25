@@ -277,7 +277,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 MarketStateVo marketStateVo = GSON.fromJson(ftGrpcReturnResult.getS2c(), MarketStateVo.class);
                 sendMarketStateMessage(marketStateVo);
-
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析全局市场状态结果失败.", e);
             }
@@ -313,7 +312,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         marketStateMessage.setMarketUSFuture(MarketState.mapFrom(marketStateVo.getMarketUSFuture()));
         marketStateMessage.setMarketSGFuture(MarketState.mapFrom(marketStateVo.getMarketSGFuture()));
         marketStateMessage.setMarketJPFuture(MarketState.mapFrom(marketStateVo.getMarketJPFuture()));
-
         rocketMQTemplate.asyncSend(MessageCommon.MARKET_STATE_TOPIC, marketStateMessage, new SendCallback() {
             @Override
             public void onSuccess(SendResult sendResult) {

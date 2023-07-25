@@ -5,4 +5,4 @@ ck:
   user: default
   password: 123456
 server:
-  port: 9000
+  port: 9093
