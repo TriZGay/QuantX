@@ -4,6 +4,9 @@ import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.RTBasicQuoteMessage;
 import io.futakotome.rtck.mapper.RTBasicQuoteMapper;
 import io.futakotome.rtck.mapper.dto.RTBasicQuoteDto;
+import io.futakotome.rtck.message.MessageService;
+import io.futakotome.rtck.message.ReactiveWebSocketHandlerMapping;
+import io.futakotome.rtck.message.RealTimeBaseQuoteMessage;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.slf4j.Logger;
@@ -15,9 +18,11 @@ import org.springframework.stereotype.Component;
 public class RTStockBasicQuoteListener implements RocketMQListener<RTBasicQuoteMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTStockBasicQuoteListener.class);
     private final RTBasicQuoteMapper mapper;
+    private final MessageService messageService;
 
-    public RTStockBasicQuoteListener(RTBasicQuoteMapper mapper) {
+    public RTStockBasicQuoteListener(RTBasicQuoteMapper mapper, MessageService messageService) {
         this.mapper = mapper;
+        this.messageService = messageService;
     }
 
     @Override
@@ -40,6 +45,28 @@ public class RTStockBasicQuoteListener implements RocketMQListener<RTBasicQuoteM
         dto.setUpdateTime(rtBasicQuoteMessage.getUpdateTime());
         if (mapper.insertOneStockBasicQuote(dto)) {
             LOGGER.info("正股实时报价入库成功.");
+            sendWsMessage(rtBasicQuoteMessage);
         }
+    }
+
+    private void sendWsMessage(RTBasicQuoteMessage rtBasicQuoteMessage) {
+        RealTimeBaseQuoteMessage realTimeBaseQuoteMessage = new RealTimeBaseQuoteMessage();
+        realTimeBaseQuoteMessage.setMarket(rtBasicQuoteMessage.getMarket());
+        realTimeBaseQuoteMessage.setCode(rtBasicQuoteMessage.getCode());
+        realTimeBaseQuoteMessage.setPriceSpread(rtBasicQuoteMessage.getPriceSpread());
+        realTimeBaseQuoteMessage.setUpdateTime(rtBasicQuoteMessage.getUpdateTime());
+        realTimeBaseQuoteMessage.setHighPrice(rtBasicQuoteMessage.getHighPrice());
+        realTimeBaseQuoteMessage.setOpenPrice(rtBasicQuoteMessage.getOpenPrice());
+        realTimeBaseQuoteMessage.setLowPrice(rtBasicQuoteMessage.getLowPrice());
+        realTimeBaseQuoteMessage.setCurPrice(rtBasicQuoteMessage.getCurPrice());
+        realTimeBaseQuoteMessage.setLastClosePrice(rtBasicQuoteMessage.getLastClosePrice());
+        realTimeBaseQuoteMessage.setVolume(rtBasicQuoteMessage.getVolume());
+        realTimeBaseQuoteMessage.setTurnover(rtBasicQuoteMessage.getTurnover());
+        realTimeBaseQuoteMessage.setTurnoverRate(rtBasicQuoteMessage.getTurnoverRate());
+        realTimeBaseQuoteMessage.setAmplitude(rtBasicQuoteMessage.getAmplitude());
+        realTimeBaseQuoteMessage.setDarkStatus(rtBasicQuoteMessage.getDarkStatus());
+        realTimeBaseQuoteMessage.setSecStatus(rtBasicQuoteMessage.getSecStatus());
+        LOGGER.info("WebSocket消息:{}", realTimeBaseQuoteMessage.toString());
+        messageService.onNext(realTimeBaseQuoteMessage, ReactiveWebSocketHandlerMapping.BASIC_QUOTE_PATH);
     }
 }
