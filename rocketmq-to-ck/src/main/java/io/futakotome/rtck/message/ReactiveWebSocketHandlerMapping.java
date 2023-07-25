@@ -15,15 +15,18 @@ public class ReactiveWebSocketHandlerMapping {
     public static final String NOTIFY_PATH = "/websocket/notify";
     public static final String KLINE_PATH = "/websocket/kl";
     public static final String MARKET_STATE_PATH = "/websocket/ms";
+    public static final String BASIC_QUOTE_PATH = "/websocket/bq";
 
     private final ReactiveWebSocketNotifyServerHandler notifyHandler;
     private final ReactiveWebSocketKLineServerHandler kLineHandler;
     private final ReactiveWebSocketMarketStateServerHandler marketStateServerHandler;
+    private final ReactiveWebSocketBasicQuoteServerHandler basicQuoteServerHandle;
 
-    public ReactiveWebSocketHandlerMapping(ReactiveWebSocketNotifyServerHandler notifyHandler, ReactiveWebSocketKLineServerHandler kLineHandler, ReactiveWebSocketMarketStateServerHandler marketStateServerHandler) {
+    public ReactiveWebSocketHandlerMapping(ReactiveWebSocketNotifyServerHandler notifyHandler, ReactiveWebSocketKLineServerHandler kLineHandler, ReactiveWebSocketMarketStateServerHandler marketStateServerHandler, ReactiveWebSocketBasicQuoteServerHandler basicQuoteServerHandle) {
         this.notifyHandler = notifyHandler;
         this.kLineHandler = kLineHandler;
         this.marketStateServerHandler = marketStateServerHandler;
+        this.basicQuoteServerHandle = basicQuoteServerHandle;
     }
 
     @Bean
@@ -32,6 +35,7 @@ public class ReactiveWebSocketHandlerMapping {
             put(NOTIFY_PATH, notifyHandler);
             put(KLINE_PATH, kLineHandler);
             put(MARKET_STATE_PATH, marketStateServerHandler);
+            put(BASIC_QUOTE_PATH, basicQuoteServerHandle);
         }};
         SimpleUrlHandlerMapping simpleUrlHandlerMapping = new SimpleUrlHandlerMapping();
         simpleUrlHandlerMapping.setOrder(1);
