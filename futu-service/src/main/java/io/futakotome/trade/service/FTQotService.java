@@ -653,6 +653,21 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else if (stockDto.getStockType().equals(StockType.Future.getCode())) {
             //期货
 
+
+        } else if (stockDto.getStockType().equals(StockType.Plate.getCode())) {
+            //板块
+            rocketMQTemplate.asyncSend(MessageCommon.RT_BASIC_QUO_TOPIC_PLATE, rtBasicQuoteMessage, new SendCallback() {
+                @Override
+                public void onSuccess(SendResult sendResult) {
+                    LOGGER.info("实时板块报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                            sendResult.getSendStatus());
+                }
+
+                @Override
+                public void onException(Throwable throwable) {
+                    LOGGER.error("实时板块报价信息投递失败", throwable);
+                }
+            });
         }
     }
 

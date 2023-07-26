@@ -4,6 +4,7 @@ public interface MessageCommon {
     //消费者组
     String RT_BASIC_QUO_CONSUMER_GROUP_INDIES = "rtbo_consumer_group_indies";
     String RT_BASIC_QUO_CONSUMER_GROUP_STOCK = "rtbo_consumer_group_stock";
+    String RT_BASIC_QUO_CONSUMER_GROUP_PLATE = "rtbo_consumer_group_plate";
     String RT_KL_DAY_CONSUMER_GROUP = "rt_kld_consumer_group";
     String RT_KL_WEEK_CONSUMER_GROUP = "rt_klw_consumer_group";
     String RT_KL_MONTH_CONSUMER_GROUP = "rt_klm_consumer_group";
@@ -30,6 +31,8 @@ public interface MessageCommon {
     String RT_BASIC_QUO_TOPIC_INDEX = "rtbo_topic_index";
     //正股报价
     String RT_BASIC_QUO_TOPIC_STOCK = "rtbo_topic_stock";
+    //板块报价
+    String RT_BASIC_QUO_TOPIC_PLATE = "rtbo_topic_plate";
     //K
     String RT_KL_DAY_TOPIC = "rt_kld_topic";
     String RT_KL_WEEK_TOPIC = "rt_klw_topic";
