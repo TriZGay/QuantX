@@ -11,11 +11,14 @@ import io.futakotome.trade.utils.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BigASHMarkert implements RequestStaticInfo, RequestPlateInfo, RequestStockInfo {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BigASHMarkert.class);
+public class BigASHMarket implements
+        RequestStaticInfo, RequestPlateInfo, RequestStockInfo, RequestTradeDate {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BigASHMarket.class);
 
     @Override
     public void sendPlateInfoRequest() {
@@ -134,5 +137,21 @@ public class BigASHMarkert implements RequestStaticInfo, RequestPlateInfo, Reque
                 .build();
         int seqNo = FTQotService.qot.getIpoList(request);
         LOGGER.info("SeqNo:" + seqNo + "大A上海市场请求IPO信息:" + request.toString());
+    }
+
+    @Override
+    public void sendTradeDateRequest() {
+        LocalDate now = LocalDate.now();
+        String firstDayOfYear = now.with(TemporalAdjusters.firstDayOfYear()).toString();
+        String endDayOfYear = now.with(TemporalAdjusters.lastDayOfYear()).toString();
+        QotRequestTradeDate.Request request = QotRequestTradeDate.Request.newBuilder()
+                .setC2S(QotRequestTradeDate.C2S.newBuilder()
+                        .setMarket(QotCommon.QotMarket.QotMarket_CNSH_Security_VALUE)
+                        .setBeginTime(firstDayOfYear)
+                        .setEndTime(endDayOfYear)
+                        .build()
+                ).build();
+        int seqNo = FTQotService.qot.requestTradeDate(request);
+        LOGGER.info("SeqNo:" + seqNo + "大A上海市场请求交易日信息:" + request.toString());
     }
 }

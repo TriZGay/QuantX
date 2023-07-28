@@ -17,6 +17,13 @@ public class SyncDataController {
         this.FTQotService = FTQotService;
     }
 
+    @GetMapping("/tradeDate")
+    public Mono<ResponseEntity<String>> syncTradeDate() {
+        FTQotService.syncTradeDate();
+        return Mono.just("commit completed.")
+                .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
+    }
+
     @GetMapping("/stocks")
     public Mono<ResponseEntity<String>> syncStaticInfo() {
         FTQotService.syncStaticInfo();

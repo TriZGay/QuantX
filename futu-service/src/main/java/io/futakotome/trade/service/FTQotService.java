@@ -107,6 +107,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         market.sendIpoInfoRequest();
     }
 
+    public void syncTradeDate() {
+        market.sendTradeDateRequest();
+    }
+
     public void sendSubInfoRequest() {
         QotGetSubInfo.Request request = QotGetSubInfo.Request.newBuilder()
                 .setC2S(QotGetSubInfo.C2S.newBuilder()
@@ -263,6 +267,21 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 sendNotifyMessage(notify);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("FutuD通知推送结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onReply_RequestTradeDate(FTAPI_Conn client, int nSerialNo, QotRequestTradeDate.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取交易日失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取交易日失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info("交易日结果" + ftGrpcReturnResult.getS2c().toString());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析交易日结果失败.", e);
             }
         }
     }

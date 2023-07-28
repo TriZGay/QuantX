@@ -6,10 +6,11 @@ import io.futakotome.trade.mapper.StockDtoMapper;
 import java.util.Arrays;
 import java.util.List;
 
-public class MarketAggregator implements RequestPlateInfo, RequestStockInfo, RequestStaticInfo {
+public class MarketAggregator implements
+        RequestPlateInfo, RequestStockInfo, RequestStaticInfo, RequestTradeDate {
     private static final List<RequestPlateInfo> allMarketPlateInfo = Arrays.asList(
             new HKMarket(),
-            new BigASHMarkert(),
+            new BigASHMarket(),
             new BigASZMarket(),
             new USMarket()
 //            new SGMarket(),
@@ -19,7 +20,7 @@ public class MarketAggregator implements RequestPlateInfo, RequestStockInfo, Req
     private static final List<RequestStockInfo> allMarketStockInfo = Arrays.asList(
             new HKMarket(),
             new BigASZMarket(),
-            new BigASHMarkert(),
+            new BigASHMarket(),
             new USMarket()
 //            new SGMarket(),
 //            new JPMarket()
@@ -27,15 +28,22 @@ public class MarketAggregator implements RequestPlateInfo, RequestStockInfo, Req
 
     private static final List<RequestStaticInfo> allMarketStaticInfo = Arrays.asList(
             new HKMarket(),
-            new BigASHMarkert(),
+            new BigASHMarket(),
             new BigASZMarket(),
             new USMarket()
     );
 
     private static final List<RequestStaticInfo> allMarketIpoInfo = Arrays.asList(
             new HKMarket(),
-            new BigASHMarkert(),
+            new BigASHMarket(),
             new BigASZMarket(),
+            new USMarket()
+    );
+
+    private static final List<RequestTradeDate> allMarketTradeDate = Arrays.asList(
+            new HKMarket(),
+            new BigASZMarket(),
+            new BigASHMarket(),
             new USMarket()
     );
 
@@ -71,6 +79,13 @@ public class MarketAggregator implements RequestPlateInfo, RequestStockInfo, Req
     public void sendIpoInfoRequest() {
         for (RequestStaticInfo perMarket : allMarketIpoInfo) {
             perMarket.sendIpoInfoRequest();
+        }
+    }
+
+    @Override
+    public void sendTradeDateRequest() {
+        for (RequestTradeDate perMarket : allMarketTradeDate) {
+            perMarket.sendTradeDateRequest();
         }
     }
 }

@@ -11,11 +11,15 @@ import io.futakotome.trade.utils.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
-public class HKMarket implements RequestPlateInfo, RequestStockInfo, RequestStaticInfo {
+public class HKMarket implements
+        RequestPlateInfo, RequestStockInfo, RequestStaticInfo, RequestTradeDate {
     private static final Logger LOGGER = LoggerFactory.getLogger(HKMarket.class);
 
     @Override
@@ -137,5 +141,21 @@ public class HKMarket implements RequestPlateInfo, RequestStockInfo, RequestStat
                 .build();
         int seqNo = FTQotService.qot.getIpoList(request);
         LOGGER.info("SeqNo:" + seqNo + "香港市场请求IPO信息:" + request.toString());
+    }
+
+    @Override
+    public void sendTradeDateRequest() {
+        LocalDate now = LocalDate.now();
+        String firstDayOfYear = now.with(TemporalAdjusters.firstDayOfYear()).toString();
+        String endDayOfYear = now.with(TemporalAdjusters.lastDayOfYear()).toString();
+        QotRequestTradeDate.Request request = QotRequestTradeDate.Request.newBuilder()
+                .setC2S(QotRequestTradeDate.C2S.newBuilder()
+                        .setMarket(QotCommon.QotMarket.QotMarket_HK_Security_VALUE)
+                        .setBeginTime(firstDayOfYear)
+                        .setEndTime(endDayOfYear)
+                        .build()
+                ).build();
+        int seqNo = FTQotService.qot.requestTradeDate(request);
+        LOGGER.info("SeqNo:" + seqNo + "香港市场请求交易日信息:" + request.toString());
     }
 }
