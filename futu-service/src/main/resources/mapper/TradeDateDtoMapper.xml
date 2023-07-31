@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.trade.mapper.TradeDateDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.TradeDateDto">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="marketOrSecurity" column="market_or_security" jdbcType="VARCHAR"/>
+            <result property="time" column="time" jdbcType="VARCHAR"/>
+            <result property="tradeDateType" column="trade_date_type" jdbcType="SMALLINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,market_or_security,time,
+        trade_date_type
+    </sql>
+    <insert id="insertBatch">
+        insert into t_trade_date(market_or_security,time,
+        trade_date_type)
+        values
+        <foreach collection="tradeDateDtoCollection" item="item" separator=",">
+            (#{item.marketOrSecurity,jdbcType=VARCHAR},#{item.time,jdbcType=VARCHAR},
+            #{item.tradeDateType,jdbcType=NUMERIC})
+        </foreach>
+    </insert>
+</mapper>

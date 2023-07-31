@@ -42,7 +42,7 @@ public class MarketAggregator implements
 
     private static final List<RequestTradeDate> allMarketTradeDate = Arrays.asList(
             new HKMarket(),
-            new BigASZMarket(),
+//            new BigASZMarket(), 统一传 3:A股
             new BigASHMarket(),
             new USMarket()
     );

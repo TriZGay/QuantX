@@ -8,6 +8,7 @@ import io.futakotome.trade.mapper.PlateDtoMapper;
 import io.futakotome.trade.mapper.StockDtoMapper;
 import io.futakotome.trade.service.FTQotService;
 import io.futakotome.trade.utils.CacheManager;
+import io.futakotome.trade.utils.RequestCount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class USMarket implements
         //一次最多请求200个股票
         //每30秒最多10次请求,也就是30秒最多请求2000个股票
         int requestStockLimit = 200;
-        int requestCount = 0;
+        RequestCount requestCount = new RequestCount();
         while (stockSize > requestStockLimit) {
             QotGetOwnerPlate.Request request = QotGetOwnerPlate.Request.newBuilder()
                     .setC2S(QotGetOwnerPlate.C2S.newBuilder()
@@ -57,16 +58,8 @@ public class USMarket implements
             i = i + requestStockLimit;
             stockSize = stockSize - requestStockLimit;
             int seqNo = FTQotService.qot.getOwnerPlate(request);
-            requestCount += 1;
             LOGGER.info("SeqNo:" + seqNo + "美国市场请求板块信息:" + request.toString() + "count:" + request);
-            if (requestCount != 0 && requestCount % 9 == 0) {
-                try {
-                    LOGGER.info("接口限制每30秒最多请求10次.sleep....");
-                    Thread.sleep(30000L);
-                } catch (InterruptedException e) {
-                    LOGGER.error("sleep失败!", e);
-                }
-            }
+            requestCount.count();
         }
         if (stockSize > 0) {
             QotGetOwnerPlate.Request request = QotGetOwnerPlate.Request.newBuilder()
@@ -88,6 +81,7 @@ public class USMarket implements
     @Override
     public void sendStockInfoRequest(PlateDtoMapper plateDtoMapper) {
         List<PlateDto> hkAllPlates = plateDtoMapper.searchByMarketEquals(QotCommon.QotMarket.QotMarket_US_Security_VALUE);
+        RequestCount requestCount = new RequestCount();
         for (int i = 0; i < hkAllPlates.size(); i++) {
             String plateCode = hkAllPlates.get(i).getCode();
             QotGetPlateSecurity.Request request = QotGetPlateSecurity.Request.newBuilder()
@@ -101,14 +95,7 @@ public class USMarket implements
             int seqNo = FTQotService.qot.getPlateSecurity(request);
             LOGGER.info("SeqNo:" + seqNo + "美国市场请求股票信息:" + request.toString());
             CacheManager.put(String.valueOf(seqNo), plateCode);
-            if (i != 0 && i % 9 == 0) {
-                try {
-                    LOGGER.info("接口限制每30秒最多请求10次.sleep....");
-                    Thread.sleep(30000L);
-                } catch (InterruptedException e) {
-                    LOGGER.error("sleep失败!", e);
-                }
-            }
+            requestCount.count();
         }
         try {
             LOGGER.info("美国市场请求股票信息结束.sleep....");
@@ -146,12 +133,13 @@ public class USMarket implements
         String endDayOfYear = now.with(TemporalAdjusters.lastDayOfYear()).toString();
         QotRequestTradeDate.Request request = QotRequestTradeDate.Request.newBuilder()
                 .setC2S(QotRequestTradeDate.C2S.newBuilder()
-                        .setMarket(QotCommon.QotMarket.QotMarket_US_Security_VALUE)
+                        .setMarket(QotCommon.TradeDateMarket.TradeDateMarket_US_VALUE)
                         .setBeginTime(firstDayOfYear)
                         .setEndTime(endDayOfYear)
                         .build()
                 ).build();
         int seqNo = FTQotService.qot.requestTradeDate(request);
+        CacheManager.put(String.valueOf(seqNo), QotCommon.TradeDateMarket.TradeDateMarket_US_VALUE);
         LOGGER.info("SeqNo:" + seqNo + "美国市场请求交易日信息:" + request.toString());
     }
 }

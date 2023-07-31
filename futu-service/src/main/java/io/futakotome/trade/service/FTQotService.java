@@ -56,9 +56,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private final IpoCnDtoMapper ipoCnMapper;
     private final IpoCnExWinningDtoMapper ipoCnExWinningMapper;
     private final SubDtoMapper subDtoMapper;
+    private final TradeDateDtoMapper tradeDateDtoMapper;
     private final FutuConfig futuConfig;
     private final RocketMQTemplate rocketMQTemplate;
-    private String sessionId;
 
     private static final String clientID = "javaclient";
 
@@ -66,7 +66,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     public FTQotService(PlateDtoMapper plateMapper, StockDtoMapper stockMapper, PlateStockDtoMapper plateStockMapper,
                         IpoHkDtoMapper ipoHkMapper, IpoUsDtoMapper ipoUsMapper, IpoCnDtoMapper ipoCnMapper, IpoCnExWinningDtoMapper ipoCnExWinningMapper,
-                        SubDtoMapper subDtoMapper, FutuConfig futuConfig, RocketMQTemplate rocketMQTemplate) {
+                        SubDtoMapper subDtoMapper, TradeDateDtoMapper tradeDateDtoMapper, FutuConfig futuConfig, RocketMQTemplate rocketMQTemplate) {
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
@@ -80,6 +80,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         this.ipoCnMapper = ipoCnMapper;
         this.ipoCnExWinningMapper = ipoCnExWinningMapper;
         this.rocketMQTemplate = rocketMQTemplate;
+        this.tradeDateDtoMapper = tradeDateDtoMapper;
     }
 
     @Deprecated
@@ -279,6 +280,49 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                Object marketType = CacheManager.get(String.valueOf(nSerialNo));
+                Iterator<JsonElement> tradeDateList = ftGrpcReturnResult.getS2c().getAsJsonArray("tradeDateList").iterator();
+                if (marketType instanceof Integer) {
+                    Integer tradeDateMarket = (Integer) marketType;
+                    List<TradeDateDto> newTradeDateDtos = new ArrayList<>();
+                    if (tradeDateMarket.equals(TradeDateMarketType.HK.getCode())) {
+                        while (tradeDateList.hasNext()) {
+                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
+                            TradeDateDto tradeDateDto = new TradeDateDto();
+                            tradeDateDto.setMarketOrSecurity(String.valueOf(MarketType.HK.getCode()));
+                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
+                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
+                            newTradeDateDtos.add(tradeDateDto);
+                        }
+                    } else if (tradeDateMarket.equals(TradeDateMarketType.CN.getCode())) {
+                        while (tradeDateList.hasNext()) {
+                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
+                            TradeDateDto tradeDateDto = new TradeDateDto();
+                            tradeDateDto.setMarketOrSecurity(MarketType.CN_SH.getCode() + "," + MarketType.CN_SZ.getCode());
+                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
+                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
+                            newTradeDateDtos.add(tradeDateDto);
+                        }
+                    } else if (tradeDateMarket.equals(TradeDateMarketType.US.getCode())) {
+                        while (tradeDateList.hasNext()) {
+                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
+                            TradeDateDto tradeDateDto = new TradeDateDto();
+                            tradeDateDto.setMarketOrSecurity(String.valueOf(MarketType.US.getCode()));
+                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
+                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
+                            newTradeDateDtos.add(tradeDateDto);
+                        }
+                    }
+                    //todo 其他的以后再算
+                    List<TradeDateDto> existTradeDates = tradeDateDtoMapper.selectList(null);
+                    newTradeDateDtos.removeIf(existTradeDates::contains);
+                    int insertRow = tradeDateDtoMapper.insertBatch(newTradeDateDtos);
+                    if (insertRow > 0) {
+                        String str = "交易日数据插入条数" + insertRow;
+                        LOGGER.info(str);
+                        sendNotifyMessage(str);
+                    }
+                }
                 LOGGER.info("交易日结果" + ftGrpcReturnResult.getS2c().toString());
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析交易日结果失败.", e);

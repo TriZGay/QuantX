@@ -31,5 +31,7 @@
     <changeSet id="8" author="futakotome">
         <sqlFile path="db/sql/InitSubscribeInfoTable.sql"/>
     </changeSet>
-
+    <changeSet id="9" author="futakotome">
+        <sqlFile path="db/sql/InitTradeDateTable.sql"/>
+    </changeSet>
 </databaseChangeLog>
