@@ -34,7 +34,11 @@ public class KLineSource extends RichSourceFunction<KLineDto> {
         connection = dataSource.getConnection();
         preparedStatement = connection.prepareStatement(
                 "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time,add_time"
-                        + " from t_kl_min_1_raw  limit 10"
+                        + " from t_kl_day_raw as t1"
+                        + " all inner join"
+                        + " (select update_time ,max(add_time) as latest from t_kl_day_raw group by update_time) as t2"
+                        + " on (t2.update_time = t1.update_time ) and (t2.latest = t1.add_time)"
+                        + " order by t1.update_time"
         );
     }
 

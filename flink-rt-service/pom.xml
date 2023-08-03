@@ -64,6 +64,11 @@ under the License.
             <!-- use uber jar with all dependencies included, change classifier to http for smaller jar -->
             <classifier>all</classifier>
         </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.3.8</version>
+        </dependency>
         <!-- Add connector dependencies here. They must be in the default scope (compile). -->
 
         <!-- Example:
