@@ -1,0 +1,1 @@
+optimize table quantx.t_ma5 final;
