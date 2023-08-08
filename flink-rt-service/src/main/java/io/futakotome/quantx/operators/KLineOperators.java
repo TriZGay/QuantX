@@ -2,14 +2,37 @@ package io.futakotome.quantx.operators;
 
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple15;
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.types.Row;
 
 import java.time.LocalDateTime;
 
 public class KLineOperators {
+
+    public static RowTypeInfo klineRowTypeInfo() {
+        return new RowTypeInfo(
+                BasicTypeInfo.BYTE_TYPE_INFO,  //market f0
+                BasicTypeInfo.STRING_TYPE_INFO, //code f1
+                BasicTypeInfo.BYTE_TYPE_INFO, //rehabType f2
+                BasicTypeInfo.DOUBLE_TYPE_INFO, //highPrice f3
+                BasicTypeInfo.DOUBLE_TYPE_INFO, //openPrice f4
+                BasicTypeInfo.DOUBLE_TYPE_INFO, //lowPrice f5
+                BasicTypeInfo.DOUBLE_TYPE_INFO, //closePrice f6
+                BasicTypeInfo.DOUBLE_TYPE_INFO, //lastClosePrice f7
+                BasicTypeInfo.LONG_TYPE_INFO, //volume f8
+                BasicTypeInfo.DOUBLE_TYPE_INFO, //turnover f9
+                BasicTypeInfo.DOUBLE_TYPE_INFO, //turnoverRate f10
+                BasicTypeInfo.DOUBLE_TYPE_INFO, //pe f11
+                BasicTypeInfo.DOUBLE_TYPE_INFO, //changeRate f12
+                BasicTypeInfo.of(LocalDateTime.class), //updateTime f13
+                BasicTypeInfo.of(LocalDateTime.class) //addTime f14
+        );
+    }
+
     public static TypeInformation<Tuple15<Integer, String, Integer, Double, Double, Double, Double, Double,
             Long, Double, Double, Double, Double, LocalDateTime, LocalDateTime>> klineTypeInformation() {
         return Types.TUPLE(Types.INT, Types.STRING, Types.INT, Types.DOUBLE, Types.DOUBLE, Types.DOUBLE, Types.DOUBLE, Types.DOUBLE,
