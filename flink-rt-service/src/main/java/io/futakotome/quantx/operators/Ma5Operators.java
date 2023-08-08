@@ -24,7 +24,7 @@ public class Ma5Operators {
     public static class ClosePriceAvg implements MapFunction<Tuple15<Integer, String, Integer, Double, Double, Double, Double, Double, Long, Double, Double, Double, Double, LocalDateTime, LocalDateTime>, Tuple6<Integer, String, Integer, Double, LocalDateTime, LocalDateTime>> {
         @Override
         public Tuple6<Integer, String, Integer, Double, LocalDateTime, LocalDateTime> map(Tuple15<Integer, String, Integer, Double, Double, Double, Double, Double, Long, Double, Double, Double, Double, LocalDateTime, LocalDateTime> v1) throws Exception {
-            return Tuple6.of(v1.f0, v1.f1, v1.f2, v1.f6 / 5, v1.f13.plusDays(1), LocalDateTime.now());
+            return Tuple6.of(v1.f0, v1.f1, v1.f2, v1.f6 / 5, v1.f13, LocalDateTime.now());
         }
     }
 

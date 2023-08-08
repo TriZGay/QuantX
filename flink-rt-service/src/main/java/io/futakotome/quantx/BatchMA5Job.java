@@ -18,10 +18,7 @@ import org.apache.flink.types.Row;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class BatchMA5Job {
     private static final String QUERY_TRADE_DATE_RECENT_5 = "select id,market_or_security,time,trade_date_type from t_trade_date where market_or_security = '%s' and time < '%s' order by time desc limit 5";
@@ -40,97 +37,116 @@ public class BatchMA5Job {
         ParameterTool parameter = ParameterTool.fromPropertiesFile(BatchMA5Job.class.getResourceAsStream("/base_config.properties"));
         final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
         ParameterTool commandLieParameter = ParameterTool.fromArgs(args);
+        //指定日期 默认今天
+        String date = commandLieParameter.get("date", LocalDate.now().toString());
         //默认全量全市场批处理
-        boolean isAll = commandLieParameter.getBoolean("all", false);
-//        MapOperator<Row, TradeDateDto> tradeDateRowMap = env.createInput(
-//                JdbcFormatter.inputFromPg(parameter,
-//                        String.format(QUERY_TRADE_DATE, firstOfYear, endOfYear),
-//                        new RowTypeInfo(
-//                                BasicTypeInfo.LONG_TYPE_INFO,
-//                                BasicTypeInfo.STRING_TYPE_INFO,
-//                                BasicTypeInfo.STRING_TYPE_INFO,
-//                                BasicTypeInfo.INT_TYPE_INFO
-//                        )))
-//                .map(new TradeDateOperators.ToTradeDatePojo());
+        boolean isAll = commandLieParameter.getBoolean("all", true);
         if (isAll) {
-
+            MARKETS.forEach(market ->
+                    computeMA5PerMarket(parameter, env, date, market));
         } else {
             //指定市场 默认大A
             String market = commandLieParameter.get("market", "21,22");
-            //指定日期 默认今天
-            String date = commandLieParameter.get("date", LocalDate.now().toString());
-            Set<String> codes = new HashSet<>();
-            if (market.contains(",")) {
-                //有逗号的是大A
-                String[] cnMarkets = market.split(",");
-                Arrays.stream(cnMarkets).forEach(cnMarket -> {
-                    try {
-                        List<String> tmpCodes = env.createInput(
-                                JdbcFormatter.inputFromClickhouse(parameter,
-                                        String.format(QUERY_DISTINCT_CODE, cnMarket),
-                                        new RowTypeInfo(Types.STRING)))
-                                .map((MapFunction<Row, String>) row -> row.getFieldAs(0))
-                                .collect();
-                        codes.addAll(tmpCodes);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-            } else {
-                List<String> tmpCodes = env.createInput(
-                        JdbcFormatter.inputFromClickhouse(parameter,
-                                String.format(QUERY_DISTINCT_CODE, market),
-                                new RowTypeInfo(Types.STRING))
-                ).map((MapFunction<Row, String>) row -> row.getFieldAs(0))
-                        .collect();
-                codes.addAll(tmpCodes);
+            computeMA5PerMarket(parameter, env, date, market);
+        }
+
+        env.execute(BatchMA5Job.class.getName());
+    }
+
+    private static void computeMA5PerMarket(ParameterTool parameter, ExecutionEnvironment env, String date, String market) {
+        Set<String> codes = new HashSet<>(needComputedCodes(market, env, parameter));
+        List<TradeDateDto> marketTradeDates = queryTradeDatesRecent5(market, date, env, parameter);
+        codes.forEach(code -> {
+            if (marketTradeDates != null && marketTradeDates.size() != 5) {
+                System.err.println(BatchMA5Job.class.getName() + ":交易区间长度不足5!停止计算...");
+            } else if (marketTradeDates != null) {
+                //交易日倒序查询
+                TradeDateDto start = marketTradeDates.get(4);
+                TradeDateDto end = marketTradeDates.get(0);
+                System.out.println("关键SQL:" + String.format(QUERY_DAY_K, code, start.getTime(), end.getTime(), code));
+                MapOperator<Row, Tuple15<Integer, String, Integer, Double, Double, Double, Double, Double,
+                        Long, Double, Double, Double, Double, LocalDateTime, LocalDateTime>> dayK = env.createInput(
+                        JdbcFormatter.inputFromClickhouse(
+                                parameter,
+                                String.format(QUERY_DAY_K, code, start.getTime(), end.getTime(), code),
+                                KLineOperators.klineRowTypeInfo()
+                        )).map(new KLineOperators.ToTuple15())
+                        .returns(KLineOperators.klineTypeInformation());
+                //backward
+                dayK.filter(new KLineOperators.FilterByRehabType(2))
+                        .reduce(new Ma5Operators.ClosePriceSum())
+                        .map(new Ma5Operators.ClosePriceAvg())
+                        .returns(Ma5Operators.ma5TypeInformation())
+                        .map(new Ma5Operators.ToRow())
+                        .output(JdbcFormatter.outputToClickhouse(parameter, INSERT_MA5, Ma5Operators.ma5Types()));
+                //forward
+                dayK.filter(new KLineOperators.FilterByRehabType(1))
+                        .reduce(new Ma5Operators.ClosePriceSum())
+                        .map(new Ma5Operators.ClosePriceAvg())
+                        .returns(Ma5Operators.ma5TypeInformation())
+                        .map(new Ma5Operators.ToRow())
+                        .output(JdbcFormatter.outputToClickhouse(parameter, INSERT_MA5, Ma5Operators.ma5Types()));
+                //none
+                dayK.filter(new KLineOperators.FilterByRehabType(0))
+                        .reduce(new Ma5Operators.ClosePriceSum())
+                        .map(new Ma5Operators.ClosePriceAvg())
+                        .returns(Ma5Operators.ma5TypeInformation())
+                        .map(new Ma5Operators.ToRow())
+                        .output(JdbcFormatter.outputToClickhouse(parameter, INSERT_MA5, Ma5Operators.ma5Types()));
             }
-            List<TradeDateDto> marketTradeDates = env.createInput(
+        });
+    }
+
+    private static List<TradeDateDto> queryTradeDatesRecent5(String market, String date, ExecutionEnvironment env, ParameterTool parameter) {
+        List<TradeDateDto> tradeDateDtos = new ArrayList<>();
+        try {
+            tradeDateDtos = env.createInput(
                     JdbcFormatter.inputFromPg(parameter,
                             String.format(QUERY_TRADE_DATE_RECENT_5, market, date),
                             TradeDateOperators.tradeDateRowTypeInfo()))
                     .map(new TradeDateOperators.ToTradeDatePojo())
                     .collect();
-            codes.forEach(code -> {
-                if (marketTradeDates != null && marketTradeDates.size() != 5) {
-                    System.err.println(BatchMA5Job.class.getName() + ":交易区间长度不足5!停止计算...");
-                } else if (marketTradeDates != null) {
-                    //交易日倒序查询
-                    TradeDateDto start = marketTradeDates.get(4);
-                    TradeDateDto end = marketTradeDates.get(0);
-                    MapOperator<Row, Tuple15<Integer, String, Integer, Double, Double, Double, Double, Double,
-                            Long, Double, Double, Double, Double, LocalDateTime, LocalDateTime>> dayK = env.createInput(
-                            JdbcFormatter.inputFromClickhouse(
-                                    parameter,
-                                    String.format(QUERY_DAY_K, code, start.getTime(), end.getTime(), code),
-                                    KLineOperators.klineRowTypeInfo()
-                            )).map(new KLineOperators.ToTuple15())
-                            .returns(KLineOperators.klineTypeInformation());
-                    //backward
-                    dayK.filter(new KLineOperators.FilterByRehabType(2))
-                            .reduce(new Ma5Operators.ClosePriceSum())
-                            .map(new Ma5Operators.ClosePriceAvg())
-                            .returns(Ma5Operators.ma5TypeInformation())
-                            .map(new Ma5Operators.ToRow())
-                            .output(JdbcFormatter.outputToClickhouse(parameter, INSERT_MA5, Ma5Operators.ma5Types()));
-                    //forward
-                    dayK.filter(new KLineOperators.FilterByRehabType(1))
-                            .reduce(new Ma5Operators.ClosePriceSum())
-                            .map(new Ma5Operators.ClosePriceAvg())
-                            .returns(Ma5Operators.ma5TypeInformation())
-                            .map(new Ma5Operators.ToRow())
-                            .output(JdbcFormatter.outputToClickhouse(parameter, INSERT_MA5, Ma5Operators.ma5Types()));
-                    //none
-                    dayK.filter(new KLineOperators.FilterByRehabType(0))
-                            .reduce(new Ma5Operators.ClosePriceSum())
-                            .map(new Ma5Operators.ClosePriceAvg())
-                            .returns(Ma5Operators.ma5TypeInformation())
-                            .map(new Ma5Operators.ToRow())
-                            .output(JdbcFormatter.outputToClickhouse(parameter, INSERT_MA5, Ma5Operators.ma5Types()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return tradeDateDtos;
+    }
+
+    private static List<String> needComputedCodes(String market, ExecutionEnvironment env, ParameterTool parameter) {
+        if (market.contains(",")) {
+            //有逗号的是大A
+            String[] cnMarkets = market.split(",");
+            List<String> cnCodes = new ArrayList<>();
+            Arrays.stream(cnMarkets).forEach(cnMarket -> {
+                try {
+                    cnCodes.addAll(
+                            env.createInput(
+                                    JdbcFormatter.inputFromClickhouse(parameter,
+                                            String.format(QUERY_DISTINCT_CODE, cnMarket),
+                                            new RowTypeInfo(Types.STRING)))
+                                    .map((MapFunction<Row, String>) row -> row.getFieldAs(0))
+                                    .collect()
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
+            return cnCodes;
+        } else {
+            List<String> otherMarketCodes = new ArrayList<>();
+            try {
+                otherMarketCodes.addAll(
+                        env.createInput(
+                                JdbcFormatter.inputFromClickhouse(parameter,
+                                        String.format(QUERY_DISTINCT_CODE, market),
+                                        new RowTypeInfo(Types.STRING))
+                        ).map((MapFunction<Row, String>) row -> row.getFieldAs(0))
+                                .collect()
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return otherMarketCodes;
         }
-
-        env.execute(BatchMA5Job.class.getName());
     }
 }
