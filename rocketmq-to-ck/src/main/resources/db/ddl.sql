@@ -1,5 +1,17 @@
 create database if not exists quantx;
 
+create table if not exists quantx.t_ma10
+(
+    market      Int8,
+    code        String,
+    rehab_type  Int8,
+    ma5         Float64,
+    update_time DateTime64,
+    add_time    DateTime64
+) ENGINE = ReplacingMergeTree(add_time)
+      PRIMARY KEY (market, code, rehab_type, update_time)
+      ORDER BY (market, code, rehab_type, update_time);
+
 create table if not exists quantx.t_ma5
 (
     market      Int8,
