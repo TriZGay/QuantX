@@ -11,7 +11,7 @@ import org.apache.flink.types.Row;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class Ma10Operators {
+public class Ma20Operators {
     public static class ClosePriceSum implements ReduceFunction<Tuple15<Integer, String, Integer, Double, Double, Double, Double, Double,
             Long, Double, Double, Double, Double, LocalDateTime, LocalDateTime>> {
         @Override
@@ -24,22 +24,22 @@ public class Ma10Operators {
     public static class ClosePriceAvg implements MapFunction<Tuple15<Integer, String, Integer, Double, Double, Double, Double, Double, Long, Double, Double, Double, Double, LocalDateTime, LocalDateTime>, Tuple6<Integer, String, Integer, Double, LocalDateTime, LocalDateTime>> {
         @Override
         public Tuple6<Integer, String, Integer, Double, LocalDateTime, LocalDateTime> map(Tuple15<Integer, String, Integer, Double, Double, Double, Double, Double, Long, Double, Double, Double, Double, LocalDateTime, LocalDateTime> v1) throws Exception {
-            return Tuple6.of(v1.f0, v1.f1, v1.f2, v1.f6 / 10, v1.f13, LocalDateTime.now());
+            return Tuple6.of(v1.f0, v1.f1, v1.f2, v1.f6 / 20, v1.f13, LocalDateTime.now());
         }
     }
 
     public static class ToRow implements MapFunction<Tuple6<Integer, String, Integer, Double, LocalDateTime, LocalDateTime>, Row> {
         @Override
-        public Row map(Tuple6<Integer, String, Integer, Double, LocalDateTime, LocalDateTime> ma10) throws Exception {
-            return Row.of(ma10.f0, ma10.f1, ma10.f2, ma10.f3, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(ma10.f4), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(ma10.f5));
+        public Row map(Tuple6<Integer, String, Integer, Double, LocalDateTime, LocalDateTime> ma20) throws Exception {
+            return Row.of(ma20.f0, ma20.f1, ma20.f2, ma20.f3, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(ma20.f4), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(ma20.f5));
         }
     }
 
-    public static int[] ma10Types() {
+    public static int[] ma20Types() {
         return new int[]{java.sql.Types.INTEGER, java.sql.Types.NCHAR, java.sql.Types.INTEGER, java.sql.Types.DOUBLE, java.sql.Types.NCHAR, java.sql.Types.NCHAR};
     }
 
-    public static TypeInformation<Tuple6<Integer, String, Integer, Double, LocalDateTime, LocalDateTime>> ma10TypeInformation() {
+    public static TypeInformation<Tuple6<Integer, String, Integer, Double, LocalDateTime, LocalDateTime>> ma20TypeInformation() {
         return Types.TUPLE(Types.INT, Types.STRING, Types.INT, Types.DOUBLE, Types.LOCAL_DATE_TIME, Types.LOCAL_DATE_TIME);
     }
 }
