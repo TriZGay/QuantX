@@ -1,12 +1,12 @@
-package io.futakotome.quantx;
+package io.futakotome.quantx.jobs;
 
+import io.futakotome.quantx.QuantXMainJob;
 import io.futakotome.quantx.dto.TradeDateDto;
 import io.futakotome.quantx.fomatters.JdbcFormatter;
 import io.futakotome.quantx.operators.KLineOperators;
 import io.futakotome.quantx.operators.Ma5Operators;
 import io.futakotome.quantx.operators.TradeDateOperators;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.operators.MapOperator;
@@ -17,10 +17,9 @@ import org.apache.flink.types.Row;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
-public class BatchMA5Job {
+public class BatchDayKMA5Job {
     private static final String QUERY_TRADE_DATE_RECENT_5 = "select id,market_or_security,time,trade_date_type from t_trade_date where market_or_security = '%s' and time < '%s' order by time desc limit 5";
     private static final String QUERY_DISTINCT_CODE = "select distinct code from t_kl_day_raw prewhere market = %s";
     private static final String QUERY_DAY_K =
@@ -33,32 +32,41 @@ public class BatchMA5Job {
     private static final String INSERT_MA5 = "insert into t_ma5 values (?,?,?,?,?,?)";
     private static final List<String> MARKETS = Arrays.asList("1", "21,22");
 
-    public static void main(String[] args) throws Exception {
-        ParameterTool parameter = ParameterTool.fromPropertiesFile(BatchMA5Job.class.getResourceAsStream("/base_config.properties"));
-        final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-        ParameterTool commandLieParameter = ParameterTool.fromArgs(args);
+
+    private final ExecutionEnvironment env;
+    private final ParameterTool configs;
+    private final ParameterTool commandLieParameter;
+
+    public BatchDayKMA5Job(ExecutionEnvironment env, ParameterTool configs, String[] args) {
+        this.env = env;
+        this.configs = configs;
+        this.commandLieParameter = ParameterTool.fromArgs(args);
+    }
+
+    public void run() throws Exception {
         //指定日期 默认今天
         String date = commandLieParameter.get("date", LocalDate.now().toString());
         //默认全量全市场批处理
         boolean isAll = commandLieParameter.getBoolean("all", true);
         if (isAll) {
             MARKETS.forEach(market ->
-                    computeMA5PerMarket(parameter, env, date, market));
+                    computeMA5PerMarket(configs, env, date, market));
         } else {
             //指定市场 默认大A
             String market = commandLieParameter.get("market", "21,22");
-            computeMA5PerMarket(parameter, env, date, market);
+            computeMA5PerMarket(configs, env, date, market);
         }
 
-        env.execute(BatchMA5Job.class.getName());
+        env.execute(BatchDayKMA5Job.class.getName());
     }
+
 
     private static void computeMA5PerMarket(ParameterTool parameter, ExecutionEnvironment env, String date, String market) {
         Set<String> codes = new HashSet<>(needComputedCodes(market, env, parameter));
         List<TradeDateDto> marketTradeDates = queryTradeDatesRecent5(market, date, env, parameter);
         codes.forEach(code -> {
             if (marketTradeDates != null && marketTradeDates.size() != 5) {
-                System.err.println(BatchMA5Job.class.getName() + ":交易区间长度不足5!停止计算...");
+                System.err.println(QuantXMainJob.class.getName() + ":交易区间长度不足5!停止计算...");
             } else if (marketTradeDates != null) {
                 //交易日倒序查询
                 TradeDateDto start = marketTradeDates.get(4);

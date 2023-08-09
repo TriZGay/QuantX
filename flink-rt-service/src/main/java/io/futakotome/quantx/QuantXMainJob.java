@@ -1,0 +1,22 @@
+package io.futakotome.quantx;
+
+import io.futakotome.quantx.jobs.BatchDayKMA5Job;
+import io.futakotome.quantx.utils.Common;
+import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.java.utils.ParameterTool;
+
+public class QuantXMainJob {
+
+    public static void main(String[] args) throws Exception {
+        ParameterTool configs = ParameterTool.fromPropertiesFile(QuantXMainJob.class.getResourceAsStream("/base_config.properties"));
+        final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
+        ParameterTool commandLieParameter = ParameterTool.fromArgs(args);
+        String type = commandLieParameter.get("type", Common.JOB_TYPE_DAYK_MA5);
+        switch (type) {
+            case Common.JOB_TYPE_DAYK_MA5: {
+                new BatchDayKMA5Job(env, configs, args).run();
+                return;
+            }
+        }
+    }
+}
