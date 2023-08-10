@@ -1,9 +1,11 @@
 package io.futakotome.quantx.jobs;
 
+import io.futakotome.quantx.QuantXMainJob;
 import io.futakotome.quantx.dto.TradeDateDto;
 import io.futakotome.quantx.fomatters.JdbcFormatter;
 import io.futakotome.quantx.operators.KLineOperators;
 import io.futakotome.quantx.operators.Ma20Operators;
+import io.futakotome.quantx.operators.Ma30Operators;
 import io.futakotome.quantx.operators.TradeDateOperators;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -18,8 +20,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class BatchDayKMA20Job {
-    private static final String QUERY_TRADE_DATE_RECENT_20 = "select id,market_or_security,time,trade_date_type from t_trade_date where market_or_security = '%s' and time < '%s' order by time desc limit 20";
+public class BatchDayKMA30Job {
+    private static final String QUERY_TRADE_DATE_RECENT_30 = "select id,market_or_security,time,trade_date_type from t_trade_date where market_or_security = '%s' and time < '%s' order by time desc limit 30";
     private static final String QUERY_DISTINCT_CODE = "select distinct code from t_kl_day_raw prewhere market = %s";
     private static final String QUERY_DAY_K =
             "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time,add_time" +
@@ -28,15 +30,14 @@ public class BatchDayKMA20Job {
                     " (select update_time ,max(add_time) as latest from t_kl_day_raw prewhere code = '%s' group by update_time) as t2 " +
                     " on (t2.update_time = t1.update_time ) and (t2.latest = t1.add_time) and (t1.update_time >= '%s') and (t1.update_time <= '%s') and (code = '%s')" +
                     " order by t1.update_time";
-    private static final String INSERT_MA20 = "insert into t_ma20 values (?,?,?,?,?,?)";
+    private static final String INSERT_MA30 = "insert into t_ma30 values (?,?,?,?,?,?)";
     private static final List<String> MARKETS = Arrays.asList("1", "21,22");
-
 
     private final ExecutionEnvironment env;
     private final ParameterTool configs;
     private final ParameterTool commandLieParameter;
 
-    public BatchDayKMA20Job(ExecutionEnvironment env, ParameterTool configs, String[] args) {
+    public BatchDayKMA30Job(ExecutionEnvironment env, ParameterTool configs, String[] args) {
         this.env = env;
         this.configs = configs;
         this.commandLieParameter = ParameterTool.fromArgs(args);
@@ -49,25 +50,25 @@ public class BatchDayKMA20Job {
         boolean isAll = commandLieParameter.getBoolean("all", true);
         if (isAll) {
             MARKETS.forEach(market ->
-                    computeMA20PerMarket(configs, env, date, market));
+                    computeMA30PerMarket(configs, env, date, market));
         } else {
             //指定市场 默认大A
             String market = commandLieParameter.get("market", "21,22");
-            computeMA20PerMarket(configs, env, date, market);
+            computeMA30PerMarket(configs, env, date, market);
         }
 
         env.execute(BatchDayKMA20Job.class.getName());
     }
 
-    private static void computeMA20PerMarket(ParameterTool parameter, ExecutionEnvironment env, String date, String market) {
+    private static void computeMA30PerMarket(ParameterTool parameter, ExecutionEnvironment env, String date, String market) {
         Set<String> codes = new HashSet<>(needComputedCodes(market, env, parameter));
-        List<TradeDateDto> marketTradeDates = queryTradeDatesRecent20(market, date, env, parameter);
+        List<TradeDateDto> marketTradeDates = queryTradeDatesRecent30(market, date, env, parameter);
         codes.forEach(code -> {
-            if (marketTradeDates != null && marketTradeDates.size() != 20) {
-                System.err.println(BatchDayKMA20Job.class.getName() + ":交易区间长度不足20!停止计算...");
+            if (marketTradeDates != null && marketTradeDates.size() != 30) {
+                System.err.println(QuantXMainJob.class.getName() + ":交易区间长度不足30!停止计算...");
             } else if (marketTradeDates != null) {
                 //交易日倒序查询
-                TradeDateDto start = marketTradeDates.get(19);
+                TradeDateDto start = marketTradeDates.get(29);
                 TradeDateDto end = marketTradeDates.get(0);
                 System.out.println("关键SQL:" + String.format(QUERY_DAY_K, code, start.getTime(), end.getTime(), code));
                 MapOperator<Row, Tuple15<Integer, String, Integer, Double, Double, Double, Double, Double,
@@ -80,35 +81,35 @@ public class BatchDayKMA20Job {
                         .returns(KLineOperators.klineTypeInformation());
                 //backward
                 dayK.filter(new KLineOperators.FilterByRehabType(2))
-                        .reduce(new Ma20Operators.ClosePriceSum())
-                        .map(new Ma20Operators.ClosePriceAvg())
-                        .returns(Ma20Operators.ma20TypeInformation())
-                        .map(new Ma20Operators.ToRow())
-                        .output(JdbcFormatter.outputToClickhouse(parameter, INSERT_MA20, Ma20Operators.ma20Types()));
+                        .reduce(new Ma30Operators.ClosePriceSum())
+                        .map(new Ma30Operators.ClosePriceAvg())
+                        .returns(Ma30Operators.ma30TypeInformation())
+                        .map(new Ma30Operators.ToRow())
+                        .output(JdbcFormatter.outputToClickhouse(parameter, INSERT_MA30, Ma30Operators.ma30Types()));
                 //forward
                 dayK.filter(new KLineOperators.FilterByRehabType(1))
-                        .reduce(new Ma20Operators.ClosePriceSum())
-                        .map(new Ma20Operators.ClosePriceAvg())
-                        .returns(Ma20Operators.ma20TypeInformation())
-                        .map(new Ma20Operators.ToRow())
-                        .output(JdbcFormatter.outputToClickhouse(parameter, INSERT_MA20, Ma20Operators.ma20Types()));
+                        .reduce(new Ma30Operators.ClosePriceSum())
+                        .map(new Ma30Operators.ClosePriceAvg())
+                        .returns(Ma30Operators.ma30TypeInformation())
+                        .map(new Ma30Operators.ToRow())
+                        .output(JdbcFormatter.outputToClickhouse(parameter, INSERT_MA30, Ma30Operators.ma30Types()));
                 //none
                 dayK.filter(new KLineOperators.FilterByRehabType(0))
-                        .reduce(new Ma20Operators.ClosePriceSum())
-                        .map(new Ma20Operators.ClosePriceAvg())
-                        .returns(Ma20Operators.ma20TypeInformation())
-                        .map(new Ma20Operators.ToRow())
-                        .output(JdbcFormatter.outputToClickhouse(parameter, INSERT_MA20, Ma20Operators.ma20Types()));
+                        .reduce(new Ma30Operators.ClosePriceSum())
+                        .map(new Ma30Operators.ClosePriceAvg())
+                        .returns(Ma30Operators.ma30TypeInformation())
+                        .map(new Ma30Operators.ToRow())
+                        .output(JdbcFormatter.outputToClickhouse(parameter, INSERT_MA30, Ma30Operators.ma30Types()));
             }
         });
     }
 
-    private static List<TradeDateDto> queryTradeDatesRecent20(String market, String date, ExecutionEnvironment env, ParameterTool parameter) {
+    private static List<TradeDateDto> queryTradeDatesRecent30(String market, String date, ExecutionEnvironment env, ParameterTool parameter) {
         List<TradeDateDto> tradeDateDtos = new ArrayList<>();
         try {
             tradeDateDtos = env.createInput(
                     JdbcFormatter.inputFromPg(parameter,
-                            String.format(QUERY_TRADE_DATE_RECENT_20, market, date),
+                            String.format(QUERY_TRADE_DATE_RECENT_30, market, date),
                             TradeDateOperators.tradeDateRowTypeInfo()))
                     .map(new TradeDateOperators.ToTradeDatePojo())
                     .collect();

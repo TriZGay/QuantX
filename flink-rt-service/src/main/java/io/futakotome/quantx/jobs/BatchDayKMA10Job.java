@@ -1,6 +1,5 @@
 package io.futakotome.quantx.jobs;
 
-import io.futakotome.quantx.QuantXMainJob;
 import io.futakotome.quantx.dto.TradeDateDto;
 import io.futakotome.quantx.fomatters.JdbcFormatter;
 import io.futakotome.quantx.operators.KLineOperators;
@@ -65,7 +64,7 @@ public class BatchDayKMA10Job {
         List<TradeDateDto> marketTradeDates = queryTradeDatesRecent10(market, date, env, parameter);
         codes.forEach(code -> {
             if (marketTradeDates != null && marketTradeDates.size() != 10) {
-                System.err.println(QuantXMainJob.class.getName() + ":交易区间长度不足10!停止计算...");
+                System.err.println(BatchDayKMA10Job.class.getName() + ":交易区间长度不足10!停止计算...");
             } else if (marketTradeDates != null) {
                 //交易日倒序查询
                 TradeDateDto start = marketTradeDates.get(9);
