@@ -30,7 +30,7 @@ public class BatchDayKMA30Job {
                     " (select update_time ,max(add_time) as latest from t_kl_day_raw prewhere code = '%s' group by update_time) as t2 " +
                     " on (t2.update_time = t1.update_time ) and (t2.latest = t1.add_time) and (t1.update_time >= '%s') and (t1.update_time <= '%s') and (code = '%s')" +
                     " order by t1.update_time";
-    private static final String INSERT_MA30 = "insert into t_ma30 values (?,?,?,?,?,?)";
+    private static final String INSERT_MA30 = "insert into t_ma30_day values (?,?,?,?,?,?)";
     private static final List<String> MARKETS = Arrays.asList("1", "21,22");
 
     private final ExecutionEnvironment env;

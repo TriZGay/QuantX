@@ -1,6 +1,6 @@
 create database if not exists quantx;
 
-create table if not exists quantx.t_ma30
+create table if not exists quantx.t_ma30_day
 (
     market      Int8,
     code        String,
@@ -12,7 +12,7 @@ create table if not exists quantx.t_ma30
       PRIMARY KEY (market, code, rehab_type, update_time)
       ORDER BY (market, code, rehab_type, update_time);
 
-create table if not exists quantx.t_ma20
+create table if not exists quantx.t_ma20_day
 (
     market      Int8,
     code        String,
@@ -24,7 +24,7 @@ create table if not exists quantx.t_ma20
       PRIMARY KEY (market, code, rehab_type, update_time)
       ORDER BY (market, code, rehab_type, update_time);
 
-create table if not exists quantx.t_ma10
+create table if not exists quantx.t_ma10_day
 (
     market      Int8,
     code        String,
@@ -36,7 +36,7 @@ create table if not exists quantx.t_ma10
       PRIMARY KEY (market, code, rehab_type, update_time)
       ORDER BY (market, code, rehab_type, update_time);
 
-create table if not exists quantx.t_ma5
+create table if not exists quantx.t_ma5_day
 (
     market      Int8,
     code        String,
