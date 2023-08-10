@@ -5,7 +5,7 @@ create table if not exists quantx.t_ma30_day
     market      Int8,
     code        String,
     rehab_type  Int8,
-    ma5         Float64,
+    ma_value    Float64,
     update_time DateTime64,
     add_time    DateTime64
 ) ENGINE = ReplacingMergeTree(add_time)
@@ -17,7 +17,7 @@ create table if not exists quantx.t_ma20_day
     market      Int8,
     code        String,
     rehab_type  Int8,
-    ma5         Float64,
+    ma_value    Float64,
     update_time DateTime64,
     add_time    DateTime64
 ) ENGINE = ReplacingMergeTree(add_time)
@@ -29,7 +29,7 @@ create table if not exists quantx.t_ma10_day
     market      Int8,
     code        String,
     rehab_type  Int8,
-    ma5         Float64,
+    ma_value    Float64,
     update_time DateTime64,
     add_time    DateTime64
 ) ENGINE = ReplacingMergeTree(add_time)
@@ -41,7 +41,7 @@ create table if not exists quantx.t_ma5_day
     market      Int8,
     code        String,
     rehab_type  Int8,
-    ma5         Float64,
+    ma_value    Float64,
     update_time DateTime64,
     add_time    DateTime64
 ) ENGINE = ReplacingMergeTree(add_time)
