@@ -33,6 +33,7 @@ public class MessageService {
 
     public Flux<String> getMessages(String session) {
         sinks.putIfAbsent(session, Sinks.many().multicast().onBackpressureBuffer());
+        LOGGER.info(sinks.get(session).toString());
         return sinks.get(session).asFlux();
     }
 }

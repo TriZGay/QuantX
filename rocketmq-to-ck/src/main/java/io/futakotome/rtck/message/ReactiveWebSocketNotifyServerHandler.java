@@ -11,6 +11,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
 @Component
 public class ReactiveWebSocketNotifyServerHandler
         extends AbstractWebSocketServerHandler
@@ -31,12 +33,12 @@ public class ReactiveWebSocketNotifyServerHandler
         Flux<WebSocketMessage> reading = session.receive()
                 .doOnNext(webSocketMessage ->
                         onMessage(webSocketMessage.getPayloadAsText(), ReactiveWebSocketHandlerMapping.NOTIFY_PATH));
-
+//        return session.send(Mono.delay(Duration.ofMillis(100)).thenMany(Mono.just(session.textMessage("dddd"))));
         Mono<CloseStatus> printCloseStatus = session.closeStatus()
                 .doOnNext(closeStatus ->
                         LOGGER.info("{},连接状态:{},{}", path, closeStatus.getCode(),
                                 closeStatus.getReason()));
-
+//
         return session.send(messages).and(reading)
                 .and(printCloseStatus);
     }
