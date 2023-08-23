@@ -4,8 +4,10 @@ import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.rtck.mapper.RTKLMapper;
 import io.futakotome.rtck.mapper.dto.RTKLDto;
+import io.futakotome.rtck.message.AbstractWebSocketServerHandler;
 import io.futakotome.rtck.message.core.MessageService;
 import io.futakotome.rtck.config.WebSocketHandlerConfiguration;
+import io.futakotome.rtck.message.core.WebSocketSender;
 import io.futakotome.rtck.message.dto.RealTimeKLMessage;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
@@ -13,59 +15,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 @Component
 @RocketMQMessageListener(consumerGroup = MessageCommon.RT_KL_QUARTER_CONSUMER_GROUP, topic = MessageCommon.RT_KL_QUARTER_TOPIC)
-public class RTKLQuarterListener implements RocketMQListener<RTKLMessage> {
+public class RTKLQuarterListener extends AbstractKLineListener implements RocketMQListener<RTKLMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTKLQuarterListener.class);
     private final RTKLMapper mapper;
-    private final MessageService messageService;
+    private final ConcurrentHashMap<String, WebSocketSender> senderMap;
 
-    public RTKLQuarterListener(RTKLMapper mapper, MessageService messageService) {
+    public RTKLQuarterListener(RTKLMapper mapper, ConcurrentHashMap<String, WebSocketSender> senderMap) {
         this.mapper = mapper;
-        this.messageService = messageService;
+        this.senderMap = senderMap;
     }
 
     @Override
     public void onMessage(RTKLMessage rtklMessage) {
-        RTKLDto dto = new RTKLDto();
-        dto.setMarket(rtklMessage.getMarket());
-        dto.setCode(rtklMessage.getCode());
-        dto.setRehabType(rtklMessage.getRehabType());
-        dto.setHighPrice(rtklMessage.getHighPrice());
-        dto.setOpenPrice(rtklMessage.getOpenPrice());
-        dto.setLowPrice(rtklMessage.getLowPrice());
-        dto.setClosePrice(rtklMessage.getClosePrice());
-        dto.setLastClosePrice(rtklMessage.getLastClosePrice());
-        dto.setVolume(rtklMessage.getVolume());
-        dto.setTurnover(rtklMessage.getTurnover());
-        dto.setTurnoverRate(rtklMessage.getTurnoverRate());
-        dto.setPe(rtklMessage.getPe());
-        dto.setChangeRate(rtklMessage.getChangeRate());
-        dto.setUpdateTime(rtklMessage.getUpdateTime());
+        RTKLDto dto = message2Dto(rtklMessage);
         if (mapper.insertOne(dto, RTKLMapper.KL_QUARTER_TABLE_NAME)) {
             LOGGER.info("季K数据入库成功");
-            sendKLineWsMessage(rtklMessage);
+            sendKLineWsMessage(rtklMessage,
+                    senderMap.get(AbstractWebSocketServerHandler.KLINE_TAG));
         }
 
     }
 
-    private void sendKLineWsMessage(RTKLMessage rtklMessage) {
-        RealTimeKLMessage realTimeKLMessage = new RealTimeKLMessage();
-        realTimeKLMessage.setMarket(rtklMessage.getMarket());
-        realTimeKLMessage.setCode(rtklMessage.getCode());
-        realTimeKLMessage.setRehabType(rtklMessage.getRehabType());
-        realTimeKLMessage.setHighPrice(rtklMessage.getHighPrice());
-        realTimeKLMessage.setOpenPrice(rtklMessage.getOpenPrice());
-        realTimeKLMessage.setLowPrice(rtklMessage.getLowPrice());
-        realTimeKLMessage.setClosePrice(rtklMessage.getClosePrice());
-        realTimeKLMessage.setLastClosePrice(rtklMessage.getLastClosePrice());
-        realTimeKLMessage.setVolume(rtklMessage.getVolume());
-        realTimeKLMessage.setTurnover(rtklMessage.getTurnover());
-        realTimeKLMessage.setTurnoverRate(rtklMessage.getTurnoverRate());
-        realTimeKLMessage.setPe(rtklMessage.getPe());
-        realTimeKLMessage.setChangeRate(rtklMessage.getChangeRate());
-        realTimeKLMessage.setUpdateTime(rtklMessage.getUpdateTime());
-        LOGGER.info("WebSocket消息:{}", realTimeKLMessage.toString());
-        messageService.onNext(realTimeKLMessage, WebSocketHandlerConfiguration.KLINE_PATH);
-    }
 }

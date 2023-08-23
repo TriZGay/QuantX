@@ -13,6 +13,7 @@ public abstract class AbstractWebSocketServerHandler {
     public static final String NOTIFY_TAG = "notify";
     public static final String MARKET_STATE_TAG = "market_state";
     public static final String BASIC_QUOTE_TAG = "basic_quote";
+    public static final String KLINE_TAG = "kline";
 
     //用于获取url参数
     protected Map<String, String> getQueryMap(String queryStr) {
