@@ -24,7 +24,6 @@ public class MarketStateListener implements RocketMQListener<MarketStateMessage>
         this.senderMap = senderMap;
     }
 
-
     @Override
     public void onMessage(MarketStateMessage marketStateMessage) {
         MarketStateWsMessage wsMessage = new MarketStateWsMessage();
@@ -38,7 +37,10 @@ public class MarketStateListener implements RocketMQListener<MarketStateMessage>
         wsMessage.setMarketUSFuture(marketStateMessage.getMarketUSFuture());
         wsMessage.setMarketSGFuture(marketStateMessage.getMarketSGFuture());
         wsMessage.setMarketJPFuture(marketStateMessage.getMarketJPFuture());
-        LOGGER.info("WebSocket消息:{}", wsMessage.toString());
-        senderMap.get(AbstractWebSocketServerHandler.MARKET_STATE_TAG).sendData(wsMessage);
+        WebSocketSender sender = senderMap.get(AbstractWebSocketServerHandler.MARKET_STATE_TAG);
+        if (sender != null) {
+            LOGGER.info("WebSocket消息:{}", wsMessage.toString());
+            sender.sendData(wsMessage);
+        }
     }
 }

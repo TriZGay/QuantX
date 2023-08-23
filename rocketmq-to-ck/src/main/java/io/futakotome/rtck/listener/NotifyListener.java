@@ -28,8 +28,12 @@ public class NotifyListener implements RocketMQListener<NotifyMessage> {
     public void onMessage(NotifyMessage notifyMessage) {
         String notifyContent = notifyMessage.getContent();
         if (notifyContent != null && !notifyContent.isEmpty()) {
-            LOGGER.info("WebSocket消息:{}", notifyContent);
-            senderMap.get(AbstractWebSocketServerHandler.NOTIFY_TAG).sendData(new NotifyWsMessage(notifyContent));
+
+            WebSocketSender sender = senderMap.get(AbstractWebSocketServerHandler.NOTIFY_TAG);
+            if (sender != null) {
+                LOGGER.info("WebSocket消息:{}", notifyContent);
+                sender.sendData(new NotifyWsMessage(notifyContent));
+            }
         }
     }
 }
