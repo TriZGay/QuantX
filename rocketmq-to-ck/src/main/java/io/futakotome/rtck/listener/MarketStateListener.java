@@ -5,7 +5,6 @@ import io.futakotome.common.message.MarketStateMessage;
 import io.futakotome.rtck.message.AbstractWebSocketServerHandler;
 import io.futakotome.rtck.message.core.WebSocketSender;
 import io.futakotome.rtck.message.dto.MarketStateWsMessage;
-import io.futakotome.rtck.config.WebSocketHandlerConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.slf4j.Logger;
