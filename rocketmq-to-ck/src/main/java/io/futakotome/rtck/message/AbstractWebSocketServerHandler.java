@@ -11,24 +11,7 @@ import java.util.Map;
 public abstract class AbstractWebSocketServerHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWebSocketServerHandler.class);
     public static final String NOTIFY_TAG = "notify";
-//    private final ObjectMapper objectMapper;
-//    private final ReactiveWebSocketListener listener;
-//    private final MessageService messageService;
-//
-//    protected AbstractWebSocketServerHandler(ObjectMapper objectMapper, ReactiveWebSocketListener listener, MessageService messageService) {
-//        this.objectMapper = objectMapper;
-//        this.listener = listener;
-//        this.messageService = messageService;
-//    }
-
-//    protected void onMessage(String payload, String session) {
-//        try {
-//            Message message = objectMapper.readValue(payload, Message.class);
-//            listener.onMessage(message, session);
-//        } catch (JsonProcessingException e) {
-//            LOGGER.error("处理消息出错.", e);
-//        }
-//    }
+    public static final String MARKET_STATE_TAG = "market_state";
 
     //用于获取url参数
     protected Map<String, String> getQueryMap(String queryStr) {
@@ -45,7 +28,4 @@ public abstract class AbstractWebSocketServerHandler {
         return queryMap;
     }
 
-//    protected MessageService getMessageService() {
-//        return messageService;
-//    }
 }
