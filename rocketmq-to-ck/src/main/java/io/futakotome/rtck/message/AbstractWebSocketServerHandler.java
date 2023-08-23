@@ -12,6 +12,7 @@ public abstract class AbstractWebSocketServerHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWebSocketServerHandler.class);
     public static final String NOTIFY_TAG = "notify";
     public static final String MARKET_STATE_TAG = "market_state";
+    public static final String BASIC_QUOTE_TAG = "basic_quote";
 
     //用于获取url参数
     protected Map<String, String> getQueryMap(String queryStr) {
