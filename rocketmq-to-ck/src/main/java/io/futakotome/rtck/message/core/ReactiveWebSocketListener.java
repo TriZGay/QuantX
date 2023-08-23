@@ -1,5 +1,7 @@
-package io.futakotome.rtck.message;
+package io.futakotome.rtck.message.core;
 
+import io.futakotome.rtck.message.dto.Message;
+import io.futakotome.rtck.message.dto.MessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

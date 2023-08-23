@@ -4,9 +4,9 @@ import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.rtck.mapper.RTKLMapper;
 import io.futakotome.rtck.mapper.dto.RTKLDto;
-import io.futakotome.rtck.message.MessageService;
-import io.futakotome.rtck.message.ReactiveWebSocketHandlerMapping;
-import io.futakotome.rtck.message.RealTimeKLMessage;
+import io.futakotome.rtck.message.core.MessageService;
+import io.futakotome.rtck.config.WebSocketHandlerConfiguration;
+import io.futakotome.rtck.message.dto.RealTimeKLMessage;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.slf4j.Logger;
@@ -65,6 +65,6 @@ public class RTKLWeekListener implements RocketMQListener<RTKLMessage> {
         realTimeKLMessage.setChangeRate(rtklMessage.getChangeRate());
         realTimeKLMessage.setUpdateTime(rtklMessage.getUpdateTime());
         LOGGER.info("WebSocket消息:{}", realTimeKLMessage.toString());
-        messageService.onNext(realTimeKLMessage, ReactiveWebSocketHandlerMapping.KLINE_PATH);
+        messageService.onNext(realTimeKLMessage, WebSocketHandlerConfiguration.KLINE_PATH);
     }
 }

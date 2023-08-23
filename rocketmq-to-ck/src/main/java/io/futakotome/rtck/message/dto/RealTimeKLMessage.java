@@ -1,40 +1,38 @@
-package io.futakotome.rtck.message;
+package io.futakotome.rtck.message.dto;
 
-public class RealTimeBaseQuoteMessage implements Message {
+public class RealTimeKLMessage implements Message {
     private Integer market;
     private String code;
-    private Double priceSpread;
-    private String updateTime;
+    private Integer rehabType;
     private Double highPrice;
     private Double openPrice;
     private Double lowPrice;
-    private Double curPrice;
+    private Double closePrice;
     private Double lastClosePrice;
     private Long volume;
     private Double turnover;
     private Double turnoverRate;
-    private Double amplitude;
-    private Integer darkStatus;
-    private Integer secStatus;
+    private Double pe;
+    private Double changeRate;
+    private String updateTime;
 
     @Override
     public String toString() {
-        return "RealTimeBaseQuoteMessage{" +
+        return "RealTimeKLMessage{" +
                 "market=" + market +
                 ", code='" + code + '\'' +
-                ", priceSpread=" + priceSpread +
-                ", updateTime='" + updateTime + '\'' +
+                ", rehabType=" + rehabType +
                 ", highPrice=" + highPrice +
                 ", openPrice=" + openPrice +
                 ", lowPrice=" + lowPrice +
-                ", curPrice=" + curPrice +
+                ", closePrice=" + closePrice +
                 ", lastClosePrice=" + lastClosePrice +
                 ", volume=" + volume +
                 ", turnover=" + turnover +
                 ", turnoverRate=" + turnoverRate +
-                ", amplitude=" + amplitude +
-                ", darkStatus=" + darkStatus +
-                ", secStatus=" + secStatus +
+                ", pe=" + pe +
+                ", changeRate=" + changeRate +
+                ", updateTime='" + updateTime + '\'' +
                 '}';
     }
 
@@ -54,20 +52,12 @@ public class RealTimeBaseQuoteMessage implements Message {
         this.code = code;
     }
 
-    public Double getPriceSpread() {
-        return priceSpread;
+    public Integer getRehabType() {
+        return rehabType;
     }
 
-    public void setPriceSpread(Double priceSpread) {
-        this.priceSpread = priceSpread;
-    }
-
-    public String getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
+    public void setRehabType(Integer rehabType) {
+        this.rehabType = rehabType;
     }
 
     public Double getHighPrice() {
@@ -94,12 +84,12 @@ public class RealTimeBaseQuoteMessage implements Message {
         this.lowPrice = lowPrice;
     }
 
-    public Double getCurPrice() {
-        return curPrice;
+    public Double getClosePrice() {
+        return closePrice;
     }
 
-    public void setCurPrice(Double curPrice) {
-        this.curPrice = curPrice;
+    public void setClosePrice(Double closePrice) {
+        this.closePrice = closePrice;
     }
 
     public Double getLastClosePrice() {
@@ -134,33 +124,33 @@ public class RealTimeBaseQuoteMessage implements Message {
         this.turnoverRate = turnoverRate;
     }
 
-    public Double getAmplitude() {
-        return amplitude;
+    public Double getPe() {
+        return pe;
     }
 
-    public void setAmplitude(Double amplitude) {
-        this.amplitude = amplitude;
+    public void setPe(Double pe) {
+        this.pe = pe;
     }
 
-    public Integer getDarkStatus() {
-        return darkStatus;
+    public Double getChangeRate() {
+        return changeRate;
     }
 
-    public void setDarkStatus(Integer darkStatus) {
-        this.darkStatus = darkStatus;
+    public void setChangeRate(Double changeRate) {
+        this.changeRate = changeRate;
     }
 
-    public Integer getSecStatus() {
-        return secStatus;
+    public String getUpdateTime() {
+        return updateTime;
     }
 
-    public void setSecStatus(Integer secStatus) {
-        this.secStatus = secStatus;
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
     }
 
     @Override
     public MessageType getType() {
-        return MessageType.RT_BASIC_QUOTE;
+        return MessageType.RT_KL;
     }
 
 }

@@ -1,38 +1,40 @@
-package io.futakotome.rtck.message;
+package io.futakotome.rtck.message.dto;
 
-public class RealTimeKLMessage implements Message {
+public class RealTimeBaseQuoteMessage implements Message {
     private Integer market;
     private String code;
-    private Integer rehabType;
+    private Double priceSpread;
+    private String updateTime;
     private Double highPrice;
     private Double openPrice;
     private Double lowPrice;
-    private Double closePrice;
+    private Double curPrice;
     private Double lastClosePrice;
     private Long volume;
     private Double turnover;
     private Double turnoverRate;
-    private Double pe;
-    private Double changeRate;
-    private String updateTime;
+    private Double amplitude;
+    private Integer darkStatus;
+    private Integer secStatus;
 
     @Override
     public String toString() {
-        return "RealTimeKLMessage{" +
+        return "RealTimeBaseQuoteMessage{" +
                 "market=" + market +
                 ", code='" + code + '\'' +
-                ", rehabType=" + rehabType +
+                ", priceSpread=" + priceSpread +
+                ", updateTime='" + updateTime + '\'' +
                 ", highPrice=" + highPrice +
                 ", openPrice=" + openPrice +
                 ", lowPrice=" + lowPrice +
-                ", closePrice=" + closePrice +
+                ", curPrice=" + curPrice +
                 ", lastClosePrice=" + lastClosePrice +
                 ", volume=" + volume +
                 ", turnover=" + turnover +
                 ", turnoverRate=" + turnoverRate +
-                ", pe=" + pe +
-                ", changeRate=" + changeRate +
-                ", updateTime='" + updateTime + '\'' +
+                ", amplitude=" + amplitude +
+                ", darkStatus=" + darkStatus +
+                ", secStatus=" + secStatus +
                 '}';
     }
 
@@ -52,12 +54,20 @@ public class RealTimeKLMessage implements Message {
         this.code = code;
     }
 
-    public Integer getRehabType() {
-        return rehabType;
+    public Double getPriceSpread() {
+        return priceSpread;
     }
 
-    public void setRehabType(Integer rehabType) {
-        this.rehabType = rehabType;
+    public void setPriceSpread(Double priceSpread) {
+        this.priceSpread = priceSpread;
+    }
+
+    public String getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
     }
 
     public Double getHighPrice() {
@@ -84,12 +94,12 @@ public class RealTimeKLMessage implements Message {
         this.lowPrice = lowPrice;
     }
 
-    public Double getClosePrice() {
-        return closePrice;
+    public Double getCurPrice() {
+        return curPrice;
     }
 
-    public void setClosePrice(Double closePrice) {
-        this.closePrice = closePrice;
+    public void setCurPrice(Double curPrice) {
+        this.curPrice = curPrice;
     }
 
     public Double getLastClosePrice() {
@@ -124,33 +134,33 @@ public class RealTimeKLMessage implements Message {
         this.turnoverRate = turnoverRate;
     }
 
-    public Double getPe() {
-        return pe;
+    public Double getAmplitude() {
+        return amplitude;
     }
 
-    public void setPe(Double pe) {
-        this.pe = pe;
+    public void setAmplitude(Double amplitude) {
+        this.amplitude = amplitude;
     }
 
-    public Double getChangeRate() {
-        return changeRate;
+    public Integer getDarkStatus() {
+        return darkStatus;
     }
 
-    public void setChangeRate(Double changeRate) {
-        this.changeRate = changeRate;
+    public void setDarkStatus(Integer darkStatus) {
+        this.darkStatus = darkStatus;
     }
 
-    public String getUpdateTime() {
-        return updateTime;
+    public Integer getSecStatus() {
+        return secStatus;
     }
 
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
+    public void setSecStatus(Integer secStatus) {
+        this.secStatus = secStatus;
     }
 
     @Override
     public MessageType getType() {
-        return MessageType.RT_KL;
+        return MessageType.RT_BASIC_QUOTE;
     }
 
 }

@@ -2,9 +2,9 @@ package io.futakotome.rtck.listener;
 
 import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.MarketStateMessage;
-import io.futakotome.rtck.message.MarketStateWsMessage;
-import io.futakotome.rtck.message.MessageService;
-import io.futakotome.rtck.message.ReactiveWebSocketHandlerMapping;
+import io.futakotome.rtck.message.dto.MarketStateWsMessage;
+import io.futakotome.rtck.message.core.MessageService;
+import io.futakotome.rtck.config.WebSocketHandlerConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.slf4j.Logger;
@@ -35,6 +35,6 @@ public class MarketStateListener implements RocketMQListener<MarketStateMessage>
         wsMessage.setMarketSGFuture(marketStateMessage.getMarketSGFuture());
         wsMessage.setMarketJPFuture(marketStateMessage.getMarketJPFuture());
         LOGGER.info("WebSocket消息:{}", wsMessage.toString());
-        messageService.onNext(wsMessage, ReactiveWebSocketHandlerMapping.MARKET_STATE_PATH);
+        messageService.onNext(wsMessage, WebSocketHandlerConfiguration.MARKET_STATE_PATH);
     }
 }

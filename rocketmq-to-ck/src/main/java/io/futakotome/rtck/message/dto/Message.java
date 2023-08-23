@@ -1,4 +1,4 @@
-package io.futakotome.rtck.message;
+package io.futakotome.rtck.message.dto;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

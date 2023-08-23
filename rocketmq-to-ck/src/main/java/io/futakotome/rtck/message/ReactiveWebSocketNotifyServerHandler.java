@@ -1,46 +1,52 @@
 package io.futakotome.rtck.message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.futakotome.rtck.annotation.WebSocketMapping;
+import io.futakotome.rtck.message.core.WebSocketSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.socket.CloseStatus;
+import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
-import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@WebSocketMapping("/websocket/notify")
 public class ReactiveWebSocketNotifyServerHandler
-        extends AbstractWebSocketServerHandler
-        implements WebSocketHandler {
+        extends AbstractWebSocketServerHandler implements WebSocketHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactiveWebSocketNotifyServerHandler.class);
+    private final ObjectMapper objectMapper;
+    private final ConcurrentHashMap<String, WebSocketSender> senderMap;
 
-    protected ReactiveWebSocketNotifyServerHandler(ObjectMapper objectMapper, ReactiveWebSocketListener listener, MessageService messageService) {
-        super(objectMapper, listener, messageService);
+    public ReactiveWebSocketNotifyServerHandler(ConcurrentHashMap<String, WebSocketSender> sendMap, ObjectMapper objectMapper) {
+        this.senderMap = sendMap;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public Mono<Void> handle(WebSocketSession session) {
-        String path = session.getHandshakeInfo().getUri().getPath();
-        Flux<WebSocketMessage> messages = getMessageService()
-                .getMessages(ReactiveWebSocketHandlerMapping.NOTIFY_PATH)
-                .map(session::textMessage);
-
-        Flux<WebSocketMessage> reading = session.receive()
-                .doOnNext(webSocketMessage ->
-                        onMessage(webSocketMessage.getPayloadAsText(), ReactiveWebSocketHandlerMapping.NOTIFY_PATH));
-//        return session.send(Mono.delay(Duration.ofMillis(100)).thenMany(Mono.just(session.textMessage("dddd"))));
-        Mono<CloseStatus> printCloseStatus = session.closeStatus()
-                .doOnNext(closeStatus ->
-                        LOGGER.info("{},连接状态:{},{}", path, closeStatus.getCode(),
-                                closeStatus.getReason()));
-//
-        return session.send(messages).and(reading)
-                .and(printCloseStatus);
+        HandshakeInfo handshakeInfo = session.getHandshakeInfo();
+        Map<String, String> queryMap = getQueryMap(handshakeInfo.getUri().getQuery());
+        //todo 定点推送?
+        String id = queryMap.getOrDefault("id", NOTIFY_TAG);
+        Mono<Void> input = session.receive()
+                .doOnNext(webSocketMessage -> {
+                    String message = webSocketMessage.getPayloadAsText();
+                    LOGGER.info(id + ": " + message);
+                }).then();
+        Mono<Void> output = session
+                .send(Flux.create(sink ->
+                        senderMap.put(id, new WebSocketSender(session, sink, objectMapper))));
+        /*
+          Mono.zip() 会将多个 Mono 合并为一个新的 Mono，任何一个 Mono 产生 error 或 complete 都会导致合并后的 Mono
+          也随之产生 error 或 complete，此时其它的 Mono 则会被执行取消操作。
+         */
+        return Mono.zip(input, output).then();
     }
 
 }

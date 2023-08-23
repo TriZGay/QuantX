@@ -3,9 +3,9 @@ package io.futakotome.rtck.listener;
 import io.futakotome.common.message.RTBasicQuoteMessage;
 import io.futakotome.rtck.mapper.RTBasicQuoteMapper;
 import io.futakotome.rtck.mapper.dto.RTBasicQuoteDto;
-import io.futakotome.rtck.message.MessageService;
-import io.futakotome.rtck.message.ReactiveWebSocketHandlerMapping;
-import io.futakotome.rtck.message.RealTimeBaseQuoteMessage;
+import io.futakotome.rtck.message.core.MessageService;
+import io.futakotome.rtck.config.WebSocketHandlerConfiguration;
+import io.futakotome.rtck.message.dto.RealTimeBaseQuoteMessage;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.slf4j.Logger;
@@ -69,6 +69,6 @@ public class RTIndiesBasicQuoteListener implements RocketMQListener<RTBasicQuote
         realTimeBaseQuoteMessage.setDarkStatus(rtBasicQuoteMessage.getDarkStatus());
         realTimeBaseQuoteMessage.setSecStatus(rtBasicQuoteMessage.getSecStatus());
         LOGGER.info("WebSocket消息:{}", realTimeBaseQuoteMessage.toString());
-        messageService.onNext(realTimeBaseQuoteMessage, ReactiveWebSocketHandlerMapping.BASIC_QUOTE_PATH);
+        messageService.onNext(realTimeBaseQuoteMessage, WebSocketHandlerConfiguration.BASIC_QUOTE_PATH);
     }
 }

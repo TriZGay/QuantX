@@ -1,4 +1,4 @@
-package io.futakotome.rtck.message;
+package io.futakotome.rtck.message.dto;
 
 public enum MessageType {
     NOTIFY,

@@ -1,7 +1,8 @@
-package io.futakotome.rtck.message;
+package io.futakotome.rtck.message.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.futakotome.rtck.message.dto.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,6 @@ public class MessageService {
 
     public Flux<String> getMessages(String session) {
         sinks.putIfAbsent(session, Sinks.many().multicast().onBackpressureBuffer());
-        LOGGER.info(sinks.get(session).toString());
         return sinks.get(session).asFlux();
     }
 }
