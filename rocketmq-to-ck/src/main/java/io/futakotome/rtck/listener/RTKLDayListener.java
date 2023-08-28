@@ -31,8 +31,6 @@ public class RTKLDayListener extends AbstractKLineListener implements RocketMQLi
         RTKLDto dto = message2Dto(rtklMessage);
         if (mapper.insertOne(dto, RTKLMapper.KL_DAY_TABLE_NAME)) {
             LOGGER.info("日K数据入库成功");
-            sendKLineWsMessage(rtklMessage,
-                    senderMap.get(AbstractWebSocketServerHandler.KLINE_TAG));
         }
     }
 

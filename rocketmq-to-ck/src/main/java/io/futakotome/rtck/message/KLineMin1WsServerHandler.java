@@ -6,7 +6,6 @@ import io.futakotome.rtck.message.core.WebSocketSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketSession;
@@ -17,14 +16,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-@WebSocketMapping("/websocket/kl")
-public class ReactiveWebSocketKLineServerHandler
+@WebSocketMapping("/websocket/kl_min1")
+public class KLineMin1WsServerHandler
         extends AbstractWebSocketServerHandler implements WebSocketHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReactiveWebSocketKLineServerHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KLineMin1WsServerHandler.class);
     private final ObjectMapper objectMapper;
     private final ConcurrentHashMap<String, WebSocketSender> senderMap;
 
-    public ReactiveWebSocketKLineServerHandler(ConcurrentHashMap<String, WebSocketSender> sendMap, ObjectMapper objectMapper) {
+    public KLineMin1WsServerHandler(ConcurrentHashMap<String, WebSocketSender> sendMap, ObjectMapper objectMapper) {
         this.senderMap = sendMap;
         this.objectMapper = objectMapper;
     }
@@ -34,13 +33,12 @@ public class ReactiveWebSocketKLineServerHandler
         HandshakeInfo handshakeInfo = session.getHandshakeInfo();
         Map<String, String> queryMap = getQueryMap(handshakeInfo.getUri().getQuery());
         //todo 定点推送?
-        String id = queryMap.getOrDefault("id", KLINE_TAG);
-        Mono<CloseStatus> close = session.closeStatus()
-                .doOnNext(closeStatus -> {
-                    LOGGER.info("连接关闭,{}:{}", closeStatus.getCode(),
-                            closeStatus.getReason());
-                    senderMap.remove(id);
-                });
+        String id = queryMap.getOrDefault("id", KLINE_MIN1_TAG);
+//        Mono<Void> close = session.close()
+//                .doOnNext(v -> {
+//                    LOGGER.info("{}:连接关闭", KLINE_MIN1_TAG);
+//                    senderMap.remove(id);
+//                });
         Mono<Void> input = session.receive()
                 .doOnNext(webSocketMessage -> {
                     String message = webSocketMessage.getPayloadAsText();
@@ -53,7 +51,7 @@ public class ReactiveWebSocketKLineServerHandler
           Mono.zip() 会将多个 Mono 合并为一个新的 Mono，任何一个 Mono 产生 error 或 complete 都会导致合并后的 Mono
           也随之产生 error 或 complete，此时其它的 Mono 则会被执行取消操作。
          */
-        return Mono.zip(input, output, close).then();
+        return Mono.zip(input, output).then();
     }
 
 }

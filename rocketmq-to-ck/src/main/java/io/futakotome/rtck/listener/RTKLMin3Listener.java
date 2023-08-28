@@ -32,7 +32,7 @@ public class RTKLMin3Listener extends AbstractKLineListener implements RocketMQL
         if (mapper.insertOne(dto, RTKLMapper.KL_MIN_3_TABLE_NAME)) {
             LOGGER.info("3分K数据入库成功");
             sendKLineWsMessage(rtklMessage,
-                    senderMap.get(AbstractWebSocketServerHandler.KLINE_TAG));
+                    senderMap.get(AbstractWebSocketServerHandler.KLINE_MIN3_TAG));
         }
     }
 

@@ -34,11 +34,11 @@ public class KLineMin5WsServerHandler
         Map<String, String> queryMap = getQueryMap(handshakeInfo.getUri().getQuery());
         //todo 定点推送?
         String id = queryMap.getOrDefault("id", KLINE_MIN5_TAG);
-        Mono<Void> close = session.close()
-                .doOnNext(v -> {
-                    LOGGER.info("{}:连接关闭", KLINE_MIN5_TAG);
-                    senderMap.remove(id);
-                });
+//        Mono<Void> close = session.close()
+//                .doOnNext(v -> {
+//                    LOGGER.info("{}:连接关闭", KLINE_MIN5_TAG);
+//                    senderMap.remove(id);
+//                });
         Mono<Void> input = session.receive()
                 .doOnNext(webSocketMessage -> {
                     String message = webSocketMessage.getPayloadAsText();
@@ -51,6 +51,6 @@ public class KLineMin5WsServerHandler
           Mono.zip() 会将多个 Mono 合并为一个新的 Mono，任何一个 Mono 产生 error 或 complete 都会导致合并后的 Mono
           也随之产生 error 或 complete，此时其它的 Mono 则会被执行取消操作。
          */
-        return Mono.zip(input, output, close).then();
+        return Mono.zip(input, output).then();
     }
 }

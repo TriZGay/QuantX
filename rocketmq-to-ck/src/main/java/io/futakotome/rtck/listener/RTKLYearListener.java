@@ -31,8 +31,6 @@ public class RTKLYearListener extends AbstractKLineListener implements RocketMQL
         RTKLDto dto = message2Dto(rtklMessage);
         if (mapper.insertOne(dto, RTKLMapper.KL_YEAR_TABLE_NAME)) {
             LOGGER.info("年K数据入库成功");
-            sendKLineWsMessage(rtklMessage,
-                    senderMap.get(AbstractWebSocketServerHandler.KLINE_TAG));
         }
     }
 
