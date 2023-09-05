@@ -1,7 +1,7 @@
 rocketmq:
-  name-server: 172.24.47.25:9876
+  name-server: 172.24.33.138:9876
 ck:
-  url: jdbc:ch://172.24.47.25:8123/quantx
+  url: jdbc:ch://172.24.33.138:8123/quantx
   user: default
   password: 123456
 server:
