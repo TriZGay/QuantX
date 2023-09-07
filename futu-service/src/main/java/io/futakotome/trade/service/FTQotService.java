@@ -15,6 +15,7 @@ import io.futakotome.common.message.*;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.SubscribeRequest;
 import io.futakotome.trade.controller.vo.SubscribeSecurity;
+import io.futakotome.trade.controller.vo.SyncCapitalFlowRequest;
 import io.futakotome.trade.domain.*;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.mapper.*;
@@ -93,17 +94,17 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         market.sendStockInfoRequest(plateMapper);
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+    //    @Scheduled(cron = "0 0 0 * * *")
     public void syncStaticInfo() {
         market.sendStaticInfoRequest();
     }
 
-    @Scheduled(cron = "0 0 1 * * *")
+    //    @Scheduled(cron = "0 0 1 * * *")
     public void syncStockOwnerPlateInfo() {
         market.sendPlateInfoRequest(stockMapper);
     }
 
-    @Scheduled(cron = "0 0 2 * * *")
+    //    @Scheduled(cron = "0 0 2 * * *")
     public void syncIpoInfo() {
         market.sendIpoInfoRequest();
     }
@@ -120,6 +121,22 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 .build();
         int seqNo = qot.getSubInfo(request);
         LOGGER.info("查询订阅信息.seqNo=" + seqNo);
+    }
+
+    public void syncCapitalFlow(SyncCapitalFlowRequest request) {
+        QotGetCapitalFlow.Request ftRequest = QotGetCapitalFlow
+                .Request.newBuilder()
+                .setC2S(QotGetCapitalFlow.C2S.newBuilder()
+                        .setSecurity(QotCommon.Security.newBuilder()
+                                .setMarket(request.getMarket())
+                                .setCode(request.getCode())
+                                .build())
+                        .build())
+                .build();
+        int seqNo = qot.getCapitalFlow(ftRequest);
+        String marketAndCode = request.getMarket() + "-" + request.getCode();
+        CacheManager.put(String.valueOf(seqNo), marketAndCode);
+        LOGGER.info("请求资金流向.seqNo=" + seqNo);
     }
 
     public void cancelSubscribe(SubscribeRequest subscribeRequest) {
@@ -268,6 +285,28 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 sendNotifyMessage(notify);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("FutuD通知推送结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onReply_GetCapitalFlow(FTAPI_Conn client, int nSerialNo, QotGetCapitalFlow.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取资金流向失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取资金流向失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                String[] marketAndCode = ((String) CacheManager.get(String.valueOf(nSerialNo))).split("-");
+                Integer market = Integer.valueOf(marketAndCode[0]);
+                String code = marketAndCode[1];
+                Iterator<JsonElement> flowItemListIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("flowItemList").iterator();
+                while (flowItemListIterator.hasNext()) {
+                    JsonObject flowItem = flowItemListIterator.next().getAsJsonObject();
+
+                }
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析资金流向结果失败.", e);
             }
         }
     }
