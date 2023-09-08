@@ -197,7 +197,6 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     public void sendGetHistoryOrderListRequest() {
         List<AccDto> accounts = accDtoMapper.selectList(null);
         accounts.forEach(accDto -> {
-
             String beginTime = LocalDateTime.of(2023, 5, 15, 0, 0, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.MS"));
             String endTime = LocalTime.MAX.atDate(LocalDate.now().minusDays(1L)).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.MS"));
             LOGGER.info("查询历史订单:" + beginTime + "-" + endTime);

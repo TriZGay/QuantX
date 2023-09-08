@@ -1,5 +1,20 @@
 create database if not exists quantx;
 
+create table if not exists quantx.t_capital_flow
+(
+    market          Int8,
+    code            String,
+    in_flow         Float64,
+    main_in_flow    Float64,
+    super_in_flow   Float64,
+    big_in_flow     Float64,
+    mid_in_flow     Float64,
+    sml_in_flow     Float64,
+    time            DateTime64,
+    last_valid_time DateTime64
+) ENGINE = MergeTree()
+      PRIMARY KEY (market, code, time);
+
 create table if not exists quantx.t_ma30_day
 (
     market      Int8,

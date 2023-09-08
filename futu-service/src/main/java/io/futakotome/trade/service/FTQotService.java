@@ -300,10 +300,15 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 String[] marketAndCode = ((String) CacheManager.get(String.valueOf(nSerialNo))).split("-");
                 Integer market = Integer.valueOf(marketAndCode[0]);
                 String code = marketAndCode[1];
-                Iterator<JsonElement> flowItemListIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("flowItemList").iterator();
+                Iterator<JsonElement> flowItemListIterator = ftGrpcReturnResult.getS2c().get("flowItemList").getAsJsonArray().iterator();
+                String lastValidTime = ftGrpcReturnResult.getS2c().get("lastValidTime").getAsString();
                 while (flowItemListIterator.hasNext()) {
                     JsonObject flowItem = flowItemListIterator.next().getAsJsonObject();
-
+                    CapitalFlowMessageContent messageContent = GSON.fromJson(flowItem, CapitalFlowMessageContent.class);
+                    messageContent.setMarket(market);
+                    messageContent.setCode(code);
+                    messageContent.setLastValidTime(lastValidTime);
+                    sendCapitalFlowMessage(messageContent);
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析资金流向结果失败.", e);
@@ -398,6 +403,33 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 LOGGER.error("摆盘结果解析失败.", e);
             }
         }
+    }
+
+    private void sendCapitalFlowMessage(CapitalFlowMessageContent messageContent) {
+        CapitalFlowMessage capitalFlowMessage = new CapitalFlowMessage();
+        capitalFlowMessage.setLastValidTime(messageContent.getLastValidTime());
+        capitalFlowMessage.setMarket(messageContent.getMarket());
+        capitalFlowMessage.setCode(messageContent.getCode());
+        capitalFlowMessage.setInFlow(messageContent.getInFlow());
+        capitalFlowMessage.setTime(messageContent.getTime());
+        //'实时'为空
+        capitalFlowMessage.setMainInFlow(messageContent.getMainInFlow() == null ? -1 : messageContent.getMainInFlow());
+        capitalFlowMessage.setSuperInFlow(messageContent.getSuperInFlow());
+        capitalFlowMessage.setBigInFlow(messageContent.getBigInFlow());
+        capitalFlowMessage.setMidInFlow(messageContent.getMidInFlow());
+        capitalFlowMessage.setSmlInFlow(messageContent.getSmlInFlow());
+        rocketMQTemplate.asyncSend(MessageCommon.CAPITAL_FLOW_TOPIC, capitalFlowMessage, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                LOGGER.info("资金流向投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        sendResult.getSendStatus());
+            }
+
+            @Override
+            public void onException(Throwable throwable) {
+                LOGGER.error("资金流向投递失败", throwable);
+            }
+        });
     }
 
     private void sendMarketStateMessage(MarketStateVo marketStateVo) {
@@ -816,7 +848,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     klMessageContent.setRehabType(rehabType);
                     klMessageContent.setMarket(market);
                     klMessageContent.setCode(code);
-                    //todo ws传回前端
                     sendKLMessage(klMessageContent);
                 }
             } catch (InvalidProtocolBufferException e) {
@@ -838,7 +869,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 Iterator<JsonElement> rtIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("rtList").iterator();
                 while (rtIterator.hasNext()) {
                     JsonObject rt = rtIterator.next().getAsJsonObject();
-                    //todo ws推到前端
                     TimeShareMessageContent content = GSON.fromJson(rt, TimeShareMessageContent.class);
                     content.setMarket(market);
                     content.setCode(code);
@@ -863,7 +893,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 Iterator<JsonElement> tickerIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("tickerList").iterator();
                 while (tickerIterator.hasNext()) {
                     JsonObject ticker = tickerIterator.next().getAsJsonObject();
-                    //todo ws推送到前端
                     RealTimeTickerMessageContent content = GSON.fromJson(ticker, RealTimeTickerMessageContent.class);
                     content.setMarket(market);
                     content.setCode(code);
