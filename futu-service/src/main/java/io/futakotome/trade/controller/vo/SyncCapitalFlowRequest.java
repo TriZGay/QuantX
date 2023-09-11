@@ -14,9 +14,7 @@ public class SyncCapitalFlowRequest {
     @NotNull(message = "标的代码不能为空")
     private String code;
 
-    @Null
     private String beginDate;
-    @Null
     private String endDate;
 
     public Integer getPeriodType() {

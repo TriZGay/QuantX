@@ -129,7 +129,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 .setCode(request.getCode())
                 .build();
         QotGetCapitalFlow.Request.Builder ftRequest = QotGetCapitalFlow.Request.newBuilder();
-        if (request.getPeriodType() == 0) {
+        if (request.getPeriodType() == 1) {
             //实时
             ftRequest.setC2S(QotGetCapitalFlow.C2S.newBuilder()
                     .setPeriodType(request.getPeriodType())
@@ -312,6 +312,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 String code = marketAndCode[1];
                 Iterator<JsonElement> flowItemListIterator = ftGrpcReturnResult.getS2c().get("flowItemList").getAsJsonArray().iterator();
                 String lastValidTime = ftGrpcReturnResult.getS2c().get("lastValidTime").getAsString();
+                // 历史周期 会断开连接?
                 while (flowItemListIterator.hasNext()) {
                     JsonObject flowItem = flowItemListIterator.next().getAsJsonObject();
                     CapitalFlowMessageContent messageContent = GSON.fromJson(flowItem, CapitalFlowMessageContent.class);
