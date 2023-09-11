@@ -124,16 +124,26 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     public void syncCapitalFlow(SyncCapitalFlowRequest request) {
-        QotGetCapitalFlow.Request ftRequest = QotGetCapitalFlow
-                .Request.newBuilder()
-                .setC2S(QotGetCapitalFlow.C2S.newBuilder()
-                        .setSecurity(QotCommon.Security.newBuilder()
-                                .setMarket(request.getMarket())
-                                .setCode(request.getCode())
-                                .build())
-                        .build())
+        QotCommon.Security security = QotCommon.Security.newBuilder()
+                .setMarket(request.getMarket())
+                .setCode(request.getCode())
                 .build();
-        int seqNo = qot.getCapitalFlow(ftRequest);
+        QotGetCapitalFlow.Request.Builder ftRequest = QotGetCapitalFlow.Request.newBuilder();
+        if (request.getPeriodType() == 0) {
+            //实时
+            ftRequest.setC2S(QotGetCapitalFlow.C2S.newBuilder()
+                    .setPeriodType(request.getPeriodType())
+                    .setSecurity(security)
+                    .build());
+        } else {
+            ftRequest.setC2S(QotGetCapitalFlow.C2S.newBuilder()
+                    .setPeriodType(request.getPeriodType())
+                    .setSecurity(security)
+                    .setBeginTime(request.getBeginDate())
+                    .setEndTime(request.getEndDate())
+                    .build());
+        }
+        int seqNo = qot.getCapitalFlow(ftRequest.build());
         String marketAndCode = request.getMarket() + "-" + request.getCode();
         CacheManager.put(String.valueOf(seqNo), marketAndCode);
         LOGGER.info("请求资金流向.seqNo=" + seqNo);
@@ -414,10 +424,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         capitalFlowMessage.setTime(messageContent.getTime());
         //'实时'为空
         capitalFlowMessage.setMainInFlow(messageContent.getMainInFlow() == null ? -1 : messageContent.getMainInFlow());
-        capitalFlowMessage.setSuperInFlow(messageContent.getSuperInFlow());
-        capitalFlowMessage.setBigInFlow(messageContent.getBigInFlow());
-        capitalFlowMessage.setMidInFlow(messageContent.getMidInFlow());
-        capitalFlowMessage.setSmlInFlow(messageContent.getSmlInFlow());
+        capitalFlowMessage.setSuperInFlow(messageContent.getSuperInFlow() == null ? -1 : messageContent.getSuperInFlow());
+        capitalFlowMessage.setBigInFlow(messageContent.getBigInFlow() == null ? -1 : messageContent.getBigInFlow());
+        capitalFlowMessage.setMidInFlow(messageContent.getMidInFlow() == null ? -1 : messageContent.getMidInFlow());
+        capitalFlowMessage.setSmlInFlow(messageContent.getSmlInFlow() == null ? -1 : messageContent.getSmlInFlow());
         rocketMQTemplate.asyncSend(MessageCommon.CAPITAL_FLOW_TOPIC, capitalFlowMessage, new SendCallback() {
             @Override
             public void onSuccess(SendResult sendResult) {

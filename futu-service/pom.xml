@@ -50,7 +50,7 @@
         <dependency>
             <groupId>com.futunn.openapi</groupId>
             <artifactId>futu-api</artifactId>
-            <version>5.8.2008</version>
+            <version>7.3.3508</version>
         </dependency>
         <dependency>
             <groupId>org.liquibase</groupId>
