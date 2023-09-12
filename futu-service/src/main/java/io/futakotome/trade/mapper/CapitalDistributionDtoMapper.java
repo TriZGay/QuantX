@@ -1,4 +1,5 @@
 package io.futakotome.trade.mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.futakotome.trade.dto.CapitalDistributionDto;
@@ -12,7 +13,7 @@ import org.apache.ibatis.annotations.Mapper;
 */
 @Mapper
 public interface CapitalDistributionDtoMapper extends BaseMapper<CapitalDistributionDto> {
-
+    int insertSelective(CapitalDistributionDto capitalDistributionDto);
 }
 
 

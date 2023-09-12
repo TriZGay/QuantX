@@ -355,16 +355,27 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             String code = marketAndCode[1];
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                CapitalDistributionDto capitalDistributionDto = GSON.fromJson(ftGrpcReturnResult.getS2c(), CapitalDistributionDto.class);
+                CapitalDistributionDto capitalDistributionDto = new CapitalDistributionDto();
                 capitalDistributionDto.setMarket(market);
                 capitalDistributionDto.setCode(code);
-                capitalDistributionDto.setUpdateTime(LocalDateTime.parse(ftGrpcReturnResult.getS2c().get("updateTime").getAsString()));
+
+                capitalDistributionDto.setCapitalInSuper(ftGrpcReturnResult.getS2c().get("capitalInSuper").getAsDouble());
+                capitalDistributionDto.setCapitalInBig(ftGrpcReturnResult.getS2c().get("capitalInBig").getAsDouble());
+                capitalDistributionDto.setCapitalInMid(ftGrpcReturnResult.getS2c().get("capitalInMid").getAsDouble());
+                capitalDistributionDto.setCapitalInSmall(ftGrpcReturnResult.getS2c().get("capitalInSmall").getAsDouble());
+
+                capitalDistributionDto.setCapitalOutSuper(ftGrpcReturnResult.getS2c().get("capitalOutSuper").getAsDouble());
+                capitalDistributionDto.setCapitalOutBig(ftGrpcReturnResult.getS2c().get("capitalOutBig").getAsDouble());
+                capitalDistributionDto.setCapitalOutMid(ftGrpcReturnResult.getS2c().get("capitalOutMid").getAsDouble());
+                capitalDistributionDto.setCapitalOutSmall(ftGrpcReturnResult.getS2c().get("capitalOutSmall").getAsDouble());
+                capitalDistributionDto.setUpdateTime(LocalDateTime.parse(ftGrpcReturnResult.getS2c().get("updateTime").getAsString(),
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
                 CapitalDistributionDto hasOne = capitalDistributionDtoMapper.selectOne(Wrappers.query(new CapitalDistributionDto())
                         .eq("market", market)
                         .eq("code", code));
                 if (hasOne == null) {
                     //不存在  新增
-                    int insertRow = capitalDistributionDtoMapper.insert(capitalDistributionDto);
+                    int insertRow = capitalDistributionDtoMapper.insertSelective(capitalDistributionDto);
                     if (insertRow > 0) {
                         //todo ws通知
                         LOGGER.info("资金分布结果入库成功.");
