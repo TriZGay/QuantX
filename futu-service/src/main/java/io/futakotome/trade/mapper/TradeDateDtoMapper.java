@@ -1,12 +1,11 @@
 package io.futakotome.trade.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import io.futakotome.trade.dto.TradeDateDto;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Collection;
-
-import io.futakotome.trade.dto.TradeDateDto;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface TradeDateDtoMapper extends BaseMapper<TradeDateDto> {

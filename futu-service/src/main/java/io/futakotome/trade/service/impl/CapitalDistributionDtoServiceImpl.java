@@ -2,8 +2,8 @@ package io.futakotome.trade.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.futakotome.trade.dto.CapitalDistributionDto;
-import io.futakotome.trade.service.CapitalDistributionDtoService;
 import io.futakotome.trade.mapper.CapitalDistributionDtoMapper;
+import io.futakotome.trade.service.CapitalDistributionDtoService;
 import org.springframework.stereotype.Service;
 
 /**

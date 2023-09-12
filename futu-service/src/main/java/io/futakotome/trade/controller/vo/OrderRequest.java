@@ -2,7 +2,8 @@ package io.futakotome.trade.controller.vo;
 
 import io.futakotome.trade.domain.*;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 public class OrderRequest {
     @NotNull(message = "accId必填")

@@ -1,7 +1,7 @@
 package io.futakotome.trade.mapper;
 
-import io.futakotome.trade.dto.CapitalDistributionDto;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import io.futakotome.trade.dto.CapitalDistributionDto;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
