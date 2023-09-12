@@ -34,4 +34,7 @@
     <changeSet id="9" author="futakotome">
         <sqlFile path="db/sql/InitTradeDateTable.sql"/>
     </changeSet>
+    <changeSet id="10" author="futakotome">
+        <sqlFile path="db/sql/InitCapitalDistributionTable.sql"/>
+    </changeSet>
 </databaseChangeLog>

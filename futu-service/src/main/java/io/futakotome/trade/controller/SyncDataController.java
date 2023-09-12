@@ -1,5 +1,6 @@
 package io.futakotome.trade.controller;
 
+import io.futakotome.trade.controller.vo.SyncCapitalDistributionRequest;
 import io.futakotome.trade.controller.vo.SyncCapitalFlowRequest;
 import io.futakotome.trade.service.FTQotService;
 import org.springframework.http.HttpStatus;
@@ -53,6 +54,17 @@ public class SyncDataController {
                     .doOnNext(r -> {
                         FTQotService.syncCapitalFlow(r);
                         responseEntityMonoSink.success(ResponseEntity.ok("同步资金流向数据成功"));
+                    }).subscribe();
+        });
+    }
+
+    @PostMapping("/capitalDtb")
+    public Mono<ResponseEntity<String>> syncCapitalDistribution(@RequestBody @Validated Mono<SyncCapitalDistributionRequest> requestMono) {
+        return Mono.create(responseEntityMonoSink -> {
+            requestMono.doOnError(WebExchangeBindException.class, throwable -> responseEntityMonoSink.success(new ResponseEntity<>("参数校验出错:" + throwable.getFieldErrors(), HttpStatus.BAD_REQUEST)))
+                    .doOnNext(r -> {
+                        FTQotService.syncCapitalDistribution(r);
+                        responseEntityMonoSink.success(ResponseEntity.ok("同步资金分布数据成功"));
                     }).subscribe();
         });
     }

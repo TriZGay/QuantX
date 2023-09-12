@@ -15,6 +15,7 @@ import io.futakotome.common.message.*;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.SubscribeRequest;
 import io.futakotome.trade.controller.vo.SubscribeSecurity;
+import io.futakotome.trade.controller.vo.SyncCapitalDistributionRequest;
 import io.futakotome.trade.controller.vo.SyncCapitalFlowRequest;
 import io.futakotome.trade.domain.*;
 import io.futakotome.trade.dto.*;
@@ -29,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +58,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private final IpoCnExWinningDtoMapper ipoCnExWinningMapper;
     private final SubDtoMapper subDtoMapper;
     private final TradeDateDtoMapper tradeDateDtoMapper;
+    private final CapitalDistributionDtoMapper capitalDistributionDtoMapper;
     private final FutuConfig futuConfig;
     private final RocketMQTemplate rocketMQTemplate;
 
@@ -67,7 +68,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     public FTQotService(PlateDtoMapper plateMapper, StockDtoMapper stockMapper, PlateStockDtoMapper plateStockMapper,
                         IpoHkDtoMapper ipoHkMapper, IpoUsDtoMapper ipoUsMapper, IpoCnDtoMapper ipoCnMapper, IpoCnExWinningDtoMapper ipoCnExWinningMapper,
-                        SubDtoMapper subDtoMapper, TradeDateDtoMapper tradeDateDtoMapper, FutuConfig futuConfig, RocketMQTemplate rocketMQTemplate) {
+                        SubDtoMapper subDtoMapper, TradeDateDtoMapper tradeDateDtoMapper, CapitalDistributionDtoMapper capitalDistributionDtoMapper, FutuConfig futuConfig, RocketMQTemplate rocketMQTemplate) {
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
@@ -82,6 +83,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         this.ipoCnExWinningMapper = ipoCnExWinningMapper;
         this.rocketMQTemplate = rocketMQTemplate;
         this.tradeDateDtoMapper = tradeDateDtoMapper;
+        this.capitalDistributionDtoMapper = capitalDistributionDtoMapper;
     }
 
     @Deprecated
@@ -147,6 +149,21 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         String marketAndCode = request.getMarket() + "-" + request.getCode();
         CacheManager.put(String.valueOf(seqNo), marketAndCode);
         LOGGER.info("请求资金流向.seqNo=" + seqNo);
+    }
+
+    public void syncCapitalDistribution(SyncCapitalDistributionRequest distributionRequest) {
+        QotGetCapitalDistribution.Request request = QotGetCapitalDistribution.Request.newBuilder()
+                .setC2S(QotGetCapitalDistribution.C2S.newBuilder()
+                        .setSecurity(QotCommon.Security.newBuilder()
+                                .setMarket(distributionRequest.getMarket())
+                                .setCode(distributionRequest.getCode())
+                                .build())
+                        .build())
+                .build();
+        int seqNo = qot.getCapitalDistribution(request);
+        String marketAndCode = distributionRequest.getMarket() + "-" + distributionRequest.getCode();
+        CacheManager.put(String.valueOf(seqNo), marketAndCode);
+        LOGGER.info("请求资金分布.seqNo=" + seqNo);
     }
 
     public void cancelSubscribe(SubscribeRequest subscribeRequest) {
@@ -323,6 +340,54 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析资金流向结果失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onReply_GetCapitalDistribution(FTAPI_Conn client, int nSerialNo, QotGetCapitalDistribution.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取资金分布失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取资金分布失败,code:" + rsp.getRetType()));
+        } else {
+            String[] marketAndCode = ((String) CacheManager.get(String.valueOf(nSerialNo))).split("-");
+            Integer market = Integer.valueOf(marketAndCode[0]);
+            String code = marketAndCode[1];
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                CapitalDistributionDto capitalDistributionDto = GSON.fromJson(ftGrpcReturnResult.getS2c(), CapitalDistributionDto.class);
+                capitalDistributionDto.setMarket(market);
+                capitalDistributionDto.setCode(code);
+                capitalDistributionDto.setUpdateTime(LocalDateTime.parse(ftGrpcReturnResult.getS2c().get("updateTime").getAsString()));
+                CapitalDistributionDto hasOne = capitalDistributionDtoMapper.selectOne(Wrappers.query(new CapitalDistributionDto())
+                        .eq("market", market)
+                        .eq("code", code));
+                if (hasOne == null) {
+                    //不存在  新增
+                    int insertRow = capitalDistributionDtoMapper.insert(capitalDistributionDto);
+                    if (insertRow > 0) {
+                        //todo ws通知
+                        LOGGER.info("资金分布结果入库成功.");
+                    }
+                } else {
+                    //存在更新
+                    hasOne.setCapitalInSuper(capitalDistributionDto.getCapitalInSuper());
+                    hasOne.setCapitalInBig(capitalDistributionDto.getCapitalInBig());
+                    hasOne.setCapitalInMid(capitalDistributionDto.getCapitalInMid());
+                    hasOne.setCapitalInSmall(capitalDistributionDto.getCapitalInSmall());
+                    hasOne.setCapitalOutSuper(capitalDistributionDto.getCapitalOutSuper());
+                    hasOne.setCapitalOutBig(capitalDistributionDto.getCapitalOutBig());
+                    hasOne.setCapitalOutMid(capitalDistributionDto.getCapitalOutMid());
+                    hasOne.setCapitalOutSmall(capitalDistributionDto.getCapitalOutSmall());
+                    hasOne.setUpdateTime(capitalDistributionDto.getUpdateTime());
+                    int updateRow = capitalDistributionDtoMapper.updateById(hasOne);
+                    if (updateRow > 0) {
+                        //todo ws通知
+                        LOGGER.info("资金分布结果更新成功.");
+                    }
+                }
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析资金分布结果失败.", e);
             }
         }
     }
