@@ -500,11 +500,11 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         capitalFlowMessage.setInFlow(messageContent.getInFlow());
         capitalFlowMessage.setTime(messageContent.getTime());
         //'实时'为空
-        capitalFlowMessage.setMainInFlow(messageContent.getMainInFlow() == null ? -1 : messageContent.getMainInFlow());
-        capitalFlowMessage.setSuperInFlow(messageContent.getSuperInFlow() == null ? -1 : messageContent.getSuperInFlow());
-        capitalFlowMessage.setBigInFlow(messageContent.getBigInFlow() == null ? -1 : messageContent.getBigInFlow());
-        capitalFlowMessage.setMidInFlow(messageContent.getMidInFlow() == null ? -1 : messageContent.getMidInFlow());
-        capitalFlowMessage.setSmlInFlow(messageContent.getSmlInFlow() == null ? -1 : messageContent.getSmlInFlow());
+        capitalFlowMessage.setMainInFlow(messageContent.getMainInFlow());
+        capitalFlowMessage.setSuperInFlow(messageContent.getSuperInFlow());
+        capitalFlowMessage.setBigInFlow(messageContent.getBigInFlow());
+        capitalFlowMessage.setMidInFlow(messageContent.getMidInFlow());
+        capitalFlowMessage.setSmlInFlow(messageContent.getSmlInFlow());
         rocketMQTemplate.asyncSend(MessageCommon.CAPITAL_FLOW_TOPIC, capitalFlowMessage, new SendCallback() {
             @Override
             public void onSuccess(SendResult sendResult) {

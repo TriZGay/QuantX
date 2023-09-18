@@ -32,12 +32,12 @@ public class CapitalFlowListener implements RocketMQListener<CapitalFlowMessage>
         CapitalFlowDto dto = new CapitalFlowDto();
         dto.setMarket(message.getMarket());
         dto.setCode(message.getCode());
-        dto.setInFlow(message.getInFlow());
-        dto.setMainInFlow(message.getMainInFlow());
-        dto.setSuperInFlow(message.getSuperInFlow());
-        dto.setBigInFlow(message.getBigInFlow());
-        dto.setMidInFlow(message.getMidInFlow());
-        dto.setSmlInFlow(message.getSmlInFlow());
+        dto.setInFlow(message.getInFlow() == null ? -1 : message.getInFlow());
+        dto.setMainInFlow(message.getMainInFlow() == null ? -1 : message.getMainInFlow());
+        dto.setSuperInFlow(message.getSuperInFlow() == null ? -1 : message.getSuperInFlow());
+        dto.setBigInFlow(message.getBigInFlow() == null ? -1 : message.getBigInFlow());
+        dto.setMidInFlow(message.getMidInFlow() == null ? -1 : message.getMidInFlow());
+        dto.setSmlInFlow(message.getSmlInFlow() == null ? -1 : message.getSmlInFlow());
         dto.setTime(message.getTime());
         dto.setLastValidTime(message.getLastValidTime());
         if (mapper.insetOneCapitalFlow(dto)) {
