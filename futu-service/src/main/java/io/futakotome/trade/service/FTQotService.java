@@ -13,10 +13,7 @@ import com.google.protobuf.util.JsonFormat;
 import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.*;
 import io.futakotome.trade.config.FutuConfig;
-import io.futakotome.trade.controller.vo.SubscribeRequest;
-import io.futakotome.trade.controller.vo.SubscribeSecurity;
-import io.futakotome.trade.controller.vo.SyncCapitalDistributionRequest;
-import io.futakotome.trade.controller.vo.SyncCapitalFlowRequest;
+import io.futakotome.trade.controller.vo.*;
 import io.futakotome.trade.domain.*;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.mapper.*;
@@ -249,6 +246,21 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         LOGGER.info("查询全局市场状态.seq=" + seqNo);
     }
 
+    public void sendRehabRequest(SyncRehabRequest syncRehabRequest) {
+        QotRequestRehab.Request request = QotRequestRehab.Request.newBuilder()
+                .setC2S(QotRequestRehab.C2S.newBuilder()
+                        .setSecurity(QotCommon.Security.newBuilder()
+                                .setMarket(syncRehabRequest.getMarket())
+                                .setCode(syncRehabRequest.getCode())
+                                .build())
+                        .build())
+                .build();
+        int seqNo = qot.requestRehab(request);
+        String marketAndCode = syncRehabRequest.getMarket() + "-" + syncRehabRequest.getCode();
+        CacheManager.put(String.valueOf(seqNo), marketAndCode);
+        LOGGER.info("查询复权因子.seq=" + seqNo);
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         this.connect();
@@ -312,6 +324,31 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 sendNotifyMessage(notify);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("FutuD通知推送结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onReply_RequestRehab(FTAPI_Conn client, int nSerialNo, QotRequestRehab.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取复权因子失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取复权因子失败,code:" + rsp.getRetType()));
+        } else {
+            String[] marketAndCode = ((String) CacheManager.get(String.valueOf(nSerialNo))).split("-");
+            Integer market = Integer.valueOf(marketAndCode[0]);
+            String code = marketAndCode[1];
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                Iterator<JsonElement> rehabListIterator = ftGrpcReturnResult.getS2c().get("rehabList").getAsJsonArray().iterator();
+                while (rehabListIterator.hasNext()) {
+                    JsonObject rehab = rehabListIterator.next().getAsJsonObject();
+                    RehabMessageContent messageContent = GSON.fromJson(rehab, RehabMessageContent.class);
+                    messageContent.setMarket(market);
+                    messageContent.setCode(code);
+                    sendRehabMessage(messageContent);
+                }
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析复权因子结果失败.", e);
             }
         }
     }
@@ -490,6 +527,47 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 LOGGER.error("摆盘结果解析失败.", e);
             }
         }
+    }
+
+    private void sendRehabMessage(RehabMessageContent rehabMessageContent) {
+        RehabMessage message = new RehabMessage();
+        message.setMarket(rehabMessageContent.getMarket());
+        message.setCode(rehabMessageContent.getCode());
+        message.setCompanyActFlag(rehabMessageContent.getCompanyActFlag());
+        message.setFwdFactorA(rehabMessageContent.getFwdFactorA());
+        message.setFwdFactorB(rehabMessageContent.getFwdFactorB());
+        message.setBwdFactorA(rehabMessageContent.getBwdFactorA());
+        message.setBwdFactorB(rehabMessageContent.getBwdFactorB());
+        message.setSplitBase(rehabMessageContent.getSplitBase());
+        message.setSplitErt(rehabMessageContent.getSplitErt());
+        message.setJoinBase(rehabMessageContent.getJoinBase());
+        message.setJoinErt(rehabMessageContent.getJoinErt());
+        message.setBonusBase(rehabMessageContent.getBonusBase());
+        message.setBonusErt(rehabMessageContent.getBonusErt());
+        message.setTransferBase(rehabMessageContent.getTransferBase());
+        message.setTransferErt(rehabMessageContent.getTransferErt());
+        message.setAllotBase(rehabMessageContent.getAllotBase());
+        message.setAllotErt(rehabMessageContent.getAllotErt());
+        message.setAllotPrice(rehabMessageContent.getAllotPrice());
+        message.setAddBase(rehabMessageContent.getAddBase());
+        message.setAddErt(rehabMessageContent.getAddErt());
+        message.setAddPrice(rehabMessageContent.getAddPrice());
+        message.setDividend(rehabMessageContent.getDividend());
+        message.setSpDividend(rehabMessageContent.getSpDividend());
+        message.setTime(rehabMessageContent.getTime());
+
+        rocketMQTemplate.asyncSend(MessageCommon.REHAB_TOPIC, message, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                LOGGER.info("复权因子投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        sendResult.getSendStatus());
+            }
+
+            @Override
+            public void onException(Throwable throwable) {
+                LOGGER.error("复权因子投递失败", throwable);
+            }
+        });
     }
 
     private void sendCapitalFlowMessage(CapitalFlowMessageContent messageContent) {

@@ -1,5 +1,35 @@
 create database if not exists quantx;
 
+create table if not exists quantx.t_rehabs
+(
+    market           Int8,
+    code             String,
+    company_act_flag Int64,
+    fwd_factor_a     Float64,
+    fwd_factor_b     Float64,
+    bwd_factor_a     Float64,
+    bwd_factor_b     Float64,
+    split_base       Int32,
+    split_ert        Int32,
+    join_base        Int32,
+    join_ert         Int32,
+    bonus_base       Int32,
+    bonus_ert        Int32,
+    transfer_base    Int32,
+    transfer_ert     Int32,
+    allot_base       Int32,
+    allot_ert        Int32,
+    allot_price      Float64,
+    add_base         Int32,
+    add_ert          Int32,
+    add_price        Float64,
+    dividend         Float64,
+    sp_dividend      Float64,
+    time             Date,
+    add_time         DateTime64
+) ENGINE = MergeTree()
+      PRIMARY KEY (market, code, time);
+
 create table if not exists quantx.t_capital_flow
 (
     market          Int8,

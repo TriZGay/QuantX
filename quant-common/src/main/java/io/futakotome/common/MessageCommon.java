@@ -22,6 +22,7 @@ public interface MessageCommon {
     String NOTIFY_CONSUMER_GROUP = "notify_consumer_group";
     String MARKET_STATE_CONSUMER_GROUP = "market_state_consumer_group";
     String CAPITAL_FLOW_CONSUMER_GROUP = "capital_flow_consumer_group";
+    String REHAB_CONSUMER_GROUP = "rehab_consumer_group";
     //经纪人队列
     String RT_BROKER_TOPIC = "rt_broker_topic";
     //分时
@@ -51,4 +52,6 @@ public interface MessageCommon {
     //全局市场状态
     String MARKET_STATE_TOPIC = "market_state_topic";
     String CAPITAL_FLOW_TOPIC = "capital_flow_topic";
+    //复权因子
+    String REHAB_TOPIC = "rehab_topic";
 }
