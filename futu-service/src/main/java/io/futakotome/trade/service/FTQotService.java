@@ -329,6 +329,32 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
+    public void onReply_RequestHistoryKL(FTAPI_Conn client, int nSerialNo, QotRequestHistoryKL.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取历史K线失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取历史K线失败,code:" + rsp.getRetType()));
+        } else {
+
+        }
+    }
+
+    @Override
+    public void onReply_RequestHistoryKLQuota(FTAPI_Conn client, int nSerialNo, QotRequestHistoryKLQuota.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            LOGGER.error("获取历史K线额度使用明细失败:" + rsp.getRetMsg(),
+                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取历史K线额度使用明细失败,code:" + rsp.getRetType()));
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                HistoryKLDetailMessageContent historyKLDetailMessage = GSON.fromJson(ftGrpcReturnResult.getS2c(), HistoryKLDetailMessageContent.class);
+                sendHistoryKLDetailMessage(historyKLDetailMessage);
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析历史K线额度使用明细结果失败.", e);
+            }
+        }
+    }
+
+    @Override
     public void onReply_RequestRehab(FTAPI_Conn client, int nSerialNo, QotRequestRehab.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("获取复权因子失败:" + rsp.getRetMsg(),
@@ -382,6 +408,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void onReply_GetCapitalDistribution(FTAPI_Conn client, int nSerialNo, QotGetCapitalDistribution.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("获取资金分布失败:" + rsp.getRetMsg(),
@@ -441,6 +468,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void onReply_RequestTradeDate(FTAPI_Conn client, int nSerialNo, QotRequestTradeDate.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("获取交易日失败:" + rsp.getRetMsg(),
@@ -527,6 +555,34 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 LOGGER.error("摆盘结果解析失败.", e);
             }
         }
+    }
+
+    private void sendHistoryKLDetailMessage(HistoryKLDetailMessageContent messageContent) {
+        HistoryKLDetailMessage message = new HistoryKLDetailMessage();
+        message.setUsedQuota(messageContent.getUsedQuota());
+        message.setRemainQuota(messageContent.getRemainQuota());
+        message.setDetailList(messageContent.getDetailList().stream().map(item -> {
+            HistoryKLDetailMessage.HistoryKLDetailItemMessage itemMessage = new HistoryKLDetailMessage.HistoryKLDetailItemMessage();
+            itemMessage.setMarket(item.getSecurity().getMarket());
+            itemMessage.setCode(item.getSecurity().getCode());
+            itemMessage.setName(item.getName());
+            itemMessage.setRequestTime(item.getRequestTime());
+            itemMessage.setRequestTimeStamp(item.getRequestTimeStamp());
+            return itemMessage;
+        }).collect(Collectors.toList()));
+
+        rocketMQTemplate.asyncSend(MessageCommon.HISTORY_KL_DETAIL_TOPIC, message, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                LOGGER.info("历史K线额度使用明细投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        sendResult.getSendStatus());
+            }
+
+            @Override
+            public void onException(Throwable throwable) {
+                LOGGER.error("历史K线额度使用明细投递失败", throwable);
+            }
+        });
     }
 
     private void sendRehabMessage(RehabMessageContent rehabMessageContent) {
@@ -1109,6 +1165,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void onReply_Sub(FTAPI_Conn client, int nSerialNo, QotSub.Response rsp) {
         if (rsp.getRetType() != 0) {
             LOGGER.error("订阅失败:" + rsp.getRetMsg(),

@@ -8,7 +8,8 @@ public enum MessageType {
     RT_KL,
     RT_TICKER,
     RT_TIME_SHARE,
-    RT_BROKERS;
+    RT_BROKERS,
+    KL_HISTORY_DETAIL;
 
     MessageType() {
     }

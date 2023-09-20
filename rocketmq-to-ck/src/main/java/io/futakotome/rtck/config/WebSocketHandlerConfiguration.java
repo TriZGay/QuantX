@@ -11,8 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
 public class WebSocketHandlerConfiguration {
-    public static final String KLINE_PATH = "/websocket/kl";
-
     @Bean
     public HandlerMapping webSocketHandlerMapping() {
         return new WebSocketMappingAnnotationHandler();

@@ -19,6 +19,7 @@ public abstract class AbstractWebSocketServerHandler {
     public static final String KLINE_MIN15_TAG = "kline_min15";
     public static final String KLINE_MIN30_TAG = "kline_min30";
     public static final String KLINE_MIN60_TAG = "kline_min60";
+    public static final String KLINE_HISTORY_DETAIL_TAG = "kline_history_detail";
 
     //用于获取url参数
     protected Map<String, String> getQueryMap(String queryStr) {

@@ -12,7 +12,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),
         @JsonSubTypes.Type(value = RealTimeTickerMessage.class, name = "RT_TICKER"),
         @JsonSubTypes.Type(value = TimeShareMessage.class, name = "RT_TIME_SHARE"),
-        @JsonSubTypes.Type(value = BrokerMessage.class, name = "RT_BROKERS")
+        @JsonSubTypes.Type(value = BrokerMessage.class, name = "RT_BROKERS"),
+        @JsonSubTypes.Type(value = HistoryKLDetailWsMessage.class, name = "KL_HISTORY_DETAIL")
 })
 public interface Message {
     MessageType getType();
