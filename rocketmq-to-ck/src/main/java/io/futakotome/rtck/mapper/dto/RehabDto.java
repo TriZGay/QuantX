@@ -4,27 +4,27 @@ public class RehabDto {
     private Integer market;
     private String code;
 
-    private Long companyActFlag;
-    private Double fwdFactorA;
-    private Double fwdFactorB;
-    private Double bwdFactorA;
-    private Double bwdFactorB;
-    private Integer splitBase;
+    private Long companyActFlag;//公司行动
+    private Double fwdFactorA;//前复权因子 A
+    private Double fwdFactorB;//B
+    private Double bwdFactorA;//后复权因子 A
+    private Double bwdFactorB;//B
+    private Integer splitBase;//拆股(例如，1拆5，Base 为1，Ert 为5)
     private Integer splitErt;
-    private Integer joinBase;
+    private Integer joinBase;//合股(例如，50合1，Base 为50，Ert 为1)
     private Integer joinErt;
-    private Integer bonusBase;
+    private Integer bonusBase;//送股(例如，10送3, Base 为10,Ert 为3)
     private Integer bonusErt;
-    private Integer transferBase;
+    private Integer transferBase;//转赠股(例如，10转3, Base 为10,Ert 为3)
     private Integer transferErt;
-    private Integer allotBase;
+    private Integer allotBase;//配股(例如，10送2, 配股价为6.3元, Base 为10, Ert 为2, Price 为6.3)
     private Integer allotErt;
     private Double allotPrice;
-    private Integer addBase;
+    private Integer addBase;//增发股(例如，10送2, 增发股价为6.3元, Base 为10, Ert 为2, Price 为6.3)
     private Integer addErt;
     private Double addPrice;
-    private Double dividend;
-    private Double spDividend;
+    private Double dividend;//现金分红(例如，每10股派现0.5元,则该字段值为0.05)
+    private Double spDividend;//特别股息(例如，每10股派特别股息0.5元,则该字段值为0.05)
     private String time;
 
     public Integer getMarket() {
