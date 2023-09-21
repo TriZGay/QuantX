@@ -24,6 +24,13 @@ public class GlobalMarketController {
                 .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
     }
 
+    @GetMapping("/historyKDetail")
+    public Mono<ResponseEntity<String>> getHistoryKLDetail() {
+        ftQotService.sendHistoryKLineDetailRequest();
+        return Mono.just("commit succeed.")
+                .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
+    }
+
     @GetMapping("/connect")
     public Mono<ResponseEntity<String>> connect2FT() {
         ftQotService.connect();

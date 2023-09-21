@@ -236,6 +236,14 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         LOGGER.info("发起订阅.seqNo=" + seqNo);
     }
 
+    public void sendHistoryKLineDetailRequest() {
+        QotRequestHistoryKLQuota.Request request = QotRequestHistoryKLQuota.Request.newBuilder()
+                .setC2S(QotRequestHistoryKLQuota.C2S.newBuilder().setBGetDetail(true).build())
+                .build();
+        int seqNo = qot.requestHistoryKLQuota(request);
+        LOGGER.info("查询历史K线数据额度明细.seq=" + seqNo);
+    }
+
     public void sendGlobalMarketStateRequest() {
         GetGlobalState.Request request = GetGlobalState.Request.newBuilder()
                 .setC2S(GetGlobalState.C2S.newBuilder()
