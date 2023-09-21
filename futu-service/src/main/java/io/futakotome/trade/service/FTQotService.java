@@ -236,6 +236,32 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         LOGGER.info("发起订阅.seqNo=" + seqNo);
     }
 
+    public void sendHistoryKLineRequest(SyncHistoryKRequest syncHistoryKRequest) {
+        QotCommon.Security security = QotCommon.Security.newBuilder()
+                .setMarket(syncHistoryKRequest.getMarket())
+                .setCode(syncHistoryKRequest.getCode())
+                .build();
+        Arrays.asList(RehabType.NONE.getCode(),
+                RehabType.FORWARD.getCode(),
+                RehabType.BACKWARD.getCode())
+                .forEach(rehabType -> {
+                    QotRequestHistoryKL.C2S c2S = QotRequestHistoryKL.C2S.newBuilder()
+                            .setRehabType(rehabType)
+                            .setKlType(syncHistoryKRequest.getKlType())
+                            .setSecurity(security)
+                            .setBeginTime(syncHistoryKRequest.getBeginDate())
+                            .setEndTime(syncHistoryKRequest.getEndDate())
+                            .build();
+                    QotRequestHistoryKL.Request request = QotRequestHistoryKL.Request.newBuilder()
+                            .setC2S(c2S)
+                            .build();
+                    int seqNo = qot.requestHistoryKL(request);
+                    String value = syncHistoryKRequest.getMarket() + "-" + syncHistoryKRequest.getCode() + "-" + syncHistoryKRequest.getKlType() + "-" + rehabType;
+                    CacheManager.put(String.valueOf(seqNo), value);
+                    LOGGER.info("查询历史K线数据.seqNo=" + seqNo);
+                });
+    }
+
     public void sendHistoryKLineDetailRequest() {
         QotRequestHistoryKLQuota.Request request = QotRequestHistoryKLQuota.Request.newBuilder()
                 .setC2S(QotRequestHistoryKLQuota.C2S.newBuilder().setBGetDetail(true).build())
@@ -342,7 +368,26 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             LOGGER.error("获取历史K线失败:" + rsp.getRetMsg(),
                     new IllegalArgumentException("connID=" + client.getConnectID() + "获取历史K线失败,code:" + rsp.getRetType()));
         } else {
-
+            String[] splitCachedValue = ((String) CacheManager.get(String.valueOf(nSerialNo))).split("-");
+            Integer market = Integer.valueOf(splitCachedValue[0]);
+            String code = splitCachedValue[1];
+            Integer klType = Integer.valueOf(splitCachedValue[2]);
+            Integer rehabType = Integer.valueOf(splitCachedValue[3]);
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                Iterator<JsonElement> klListIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("klList").iterator();
+                while (klListIterator.hasNext()) {
+                    JsonObject kl = klListIterator.next().getAsJsonObject();
+                    KLMessageContent klMessageContent = GSON.fromJson(kl, KLMessageContent.class);
+                    klMessageContent.setKlType(klType);
+                    klMessageContent.setRehabType(rehabType);
+                    klMessageContent.setMarket(market);
+                    klMessageContent.setCode(code);
+                    sendKLMessage(klMessageContent);
+                }
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析历史K线额度使用明细结果失败.", e);
+            }
         }
     }
 
@@ -569,15 +614,16 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         HistoryKLDetailMessage message = new HistoryKLDetailMessage();
         message.setUsedQuota(messageContent.getUsedQuota());
         message.setRemainQuota(messageContent.getRemainQuota());
-        message.setDetailList(messageContent.getDetailList().stream().map(item -> {
-            HistoryKLDetailMessage.HistoryKLDetailItemMessage itemMessage = new HistoryKLDetailMessage.HistoryKLDetailItemMessage();
-            itemMessage.setMarket(item.getSecurity().getMarket());
-            itemMessage.setCode(item.getSecurity().getCode());
-            itemMessage.setName(item.getName());
-            itemMessage.setRequestTime(item.getRequestTime());
-            itemMessage.setRequestTimeStamp(item.getRequestTimeStamp());
-            return itemMessage;
-        }).collect(Collectors.toList()));
+        message.setDetailList(messageContent.getDetailList() == null ? new ArrayList<>() :
+                messageContent.getDetailList().stream().map(item -> {
+                    HistoryKLDetailMessage.HistoryKLDetailItemMessage itemMessage = new HistoryKLDetailMessage.HistoryKLDetailItemMessage();
+                    itemMessage.setMarket(item.getSecurity().getMarket());
+                    itemMessage.setCode(item.getSecurity().getCode());
+                    itemMessage.setName(item.getName());
+                    itemMessage.setRequestTime(item.getRequestTime());
+                    itemMessage.setRequestTimeStamp(item.getRequestTimeStamp());
+                    return itemMessage;
+                }).collect(Collectors.toList()));
 
         rocketMQTemplate.asyncSend(MessageCommon.HISTORY_KL_DETAIL_TOPIC, message, new SendCallback() {
             @Override
