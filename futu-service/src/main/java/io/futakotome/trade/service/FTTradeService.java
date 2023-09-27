@@ -58,7 +58,6 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     private final AccInfoDtoMapper accInfoDtoMapper;
     private final OrderDtoMapper orderDtoMapper;
     private final PositionDtoMapper positionDtoMapper;
-    private String sessionId;
 
     public FTTradeService(FutuConfig futuConfig, AccDtoMapper accDtoMapper, AccInfoDtoMapper accInfoDtoMapper, OrderDtoMapper orderDtoMapper, PositionDtoMapper positionDtoMapper) {
         this.accDtoMapper = accDtoMapper;
@@ -179,20 +178,20 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 }));
     }
 
-    public void sendTradeAccPushSubscribe() {
-        List<AccDto> accounts = accDtoMapper.selectList(null);
-        TrdSubAccPush.Request request = TrdSubAccPush.Request
-                .newBuilder()
-                .setC2S(TrdSubAccPush
-                        .C2S.newBuilder()
-                        .addAllAccIDList(accounts.stream()
-                                .map(accDto -> Long.parseLong(accDto.getAccId()))
-                                .collect(Collectors.toList()))
-                        .build())
-                .build();
-        int seqNo = trd.subAccPush(request);
-        LOGGER.info("交易账号发起订阅.seqNo=" + seqNo);
-    }
+//    public void sendTradeAccPushSubscribe() {
+//        List<AccDto> accounts = accDtoMapper.selectList(null);
+//        TrdSubAccPush.Request request = TrdSubAccPush.Request
+//                .newBuilder()
+//                .setC2S(TrdSubAccPush
+//                        .C2S.newBuilder()
+//                        .addAllAccIDList(accounts.stream()
+//                                .map(accDto -> Long.parseLong(accDto.getAccId()))
+//                                .collect(Collectors.toList()))
+//                        .build())
+//                .build();
+//        int seqNo = trd.subAccPush(request);
+//        LOGGER.info("交易账号发起订阅.seqNo=" + seqNo);
+//    }
 
     public void sendGetHistoryOrderListRequest() {
         List<AccDto> accounts = accDtoMapper.selectList(null);

@@ -348,8 +348,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onPush_Notify(FTAPI_Conn client, Notify.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取FutuD通知推送失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取FutuD通知推送失败,code:" + rsp.getRetType()));
+            String notify = "获取FutuD通知推送失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取FutuD通知推送失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
@@ -365,8 +366,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onReply_RequestHistoryKL(FTAPI_Conn client, int nSerialNo, QotRequestHistoryKL.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取历史K线失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取历史K线失败,code:" + rsp.getRetType()));
+            String notify = "获取历史K线失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取历史K线失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             String[] splitCachedValue = ((String) CacheManager.get(String.valueOf(nSerialNo))).split("-");
             Integer market = Integer.valueOf(splitCachedValue[0]);
@@ -394,8 +396,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onReply_RequestHistoryKLQuota(FTAPI_Conn client, int nSerialNo, QotRequestHistoryKLQuota.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取历史K线额度使用明细失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取历史K线额度使用明细失败,code:" + rsp.getRetType()));
+            String notify = "获取历史K线额度使用明细失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取历史K线额度使用明细失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
@@ -410,8 +413,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onReply_RequestRehab(FTAPI_Conn client, int nSerialNo, QotRequestRehab.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取复权因子失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取复权因子失败,code:" + rsp.getRetType()));
+            String notify = "获取复权因子失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取复权因子失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             String[] marketAndCode = ((String) CacheManager.get(String.valueOf(nSerialNo))).split("-");
             Integer market = Integer.valueOf(marketAndCode[0]);
@@ -435,8 +439,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onReply_GetCapitalFlow(FTAPI_Conn client, int nSerialNo, QotGetCapitalFlow.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取资金流向失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取资金流向失败,code:" + rsp.getRetType()));
+            String notify = "获取资金流向失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取资金流向失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
@@ -464,8 +469,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Transactional(rollbackFor = Exception.class)
     public void onReply_GetCapitalDistribution(FTAPI_Conn client, int nSerialNo, QotGetCapitalDistribution.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取资金分布失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取资金分布失败,code:" + rsp.getRetType()));
+            String notify = "获取资金分布失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取资金分布失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             String[] marketAndCode = ((String) CacheManager.get(String.valueOf(nSerialNo))).split("-");
             Integer market = Integer.valueOf(marketAndCode[0]);
@@ -494,8 +500,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     //不存在  新增
                     int insertRow = capitalDistributionDtoMapper.insertSelective(capitalDistributionDto);
                     if (insertRow > 0) {
-                        //todo ws通知
-                        LOGGER.info("资金分布结果入库成功.");
+                        String notify = "资金分布结果入库成功.";
+                        LOGGER.info(notify);
+                        sendNotifyMessage(notify);
                     }
                 } else {
                     //存在更新
@@ -511,7 +518,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     int updateRow = capitalDistributionDtoMapper.updateById(hasOne);
                     if (updateRow > 0) {
                         //todo ws通知
-                        LOGGER.info("资金分布结果更新成功.");
+                        String notify = "资金分布结果更新成功.";
+                        LOGGER.info(notify);
+                        sendNotifyMessage(notify);
                     }
                 }
             } catch (InvalidProtocolBufferException e) {
@@ -524,8 +533,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Transactional(rollbackFor = Exception.class)
     public void onReply_RequestTradeDate(FTAPI_Conn client, int nSerialNo, QotRequestTradeDate.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取交易日失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取交易日失败,code:" + rsp.getRetType()));
+            String notify = "获取交易日失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取交易日失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
@@ -572,7 +582,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                         sendNotifyMessage(str);
                     }
                 }
-                LOGGER.info("交易日结果" + ftGrpcReturnResult.getS2c().toString());
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析交易日结果失败.", e);
             }
@@ -582,8 +591,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onReply_GetGlobalState(FTAPI_Conn client, int nSerialNo, GetGlobalState.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取全局市场状态失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取全局市场状态失败,code:" + rsp.getRetType()));
+            String notify = "获取全局市场状态失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取全局市场状态失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
@@ -598,8 +608,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onPush_UpdateOrderBook(FTAPI_Conn client, QotUpdateOrderBook.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取摆盘推送失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取摆盘失败,code:" + rsp.getRetType()));
+            String notify = "获取摆盘推送失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取摆盘失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
@@ -1083,8 +1094,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onPush_UpdateBasicQuote(FTAPI_Conn client, QotUpdateBasicQot.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取报价推送失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取报价失败,code:" + rsp.getRetType()));
+            String notify = "获取报价推送失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取报价失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
@@ -1092,8 +1104,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 while (basicQotIterator.hasNext()) {
                     JsonObject oneBasicQotInfo = basicQotIterator.next().getAsJsonObject();
                     BasicQuoteMessageContent messageContent = GSON.fromJson(oneBasicQotInfo, BasicQuoteMessageContent.class);
-//                    RealTimeBaseQuoteMessage message = new RealTimeBaseQuoteMessage(messageContent);
-//                    webSocketService.onNext(message, this.sessionId);
                     sendBasicQuoteMessage(messageContent);
                 }
 
@@ -1106,8 +1116,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onPush_UpdateKL(FTAPI_Conn client, QotUpdateKL.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取K线推送失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取K线数据失败,code:" + rsp.getRetType()));
+            String notify = "获取K线推送失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取K线数据失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
@@ -1134,8 +1145,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onPush_UpdateRT(FTAPI_Conn client, QotUpdateRT.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取分时推送失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取分时数据失败,code:" + rsp.getRetType()));
+            String notify = "获取分时推送失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取分时数据失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
@@ -1158,8 +1170,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onPush_UpdateTicker(FTAPI_Conn client, QotUpdateTicker.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取逐笔推送失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取逐笔数据失败,code:" + rsp.getRetType()));
+            String notify = "获取逐笔推送失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取逐笔数据失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
@@ -1182,12 +1195,12 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onPush_UpdateBroker(FTAPI_Conn client, QotUpdateBroker.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("获取经纪队列推送失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("connID=" + client.getConnectID() + "获取经纪队列数据失败,code:" + rsp.getRetType()));
+            String notify = "获取经纪队列推送失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取经纪队列数据失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info("经纪队列推送" + ftGrpcReturnResult.toString());
                 Integer market = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("market").getAsInt();
                 String code = ftGrpcReturnResult.getS2c().get("security").getAsJsonObject().get("code").getAsString();
                 if (ftGrpcReturnResult.getS2c().has("brokerAskList")) {
@@ -1222,8 +1235,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Transactional(rollbackFor = Exception.class)
     public void onReply_Sub(FTAPI_Conn client, int nSerialNo, QotSub.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("订阅失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("请求序列号:" + nSerialNo + "订阅失败,code:" + rsp.getRetType()));
+            String notify = "订阅失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "订阅失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
@@ -1235,7 +1249,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                                         .forEach(subType -> {
                                             int delRow = subDtoMapper.deleteBySecurityCodeAndSubType(subscribeSecurity.getCode(), subType);
                                             if (delRow > 0) {
-//                                                webSocketService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "取消订阅成功"), this.sessionId);
+                                                String notify = "取消订阅成功";
+                                                LOGGER.info(notify);
+                                                sendNotifyMessage(notify);
                                             }
                                         }));
 
@@ -1258,7 +1274,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                         if (toAddList.size() > 0) {
                             int insertRow = subDtoMapper.insertBatch(toAddList);
                             if (insertRow > 0) {
-//                                webSocketService.onNext(new NotifyMessage(ftGrpcReturnResult.getRetType().toString(), "订阅成功"), this.sessionId);
+                                String notify = "订阅成功";
+                                LOGGER.info(notify);
+                                sendNotifyMessage(notify);
                             }
                         }
                     }
@@ -1274,10 +1292,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Transactional(rollbackFor = Exception.class)
     public void onReply_GetSubInfo(FTAPI_Conn client, int nSerialNo, QotGetSubInfo.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("查询订阅信息失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询订阅信息失败,code:" + rsp.getRetType()));
+            String notify = "查询订阅信息失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询订阅信息失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
-            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询订阅信息...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 if (ftGrpcReturnResult.getS2c().has("connSubInfoList")) {
@@ -1310,14 +1328,18 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     Collection<SubDto> subtractForInsert = CollectionUtils.subtract(subDtoList, existSubscribeInfo);
                     if (subtractForInsert.size() > 0) {
                         int insertRow = subDtoMapper.insertBatch(subtractForInsert);
-                        LOGGER.info("订阅信息表插入条数." + insertRow);
+                        String notify = "订阅信息表插入条数." + insertRow;
+                        LOGGER.info(notify);
+                        sendNotifyMessage(notify);
                     }
                     //差集,删除数据
                     Collection<SubDto> subtractForDel = CollectionUtils.subtract(existSubscribeInfo, subDtoList);
                     if (subtractForDel.size() > 0) {
                         int delRow = subDtoMapper.deleteBatchIds(subtractForDel
                                 .stream().map(SubDto::getId).collect(Collectors.toList()));
-                        LOGGER.info("订阅信息表删除条数." + delRow);
+                        String notify = "订阅信息表删除条数." + delRow;
+                        LOGGER.info(notify);
+                        sendNotifyMessage(notify);
                     }
                 }
             } catch (InvalidProtocolBufferException e) {
@@ -1330,10 +1352,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Transactional(rollbackFor = Exception.class)
     public void onReply_GetIpoList(FTAPI_Conn client, int nSerialNo, QotGetIpoList.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("查询IPO信息失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询IPO信息失败,code:" + rsp.getRetType()));
+            String notify = "查询IPO信息失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询IPO信息失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
-            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询IPO信息...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 Iterator<JsonElement> iterator = ftGrpcReturnResult.getS2c().getAsJsonArray("ipoList").iterator();
@@ -1468,10 +1490,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Transactional(rollbackFor = Exception.class)
     public void onReply_GetOwnerPlate(FTAPI_Conn client, int nSerialNo, QotGetOwnerPlate.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("查询股票板块信息失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询股票板块信息失败,code:" + rsp.getRetType()));
+            String notify = "查询股票板块信息失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询股票板块信息失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
-            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询股票板块信息...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 Iterator<JsonElement> iterator = ftGrpcReturnResult.getS2c().getAsJsonArray("ownerPlateList").iterator();
@@ -1553,10 +1575,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Transactional(rollbackFor = Exception.class)
     public void onReply_GetStaticInfo(FTAPI_Conn client, int nSerialNo, QotGetStaticInfo.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("查询静态信息失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询静态信息失败,code:" + rsp.getRetType()));
+            String notify = "查询静态信息失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询静态信息失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
-            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询静态信息...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 Iterator<JsonElement> iterator = ftGrpcReturnResult.getS2c().getAsJsonArray("staticInfoList").iterator();
@@ -1625,7 +1647,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     int insertRow = stockMapper.insertBatch(newStocks.subList(i, i + insertLength));
                     LOGGER.info("插入条数:" + insertRow);
                 }
-//                webSocketService.onNext(new NotifyMessage(String.valueOf(nSerialNo), "nSerialNo=" + nSerialNo + "同步成功"), this.sessionId);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询静态信息解析结果失败!", e);
             }
@@ -1637,10 +1658,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Transactional
     public void onReply_GetPlateSecurity(FTAPI_Conn client, int nSerialNo, QotGetPlateSecurity.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("查询股票信息失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询股票信息失败,code:" + rsp.getRetType()));
+            String notify = "查询股票信息失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询股票信息失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
-            LOGGER.info("connID=" + client.getConnectID() + "查询股票信息...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 Iterator<JsonElement> stockInfoIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("staticInfoList").iterator();
@@ -1686,10 +1707,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Transactional
     public void onReply_GetPlateSet(FTAPI_Conn client, int nSerialNo, QotGetPlateSet.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("查询板块信息失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询板块信息失败,code:" + rsp.getRetType()));
+            String notify = "查询板块信息失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询板块信息失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
-            LOGGER.info("connID=" + client.getConnectID() + "查询板块信息...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp),
                         FTGrpcReturnResult.class);
