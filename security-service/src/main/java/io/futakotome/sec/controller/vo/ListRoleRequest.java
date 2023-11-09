@@ -1,6 +1,6 @@
 package io.futakotome.sec.controller.vo;
 
-public class ListRoleRequest {
+public class ListRoleRequest extends PaginationRequest {
     private String name;
 
     public String getName() {

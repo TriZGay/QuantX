@@ -5,6 +5,10 @@ public class CommonResult {
     private String msg;
     private Object data;
 
+    public static final Integer COMMON_SUCCESS = 10001;
+    public static final Integer COMMON_FAILED = 20001;
+    public static final Integer SERVER_EXCEPTION = 99999;
+
     public CommonResult(Builder builder) {
         this.code = builder.code;
         this.msg = builder.msg;
