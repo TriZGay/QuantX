@@ -1,6 +1,6 @@
 package io.futakotome.sec.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.futakotome.sec.controller.vo.AddRoleRequest;
 import io.futakotome.sec.controller.vo.ListRoleRequest;
 import io.futakotome.sec.controller.vo.UpdateRoleRequest;
@@ -14,9 +14,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @createDate 2023-11-08 14:30:41
  */
 public interface RoleDtoService extends IService<RoleDto> {
-    Page<Role> queryRoles(ListRoleRequest request);
+    IPage<Role> queryRoles(ListRoleRequest request);
 
     boolean addRole(AddRoleRequest request);
 
     boolean updateRoleById(Long id, UpdateRoleRequest request);
+
+    boolean deleteRoleById(Long id);
 }

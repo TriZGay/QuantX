@@ -1,7 +1,7 @@
 package io.futakotome.sec.mapper;
 
-import io.futakotome.sec.dto.RoleDto;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import io.futakotome.sec.dto.RoleDto;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -12,7 +12,9 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface RoleDtoMapper extends BaseMapper<RoleDto> {
+    int insertAll(RoleDto roleDto);
 
+    int updateSelective(RoleDto roleDto);
 }
 
 
