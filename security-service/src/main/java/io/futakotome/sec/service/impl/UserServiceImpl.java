@@ -2,7 +2,7 @@ package io.futakotome.sec.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.futakotome.sec.dto.UserDto;
-import io.futakotome.sec.service.UserDtoService;
+import io.futakotome.sec.service.UserService;
 import io.futakotome.sec.mapper.UserDtoMapper;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 * @createDate 2023-11-08 14:34:25
 */
 @Service
-public class UserDtoServiceImpl extends ServiceImpl<UserDtoMapper, UserDto>
-    implements UserDtoService{
+public class UserServiceImpl extends ServiceImpl<UserDtoMapper, UserDto>
+    implements UserService {
 
 }
 

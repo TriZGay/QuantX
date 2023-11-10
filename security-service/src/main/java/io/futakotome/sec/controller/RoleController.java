@@ -6,7 +6,7 @@ import io.futakotome.sec.controller.vo.CommonResult;
 import io.futakotome.sec.controller.vo.ListRoleRequest;
 import io.futakotome.sec.controller.vo.UpdateRoleRequest;
 import io.futakotome.sec.domain.Role;
-import io.futakotome.sec.service.RoleDtoService;
+import io.futakotome.sec.service.RoleService;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/role")
 public class RoleController {
-    private final RoleDtoService roleService;
+    private final RoleService roleService;
 
-    public RoleController(RoleDtoService roleService) {
+    public RoleController(RoleService roleService) {
         this.roleService = roleService;
     }
 

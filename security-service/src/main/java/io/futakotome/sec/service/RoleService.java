@@ -13,7 +13,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @description 针对表【t_role】的数据库操作Service
  * @createDate 2023-11-08 14:30:41
  */
-public interface RoleDtoService extends IService<RoleDto> {
+public interface RoleService extends IService<RoleDto> {
     IPage<Role> queryRoles(ListRoleRequest request);
 
     boolean addRole(AddRoleRequest request);

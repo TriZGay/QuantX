@@ -10,7 +10,7 @@ import io.futakotome.sec.controller.vo.ListRoleRequest;
 import io.futakotome.sec.controller.vo.UpdateRoleRequest;
 import io.futakotome.sec.domain.Role;
 import io.futakotome.sec.dto.RoleDto;
-import io.futakotome.sec.service.RoleDtoService;
+import io.futakotome.sec.service.RoleService;
 import io.futakotome.sec.mapper.RoleDtoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
  * @createDate 2023-11-08 14:30:41
  */
 @Service
-public class RoleDtoServiceImpl extends ServiceImpl<RoleDtoMapper, RoleDto>
-        implements RoleDtoService {
+public class RoleServiceImpl extends ServiceImpl<RoleDtoMapper, RoleDto>
+        implements RoleService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoleDtoServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoleServiceImpl.class);
     private final RoleDtoMapper roleDtoMapper;
 
-    public RoleDtoServiceImpl(RoleDtoMapper roleDtoMapper) {
+    public RoleServiceImpl(RoleDtoMapper roleDtoMapper) {
         this.roleDtoMapper = roleDtoMapper;
     }
 
