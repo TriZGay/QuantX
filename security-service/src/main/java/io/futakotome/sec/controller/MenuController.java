@@ -1,9 +1,11 @@
 package io.futakotome.sec.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.futakotome.sec.controller.vo.AddMenuRequest;
 import io.futakotome.sec.controller.vo.CommonResult;
 import io.futakotome.sec.controller.vo.ListMenuRequest;
 import io.futakotome.sec.controller.vo.UpdateMenuRequest;
+import io.futakotome.sec.domain.Menu;
 import io.futakotome.sec.service.MenuService;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +28,19 @@ public class MenuController {
     @PostMapping("/list")
     public Mono<ResponseEntity<CommonResult>> listMenu(ListMenuRequest request) {
         return Mono.create(responseEntityMonoSink -> {
-
+            IPage<Menu> page = menuService.queryMenus(request);
+            if (page != null) {
+                responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
+                        .code(CommonResult.COMMON_SUCCESS)
+                        .msg("查询成功")
+                        .data(page.convert(Menu::menu2VoMapper))
+                        .build()));
+            } else {
+                responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
+                        .code(CommonResult.SERVER_EXCEPTION)
+                        .msg("查询失败")
+                        .build()));
+            }
         });
     }
 
@@ -57,9 +71,27 @@ public class MenuController {
 
     @PutMapping("/update/{id}")
     public Mono<ResponseEntity<CommonResult>> updateMenu(@PathVariable("id") Long id,
-                                                         @RequestBody @Validated UpdateMenuRequest updateMenuRequest) {
+                                                         @RequestBody @Validated Mono<UpdateMenuRequest> requestMono) {
         return Mono.create(responseEntityMonoSink -> {
-
+            requestMono.doOnError(WebExchangeBindException.class, throwable -> {
+                responseEntityMonoSink.success(ResponseEntity.badRequest().body(new CommonResult.Builder()
+                        .code(CommonResult.SERVER_EXCEPTION)
+                        .msg(throwable.getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
+                                .collect(Collectors.joining()))
+                        .build()));
+            }).doOnNext(updateMenuRequest -> {
+                if (menuService.updateMenuById(id, updateMenuRequest)) {
+                    responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
+                            .code(CommonResult.COMMON_SUCCESS)
+                            .msg("修改菜单成功")
+                            .build()));
+                } else {
+                    responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
+                            .code(CommonResult.COMMON_FAILED)
+                            .msg("修改菜单失败")
+                            .build()));
+                }
+            }).subscribe();
         });
     }
 

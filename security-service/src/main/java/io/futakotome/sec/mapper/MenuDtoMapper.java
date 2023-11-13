@@ -1,4 +1,5 @@
 package io.futakotome.sec.mapper;
+import org.apache.ibatis.annotations.Param;
 
 import io.futakotome.sec.dto.MenuDto;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -12,7 +13,9 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface MenuDtoMapper extends BaseMapper<MenuDto> {
+    int insertAll(MenuDto menuDto);
 
+    int updateSelective(MenuDto menuDto);
 }
 
 

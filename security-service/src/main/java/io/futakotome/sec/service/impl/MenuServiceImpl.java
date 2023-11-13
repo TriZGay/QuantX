@@ -1,10 +1,17 @@
 package io.futakotome.sec.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.futakotome.sec.controller.vo.AddMenuRequest;
+import io.futakotome.sec.controller.vo.ListMenuRequest;
+import io.futakotome.sec.controller.vo.UpdateMenuRequest;
+import io.futakotome.sec.domain.Menu;
 import io.futakotome.sec.dto.MenuDto;
-import io.futakotome.sec.service.MenuService;
 import io.futakotome.sec.mapper.MenuDtoMapper;
+import io.futakotome.sec.service.MenuService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,10 +34,48 @@ public class MenuServiceImpl extends ServiceImpl<MenuDtoMapper, MenuDto>
     }
 
     @Override
+    public IPage<Menu> queryMenus(ListMenuRequest listMenuRequest) {
+        try {
+            Page<MenuDto> pagination = Page.of(1, 10);
+            QueryWrapper<MenuDto> queryWrapper = Wrappers.query();
+            if (listMenuRequest.getCurrent() != null) {
+                pagination.setCurrent(listMenuRequest.getCurrent());
+            }
+            if (listMenuRequest.getSize() != null) {
+                pagination.setSize(listMenuRequest.getSize());
+            }
+            if (listMenuRequest.getName() != null) {
+                queryWrapper.like("name", listMenuRequest.getName());
+            }
+            return page(pagination, queryWrapper).convert(Menu::dto2MenuMapper);
+        } catch (Exception e) {
+            LOGGER.error("查询菜单失败", e);
+            return null;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateMenuById(Long id, UpdateMenuRequest updateMenuRequest) {
+        MenuDto updateMenu = Menu.transferUpdReq(id, updateMenuRequest);
+        try {
+            return menuDtoMapper.updateSelective(updateMenu) > 0;
+        } catch (Exception e) {
+            LOGGER.error("更新菜单失败", e);
+            return false;
+        }
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addMenu(AddMenuRequest addMenuRequest) {
-
-        return false;
+        MenuDto addMenu = Menu.transferAddReq(addMenuRequest);
+        try {
+            return menuDtoMapper.insertAll(addMenu) > 0;
+        } catch (Exception e) {
+            LOGGER.error("新增菜单失败", e);
+            return false;
+        }
     }
 
     @Override
