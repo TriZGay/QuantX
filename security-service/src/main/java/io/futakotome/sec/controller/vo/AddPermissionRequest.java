@@ -9,6 +9,9 @@ public class AddPermissionRequest {
     private String name;
     @NotNull(message = "权限类型必填")
     private Integer type;
+    @NotNull(message = "权限标识必填")
+    @NotEmpty(message = "权限标识不能为空")
+    private String tag;
     private String method;
     private Long menuId;
 
@@ -26,6 +29,14 @@ public class AddPermissionRequest {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public String getMethod() {

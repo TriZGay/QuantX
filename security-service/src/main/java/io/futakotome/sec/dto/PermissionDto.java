@@ -18,6 +18,8 @@ public class PermissionDto implements Serializable {
 
     private Integer type;
 
+    private String tag;
+
     private String method;
 
     private Long menuId;
@@ -50,6 +52,14 @@ public class PermissionDto implements Serializable {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public String getMethod() {

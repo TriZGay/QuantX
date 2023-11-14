@@ -4,15 +4,17 @@ public class PermissionVo {
     private Long id;
     private String name;
     private Integer type;
+    private String tag;
     private String method;
     private Long menuId;
     private String createTime;
     private String modifyTime;
 
-    public PermissionVo(Long id, String name, Integer type, String method, Long menuId, String createTime, String modifyTime) {
+    public PermissionVo(Long id, String name, Integer type, String tag, String method, Long menuId, String createTime, String modifyTime) {
         this.id = id;
         this.name = name;
         this.type = type;
+        this.tag = tag;
         this.method = method;
         this.menuId = menuId;
         this.createTime = createTime;
@@ -41,6 +43,14 @@ public class PermissionVo {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public String getMethod() {

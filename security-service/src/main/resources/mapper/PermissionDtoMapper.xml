@@ -5,13 +5,13 @@
 <mapper namespace="io.futakotome.sec.mapper.PermissionDtoMapper">
 
     <resultMap id="BaseResultMap" type="io.futakotome.sec.dto.PermissionDto">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="name" column="name" jdbcType="VARCHAR"/>
-            <result property="type" column="type" jdbcType="SMALLINT"/>
-            <result property="method" column="method" jdbcType="VARCHAR"/>
-            <result property="menuId" column="menu_id" jdbcType="BIGINT"/>
-            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
-            <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="type" column="type" jdbcType="SMALLINT"/>
+        <result property="method" column="method" jdbcType="VARCHAR"/>
+        <result property="menuId" column="menu_id" jdbcType="BIGINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -21,10 +21,10 @@
     </sql>
     <insert id="insertAll">
         insert into t_permission
-        (name, type,
+        (name, type, tag,
          method, menu_id, create_time,
          modify_time)
-        values (#{name,jdbcType=VARCHAR}, #{type,jdbcType=NUMERIC},
+        values (#{name,jdbcType=VARCHAR}, #{type,jdbcType=NUMERIC}, #{tag,jdbcType=VARCHAR},
                 #{method,jdbcType=VARCHAR}, #{menuId,jdbcType=NUMERIC}, #{createTime},
                 #{modifyTime})
 
@@ -34,6 +34,7 @@
         <set>
             <if test="name != null">name=#{name,jdbcType=VARCHAR},</if>
             <if test="type != null">type=#{type,jdbcType=NUMERIC},</if>
+            <if test="tag != null">tag=#{tag,jdbcType=VARCHAR},</if>
             <if test="method != null">method=#{method,jdbcType=VARCHAR},</if>
             <if test="menuId != null">menu_id=#{menuId,jdbcType=NUMERIC},</if>
             <if test="createTime != null">create_time=#{createTime},</if>

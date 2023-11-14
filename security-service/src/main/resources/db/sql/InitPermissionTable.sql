@@ -1,12 +1,13 @@
 create table public.t_permission
 (
-    id          bigserial   not null,
-    name        varchar(64) null,
-    type        smallint    null,
-    method      varchar(10) null,
-    menu_id     bigint      null,
-    create_time timestamp   null,
-    modify_time timestamp   null
+    id          bigserial    not null,
+    name        varchar(64)  null,
+    type        smallint     null,
+    tag         varchar(128) not null,
+    method      varchar(10)  null,
+    menu_id     bigint       null,
+    create_time timestamp    null,
+    modify_time timestamp    null
 );
 
 alter table public.t_permission
