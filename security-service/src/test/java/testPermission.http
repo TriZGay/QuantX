@@ -14,9 +14,11 @@ POST http://localhost:9095/permission/add
 Content-Type: application/json
 
 {
-  "name": "系统管理",
-  "parentId": -1,
-  "path": "/sys"
+  "name": "用户服务",
+  "type": 1,
+  "tag": "/use/**",
+  "method": "post",
+  "menuId": 1
 }
 
 ###
@@ -24,8 +26,7 @@ PUT http://localhost:9095/permission/update/1
 Content-Type: application/json
 
 {
-  "name": "超级管理员2",
-  "status": 2
+  "name": "超级管理员2"
 }
 
 ###
