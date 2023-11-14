@@ -30,16 +30,10 @@ public class MenuController {
         return Mono.create(responseEntityMonoSink -> {
             IPage<Menu> page = menuService.queryMenus(request);
             if (page != null) {
-                responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                        .code(CommonResult.COMMON_SUCCESS)
-                        .msg("查询成功")
-                        .data(page.convert(Menu::menu2VoMapper))
-                        .build()));
+                Utils.successWithData(responseEntityMonoSink, CommonResult.COMMON_SUCCESS,
+                        "查询成功", page.convert(Menu::menu2VoMapper));
             } else {
-                responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                        .code(CommonResult.SERVER_EXCEPTION)
-                        .msg("查询失败")
-                        .build()));
+                Utils.success(responseEntityMonoSink, CommonResult.SERVER_EXCEPTION, "查询失败");
             }
         });
     }
@@ -47,25 +41,14 @@ public class MenuController {
     @PostMapping("/add")
     public Mono<ResponseEntity<CommonResult>> addMenu(@RequestBody @Validated Mono<AddMenuRequest> requestMono) {
         return Mono.create(responseEntityMonoSink -> {
-            requestMono.doOnError(WebExchangeBindException.class, throwable -> {
-                responseEntityMonoSink.success(ResponseEntity.badRequest().body(new CommonResult.Builder()
-                        .code(CommonResult.SERVER_EXCEPTION)
-                        .msg(throwable.getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
-                                .collect(Collectors.joining()))
-                        .build()));
-            }).doOnNext(request -> {
-                if (menuService.addMenu(request)) {
-                    responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                            .code(CommonResult.COMMON_SUCCESS)
-                            .msg("添加菜单成功")
-                            .build()));
-                } else {
-                    responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                            .code(CommonResult.COMMON_FAILED)
-                            .msg("添加菜单失败")
-                            .build()));
-                }
-            }).subscribe();
+            requestMono.doOnError(WebExchangeBindException.class, Utils.badRequestHandle(responseEntityMonoSink))
+                    .doOnNext(request -> {
+                        if (menuService.addMenu(request)) {
+                            Utils.success(responseEntityMonoSink, CommonResult.COMMON_SUCCESS, "添加菜单成功");
+                        } else {
+                            Utils.success(responseEntityMonoSink, CommonResult.COMMON_FAILED, "添加菜单失败");
+                        }
+                    }).subscribe();
         });
     }
 
@@ -73,25 +56,14 @@ public class MenuController {
     public Mono<ResponseEntity<CommonResult>> updateMenu(@PathVariable("id") Long id,
                                                          @RequestBody @Validated Mono<UpdateMenuRequest> requestMono) {
         return Mono.create(responseEntityMonoSink -> {
-            requestMono.doOnError(WebExchangeBindException.class, throwable -> {
-                responseEntityMonoSink.success(ResponseEntity.badRequest().body(new CommonResult.Builder()
-                        .code(CommonResult.SERVER_EXCEPTION)
-                        .msg(throwable.getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
-                                .collect(Collectors.joining()))
-                        .build()));
-            }).doOnNext(updateMenuRequest -> {
-                if (menuService.updateMenuById(id, updateMenuRequest)) {
-                    responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                            .code(CommonResult.COMMON_SUCCESS)
-                            .msg("修改菜单成功")
-                            .build()));
-                } else {
-                    responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                            .code(CommonResult.COMMON_FAILED)
-                            .msg("修改菜单失败")
-                            .build()));
-                }
-            }).subscribe();
+            requestMono.doOnError(WebExchangeBindException.class, Utils.badRequestHandle(responseEntityMonoSink))
+                    .doOnNext(updateMenuRequest -> {
+                        if (menuService.updateMenuById(id, updateMenuRequest)) {
+                            Utils.success(responseEntityMonoSink, CommonResult.COMMON_SUCCESS, "修改菜单成功");
+                        } else {
+                            Utils.success(responseEntityMonoSink, CommonResult.COMMON_FAILED, "修改菜单失败");
+                        }
+                    }).subscribe();
         });
     }
 
@@ -99,15 +71,9 @@ public class MenuController {
     public Mono<ResponseEntity<CommonResult>> deleteMenu(@PathVariable("id") Long id) {
         return Mono.create(responseEntityMonoSink -> {
             if (menuService.deleteBy(id)) {
-                responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                        .code(CommonResult.COMMON_SUCCESS)
-                        .msg("删除菜单成功")
-                        .build()));
+                Utils.success(responseEntityMonoSink, CommonResult.COMMON_SUCCESS, "删除菜单成功");
             } else {
-                responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                        .code(CommonResult.COMMON_FAILED)
-                        .msg("删除菜单失败")
-                        .build()));
+                Utils.success(responseEntityMonoSink, CommonResult.COMMON_FAILED, "删除菜单失败");
             }
         });
     }

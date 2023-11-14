@@ -7,14 +7,11 @@ import io.futakotome.sec.controller.vo.ListRoleRequest;
 import io.futakotome.sec.controller.vo.UpdateRoleRequest;
 import io.futakotome.sec.domain.Role;
 import io.futakotome.sec.service.RoleService;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
-
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/role")
@@ -30,16 +27,10 @@ public class RoleController {
         return Mono.create(responseEntityMonoSink -> {
             IPage<Role> pageRole = roleService.queryRoles(request);
             if (pageRole != null) {
-                responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                        .code(CommonResult.COMMON_SUCCESS)
-                        .msg("查询成功")
-                        .data(pageRole.convert(Role::role2VoMapper))
-                        .build()));
+                Utils.successWithData(responseEntityMonoSink, CommonResult.COMMON_SUCCESS,
+                        "查询成功", pageRole.convert(Role::role2VoMapper));
             } else {
-                responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                        .code(CommonResult.SERVER_EXCEPTION)
-                        .msg("查询失败")
-                        .build()));
+                Utils.success(responseEntityMonoSink, CommonResult.SERVER_EXCEPTION, "查询失败");
             }
         });
     }
@@ -47,25 +38,14 @@ public class RoleController {
     @PostMapping("/add")
     public Mono<ResponseEntity<CommonResult>> addRole(@RequestBody @Validated Mono<AddRoleRequest> requestMono) {
         return Mono.create(responseEntityMonoSink -> {
-            requestMono.doOnError(WebExchangeBindException.class, throwable -> {
-                responseEntityMonoSink.success(ResponseEntity.badRequest().body(new CommonResult.Builder()
-                        .code(CommonResult.SERVER_EXCEPTION)
-                        .msg(throwable.getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
-                                .collect(Collectors.joining()))
-                        .build()));
-            }).doOnNext(request -> {
-                if (roleService.addRole(request)) {
-                    responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                            .code(CommonResult.COMMON_SUCCESS)
-                            .msg("添加角色成功")
-                            .build()));
-                } else {
-                    responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                            .code(CommonResult.COMMON_FAILED)
-                            .msg("添加角色失败")
-                            .build()));
-                }
-            }).subscribe();
+            requestMono.doOnError(WebExchangeBindException.class, Utils.badRequestHandle(responseEntityMonoSink))
+                    .doOnNext(request -> {
+                        if (roleService.addRole(request)) {
+                            Utils.success(responseEntityMonoSink, CommonResult.COMMON_SUCCESS, "添加角色成功");
+                        } else {
+                            Utils.success(responseEntityMonoSink, CommonResult.COMMON_FAILED, "添加角色失败");
+                        }
+                    }).subscribe();
         });
     }
 
@@ -73,25 +53,14 @@ public class RoleController {
     public Mono<ResponseEntity<CommonResult>> updateBy(@PathVariable("id") Long id,
                                                        @RequestBody @Validated Mono<UpdateRoleRequest> requestMono) {
         return Mono.create(responseEntityMonoSink -> {
-            requestMono.doOnError(WebExchangeBindException.class, throwable -> {
-                responseEntityMonoSink.success(ResponseEntity.badRequest().body(new CommonResult.Builder()
-                        .code(CommonResult.SERVER_EXCEPTION)
-                        .msg(throwable.getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
-                                .collect(Collectors.joining()))
-                        .build()));
-            }).doOnNext(request -> {
-                if (roleService.updateRoleById(id, request)) {
-                    responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                            .code(CommonResult.COMMON_SUCCESS)
-                            .msg("修改角色成功")
-                            .build()));
-                } else {
-                    responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                            .code(CommonResult.COMMON_FAILED)
-                            .msg("修改角色失败")
-                            .build()));
-                }
-            }).subscribe();
+            requestMono.doOnError(WebExchangeBindException.class, Utils.badRequestHandle(responseEntityMonoSink))
+                    .doOnNext(request -> {
+                        if (roleService.updateRoleById(id, request)) {
+                            Utils.success(responseEntityMonoSink, CommonResult.COMMON_SUCCESS, "修改角色成功");
+                        } else {
+                            Utils.success(responseEntityMonoSink, CommonResult.COMMON_FAILED, "修改角色失败");
+                        }
+                    }).subscribe();
         });
     }
 
@@ -99,15 +68,9 @@ public class RoleController {
     public Mono<ResponseEntity<CommonResult>> deleteBy(@PathVariable("id") Long id) {
         return Mono.create(responseEntityMonoSink -> {
             if (roleService.deleteRoleById(id)) {
-                responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                        .code(CommonResult.COMMON_SUCCESS)
-                        .msg("删除角色成功")
-                        .build()));
+                Utils.success(responseEntityMonoSink, CommonResult.COMMON_SUCCESS, "删除角色成功");
             } else {
-                responseEntityMonoSink.success(ResponseEntity.ok(new CommonResult.Builder()
-                        .code(CommonResult.COMMON_FAILED)
-                        .msg("删除角色失败")
-                        .build()));
+                Utils.success(responseEntityMonoSink, CommonResult.COMMON_FAILED, "删除角色失败");
             }
         });
     }
