@@ -19,4 +19,26 @@
         method,menu_id,create_time,
         modify_time
     </sql>
+    <insert id="insertAll">
+        insert into t_permission
+        (name, type,
+         method, menu_id, create_time,
+         modify_time)
+        values (#{name,jdbcType=VARCHAR}, #{type,jdbcType=NUMERIC},
+                #{method,jdbcType=VARCHAR}, #{menuId,jdbcType=NUMERIC}, #{createTime},
+                #{modifyTime})
+
+    </insert>
+    <update id="updateSelective">
+        update t_permission
+        <set>
+            <if test="name != null">name=#{name,jdbcType=VARCHAR},</if>
+            <if test="type != null">type=#{type,jdbcType=NUMERIC},</if>
+            <if test="method != null">method=#{method,jdbcType=VARCHAR},</if>
+            <if test="menuId != null">menu_id=#{menuId,jdbcType=NUMERIC},</if>
+            <if test="createTime != null">create_time=#{createTime},</if>
+            <if test="modifyTime != null">modify_time=#{modifyTime},</if>
+        </set>
+        where id = #{id,jdbcType=NUMERIC}
+    </update>
 </mapper>
