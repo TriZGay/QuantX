@@ -34,18 +34,23 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionDtoMapper, Perm
 
     @Override
     public IPage<Permission> queryPermission(ListPermissionRequest listPermissionRequest) {
-        Page<PermissionDto> pagination = Page.of(1, 10);
-        QueryWrapper<PermissionDto> queryWrapper = Wrappers.query();
-        if (listPermissionRequest.getCurrent() != null) {
-            pagination.setCurrent(listPermissionRequest.getCurrent());
+        try {
+            Page<PermissionDto> pagination = Page.of(1, 10);
+            QueryWrapper<PermissionDto> queryWrapper = Wrappers.query();
+            if (listPermissionRequest.getCurrent() != null) {
+                pagination.setCurrent(listPermissionRequest.getCurrent());
+            }
+            if (listPermissionRequest.getSize() != null) {
+                pagination.setSize(listPermissionRequest.getSize());
+            }
+            if (listPermissionRequest.getName() != null) {
+                queryWrapper.like("name", listPermissionRequest.getName());
+            }
+            return page(pagination, queryWrapper).convert(Permission::dto2Permission);
+        } catch (Exception e) {
+            LOGGER.error("查询权限失败", e);
+            return null;
         }
-        if (listPermissionRequest.getSize() != null) {
-            pagination.setSize(listPermissionRequest.getSize());
-        }
-        if (listPermissionRequest.getName() != null) {
-            queryWrapper.like("name", listPermissionRequest.getName());
-        }
-        return page(pagination, queryWrapper).convert(Permission::dto2Permission);
     }
 
     @Override
