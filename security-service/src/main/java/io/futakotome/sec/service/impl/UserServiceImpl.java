@@ -70,7 +70,7 @@ public class UserServiceImpl extends ServiceImpl<UserDtoMapper, UserDto>
     public boolean updateById(Long id, UpdateUserRequest request) {
         UserDto dto = User.transferUpdReq(id, request);
         try {
-            return userDtoMapper.updateById(dto) > 0;
+            return userDtoMapper.updateSelective(dto) > 0;
         } catch (Exception e) {
             LOGGER.error("修改用户失败", e);
             return false;

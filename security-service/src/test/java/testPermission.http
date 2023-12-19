@@ -16,7 +16,7 @@ Content-Type: application/json
 {
   "name": "用户服务",
   "type": 1,
-  "tag": "/use/**",
+  "tag": "/user/**",
   "method": "post",
   "menuId": 1
 }
