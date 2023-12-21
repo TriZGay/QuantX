@@ -28,4 +28,7 @@
     <changeSet id="7" author="futakotome">
         <sqlFile path="db/sql/InitRoleUserTable.sql"/>
     </changeSet>
+    <changeSet id="8" author="futakotome">
+        <sqlFile path="db/sql/DataInitalize.sql"/>
+    </changeSet>
 </databaseChangeLog>
