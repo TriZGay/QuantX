@@ -61,8 +61,11 @@ coverage
 *.sln
 *.sw?
 
+package-lock.json
+
 *.tsbuildinfo
 
 logs/
 tests_output/
+backend/src/main/resources/public/
 
