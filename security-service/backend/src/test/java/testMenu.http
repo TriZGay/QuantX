@@ -1,4 +1,4 @@
-POST http://localhost:9095/menu/list
+POST http://localhost:9095/api/sec/menu/list
 Content-Type: application/json
 
 {}
