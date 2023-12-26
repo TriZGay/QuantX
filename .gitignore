@@ -67,5 +67,5 @@ package-lock.json
 
 logs/
 tests_output/
-backend/src/main/resources/public/
 
+/security-service/backend/src/main/resources/public/
