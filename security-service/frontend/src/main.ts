@@ -8,7 +8,6 @@ import router from './router'
 
 //bootstrap
 import "@/assets/styles.scss"
-import * as bootstrap from 'bootstrap'
 
 const app = createApp(App)
 
