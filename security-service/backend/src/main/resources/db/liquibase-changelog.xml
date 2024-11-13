@@ -1,0 +1,34 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+   http://www.liquibase.org/xml/ns/dbchangelog
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="1" author="futakotome">
+        <sqlFile path="db/sql/InitRoleTable.sql"/>
+    </changeSet>
+    <changeSet id="2" author="futakotome">
+        <sqlFile path="db/sql/InitPermissionTable.sql"/>
+    </changeSet>
+    <changeSet id="3" author="futakotome">
+        <sqlFile path="db/sql/InitUserTable.sql"/>
+    </changeSet>
+    <changeSet id="4" author="futakotome">
+        <sqlFile path="db/sql/InitMenuTable.sql"/>
+    </changeSet>
+    <changeSet id="5" author="futakotome">
+        <sqlFile path="db/sql/InitRoleMenuTable.sql"/>
+    </changeSet>
+    <changeSet id="6" author="futakotome">
+        <sqlFile path="db/sql/InitRolePermissionTable.sql"/>
+    </changeSet>
+    <changeSet id="7" author="futakotome">
+        <sqlFile path="db/sql/InitRoleUserTable.sql"/>
+    </changeSet>
+    <changeSet id="8" author="futakotome">
+        <sqlFile path="db/sql/DataInitalize.sql"/>
+    </changeSet>
+</databaseChangeLog>

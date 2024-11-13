@@ -1,0 +1,32 @@
+POST http://localhost:9095/permission/list
+Content-Type: application/json
+
+{}
+
+###
+DELETE http://localhost:9095/permission/delete/1
+Content-Type: application/json
+
+{}
+
+###
+POST http://localhost:9095/permission/add
+Content-Type: application/json
+
+{
+  "name": "用户服务",
+  "type": 1,
+  "tag": "/user/**",
+  "method": "post",
+  "menuId": 1
+}
+
+###
+PUT http://localhost:9095/permission/update/1
+Content-Type: application/json
+
+{
+  "name": "超级管理员2"
+}
+
+###

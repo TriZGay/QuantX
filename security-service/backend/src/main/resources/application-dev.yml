@@ -1,0 +1,14 @@
+server:
+  port: 9095
+spring:
+  webflux:
+    base-path: /api/sec
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sys_sec
+    username: postgres
+    password: 123456
+  liquibase:
+    change-log: classpath:db/liquibase-changelog.xml
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

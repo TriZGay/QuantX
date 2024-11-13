@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.trade.mapper.IpoHkDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.IpoHkDto">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="market" column="market" jdbcType="OTHER"/>
+            <result property="code" column="code" jdbcType="VARCHAR"/>
+            <result property="listTime" column="list_time" jdbcType="DATE"/>
+            <result property="ipoPriceMin" column="ipo_price_min" jdbcType="DOUBLE"/>
+            <result property="ipoPriceMax" column="ipo_price_max" jdbcType="DOUBLE"/>
+            <result property="listPrice" column="list_price" jdbcType="DOUBLE"/>
+            <result property="lotSize" column="lot_size" jdbcType="OTHER"/>
+            <result property="entrancePrice" column="entrance_price" jdbcType="DOUBLE"/>
+            <result property="isSubscribeStatus" column="is_subscribe_status" jdbcType="SMALLINT"/>
+            <result property="applyEndtime" column="apply_endtime" jdbcType="DATE"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,name,market,
+        code,list_time,ipo_price_min,
+        ipo_price_max,list_price,lot_size,
+        entrance_price,is_subscribe_status,apply_endtime
+    </sql>
+    <insert id="insertBatch">
+        insert into t_ipo_hk(name,market,
+        code,list_time,ipo_price_min,
+        ipo_price_max,list_price,lot_size,
+        entrance_price,is_subscribe_status,apply_endtime)
+        values
+        <foreach collection="ipoHkDtoCollection" item="item" separator=",">
+            (#{item.name,jdbcType=VARCHAR},#{item.market,jdbcType=INTEGER},
+            #{item.code,jdbcType=VARCHAR},#{item.listTime},#{item.ipoPriceMin,jdbcType=DECIMAL},
+            #{item.ipoPriceMax,jdbcType=DECIMAL},#{item.listPrice,jdbcType=DECIMAL},#{item.lotSize,jdbcType=INTEGER},
+            #{item.entrancePrice,jdbcType=DECIMAL},#{item.isSubscribeStatus,jdbcType=INTEGER},#{item.applyEndtime})
+        </foreach>
+    </insert>
+</mapper>

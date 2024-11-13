@@ -1,0 +1,8 @@
+rocketmq:
+  name-server: 172.19.210.233:9876
+ck:
+  url: jdbc:ch://172.19.210.233:8123/quantx
+  user: default
+  password: 123456
+server:
+  port: 9093

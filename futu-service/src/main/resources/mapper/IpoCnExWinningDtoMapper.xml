@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.trade.mapper.IpoCnExWinningDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.IpoCnExWinningDto">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="winningName" column="winning_name" jdbcType="VARCHAR"/>
+        <result property="winningInfo" column="winning_info" jdbcType="VARCHAR"/>
+        <result property="ipoCnId" column="ipo_cn_id" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,winning_name,winning_info,
+        ipo_cn_id
+    </sql>
+    <insert id="insertBatch">
+        insert into t_ipo_cn_ex_winning(winning_name,winning_info,
+        ipo_cn_id)
+        values
+        <foreach collection="ipoCnExWinningDtoCollection" item="item" separator=",">
+            (#{item.winningName,jdbcType=VARCHAR},#{item.winningInfo,jdbcType=VARCHAR},
+            #{item.ipoCnId,jdbcType=NUMERIC})
+        </foreach>
+    </insert>
+</mapper>

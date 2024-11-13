@@ -1,0 +1,31 @@
+POST http://localhost:9095/api/sec/menu/list
+Content-Type: application/json
+
+{}
+
+###
+DELETE http://localhost:9095/menu/delete/1
+Content-Type: application/json
+
+{}
+
+###
+POST http://localhost:9095/menu/add
+Content-Type: application/json
+
+{
+  "name": "系统管理",
+  "parentId": -1,
+  "path": "/sys"
+}
+
+###
+PUT http://localhost:9095/menu/update/1
+Content-Type: application/json
+
+{
+  "name": "超级管理员2",
+  "status": 2
+}
+
+###

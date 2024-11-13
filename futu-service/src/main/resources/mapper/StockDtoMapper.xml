@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.trade.mapper.StockDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.StockDto">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="lotSize" column="lot_size" jdbcType="INTEGER"/>
+        <result property="stockType" column="stock_type" jdbcType="SMALLINT"/>
+        <result property="stockChildType" column="stock_child_type" jdbcType="SMALLINT"/>
+        <result property="stockOwner" column="stock_owner" jdbcType="VARCHAR"/>
+        <result property="optionType" column="option_type" jdbcType="VARCHAR"/>
+        <result property="strikeTime" column="strike_time" jdbcType="VARCHAR"/>
+        <result property="strikePrice" column="strike_price" jdbcType="DOUBLE"/>
+        <result property="suspension" column="suspension" jdbcType="SMALLINT"/>
+        <result property="listingDate" column="listing_date" jdbcType="DATE"/>
+        <result property="stockId" column="stock_id" jdbcType="BIGINT"/>
+        <result property="delisting" column="delisting" jdbcType="SMALLINT"/>
+        <result property="indexOptionType" column="index_option_type" jdbcType="VARCHAR"/>
+        <result property="mainContract" column="main_contract" jdbcType="SMALLINT"/>
+        <result property="lastTradeTime" column="last_trade_time" jdbcType="DATE"/>
+        <result property="exchangeType" column="exchange_type" jdbcType="INTEGER"/>
+        <result property="market" column="market" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,name,code,
+        lot_size,stock_type,stock_child_type,
+        stock_owner,option_type,strike_time,
+        strike_price,suspension,listing_date,
+        stock_id,delisting,index_option_type,
+        main_contract,last_trade_time,exchange_type,
+        market
+    </sql>
+    <insert id="insertBatch">
+        insert into t_stock(name,code,
+        lot_size,stock_type,stock_child_type,
+        stock_owner,option_type,strike_time,
+        strike_price,suspension,listing_date,
+        stock_id,delisting,index_option_type,
+        main_contract,last_trade_time,exchange_type,
+        market)
+        values
+        <foreach collection="stockDtoCollection" item="item" separator=",">
+            (#{item.name,jdbcType=VARCHAR},#{item.code,jdbcType=VARCHAR},
+            #{item.lotSize,jdbcType=INTEGER},#{item.stockType,jdbcType=SMALLINT},#{item.stockChildType,jdbcType=SMALLINT},
+            #{item.stockOwner,jdbcType=VARCHAR},#{item.optionType,jdbcType=VARCHAR},#{item.strikeTime,jdbcType=VARCHAR},
+            #{item.strikePrice,jdbcType=DECIMAL},#{item.suspension,jdbcType=NUMERIC},#{item.listingDate,jdbcType=DATE},
+            #{item.stockId,jdbcType=NUMERIC},#{item.delisting,jdbcType=NUMERIC},#{item.indexOptionType,jdbcType=VARCHAR},
+            #{item.mainContract,jdbcType=NUMERIC},#{item.lastTradeTime,jdbcType=DATE},#{item.exchangeType,jdbcType=INTEGER},
+            #{item.market,jdbcType=INTEGER})
+        </foreach>
+    </insert>
+    <select id="searchOneByCode" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_stock
+        where
+        code = #{code,jdbcType=VARCHAR}
+    </select>
+</mapper>

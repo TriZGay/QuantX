@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.sec.mapper.MenuDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.sec.dto.MenuDto">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" jdbcType="BIGINT"/>
+        <result property="path" column="path" jdbcType="VARCHAR"/>
+        <result property="component" column="component" jdbcType="VARCHAR"/>
+        <result property="redirect" column="redirect" jdbcType="VARCHAR"/>
+        <result property="icon" column="icon" jdbcType="VARCHAR"/>
+        <result property="visible" column="visible" jdbcType="SMALLINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,name,parent_id,
+        path,component,redirect,
+        icon,visible,create_time,
+        modify_time
+    </sql>
+    <insert id="insertAll">
+        insert into t_menu
+        (name, parent_id,
+         path, component, redirect,
+         icon, visible, create_time,
+         modify_time)
+        values (#{name,jdbcType=VARCHAR}, #{parentId,jdbcType=NUMERIC},
+                #{path,jdbcType=VARCHAR}, #{component,jdbcType=VARCHAR}, #{redirect,jdbcType=VARCHAR},
+                #{icon,jdbcType=VARCHAR}, #{visible,jdbcType=NUMERIC}, #{createTime},
+                #{modifyTime})
+
+    </insert>
+    <update id="updateSelective">
+        update t_menu
+        <set>
+            <if test="name != null">name=#{name,jdbcType=VARCHAR},</if>
+            <if test="parentId != null">parent_id=#{parentId,jdbcType=NUMERIC},</if>
+            <if test="path != null">path=#{path,jdbcType=VARCHAR},</if>
+            <if test="component != null">component=#{component,jdbcType=VARCHAR},</if>
+            <if test="redirect != null">redirect=#{redirect,jdbcType=VARCHAR},</if>
+            <if test="icon != null">icon=#{icon,jdbcType=VARCHAR},</if>
+            <if test="visible != null">visible=#{visible,jdbcType=NUMERIC},</if>
+            <if test="createTime != null">create_time=#{createTime},</if>
+            <if test="modifyTime != null">modify_time=#{modifyTime},</if>
+        </set>
+        where id = #{id,jdbcType=NUMERIC}
+    </update>
+</mapper>

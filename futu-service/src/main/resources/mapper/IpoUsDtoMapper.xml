@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.trade.mapper.IpoUsDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.IpoUsDto">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="market" column="market" jdbcType="OTHER"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="listTime" column="list_time" jdbcType="DATE"/>
+        <result property="ipoPriceMin" column="ipo_price_min" jdbcType="DOUBLE"/>
+        <result property="ipoPriceMax" column="ipo_price_max" jdbcType="DOUBLE"/>
+        <result property="issueSize" column="issue_size" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,name,market,
+        code,list_time,ipo_price_min,
+        ipo_price_max,issue_size
+    </sql>
+    <insert id="insertBatch">
+        insert into t_ipo_us(name,market,
+        code,list_time,ipo_price_min,
+        ipo_price_max,issue_size)
+        values
+        <foreach collection="ipoUsDtoCollection" item="item" separator=",">
+            (#{item.name,jdbcType=VARCHAR},#{item.market,jdbcType=INTEGER},
+            #{item.code,jdbcType=VARCHAR},#{item.listTime},#{item.ipoPriceMin,jdbcType=DECIMAL},
+            #{item.ipoPriceMax,jdbcType=DECIMAL},#{item.issueSize,jdbcType=NUMERIC})
+        </foreach>
+    </insert>
+</mapper>

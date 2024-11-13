@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.sec.mapper.RoleDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.sec.dto.RoleDto">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,name,status,
+        create_time,modify_time
+    </sql>
+    <insert id="insertAll">
+        insert into t_role
+        (name, status,
+         create_time, modify_time)
+        values (#{name,jdbcType=VARCHAR}, #{status,jdbcType=NUMERIC},
+                #{createTime}, #{modifyTime})
+    </insert>
+    <update id="updateSelective">
+        update t_role
+        <set>
+            <if test="name != null">name=#{name,jdbcType=VARCHAR},</if>
+            <if test="status != null">status=#{status,jdbcType=NUMERIC},</if>
+            <if test="createTime != null">create_time=#{createTime},</if>
+            <if test="modifyTime != null">modify_time=#{modifyTime},</if>
+        </set>
+        where id = #{id,jdbcType=NUMERIC}
+    </update>
+</mapper>

@@ -1,0 +1,30 @@
+POST http://localhost:9095/user/list
+Content-Type: application/json
+
+{}
+
+###
+DELETE http://localhost:9095/user/delete/1
+Content-Type: application/json
+
+{}
+
+###
+POST http://localhost:9095/user/add
+Content-Type: application/json
+
+{
+  "username": "超级用户",
+  "password": "123",
+  "status": 1
+}
+
+###
+PUT http://localhost:9095/user/update/1
+Content-Type: application/json
+
+{
+  "username": "超级管理员2"
+}
+
+###

@@ -1,0 +1,40 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+   http://www.liquibase.org/xml/ns/dbchangelog
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="1" author="futakotome">
+        <sqlFile path="db/sql/InitAccTable.sql"/>
+    </changeSet>
+    <changeSet id="2" author="futakotome">
+        <sqlFile path="db/sql/InitAccInfoTable.sql"/>
+    </changeSet>
+    <changeSet id="3" author="futakotome">
+        <sqlFile path="db/sql/InitOrderTable.sql"/>
+    </changeSet>
+    <changeSet id="4" author="futakotome">
+        <sqlFile path="db/sql/InitPositionTable.sql"/>
+    </changeSet>
+    <changeSet id="5" author="futakotome">
+        <sqlFile path="db/sql/InitPlateTable.sql"/>
+    </changeSet>
+    <changeSet id="6" author="futakotome">
+        <sqlFile path="db/sql/InitStockTable.sql"/>
+    </changeSet>
+    <changeSet id="7" author="futakotome">
+        <sqlFile path="db/sql/InitIpoTable.sql"/>
+    </changeSet>
+    <changeSet id="8" author="futakotome">
+        <sqlFile path="db/sql/InitSubscribeInfoTable.sql"/>
+    </changeSet>
+    <changeSet id="9" author="futakotome">
+        <sqlFile path="db/sql/InitTradeDateTable.sql"/>
+    </changeSet>
+    <changeSet id="10" author="futakotome">
+        <sqlFile path="db/sql/InitCapitalDistributionTable.sql"/>
+    </changeSet>
+</databaseChangeLog>

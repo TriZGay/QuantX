@@ -1,0 +1,9 @@
+server:
+  port: 9094
+spring:
+  redis:
+    host: 172.19.137.28
+    port: 6379
+    database: 0
+    username: default
+    password: 123456
