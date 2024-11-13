@@ -34,7 +34,7 @@ public class KLineController {
                     )).doOnNext(request -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), request.getStart(), request.getEnd());
                 responseEntityMonoSink.success(
-                        ResponseEntity.ok(mapper.queryKLineCommon(request, KLineMapper.KL_YEAR_TABLE_NAME))
+                        ResponseEntity.ok(mapper.queryKLineArchived(request, KLineMapper.KL_YEAR_ARC_TABLE_NAME))
                 );
             }).subscribe();
         });
@@ -49,7 +49,7 @@ public class KLineController {
                     )).doOnNext(request -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), request.getStart(), request.getEnd());
                 responseEntityMonoSink.success(
-                        ResponseEntity.ok(mapper.queryKLineCommon(request, KLineMapper.KL_QUARTER_TABLE_NAME))
+                        ResponseEntity.ok(mapper.queryKLineArchived(request, KLineMapper.KL_QUARTER_ARC_TABLE_NAME))
                 );
             }).subscribe();
         });
@@ -64,7 +64,7 @@ public class KLineController {
                     )).doOnNext(request -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), request.getStart(), request.getEnd());
                 responseEntityMonoSink.success(
-                        ResponseEntity.ok(mapper.queryKLineCommon(request, KLineMapper.KL_MONTH_TABLE_NAME))
+                        ResponseEntity.ok(mapper.queryKLineArchived(request, KLineMapper.KL_MONTH_ARC_TABLE_NAME))
                 );
             }).subscribe();
         });
@@ -79,7 +79,7 @@ public class KLineController {
                     )).doOnNext(request -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), request.getStart(), request.getEnd());
                 responseEntityMonoSink.success(
-                        ResponseEntity.ok(mapper.queryKLineCommon(request, KLineMapper.KL_WEEK_TABLE_NAME))
+                        ResponseEntity.ok(mapper.queryKLineArchived(request, KLineMapper.KL_WEEK_ARC_TABLE_NAME))
                 );
             }).subscribe();
         });
@@ -94,7 +94,7 @@ public class KLineController {
                     )).doOnNext(request -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), request.getStart(), request.getEnd());
                 responseEntityMonoSink.success(
-                        ResponseEntity.ok(mapper.queryKLineCommon(request, KLineMapper.KL_MIN_60_TABLE_NAME))
+                        ResponseEntity.ok(mapper.queryKLineArchived(request, KLineMapper.KL_MIN_60_ARC_TABLE_NAME))
                 );
             }).subscribe();
         });
@@ -109,7 +109,7 @@ public class KLineController {
                     )).doOnNext(request -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), request.getStart(), request.getEnd());
                 responseEntityMonoSink.success(
-                        ResponseEntity.ok(mapper.queryKLineCommon(request, KLineMapper.KL_MIN_30_TABLE_NAME))
+                        ResponseEntity.ok(mapper.queryKLineArchived(request, KLineMapper.KL_MIN_30_ARC_TABLE_NAME))
                 );
             }).subscribe();
         });
@@ -124,7 +124,7 @@ public class KLineController {
                     )).doOnNext(request -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), request.getStart(), request.getEnd());
                 responseEntityMonoSink.success(
-                        ResponseEntity.ok(mapper.queryKLineCommon(request, KLineMapper.KL_MIN_5_TABLE_NAME))
+                        ResponseEntity.ok(mapper.queryKLineArchived(request, KLineMapper.KL_MIN_5_ARC_TABLE_NAME))
                 );
             }).subscribe();
         });
@@ -139,7 +139,7 @@ public class KLineController {
                     )).doOnNext(request -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), request.getStart(), request.getEnd());
                 responseEntityMonoSink.success(
-                        ResponseEntity.ok(mapper.queryKLineCommon(request, KLineMapper.KL_MIN_3_TABLE_NAME))
+                        ResponseEntity.ok(mapper.queryKLineArchived(request, KLineMapper.KL_MIN_3_ARC_TABLE_NAME))
                 );
             }).subscribe();
         });
@@ -183,7 +183,9 @@ public class KLineController {
                                 new ResponseEntity<>("参数校验失败:" + throwables.getFieldErrors(), HttpStatus.BAD_REQUEST)
                         )).doOnNext(request -> {
                     LOGGER.info(PRINT_REQUEST_TEMPLATE, request.toString(), request.getStart(), request.getEnd());
-                    responseEntityMonoSink.success(ResponseEntity.ok(mapper.queryKLineCommon(request, KLineMapper.KL_DAY_TABLE_NAME)));
+                    responseEntityMonoSink.success(
+                            ResponseEntity.ok(mapper.queryKLineArchived(request, KLineMapper.KL_DAY_ARC_TABLE_NAME))
+                    );
                 }).subscribe());
     }
 }

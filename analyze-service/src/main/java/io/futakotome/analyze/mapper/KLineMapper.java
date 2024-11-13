@@ -17,17 +17,27 @@ import java.util.List;
 @Component
 public class KLineMapper {
     public static final String KL_DAY_TABLE_NAME = "t_kl_day_raw";
+    public static final String KL_DAY_ARC_TABLE_NAME = "t_kl_day_arc";
     public static final String KL_WEEK_TABLE_NAME = "t_kl_week_raw";
+    public static final String KL_WEEK_ARC_TABLE_NAME = "t_kl_week_arc";
     public static final String KL_MONTH_TABLE_NAME = "t_kl_month_raw";
+    public static final String KL_MONTH_ARC_TABLE_NAME = "t_kl_month_arc";
     public static final String KL_QUARTER_TABLE_NAME = "t_kl_quarter_raw";
+    public static final String KL_QUARTER_ARC_TABLE_NAME = "t_kl_quarter_arc";
     public static final String KL_YEAR_TABLE_NAME = "t_kl_year_raw";
+    public static final String KL_YEAR_ARC_TABLE_NAME = "t_kl_year_arc";
     public static final String KL_MIN_1_TABLE_NAME = "t_kl_min_1_raw";
     public static final String KL_MIN_1_ARC_TABLE_NAME = "t_kl_min_1_arc";
     public static final String KL_MIN_3_TABLE_NAME = "t_kl_min_3_raw";
+    public static final String KL_MIN_3_ARC_TABLE_NAME = "t_kl_min_3_arc";
     public static final String KL_MIN_5_TABLE_NAME = "t_kl_min_5_raw";
+    public static final String KL_MIN_5_ARC_TABLE_NAME = "t_kl_min_5_arc";
     public static final String KL_MIN_15_TABLE_NAME = "t_kl_min_15_raw";
+    public static final String KL_MIN_15_ARC_TABLE_NAME = "t_kl_min_15_arc";
     public static final String KL_MIN_30_TABLE_NAME = "t_kl_min_30_raw";
+    public static final String KL_MIN_30_ARC_TABLE_NAME = "t_kl_min_30_arc";
     public static final String KL_MIN_60_TABLE_NAME = "t_kl_min_60_raw";
+    public static final String KL_MIN_60_ARC_TABLE_NAME = "t_kl_min_60_arc";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KLineMapper.class);
     private final ClickHouseDataSource dataSource;
@@ -37,8 +47,29 @@ public class KLineMapper {
     }
 
     private Integer fillStep(String archedTableName) {
-        if (archedTableName.equals(KL_MIN_1_ARC_TABLE_NAME)) {
-            return 60;
+        switch (archedTableName) {
+            case KL_MIN_1_ARC_TABLE_NAME:
+                return 60;
+            case KL_MIN_3_ARC_TABLE_NAME:
+                return 60 * 3;
+            case KL_MIN_5_ARC_TABLE_NAME:
+                return 60 * 5;
+            case KL_MIN_15_ARC_TABLE_NAME:
+                return 60 * 15;
+            case KL_MIN_30_ARC_TABLE_NAME:
+                return 60 * 30;
+            case KL_MIN_60_ARC_TABLE_NAME:
+                return 60 * 60;
+            case KL_DAY_ARC_TABLE_NAME:
+                return 60 * 60 * 24;
+            case KL_MONTH_ARC_TABLE_NAME:
+                return 60 * 60 * 24 * 30;
+            case KL_WEEK_ARC_TABLE_NAME:
+                return 60 * 60 * 24 * 7;
+            case KL_QUARTER_ARC_TABLE_NAME:
+                return 60 * 60 * 24 * 120;
+            case KL_YEAR_ARC_TABLE_NAME:
+                return 60 * 60 * 24 * 365;
         }
         return 0;
     }
