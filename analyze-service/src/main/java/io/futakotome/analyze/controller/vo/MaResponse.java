@@ -1,11 +1,19 @@
-package io.futakotome.analyze.mapper.dto;
+package io.futakotome.analyze.controller.vo;
 
-public class MaDto {
+public class MaResponse {
     private Integer market;
     private String code;
     private Integer rehabType;
     private Double maValue;
     private String updateTime;
+
+    public MaResponse(Integer market, String code, Integer rehabType, Double maValue, String updateTime) {
+        this.market = market;
+        this.code = code;
+        this.rehabType = rehabType;
+        this.maValue = maValue;
+        this.updateTime = updateTime;
+    }
 
     public Integer getMarket() {
         return market;

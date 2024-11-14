@@ -11,6 +11,10 @@ public class MaRequest extends RangeRequest {
     @NotNull(message = "复权类型必填")
     private Integer rehabType;
 
+    @NotNull(message = "时间粒度必填")
+    @EnumValid(target = Granularity.class, message = "粒度输入错误")
+    private Integer granularity;
+
     public String getCode() {
         return code;
     }
@@ -25,5 +29,13 @@ public class MaRequest extends RangeRequest {
 
     public void setRehabType(Integer rehabType) {
         this.rehabType = rehabType;
+    }
+
+    public Integer getGranularity() {
+        return granularity;
+    }
+
+    public void setGranularity(Integer granularity) {
+        this.granularity = granularity;
     }
 }
