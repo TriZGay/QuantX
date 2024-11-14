@@ -1,36 +1,36 @@
-package io.futakotome.analyze.mapper.dto;
+package io.futakotome.analyze.controller.vo;
 
-public class KLineDto {
+public class KLineResponse {
     private Integer market;
     private String code;
     private Integer rehabType;
-    private Double highPrice;
-    private Double openPrice;
-    private Double lowPrice;
-    private Double closePrice;
+    private String highPrice;
+    private String openPrice;
+    private String lowPrice;
+    private String closePrice;
     private Double lastClosePrice;
     private Long volume;
     private Double turnover;
     private Double turnoverRate;
     private Double pe;
     private Double changeRate;
-    private String updateTime;
-    private String addTime;
+    private String datetime;
 
-    public String getAddTime() {
-        return addTime;
-    }
-
-    public void setAddTime(String addTime) {
-        this.addTime = addTime;
-    }
-
-    public Integer getRehabType() {
-        return rehabType;
-    }
-
-    public void setRehabType(Integer rehabType) {
+    public KLineResponse(Integer market, String code, Integer rehabType, String highPrice, String openPrice, String lowPrice, String closePrice, Double lastClosePrice, Long volume, Double turnover, Double turnoverRate, Double pe, Double changeRate, String datetime) {
+        this.market = market;
+        this.code = code;
         this.rehabType = rehabType;
+        this.highPrice = highPrice;
+        this.openPrice = openPrice;
+        this.lowPrice = lowPrice;
+        this.closePrice = closePrice;
+        this.lastClosePrice = lastClosePrice;
+        this.volume = volume;
+        this.turnover = turnover;
+        this.turnoverRate = turnoverRate;
+        this.pe = pe;
+        this.changeRate = changeRate;
+        this.datetime = datetime;
     }
 
     public Integer getMarket() {
@@ -49,35 +49,43 @@ public class KLineDto {
         this.code = code;
     }
 
-    public Double getHighPrice() {
+    public Integer getRehabType() {
+        return rehabType;
+    }
+
+    public void setRehabType(Integer rehabType) {
+        this.rehabType = rehabType;
+    }
+
+    public String getHighPrice() {
         return highPrice;
     }
 
-    public void setHighPrice(Double highPrice) {
+    public void setHighPrice(String highPrice) {
         this.highPrice = highPrice;
     }
 
-    public Double getOpenPrice() {
+    public String getOpenPrice() {
         return openPrice;
     }
 
-    public void setOpenPrice(Double openPrice) {
+    public void setOpenPrice(String openPrice) {
         this.openPrice = openPrice;
     }
 
-    public Double getLowPrice() {
+    public String getLowPrice() {
         return lowPrice;
     }
 
-    public void setLowPrice(Double lowPrice) {
+    public void setLowPrice(String lowPrice) {
         this.lowPrice = lowPrice;
     }
 
-    public Double getClosePrice() {
+    public String getClosePrice() {
         return closePrice;
     }
 
-    public void setClosePrice(Double closePrice) {
+    public void setClosePrice(String closePrice) {
         this.closePrice = closePrice;
     }
 
@@ -129,11 +137,11 @@ public class KLineDto {
         this.changeRate = changeRate;
     }
 
-    public String getUpdateTime() {
-        return updateTime;
+    public String getDatetime() {
+        return datetime;
     }
 
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
+    public void setDatetime(String datetime) {
+        this.datetime = datetime;
     }
 }

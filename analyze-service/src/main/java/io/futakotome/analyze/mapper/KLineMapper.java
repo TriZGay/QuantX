@@ -96,14 +96,10 @@ public class KLineMapper {
                     kLineDto.setMarket(resultSet.getInt(1));
                     kLineDto.setCode(resultSet.getString(2));
                     kLineDto.setRehabType(resultSet.getInt(3));
-                    kLineDto.setHighPrice(resultSet.getDouble(4) == 0D ? "-"
-                            : String.valueOf(resultSet.getDouble(4)));
-                    kLineDto.setOpenPrice(resultSet.getDouble(5) == 0D ? "-"
-                            : String.valueOf(resultSet.getDouble(5)));
-                    kLineDto.setLowPrice(resultSet.getDouble(6) == 0D ? "-"
-                            : String.valueOf(resultSet.getDouble(6)));
-                    kLineDto.setClosePrice(resultSet.getDouble(7) == 0D ? "-"
-                            : String.valueOf(resultSet.getDouble(7)));
+                    kLineDto.setHighPrice(resultSet.getDouble(4));
+                    kLineDto.setOpenPrice(resultSet.getDouble(5));
+                    kLineDto.setLowPrice(resultSet.getDouble(6));
+                    kLineDto.setClosePrice(resultSet.getDouble(7));
                     kLineDto.setLastClosePrice(resultSet.getDouble(8));
                     kLineDto.setVolume(resultSet.getLong(9));
                     kLineDto.setTurnover(resultSet.getDouble(10));
@@ -121,52 +117,52 @@ public class KLineMapper {
         }
     }
 
-    public List<KLineDto> queryKLineCommon(KLineRequest request, String tableName) {
-        try (Connection connection = dataSource.getConnection()) {
-            List<KLineDto> kLineDtos = new ArrayList<>();
-            try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time,add_time" +
-                            " from " + tableName + " as t1" +
-                            " all inner join" +
-                            " (select update_time ,max(add_time) as latest from " + tableName + " prewhere code = ? group by update_time) as t2 " +
-                            " on (t2.update_time = t1.update_time ) and (t2.latest = t1.add_time) and (code = ? ) and (rehab_type = ?) and (t1.update_time >= ?) and (t1.update_time <= ?)" +
-                            " order by t1.update_time"
-            )) {
-                preparedStatement.setString(1, request.getCode());
-                preparedStatement.setString(2, request.getCode());
-                preparedStatement.setInt(3, request.getRehabType());
-                preparedStatement.setString(4, request.getStart());
-                preparedStatement.setString(5, request.getEnd());
-                ResultSet resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()) {
-                    KLineDto kLineDto = new KLineDto();
-                    kLineDto.setMarket(resultSet.getInt(1));
-                    kLineDto.setCode(resultSet.getString(2));
-                    kLineDto.setRehabType(resultSet.getInt(3));
-                    kLineDto.setHighPrice(resultSet.getDouble(4) == 0D ? "-"
-                            : String.valueOf(resultSet.getDouble(4)));
-                    kLineDto.setOpenPrice(resultSet.getDouble(5) == 0D ? "-"
-                            : String.valueOf(resultSet.getDouble(5)));
-                    kLineDto.setLowPrice(resultSet.getDouble(6) == 0D ? "-"
-                            : String.valueOf(resultSet.getDouble(6)));
-                    kLineDto.setClosePrice(resultSet.getDouble(7) == 0D ? "-"
-                            : String.valueOf(resultSet.getDouble(7)));
-                    kLineDto.setLastClosePrice(resultSet.getDouble(8));
-                    kLineDto.setVolume(resultSet.getLong(9));
-                    kLineDto.setTurnover(resultSet.getDouble(10));
-                    kLineDto.setTurnoverRate(resultSet.getDouble(11));
-                    kLineDto.setPe(resultSet.getDouble(12));
-                    kLineDto.setChangeRate(resultSet.getDouble(13));
-                    kLineDto.setUpdateTime(resultSet.getString(14));
-                    kLineDto.setAddTime(resultSet.getString(15));
-                    kLineDtos.add(kLineDto);
-                }
-            }
-            return kLineDtos;
-        } catch (SQLException throwables) {
-            LOGGER.error("查询K线数据出错", throwables);
-            return null;
-        }
-    }
+//    public List<KLineDto> queryKLineCommon(KLineRequest request, String tableName) {
+//        try (Connection connection = dataSource.getConnection()) {
+//            List<KLineDto> kLineDtos = new ArrayList<>();
+//            try (PreparedStatement preparedStatement = connection.prepareStatement(
+//                    "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time,add_time" +
+//                            " from " + tableName + " as t1" +
+//                            " all inner join" +
+//                            " (select update_time ,max(add_time) as latest from " + tableName + " prewhere code = ? group by update_time) as t2 " +
+//                            " on (t2.update_time = t1.update_time ) and (t2.latest = t1.add_time) and (code = ? ) and (rehab_type = ?) and (t1.update_time >= ?) and (t1.update_time <= ?)" +
+//                            " order by t1.update_time"
+//            )) {
+//                preparedStatement.setString(1, request.getCode());
+//                preparedStatement.setString(2, request.getCode());
+//                preparedStatement.setInt(3, request.getRehabType());
+//                preparedStatement.setString(4, request.getStart());
+//                preparedStatement.setString(5, request.getEnd());
+//                ResultSet resultSet = preparedStatement.executeQuery();
+//                while (resultSet.next()) {
+//                    KLineDto kLineDto = new KLineDto();
+//                    kLineDto.setMarket(resultSet.getInt(1));
+//                    kLineDto.setCode(resultSet.getString(2));
+//                    kLineDto.setRehabType(resultSet.getInt(3));
+//                    kLineDto.setHighPrice(resultSet.getDouble(4) == 0D ? "-"
+//                            : Double.valueOf(resultSet.getDouble(4)));
+//                    kLineDto.setOpenPrice(resultSet.getDouble(5) == 0D ? "-"
+//                            : Double.valueOf(resultSet.getDouble(5)));
+//                    kLineDto.setLowPrice(resultSet.getDouble(6) == 0D ? "-"
+//                            : Double.valueOf(resultSet.getDouble(6)));
+//                    kLineDto.setClosePrice(resultSet.getDouble(7) == 0D ? "-"
+//                            : Double.valueOf(resultSet.getDouble(7)));
+//                    kLineDto.setLastClosePrice(resultSet.getDouble(8));
+//                    kLineDto.setVolume(resultSet.getLong(9));
+//                    kLineDto.setTurnover(resultSet.getDouble(10));
+//                    kLineDto.setTurnoverRate(resultSet.getDouble(11));
+//                    kLineDto.setPe(resultSet.getDouble(12));
+//                    kLineDto.setChangeRate(resultSet.getDouble(13));
+//                    kLineDto.setUpdateTime(resultSet.getString(14));
+//                    kLineDto.setAddTime(resultSet.getString(15));
+//                    kLineDtos.add(kLineDto);
+//                }
+//            }
+//            return kLineDtos;
+//        } catch (SQLException throwables) {
+//            LOGGER.error("查询K线数据出错", throwables);
+//            return null;
+//        }
+//    }
 
 }

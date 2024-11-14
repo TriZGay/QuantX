@@ -5,14 +5,14 @@ public class MaResponse {
     private String code;
     private Integer rehabType;
     private Double maValue;
-    private String updateTime;
+    private String datetime;
 
-    public MaResponse(Integer market, String code, Integer rehabType, Double maValue, String updateTime) {
+    public MaResponse(Integer market, String code, Integer rehabType, Double maValue, String datetime) {
         this.market = market;
         this.code = code;
         this.rehabType = rehabType;
         this.maValue = maValue;
-        this.updateTime = updateTime;
+        this.datetime = datetime;
     }
 
     public Integer getMarket() {
@@ -47,11 +47,11 @@ public class MaResponse {
         this.maValue = maValue;
     }
 
-    public String getUpdateTime() {
-        return updateTime;
+    public String getDatetime() {
+        return datetime;
     }
 
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
+    public void setDatetime(String datetime) {
+        this.datetime = datetime;
     }
 }

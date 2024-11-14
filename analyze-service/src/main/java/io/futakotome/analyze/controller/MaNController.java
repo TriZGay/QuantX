@@ -19,13 +19,13 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/ma")
 public class MaNController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Min1KMaNController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MaNController.class);
     private static final String PRINT_REQUEST_TEMPLATE = "请求参数:{},粒度:{},时间范围:start={},end={}";
 
     private final MaN ma;
 
-    public MaNController(MaN maN) {
-        this.ma = maN;
+    public MaNController(MaNMapper mapper) {
+        this.ma = new MaN(mapper);
     }
 
     @PostMapping("/n")
