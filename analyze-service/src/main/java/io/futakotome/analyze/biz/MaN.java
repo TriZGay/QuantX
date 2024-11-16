@@ -1,4 +1,4 @@
-package io.futakotome.analyze.domain;
+package io.futakotome.analyze.biz;
 
 import io.futakotome.analyze.controller.vo.MaRequest;
 import io.futakotome.analyze.controller.vo.MaResponse;
