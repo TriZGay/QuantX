@@ -1,8 +1,8 @@
 package io.futakotome.analyze.controller;
 
+import io.futakotome.analyze.biz.MaN;
 import io.futakotome.analyze.controller.vo.Granularity;
 import io.futakotome.analyze.controller.vo.MaRequest;
-import io.futakotome.analyze.biz.MaN;
 import io.futakotome.analyze.mapper.MaNMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

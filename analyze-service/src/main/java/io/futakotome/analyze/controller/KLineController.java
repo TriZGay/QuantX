@@ -1,8 +1,8 @@
 package io.futakotome.analyze.controller;
 
+import io.futakotome.analyze.biz.KLine;
 import io.futakotome.analyze.controller.vo.Granularity;
 import io.futakotome.analyze.controller.vo.KLineRequest;
-import io.futakotome.analyze.biz.KLine;
 import io.futakotome.analyze.mapper.KLineMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
