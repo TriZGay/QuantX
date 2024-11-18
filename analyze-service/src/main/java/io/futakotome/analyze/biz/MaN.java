@@ -18,11 +18,17 @@ public class MaN {
     public List<MaResponse> maNDataUseArc(MaRequest maRequest) {
         switch (maRequest.getGranularity()) {
             case 1:
-                return repository.queryMa5Common(maRequest, KLineMapper.KL_MIN_1_ARC_TABLE_NAME)
-                        .stream().map(maDto -> new MaResponse(maDto.getMarket(), maDto.getCode(),
-                                maDto.getRehabType(), maDto.getMaValue(), maDto.getUpdateTime()
-                        ))
-                        .collect(Collectors.toList());
+                switch (maRequest.getSpan()) {
+                    case 1:
+                        //1分K ma5
+                        return repository.queryMa5Common(maRequest, KLineMapper.KL_MIN_1_ARC_TABLE_NAME)
+                                .stream().map(maDto -> new MaResponse(maDto.getMarket(), maDto.getCode(),
+                                        maDto.getRehabType(), maDto.getMaValue(), maDto.getUpdateTime()
+                                ))
+                                .collect(Collectors.toList());
+                    case 2:
+                        return null;
+                }
             case 2:
                 return null;
         }
