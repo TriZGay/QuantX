@@ -38,7 +38,12 @@ public class MaNController {
                 responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
             }).doOnNext(maRequest -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, maRequest.getCode(), Granularity.mapName(maRequest.getGranularity()), MaSpan.mapName(maRequest.getSpan()), maRequest.getStart(), maRequest.getEnd());
-                responseEntityMonoSink.success(ResponseEntity.ok(ma.maNDataUseArc(maRequest)));
+                try {
+                    responseEntityMonoSink.success(ResponseEntity.ok(ma.maNDataUseArc(maRequest)));
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                    responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
+                }
             }).subscribe();
         });
     }

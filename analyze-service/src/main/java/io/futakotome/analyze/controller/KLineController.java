@@ -30,12 +30,18 @@ public class KLineController {
     @PostMapping("/n")
     public Mono<ResponseEntity<?>> yearK(@RequestBody @Validated Mono<KLineRequest> requestMono) {
         return Mono.create(responseEntityMonoSink -> {
-            requestMono.doOnError(WebExchangeBindException.class, throwables ->
-                    responseEntityMonoSink.success(
-                            new ResponseEntity<>("参数校验失败:" + throwables.getFieldErrors(), HttpStatus.BAD_REQUEST)
-                    )).doOnNext(request -> {
+            requestMono.doOnError(WebExchangeBindException.class, throwable -> {
+                responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors(), HttpStatus.BAD_REQUEST));
+            }).doOnError(Exception.class, throwable -> {
+                responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
+            }).doOnNext(request -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), Granularity.mapName(request.getGranularity()), request.getStart(), request.getEnd());
-                responseEntityMonoSink.success(ResponseEntity.ok(kLine.kLinesUseArc(request)));
+                try {
+                    responseEntityMonoSink.success(ResponseEntity.ok(kLine.kLinesUseArc(request)));
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                    responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
+                }
             }).subscribe();
         });
     }
