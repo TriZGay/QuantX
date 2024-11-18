@@ -30,8 +30,10 @@ public class MetaController {
     @RequestMapping("/codes")
     public Mono<ResponseEntity<?>> getMeta(@RequestBody @Validated Mono<MetaRequest> metaRequest) {
         return Mono.create(responseEntityMonoSink -> {
-            metaRequest.doOnError(WebExchangeBindException.class, throwbales -> {
-                responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwbales.getFieldErrors(), HttpStatus.BAD_REQUEST));
+            metaRequest.doOnError(WebExchangeBindException.class, throwable -> {
+                responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors(), HttpStatus.BAD_REQUEST));
+            }).doOnError(Exception.class, throwable -> {
+                responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
             }).doOnNext(request -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, Granularity.mapName(request.getGranularity()));
                 try {

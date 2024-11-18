@@ -15,6 +15,10 @@ public class MaRequest extends RangeRequest {
     @EnumValid(target = Granularity.class, message = "粒度输入错误")
     private Integer granularity;
 
+    @NotNull(message = "时间跨度必填")
+    @EnumValid(target = MaSpan.class, message = "时间跨度输入错误")
+    private Integer span;
+
     public String getCode() {
         return code;
     }
@@ -37,5 +41,13 @@ public class MaRequest extends RangeRequest {
 
     public void setGranularity(Integer granularity) {
         this.granularity = granularity;
+    }
+
+    public Integer getSpan() {
+        return span;
+    }
+
+    public void setSpan(Integer span) {
+        this.span = span;
     }
 }
