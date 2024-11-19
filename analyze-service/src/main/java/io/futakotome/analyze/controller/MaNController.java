@@ -39,6 +39,7 @@ public class MaNController {
             }).doOnNext(maRequest -> {
                 LOGGER.info(PRINT_REQUEST_TEMPLATE, maRequest.getCode(), Granularity.mapName(maRequest.getGranularity()), MaSpan.mapName(maRequest.getSpan()), maRequest.getStart(), maRequest.getEnd());
                 try {
+                    //todo 验证数据准确性
                     responseEntityMonoSink.success(ResponseEntity.ok(ma.maNDataUseArc(maRequest)));
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);

@@ -28,6 +28,156 @@ public class MaNMapper {
         this.dataSource = dataSource;
     }
 
+    public List<MaDto> queryMa120Common(MaRequest maRequest, String tableName) {
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    "select market,code ,rehab_type,update_time,round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 119 following),4) as ma120 " +
+                            "from " + tableName +
+                            " prewhere  (rehab_type = ?)and ( code = ? )AND (update_time >= ?) AND (update_time <= ?) "
+            )) {
+                preparedStatement.setInt(1, maRequest.getRehabType());
+                preparedStatement.setString(2, maRequest.getCode());
+                preparedStatement.setString(3, maRequest.getStart());
+                preparedStatement.setString(4, maRequest.getEnd());
+                ResultSet resultSet = preparedStatement.executeQuery();
+                List<MaDto> maDtos = new ArrayList<>();
+                while (resultSet.next()) {
+                    MaDto maDto = new MaDto();
+                    maDto.setMarket(resultSet.getInt(1));
+                    maDto.setCode(resultSet.getString(2));
+                    maDto.setRehabType(resultSet.getInt(3));
+                    maDto.setUpdateTime(resultSet.getString(4));
+                    maDto.setMaValue(resultSet.getDouble(5));
+                    maDtos.add(maDto);
+                }
+                return maDtos;
+            }
+        } catch (SQLException throwables) {
+            LOGGER.error("{}:查询MA120数据出错", tableName, throwables);
+            return null;
+        }
+    }
+
+    public List<MaDto> queryMa60Common(MaRequest maRequest, String tableName) {
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    "select market,code ,rehab_type,update_time,round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 59 following),4) as ma60 " +
+                            "from " + tableName +
+                            " prewhere  (rehab_type = ?)and ( code = ? )AND (update_time >= ?) AND (update_time <= ?) "
+            )) {
+                preparedStatement.setInt(1, maRequest.getRehabType());
+                preparedStatement.setString(2, maRequest.getCode());
+                preparedStatement.setString(3, maRequest.getStart());
+                preparedStatement.setString(4, maRequest.getEnd());
+                ResultSet resultSet = preparedStatement.executeQuery();
+                List<MaDto> maDtos = new ArrayList<>();
+                while (resultSet.next()) {
+                    MaDto maDto = new MaDto();
+                    maDto.setMarket(resultSet.getInt(1));
+                    maDto.setCode(resultSet.getString(2));
+                    maDto.setRehabType(resultSet.getInt(3));
+                    maDto.setUpdateTime(resultSet.getString(4));
+                    maDto.setMaValue(resultSet.getDouble(5));
+                    maDtos.add(maDto);
+                }
+                return maDtos;
+            }
+        } catch (SQLException throwables) {
+            LOGGER.error("{}:查询MA60数据出错", tableName, throwables);
+            return null;
+        }
+    }
+
+    public List<MaDto> queryMa30Common(MaRequest maRequest, String tableName) {
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    "select market,code ,rehab_type,update_time,round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 29 following),4) as ma30 " +
+                            "from " + tableName +
+                            " prewhere  (rehab_type = ?)and ( code = ? )AND (update_time >= ?) AND (update_time <= ?) "
+            )) {
+                preparedStatement.setInt(1, maRequest.getRehabType());
+                preparedStatement.setString(2, maRequest.getCode());
+                preparedStatement.setString(3, maRequest.getStart());
+                preparedStatement.setString(4, maRequest.getEnd());
+                ResultSet resultSet = preparedStatement.executeQuery();
+                List<MaDto> maDtos = new ArrayList<>();
+                while (resultSet.next()) {
+                    MaDto maDto = new MaDto();
+                    maDto.setMarket(resultSet.getInt(1));
+                    maDto.setCode(resultSet.getString(2));
+                    maDto.setRehabType(resultSet.getInt(3));
+                    maDto.setUpdateTime(resultSet.getString(4));
+                    maDto.setMaValue(resultSet.getDouble(5));
+                    maDtos.add(maDto);
+                }
+                return maDtos;
+            }
+        } catch (SQLException throwables) {
+            LOGGER.error("{}:查询MA30数据出错", tableName, throwables);
+            return null;
+        }
+    }
+
+    public List<MaDto> queryMa20Common(MaRequest maRequest, String tableName) {
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    "select market,code ,rehab_type,update_time,round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 19 following),4) as ma20 " +
+                            "from " + tableName +
+                            " prewhere  (rehab_type = ?)and ( code = ? )AND (update_time >= ?) AND (update_time <= ?) "
+            )) {
+                preparedStatement.setInt(1, maRequest.getRehabType());
+                preparedStatement.setString(2, maRequest.getCode());
+                preparedStatement.setString(3, maRequest.getStart());
+                preparedStatement.setString(4, maRequest.getEnd());
+                ResultSet resultSet = preparedStatement.executeQuery();
+                List<MaDto> maDtos = new ArrayList<>();
+                while (resultSet.next()) {
+                    MaDto maDto = new MaDto();
+                    maDto.setMarket(resultSet.getInt(1));
+                    maDto.setCode(resultSet.getString(2));
+                    maDto.setRehabType(resultSet.getInt(3));
+                    maDto.setUpdateTime(resultSet.getString(4));
+                    maDto.setMaValue(resultSet.getDouble(5));
+                    maDtos.add(maDto);
+                }
+                return maDtos;
+            }
+        } catch (SQLException throwables) {
+            LOGGER.error("{}:查询MA20数据出错", tableName, throwables);
+            return null;
+        }
+    }
+
+    public List<MaDto> queryMa10Common(MaRequest maRequest, String tableName) {
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    "select market,code ,rehab_type,update_time,round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 9 following),4) as ma10 " +
+                            "from " + tableName +
+                            " prewhere  (rehab_type = ?)and ( code = ? )AND (update_time >= ?) AND (update_time <= ?) "
+            )) {
+                preparedStatement.setInt(1, maRequest.getRehabType());
+                preparedStatement.setString(2, maRequest.getCode());
+                preparedStatement.setString(3, maRequest.getStart());
+                preparedStatement.setString(4, maRequest.getEnd());
+                ResultSet resultSet = preparedStatement.executeQuery();
+                List<MaDto> maDtos = new ArrayList<>();
+                while (resultSet.next()) {
+                    MaDto maDto = new MaDto();
+                    maDto.setMarket(resultSet.getInt(1));
+                    maDto.setCode(resultSet.getString(2));
+                    maDto.setRehabType(resultSet.getInt(3));
+                    maDto.setUpdateTime(resultSet.getString(4));
+                    maDto.setMaValue(resultSet.getDouble(5));
+                    maDtos.add(maDto);
+                }
+                return maDtos;
+            }
+        } catch (SQLException throwables) {
+            LOGGER.error("{}:查询MA10数据出错", tableName, throwables);
+            return null;
+        }
+    }
+
     public List<MaDto> queryMa5Common(MaRequest maRequest, String tableName) {
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
@@ -53,7 +203,7 @@ public class MaNMapper {
                 return maDtos;
             }
         } catch (SQLException throwables) {
-            LOGGER.error("查询MA5数据出错", throwables);
+            LOGGER.error("{}:查询MA5数据出错", tableName, throwables);
             return null;
         }
     }
