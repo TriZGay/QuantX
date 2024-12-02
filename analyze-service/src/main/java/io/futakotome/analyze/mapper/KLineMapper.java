@@ -81,15 +81,27 @@ public class KLineMapper {
                     "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
                             " from " + tableName +
                             " prewhere (code = ?) and (rehab_type = ?) and (update_time >= ?) and (update_time <= ?) order by update_time asc" +
-                            " with fill from toDateTime64(?,3) to toDateTime64(?,3) step ?;"
+                            " with fill from toDateTime64(?,3) to toDateTime64(?,3) step ? " +
+                            " union all" +
+                            " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
+                            " from " + tableName +
+                            " prewhere (code = ?) and (rehab_type = ?) and (update_time >= ?) and (update_time <= ?) order by update_time asc" +
+                            " with fill from toDateTime64(?,3) to toDateTime64(?,3) step ? "
             )) {
                 preparedStatement.setString(1, request.getCode());
                 preparedStatement.setInt(2, request.getRehabType());
-                preparedStatement.setString(3, request.getStart());
-                preparedStatement.setString(4, request.getEnd());
-                preparedStatement.setString(5, request.getStart());
-                preparedStatement.setString(6, request.getEnd());
+                preparedStatement.setString(3, request.getAmStart());
+                preparedStatement.setString(4, request.getAmEnd());
+                preparedStatement.setString(5, request.getAmStart());
+                preparedStatement.setString(6, request.getAmEnd());
                 preparedStatement.setInt(7, fillStep(tableName));
+                preparedStatement.setString(8, request.getCode());
+                preparedStatement.setInt(9, request.getRehabType());
+                preparedStatement.setString(10, request.getPmStart());
+                preparedStatement.setString(11, request.getPmEnd());
+                preparedStatement.setString(12, request.getPmStart());
+                preparedStatement.setString(13, request.getPmEnd());
+                preparedStatement.setInt(14, fillStep(tableName));
                 ResultSet resultSet = preparedStatement.executeQuery();
                 while (resultSet.next()) {
                     KLineDto kLineDto = new KLineDto();
