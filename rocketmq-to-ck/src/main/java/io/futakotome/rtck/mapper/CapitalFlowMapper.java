@@ -1,11 +1,11 @@
 package io.futakotome.rtck.mapper;
 
-import com.clickhouse.jdbc.ClickHouseDataSource;
 import io.futakotome.rtck.mapper.dto.CapitalFlowDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -13,9 +13,9 @@ import java.sql.SQLException;
 @Component
 public class CapitalFlowMapper {
     public static final Logger LOGGER = LoggerFactory.getLogger(CapitalFlowMapper.class);
-    private final ClickHouseDataSource dataSource;
+    private final DataSource dataSource;
 
-    public CapitalFlowMapper(ClickHouseDataSource dataSource) {
+    public CapitalFlowMapper(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

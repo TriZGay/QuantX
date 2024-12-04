@@ -1,11 +1,11 @@
 package io.futakotome.rtck.mapper;
 
-import com.clickhouse.jdbc.ClickHouseDataSource;
 import io.futakotome.rtck.mapper.dto.RTKLDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -28,9 +28,9 @@ public class RTKLMapper {
     public static final String KL_MIN_60_TABLE_NAME = "t_kl_min_60_raw";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RTKLMapper.class);
-    private final ClickHouseDataSource dataSource;
+    private final DataSource dataSource;
 
-    public RTKLMapper(ClickHouseDataSource dataSource) {
+    public RTKLMapper(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

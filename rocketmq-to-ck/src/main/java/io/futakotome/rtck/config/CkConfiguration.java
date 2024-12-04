@@ -1,22 +1,47 @@
 package io.futakotome.rtck.config;
 
-import com.clickhouse.jdbc.ClickHouseDataSource;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import io.micrometer.core.instrument.Clock;
+import io.micrometer.core.instrument.logging.LoggingMeterRegistry;
+import io.micrometer.core.instrument.logging.LoggingRegistryConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.Objects;
-import java.util.Properties;
 
 @Configuration
 public class CkConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CkConfiguration.class);
+
     @Bean
-    public ClickHouseDataSource dataSource(CkConfigurationProperties properties) throws SQLException {
+    public DataSource dataSource(CkConfigurationProperties properties) throws SQLException {
         Objects.requireNonNull(properties.getUser());
         Objects.requireNonNull(properties.getPassword());
-        Properties auth = new Properties();
-        auth.put("user", properties.getUser());
-        auth.put("password", properties.getPassword());
-        return new ClickHouseDataSource(properties.getUrl(),auth);
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(properties.getUrl());
+        config.setUsername(properties.getUser());
+        config.setPassword(properties.getPassword());
+        config.setMinimumIdle(10);
+        config.setMaximumPoolSize(20);
+        config.setDriverClassName(properties.getDriverClass());
+        HikariDataSource dataSource = new HikariDataSource(config);
+        dataSource.setMetricRegistry(new LoggingMeterRegistry(new LoggingRegistryConfig() {
+            @Override
+            public String get(String s) {
+                return null;
+            }
+
+            @Override
+            public Duration step() {
+                return Duration.ofSeconds(10);
+            }
+        }, Clock.SYSTEM));
+        return dataSource;
     }
 }

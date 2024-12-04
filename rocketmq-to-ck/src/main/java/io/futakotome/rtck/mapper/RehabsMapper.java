@@ -1,11 +1,11 @@
 package io.futakotome.rtck.mapper;
 
-import com.clickhouse.jdbc.ClickHouseDataSource;
 import io.futakotome.rtck.mapper.dto.RehabDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -16,9 +16,9 @@ import java.time.format.DateTimeFormatter;
 public class RehabsMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(RehabsMapper.class);
 
-    private final ClickHouseDataSource dataSource;
+    private final DataSource dataSource;
 
-    public RehabsMapper(ClickHouseDataSource dataSource) {
+    public RehabsMapper(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

@@ -1,11 +1,11 @@
 package io.futakotome.rtck.mapper;
 
-import com.clickhouse.jdbc.ClickHouseDataSource;
 import io.futakotome.rtck.mapper.dto.RTBasicQuoteDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -14,9 +14,9 @@ import java.sql.SQLException;
 public class RTBasicQuoteMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTBasicQuoteMapper.class);
 
-    private final ClickHouseDataSource dataSource;
+    private final DataSource dataSource;
 
-    public RTBasicQuoteMapper(ClickHouseDataSource dataSource) {
+    public RTBasicQuoteMapper(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

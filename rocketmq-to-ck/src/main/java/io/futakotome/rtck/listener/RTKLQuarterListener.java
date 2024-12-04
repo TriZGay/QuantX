@@ -4,7 +4,6 @@ import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.rtck.mapper.RTKLMapper;
 import io.futakotome.rtck.mapper.dto.RTKLDto;
-import io.futakotome.rtck.message.AbstractWebSocketServerHandler;
 import io.futakotome.rtck.message.core.WebSocketSender;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
