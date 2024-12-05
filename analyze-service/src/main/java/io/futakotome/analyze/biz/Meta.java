@@ -15,6 +15,10 @@ public class Meta {
         this.repository = mapper;
     }
 
+    public List<String> showTables() {
+        return repository.tables();
+    }
+
     public List<MetaResponse> hasDataCodes(MetaRequest request) {
         switch (request.getGranularity()) {
             case 1:

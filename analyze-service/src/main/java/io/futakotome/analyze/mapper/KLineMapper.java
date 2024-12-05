@@ -5,13 +5,17 @@ import io.futakotome.analyze.controller.vo.KLineRequest;
 import io.futakotome.analyze.mapper.dto.KLineDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -40,10 +44,10 @@ public class KLineMapper {
     public static final String KL_MIN_60_ARC_TABLE_NAME = "t_kl_min_60_arc";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KLineMapper.class);
-    private final ClickHouseDataSource dataSource;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public KLineMapper(ClickHouseDataSource dataSource) {
-        this.dataSource = dataSource;
+    public KLineMapper(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     private Integer fillStep(String archedTableName) {
@@ -75,56 +79,23 @@ public class KLineMapper {
     }
 
     public List<KLineDto> queryKLineArchived(KLineRequest request, String tableName) {
-        try (Connection connection = dataSource.getConnection()) {
-            List<KLineDto> result = new ArrayList<>();
-            try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
-                            " from " + tableName +
-                            " prewhere (code = ?) and (rehab_type = ?) and (update_time >= ?) and (update_time <= ?) order by update_time asc" +
-                            " with fill from toDateTime64(?,3) to toDateTime64(?,3) step ? " +
-                            " union all" +
-                            " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
-                            " from " + tableName +
-                            " prewhere (code = ?) and (rehab_type = ?) and (update_time >= ?) and (update_time <= ?) order by update_time asc" +
-                            " with fill from toDateTime64(?,3) to toDateTime64(?,3) step ? "
-            )) {
-                preparedStatement.setString(1, request.getCode());
-                preparedStatement.setInt(2, request.getRehabType());
-                preparedStatement.setString(3, request.getAmStart());
-                preparedStatement.setString(4, request.getAmEnd());
-                preparedStatement.setString(5, request.getAmStart());
-                preparedStatement.setString(6, request.getAmEnd());
-                preparedStatement.setInt(7, fillStep(tableName));
-                preparedStatement.setString(8, request.getCode());
-                preparedStatement.setInt(9, request.getRehabType());
-                preparedStatement.setString(10, request.getPmStart());
-                preparedStatement.setString(11, request.getPmEnd());
-                preparedStatement.setString(12, request.getPmStart());
-                preparedStatement.setString(13, request.getPmEnd());
-                preparedStatement.setInt(14, fillStep(tableName));
-                ResultSet resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()) {
-                    KLineDto kLineDto = new KLineDto();
-                    kLineDto.setMarket(resultSet.getInt(1));
-                    kLineDto.setCode(resultSet.getString(2));
-                    kLineDto.setRehabType(resultSet.getInt(3));
-                    kLineDto.setHighPrice(resultSet.getDouble(4));
-                    kLineDto.setOpenPrice(resultSet.getDouble(5));
-                    kLineDto.setLowPrice(resultSet.getDouble(6));
-                    kLineDto.setClosePrice(resultSet.getDouble(7));
-                    kLineDto.setLastClosePrice(resultSet.getDouble(8));
-                    kLineDto.setVolume(resultSet.getLong(9));
-                    kLineDto.setTurnover(resultSet.getDouble(10));
-                    kLineDto.setTurnoverRate(resultSet.getDouble(11));
-                    kLineDto.setPe(resultSet.getDouble(12));
-                    kLineDto.setChangeRate(resultSet.getDouble(13));
-                    kLineDto.setUpdateTime(resultSet.getString(14));
-                    result.add(kLineDto);
-                }
-            }
-            return result;
-        } catch (SQLException throwables) {
-            LOGGER.error("查询K线数据出错", throwables);
+        try {
+            String sql = "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
+                    " from :tableName" +
+                    " prewhere (code = :code) and (rehab_type = :rehabType) and (((update_time >= :amStart) and (update_time <= :amEnd)) or ((update_time >= :pmStart) and (update_time <= :pmEnd))) " +
+                    " order by update_time asc with fill from toDateTime64(:amStart,3) to toDateTime64(:pmEnd,3) step :step ";
+            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
+                put("tableName", tableName);
+                put("code", request.getCode());
+                put("rehabType", request.getRehabType());
+                put("amStart", request.getAmStart());
+                put("amEnd", request.getAmEnd());
+                put("step", fillStep(tableName));
+                put("pmStart", request.getPmStart());
+                put("pmEnd", request.getPmEnd());
+            }}, new BeanPropertyRowMapper<>(KLineDto.class));
+        } catch (Exception e) {
+            LOGGER.error("查询K线数据出错.", e);
             return null;
         }
     }

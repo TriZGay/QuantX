@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,9 +19,9 @@ import java.util.List;
 public class BaseQuoteMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseQuoteMapper.class);
 
-    private final ClickHouseDataSource dataSource;
+    private final DataSource dataSource;
 
-    public BaseQuoteMapper(ClickHouseDataSource dataSource) {
+    public BaseQuoteMapper(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,9 +23,9 @@ public class MaNMapper {
     public static final String DAY_K_MA30_TABLE_NAME = "t_ma30_day";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MaNMapper.class);
-    private final ClickHouseDataSource dataSource;
+    private final DataSource dataSource;
 
-    public MaNMapper(ClickHouseDataSource dataSource) {
+    public MaNMapper(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

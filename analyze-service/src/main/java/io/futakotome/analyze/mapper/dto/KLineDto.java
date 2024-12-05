@@ -15,16 +15,7 @@ public class KLineDto {
     private Double pe;
     private Double changeRate;
     private String updateTime;
-    private String addTime;
-
-    public String getAddTime() {
-        return addTime;
-    }
-
-    public void setAddTime(String addTime) {
-        this.addTime = addTime;
-    }
-
+    
     public Integer getRehabType() {
         return rehabType;
     }

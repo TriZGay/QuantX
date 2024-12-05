@@ -5,8 +5,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.logging.LoggingMeterRegistry;
 import io.micrometer.core.instrument.logging.LoggingRegistryConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,8 +15,6 @@ import java.util.Objects;
 
 @Configuration
 public class CkConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CkConfiguration.class);
-
     @Bean
     public DataSource dataSource(CkConfigurationProperties properties) throws SQLException {
         Objects.requireNonNull(properties.getUser());

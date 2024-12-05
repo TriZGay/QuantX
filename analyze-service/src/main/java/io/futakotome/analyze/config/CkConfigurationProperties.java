@@ -9,6 +9,15 @@ public class CkConfigurationProperties {
     private String url;
     private String user;
     private String password;
+    private String driverClass;
+
+    public String getDriverClass() {
+        return driverClass;
+    }
+
+    public void setDriverClass(String driverClass) {
+        this.driverClass = driverClass;
+    }
 
     public String getUrl() {
         return url;

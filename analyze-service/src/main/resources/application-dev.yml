@@ -1,6 +1,10 @@
 server:
   port: 9091
 ck:
-  url: jdbc:ch://172.24.239.243:8123/quantx
+  driverClass: com.clickhouse.jdbc.ClickHouseDriver
+  url: jdbc:ch://172.21.17.107:8123/quantx
   user: default
   password: 123456
+logging:
+  level:
+    org.springframework.jdbc.core.JdbcTemplate: DEBUG
