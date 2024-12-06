@@ -1,6 +1,5 @@
 package io.futakotome.analyze.mapper;
 
-import com.clickhouse.jdbc.ClickHouseDataSource;
 import io.futakotome.analyze.controller.vo.KLineRequest;
 import io.futakotome.analyze.mapper.dto.KLineDto;
 import org.slf4j.Logger;
@@ -9,12 +8,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -82,17 +75,24 @@ public class KLineMapper {
         try {
             String sql = "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
                     " from :tableName" +
-                    " prewhere (code = :code) and (rehab_type = :rehabType) and (((update_time >= :amStart) and (update_time <= :amEnd)) or ((update_time >= :pmStart) and (update_time <= :pmEnd))) " +
-                    " order by update_time asc with fill from toDateTime64(:amStart,3) to toDateTime64(:pmEnd,3) step :step ";
+                    " prewhere (code = :code) and (rehab_type = :rehabType) and (update_time >= :start) and (update_time <= :end) order by update_time asc";
+//            String sql ="select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time " +
+//                    " from (select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
+//                    " from :tableName" +
+//                    " prewhere (code = :code) and (rehab_type = :rehabType) and (((update_time >= :amStart) and (update_time <= :amEnd)) or ((update_time >= :pmStart) and (update_time <= :pmEnd))) " +
+//                    " order by update_time asc with fill from toDateTime64(:amStart,3) to toDateTime64(:pmEnd,3) step :step )" +
+//                    " where (((update_time >= :amStart) and (update_time <= :amEnd)) or ((update_time >= :pmStart) and (update_time <= :pmEnd)))";
             return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
                 put("tableName", tableName);
                 put("code", request.getCode());
                 put("rehabType", request.getRehabType());
-                put("amStart", request.getAmStart());
-                put("amEnd", request.getAmEnd());
-                put("step", fillStep(tableName));
-                put("pmStart", request.getPmStart());
-                put("pmEnd", request.getPmEnd());
+                put("start", request.getStart());
+                put("end", request.getEnd());
+//                put("amStart", request.getAmStart());
+//                put("amEnd", request.getAmEnd());
+//                put("step", fillStep(tableName));
+//                put("pmStart", request.getPmStart());
+//                put("pmEnd", request.getPmEnd());
             }}, new BeanPropertyRowMapper<>(KLineDto.class));
         } catch (Exception e) {
             LOGGER.error("查询K线数据出错.", e);

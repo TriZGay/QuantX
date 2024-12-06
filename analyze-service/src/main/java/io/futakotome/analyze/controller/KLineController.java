@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/k")
 public class KLineController {
     private static final Logger LOGGER = LoggerFactory.getLogger(KLineController.class);
-    private static final String PRINT_REQUEST_TEMPLATE = "请求参数:{},粒度:{},时间范围:上午={}-{},下午={}-{}";
+    private static final String PRINT_REQUEST_TEMPLATE = "请求参数:{},粒度:{},时间范围:{}-{}";
     private final KLine kLine;
 
     public KLineController(KLineMapper mapper) {
@@ -35,8 +35,8 @@ public class KLineController {
             }).doOnError(Exception.class, throwable -> {
                 responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
             }).doOnNext(request -> {
-                LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), Granularity.mapName(request.getGranularity()), request.getAmStart(), request.getAmEnd(),
-                        request.getPmStart(), request.getPmEnd());
+                LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), Granularity.mapName(request.getGranularity()),
+                        request.getStart(), request.getEnd());
                 try {
                     responseEntityMonoSink.success(ResponseEntity.ok(kLine.kLinesUseArc(request)));
                 } catch (Exception e) {

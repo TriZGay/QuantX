@@ -29,7 +29,7 @@ public class MaNMapper {
         try {
             String sql = "select market,code ,rehab_type,update_time,round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and :following following),4) as ma_value " +
                     " from :tableName" +
-                    " prewhere (rehab_type = :rehabType) and (code = :code) AND (update_time >= :start) AND (update_time <= :end) ";
+                    " prewhere (rehab_type = :rehabType) and (code = :code) and (update_time >= :start) and (update_time <= :end) order by update_time asc ";
             return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
                 put("tableName", tableName);
                 put("rehabType", maRequest.getRehabType());

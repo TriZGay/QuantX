@@ -3,7 +3,7 @@ package io.futakotome.analyze.controller.vo;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-public class KLineRequest extends TradeDateRange {
+public class KLineRequest extends RangeRequest {
     @NotNull(message = "code必填")
     @NotEmpty(message = "code不能为空")
     private String code;
