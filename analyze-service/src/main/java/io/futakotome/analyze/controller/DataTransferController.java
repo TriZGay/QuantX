@@ -1,8 +1,7 @@
 package io.futakotome.analyze.controller;
 
 import io.futakotome.analyze.biz.KLine;
-import io.futakotome.analyze.controller.vo.Granularity;
-import io.futakotome.analyze.controller.vo.KLineRequest;
+import io.futakotome.analyze.controller.vo.KLineArchiveRequest;
 import io.futakotome.analyze.mapper.KLineMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,33 +16,34 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/k")
-public class KLineController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KLineController.class);
-    private static final String PRINT_REQUEST_TEMPLATE = "请求参数:{},粒度:{},时间范围:{}-{}";
+@RequestMapping("/trans")
+public class DataTransferController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataTransferController.class);
+    private static final String PRINT_REQUEST_TEMPLATE = "表格:{}.时间范围:{}-{}.";
     private final KLine kLine;
 
-    public KLineController(KLineMapper mapper) {
+    public DataTransferController(KLineMapper mapper) {
         this.kLine = new KLine(mapper);
     }
 
-    @PostMapping("/n")
-    public Mono<ResponseEntity<?>> klineN(@RequestBody @Validated Mono<KLineRequest> requestMono) {
+    @PostMapping("/klineArchive")
+    public Mono<ResponseEntity<?>> klineArchive(@RequestBody @Validated Mono<KLineArchiveRequest> requestMono) {
         return Mono.create(responseEntityMonoSink -> {
             requestMono.doOnError(WebExchangeBindException.class, throwable -> {
                 responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors(), HttpStatus.BAD_REQUEST));
             }).doOnError(Exception.class, throwable -> {
                 responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
             }).doOnNext(request -> {
-                LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getCode(), Granularity.mapName(request.getGranularity()),
-                        request.getStart(), request.getEnd());
+                LOGGER.info(PRINT_REQUEST_TEMPLATE, request.getTableName(), request.getStart(), request.getEnd());
                 try {
-                    responseEntityMonoSink.success(ResponseEntity.ok(kLine.kLinesUseArc(request)));
+                    responseEntityMonoSink.success(ResponseEntity.ok("数据归档条数:" + kLine.kLinesArchive(request)));
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                     responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
                 }
             }).subscribe();
         });
+
     }
+
 }

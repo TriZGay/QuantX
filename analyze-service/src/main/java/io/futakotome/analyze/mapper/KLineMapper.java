@@ -1,5 +1,6 @@
 package io.futakotome.analyze.mapper;
 
+import io.futakotome.analyze.controller.vo.KLineArchiveRequest;
 import io.futakotome.analyze.controller.vo.KLineRequest;
 import io.futakotome.analyze.mapper.dto.KLineDto;
 import org.slf4j.Logger;
@@ -73,7 +74,7 @@ public class KLineMapper {
 
     public List<KLineDto> queryKLineArchived(KLineRequest request, String tableName) {
         try {
-            String sql = "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
+            String sql = "select  market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
                     " from :tableName" +
                     " prewhere (code = :code) and (rehab_type = :rehabType) and (update_time >= :start) and (update_time <= :end) order by update_time asc";
 //            String sql ="select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time " +
@@ -100,6 +101,35 @@ public class KLineMapper {
         }
     }
 
+    public int kLinesRawTransToArc(KLineArchiveRequest kLineArchiveRequest, String toTableName) {
+        try {
+            String sql = "insert into " + toTableName +
+                    " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
+                    " from :tableName as t1 all inner join" +
+                    " (select update_time ,max(add_time) as latest from :tableName group by update_time ) as t2" +
+                    " on (t2.update_time = t1.update_time ) and (t2.latest = t1.add_time) and (t1.update_time >= :start) and (t1.update_time <= :end)" +
+                    " order by update_time asc";
+//            namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
+//                put("toTableName", toTableName);
+//                put("tableName", kLineArchiveRequest.getTableName());
+//                put("start", kLineArchiveRequest.getStart());
+//                put("end", kLineArchiveRequest.getEnd());
+//            }}, rs -> {
+//                LOGGER.info(rs.toString());
+//            });
+//            return 0;
+            return namedParameterJdbcTemplate.update(sql, new HashMap<>() {{
+//                put("toTableName", toTableName);
+                put("tableName", kLineArchiveRequest.getTableName());
+                put("start", kLineArchiveRequest.getStart());
+                put("end", kLineArchiveRequest.getEnd());
+            }});
+        } catch (
+                Exception e) {
+            LOGGER.error("归档K线数据出错.", e);
+            return 0;
+        }
+    }
 //    public List<KLineDto> queryKLineCommon(KLineRequest request, String tableName) {
 //        try (Connection connection = dataSource.getConnection()) {
 //            List<KLineDto> kLineDtos = new ArrayList<>();

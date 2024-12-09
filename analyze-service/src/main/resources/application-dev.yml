@@ -2,7 +2,7 @@ server:
   port: 9091
 ck:
   driverClass: com.clickhouse.jdbc.ClickHouseDriver
-  url: jdbc:ch://172.18.222.230:8123/quantx
+  url: jdbc:ch://172.18.224.127:8123/quantx
   user: default
   password: 123456
 logging:
