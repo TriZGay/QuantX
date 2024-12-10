@@ -1,9 +1,11 @@
 package io.futakotome.analyze.biz;
 
+import io.futakotome.analyze.controller.vo.DbInfoResponse;
 import io.futakotome.analyze.controller.vo.MetaRequest;
 import io.futakotome.analyze.controller.vo.MetaResponse;
 import io.futakotome.analyze.mapper.KLineMapper;
 import io.futakotome.analyze.mapper.MetaDataMapper;
+import io.futakotome.analyze.mapper.dto.AnaDatabaseInfoDto;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,8 +17,21 @@ public class Meta {
         this.repository = mapper;
     }
 
+    public List<DbInfoResponse> dbInfo() {
+        if (repository.dbInfo() != null) {
+            return repository.dbInfo().stream().map(this::dbInfoDtoMapResponse)
+                    .collect(Collectors.toList());
+        } else {
+            throw new IllegalStateException("查询数据库信息失败.");
+        }
+    }
+
     public List<String> showTables() {
-        return repository.tables();
+        if (repository.tables() != null) {
+            return repository.tables();
+        } else {
+            throw new IllegalStateException("查询数据库表格失败.");
+        }
     }
 
     public List<MetaResponse> hasDataCodes(MetaRequest request) {
@@ -29,5 +44,18 @@ public class Meta {
                 return null;
         }
         return null;
+    }
+
+    private DbInfoResponse dbInfoDtoMapResponse(AnaDatabaseInfoDto dto) {
+        DbInfoResponse response = new DbInfoResponse();
+        response.setDatabase(dto.getDatabase());
+        response.setTable(dto.getTable());
+        response.setBytesOnDisk(dto.getBytesOnDisk());
+        response.setSize(dto.getSize());
+        response.setRows(dto.getRows());
+        response.setCompressedRate(dto.getCompressedRate());
+        response.setDataCompressedBytes(dto.getDataCompressedBytes());
+        response.setDataUncompressedBytes(dto.getDataUncompressedBytes());
+        return response;
     }
 }

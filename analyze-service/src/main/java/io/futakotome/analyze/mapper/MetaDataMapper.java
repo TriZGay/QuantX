@@ -1,8 +1,10 @@
 package io.futakotome.analyze.mapper;
 
+import io.futakotome.analyze.mapper.dto.AnaDatabaseInfoDto;
 import io.futakotome.analyze.mapper.dto.MetaDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,22 @@ public class MetaDataMapper {
 
     public MetaDataMapper(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
+
+    public List<AnaDatabaseInfoDto> dbInfo() {
+        try {
+            String sql = "select database,table,formatReadableSize(size) AS size,formatReadableSize(bytes_on_disk) AS bytes_on_disk,formatReadableSize(data_uncompressed_bytes) AS data_uncompressed_bytes,formatReadableSize(data_compressed_bytes) AS data_compressed_bytes,round(compress_rate,2) AS compressed_rate,rows" +
+                    " from (" +
+                    "select database,table,sum(bytes) AS size,sum(rows) AS rows,sum(bytes_on_disk) AS bytes_on_disk,sum(data_uncompressed_bytes) AS data_uncompressed_bytes,sum(data_compressed_bytes) AS data_compressed_bytes,(data_compressed_bytes / data_uncompressed_bytes) * 100 AS compress_rate" +
+                    " from system.parts" +
+                    " where database='quantx'" +
+                    " group by database,table" +
+                    ")";
+            return namedParameterJdbcTemplate.query(sql, new BeanPropertyRowMapper<>(AnaDatabaseInfoDto.class));
+        } catch (Exception e) {
+            LOGGER.error("查询数据库信息失败.", e);
+            return null;
+        }
     }
 
     public List<String> tables() {

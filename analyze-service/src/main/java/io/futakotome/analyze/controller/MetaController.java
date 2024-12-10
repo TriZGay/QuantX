@@ -24,6 +24,18 @@ public class MetaController {
         this.meta = new Meta(mapper);
     }
 
+    @GetMapping(value = "/dbInfo")
+    public Mono<ResponseEntity<?>> dnInfo() {
+        return Mono.create(responseEntityMonoSink -> {
+            try {
+                responseEntityMonoSink.success(ResponseEntity.ok(meta.dbInfo()));
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+                responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
+            }
+        });
+    }
+
     @GetMapping(value = "/tables")
     public Mono<ResponseEntity<?>> getTables() {
         return Mono.create(responseEntityMonoSink -> {
