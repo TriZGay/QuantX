@@ -4,6 +4,7 @@ import io.futakotome.analyze.mapper.dto.AnaDatabaseInfoDto;
 import io.futakotome.analyze.mapper.dto.MetaDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ public class MetaDataMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetaDataMapper.class);
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public MetaDataMapper(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public MetaDataMapper(@Qualifier("analyzeNamedParameterJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 

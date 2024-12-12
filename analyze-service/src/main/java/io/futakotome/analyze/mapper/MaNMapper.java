@@ -4,6 +4,7 @@ import io.futakotome.analyze.controller.vo.MaRequest;
 import io.futakotome.analyze.mapper.dto.MaDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ public class MaNMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(MaNMapper.class);
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public MaNMapper(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public MaNMapper(@Qualifier("analyzeNamedParameterJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 

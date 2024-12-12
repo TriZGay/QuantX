@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import javax.sql.DataSource;
@@ -12,10 +13,10 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 @Configuration
-public class CkConfiguration {
-
-    @Bean(name = "analyzeDataSource")
-    public DataSource dataSource(CkConfigurationProperties properties) throws SQLException {
+public class PgConfiguration {
+    @Bean(name = "offlineDataSource")
+    @Primary
+    public DataSource dataSource(PgConfigurationProperties properties) throws SQLException {
         Objects.requireNonNull(properties.getUser());
         Objects.requireNonNull(properties.getPassword());
         HikariConfig config = new HikariConfig();
@@ -28,8 +29,8 @@ public class CkConfiguration {
         return new HikariDataSource(config);
     }
 
-    @Bean(name = "analyzeNamedParameterJdbcTemplate")
-    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(@Qualifier("analyzeDataSource") DataSource dataSource) {
+    @Bean(name = "offlineNamedParameterJdbcTemplate")
+    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(@Qualifier("offlineDataSource") DataSource dataSource) {
         return new NamedParameterJdbcTemplate(dataSource);
     }
 }

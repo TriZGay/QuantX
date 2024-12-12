@@ -33,7 +33,7 @@ public class BaseQuoteController {
                                 new ResponseEntity<>("参数校验失败:" + throwables.getFieldErrors(), HttpStatus.BAD_REQUEST)
                         )).doOnNext(baseQuoteRequest -> {
                     LOGGER.info(PRINT_REQUEST_TEMPLATE, baseQuoteRequest.getCode(), baseQuoteRequest.getStart(), baseQuoteRequest.getEnd());
-                    responseEntityMonoSink.success(ResponseEntity.ok(baseQuoteMapper.queryListConditional(baseQuoteRequest)));
+//                    responseEntityMonoSink.success(ResponseEntity.ok(baseQuoteMapper.queryListConditional(baseQuoteRequest)));
                 }).subscribe());
     }
 

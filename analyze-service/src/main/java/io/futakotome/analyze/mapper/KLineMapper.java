@@ -5,6 +5,7 @@ import io.futakotome.analyze.controller.vo.KLineRequest;
 import io.futakotome.analyze.mapper.dto.KLineDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -40,7 +41,7 @@ public class KLineMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(KLineMapper.class);
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public KLineMapper(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public KLineMapper(@Qualifier("analyzeNamedParameterJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
