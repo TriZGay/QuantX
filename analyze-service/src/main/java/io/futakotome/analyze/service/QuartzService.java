@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -35,7 +34,7 @@ public class QuartzService {
                     Objects.nonNull(jobGroup) ? jobGroup : DEFAULT_JOB_GROUP);
             if (scheduler.checkExists(jobKey)) {
                 LOGGER.warn("添加任务失败,已存在该任务,jobKey为:{}", jobKey);
-                return "已存在该任务";
+                throw new RuntimeException("已存在该任务");
             }
             JobDetail job = JobBuilder.newJob()
                     .ofType(jobClass)
@@ -60,7 +59,7 @@ public class QuartzService {
 
         } catch (Exception e) {
             LOGGER.error("添加任务失败.", e);
-            return "添加任务失败";
+            throw new RuntimeException("添加任务失败");
         }
     }
 
@@ -110,10 +109,12 @@ public class QuartzService {
         try {
             Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.anyGroup());
             for (JobKey jobKey : jobKeys) {
-                List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(jobKey);
-                for (Trigger trigger : triggersOfJob) {
-                    Trigger.TriggerState state = scheduler.getTriggerState(trigger.getKey());
-                }
+                JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+                LOGGER.info("job:{}", jobDetail);
+//                List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(jobKey);
+//                for (Trigger trigger : triggersOfJob) {
+//                    Trigger.TriggerState state = scheduler.getTriggerState(trigger.getKey());
+//                }
             }
 //            jobKeys.stream().flatMap(jobKey -> {
 //                        try {

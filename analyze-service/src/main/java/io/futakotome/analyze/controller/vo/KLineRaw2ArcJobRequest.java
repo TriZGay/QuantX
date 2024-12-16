@@ -3,11 +3,14 @@ package io.futakotome.analyze.controller.vo;
 import io.futakotome.analyze.utils.EntityToJobDataMapConverter;
 import org.quartz.JobDataMap;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class KLineRaw2ArcJobRequest extends JobRequest {
     @NotNull(message = "源表必填")
+    @NotEmpty(message = "源表必填")
     private String fromTable;
+    @NotEmpty(message = "目的表必填")
     @NotNull(message = "目的表必填")
     private String toTable;
     private String updateTimeStart;

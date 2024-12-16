@@ -4,7 +4,6 @@ import io.futakotome.analyze.controller.vo.JobRequest;
 import io.futakotome.analyze.controller.vo.KLineRaw2ArcJobRequest;
 import io.futakotome.analyze.job.KLineRaw2ArcJob;
 import io.futakotome.analyze.service.QuartzService;
-import org.quartz.JobDataMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
