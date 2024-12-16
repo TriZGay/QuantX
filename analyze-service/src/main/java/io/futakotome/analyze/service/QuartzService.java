@@ -1,16 +1,17 @@
 package io.futakotome.analyze.service;
 
+import io.futakotome.analyze.controller.vo.TaskResponse;
 import io.futakotome.analyze.job.QuantxJobListener;
 import io.futakotome.analyze.job.QuantxSchedulerListener;
 import io.futakotome.analyze.job.QuantxTriggerListener;
+import io.futakotome.analyze.utils.EntityToJobDataMapConverter;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class QuartzService {
@@ -92,8 +93,8 @@ public class QuartzService {
                     Objects.nonNull(triggerGroup) ? triggerGroup : DEFAULT_TRIGGER_GROUP);
             Trigger trigger = scheduler.getTrigger(triggerKey);
             if (Objects.isNull(trigger)) {
-                LOGGER.warn("删除任务失败,任务不存在.{},{}", jobKey, triggerKey);
-                return "删除任务失败,任务不存在";
+                LOGGER.error("删除任务失败,任务不存在.{},{}", jobKey, triggerKey);
+                throw new RuntimeException("删除任务失败,任务不存在");
             }
             scheduler.pauseTrigger(triggerKey);
             scheduler.unscheduleJob(triggerKey);
@@ -101,35 +102,45 @@ public class QuartzService {
             return "删除任务成功";
         } catch (Exception e) {
             LOGGER.error("删除任务失败.", e);
-            return "删除任务失败";
+            throw new RuntimeException("删除任务失败");
         }
     }
 
-    public String getTriggers() {
+    public List<TaskResponse> getTriggers() {
         try {
             Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.anyGroup());
+            List<TaskResponse> tasks = new ArrayList<>();
             for (JobKey jobKey : jobKeys) {
                 JobDetail jobDetail = scheduler.getJobDetail(jobKey);
-                LOGGER.info("job:{}", jobDetail);
-//                List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(jobKey);
-//                for (Trigger trigger : triggersOfJob) {
-//                    Trigger.TriggerState state = scheduler.getTriggerState(trigger.getKey());
-//                }
+                String jobGroup = jobDetail.getKey().getGroup();
+                String jobName = jobDetail.getKey().getName();
+                String jobDataMap = EntityToJobDataMapConverter.convert(jobDetail.getJobDataMap());
+                List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(jobKey);
+                for (Trigger trigger : triggersOfJob) {
+                    TaskResponse taskResponse = new TaskResponse();
+                    String triggerName = trigger.getKey().getName();
+                    String triggerGroup = trigger.getKey().getGroup();
+                    Trigger.TriggerState state = scheduler.getTriggerState(trigger.getKey());
+                    if (trigger instanceof CronTrigger) {
+                        CronTrigger cronTrigger = (CronTrigger) trigger;
+                        String cron = cronTrigger.getCronExpression();
+                        Date nextFireTime = cronTrigger.getNextFireTime();
+                        taskResponse.setNextFireTime(nextFireTime);
+                        taskResponse.setCron(cron);
+                    }
+                    taskResponse.setTriggerName(triggerName);
+                    taskResponse.setTriggerGroup(triggerGroup);
+                    taskResponse.setJobName(jobName);
+                    taskResponse.setJobGroup(jobGroup);
+                    taskResponse.setJobDataMap(jobDataMap);
+                    taskResponse.setState(state.toString());
+                    tasks.add(taskResponse);
+                }
             }
-//            jobKeys.stream().flatMap(jobKey -> {
-//                        try {
-//                            return scheduler.getTriggersOfJob(jobKey);
-//                        } catch (SchedulerException e) {
-//                            throw new RuntimeException(e);
-//                        }
-//                    })
-
-//            scheduler.getJobKeys(GroupMatcher.anyGroup());
-            LOGGER.info(scheduler.getMetaData().toString());
-            return scheduler.getMetaData().toString();
+            return tasks;
         } catch (Exception e) {
             LOGGER.error("查询任务失败.", e);
-            return "fail";
+            throw new RuntimeException(e);
         }
     }
 }

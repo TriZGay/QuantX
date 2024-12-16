@@ -1,5 +1,6 @@
 package io.futakotome.analyze.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.quartz.JobDataMap;
 
@@ -13,8 +14,15 @@ public final class EntityToJobDataMapConverter {
             String json = MAPPER.writeValueAsString(entity);
             return new JobDataMap(MAPPER.readValue(json, Map.class));
         } catch (Exception e) {
-            e.printStackTrace();
-            return new JobDataMap();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String convert(JobDataMap jobDataMap) {
+        try {
+            return MAPPER.writeValueAsString(jobDataMap);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 }
