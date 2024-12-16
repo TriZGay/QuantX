@@ -1,8 +1,10 @@
 package io.futakotome.analyze.controller;
 
 import io.futakotome.analyze.controller.vo.JobRequest;
+import io.futakotome.analyze.controller.vo.KLineRaw2ArcJobRequest;
 import io.futakotome.analyze.job.KLineRaw2ArcJob;
 import io.futakotome.analyze.service.QuartzService;
+import org.quartz.JobDataMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/task")
@@ -52,8 +56,8 @@ public class TaskController {
         });
     }
 
-    @PostMapping("/execute")
-    public Mono<ResponseEntity<?>> executeTask(@RequestBody @Validated Mono<JobRequest> jobRequestMono) {
+    @PostMapping("/addKLineRaw2ArcTask")
+    public Mono<ResponseEntity<?>> addKLineRaw2ArcTask(@RequestBody @Validated Mono<KLineRaw2ArcJobRequest> jobRequestMono) {
         return Mono.create(responseEntityMonoSink -> {
             jobRequestMono.doOnError(WebExchangeBindException.class, throwable -> {
                 responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors(), HttpStatus.BAD_REQUEST));
@@ -61,25 +65,13 @@ public class TaskController {
                 responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
             }).doOnNext(request -> {
                 try {
-                    responseEntityMonoSink.success(ResponseEntity.ok(quartzService.addJob(request.getJobName(), KLineRaw2ArcJob.class)));
-                } catch (Exception e) {
-                    LOGGER.error(e.getMessage(), e);
-                    responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
-                }
-            }).subscribe();
-        });
-    }
-
-    @PostMapping("/add")
-    public Mono<ResponseEntity<?>> addTask(@RequestBody @Validated Mono<JobRequest> jobRequestMono) {
-        return Mono.create(responseEntityMonoSink -> {
-            jobRequestMono.doOnError(WebExchangeBindException.class, throwable -> {
-                responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors(), HttpStatus.BAD_REQUEST));
-            }).doOnError(Exception.class, throwable -> {
-                responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
-            }).doOnNext(request -> {
-                try {
-                    responseEntityMonoSink.success(ResponseEntity.ok(quartzService.addJob(request.getJobName(), request.getCron(), KLineRaw2ArcJob.class)));
+                    if (Objects.nonNull(request.getCron()) && !request.getCron().isEmpty()) {
+                        //定时执行
+                        responseEntityMonoSink.success(ResponseEntity.ok(quartzService.addJob(request.getJobName(), request.getCron(), request.toJobDataMap(), KLineRaw2ArcJob.class)));
+                    } else {
+                        //马上执行
+                        responseEntityMonoSink.success(ResponseEntity.ok(quartzService.addJob(request.getJobName(), request.toJobDataMap(), KLineRaw2ArcJob.class)));
+                    }
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                     responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));

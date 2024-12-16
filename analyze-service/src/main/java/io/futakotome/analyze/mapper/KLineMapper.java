@@ -1,6 +1,5 @@
 package io.futakotome.analyze.mapper;
 
-import io.futakotome.analyze.controller.vo.KLineArchiveRequest;
 import io.futakotome.analyze.controller.vo.KLineRequest;
 import io.futakotome.analyze.mapper.dto.KLineDto;
 import org.slf4j.Logger;
@@ -75,26 +74,15 @@ public class KLineMapper {
 
     public List<KLineDto> queryKLineArchived(KLineRequest request, String tableName) {
         try {
-            String sql = "select  market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
+            String sql = "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
                     " from :tableName" +
                     " prewhere (code = :code) and (rehab_type = :rehabType) and (update_time >= :start) and (update_time <= :end) order by update_time asc";
-//            String sql ="select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time " +
-//                    " from (select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
-//                    " from :tableName" +
-//                    " prewhere (code = :code) and (rehab_type = :rehabType) and (((update_time >= :amStart) and (update_time <= :amEnd)) or ((update_time >= :pmStart) and (update_time <= :pmEnd))) " +
-//                    " order by update_time asc with fill from toDateTime64(:amStart,3) to toDateTime64(:pmEnd,3) step :step )" +
-//                    " where (((update_time >= :amStart) and (update_time <= :amEnd)) or ((update_time >= :pmStart) and (update_time <= :pmEnd)))";
             return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
                 put("tableName", tableName);
                 put("code", request.getCode());
                 put("rehabType", request.getRehabType());
                 put("start", request.getStart());
                 put("end", request.getEnd());
-//                put("amStart", request.getAmStart());
-//                put("amEnd", request.getAmEnd());
-//                put("step", fillStep(tableName));
-//                put("pmStart", request.getPmStart());
-//                put("pmEnd", request.getPmEnd());
             }}, new BeanPropertyRowMapper<>(KLineDto.class));
         } catch (Exception e) {
             LOGGER.error("查询K线数据出错.", e);
@@ -102,81 +90,24 @@ public class KLineMapper {
         }
     }
 
-    public int kLinesRawTransToArc(KLineArchiveRequest kLineArchiveRequest, String toTableName) {
+    public int kLinesRawTransToArc(String fromTableName, String toTableName, String start, String end) {
         try {
             String sql = "insert into " + toTableName +
                     " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
-                    " from :tableName as t1 all inner join" +
-                    " (select update_time ,max(add_time) as latest from :tableName group by update_time ) as t2" +
+                    " from :fromTableName as t1 all inner join" +
+                    " (select update_time ,max(add_time) as latest from :fromTableName group by update_time ) as t2" +
                     " on (t2.update_time = t1.update_time ) and (t2.latest = t1.add_time) and (t1.update_time >= :start) and (t1.update_time <= :end)" +
                     " order by update_time asc";
-//            namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
-//                put("toTableName", toTableName);
-//                put("tableName", kLineArchiveRequest.getTableName());
-//                put("start", kLineArchiveRequest.getStart());
-//                put("end", kLineArchiveRequest.getEnd());
-//            }}, rs -> {
-//                LOGGER.info(rs.toString());
-//            });
-//            return 0;
             return namedParameterJdbcTemplate.update(sql, new HashMap<>() {{
-//                put("toTableName", toTableName);
-                put("tableName", kLineArchiveRequest.getTableName());
-                put("start", kLineArchiveRequest.getStart());
-                put("end", kLineArchiveRequest.getEnd());
+                put("fromTableName", fromTableName);
+                put("toTableName", toTableName);
+                put("start", start);
+                put("end", end);
             }});
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             LOGGER.error("归档K线数据出错.", e);
             return 0;
         }
     }
-//    public List<KLineDto> queryKLineCommon(KLineRequest request, String tableName) {
-//        try (Connection connection = dataSource.getConnection()) {
-//            List<KLineDto> kLineDtos = new ArrayList<>();
-//            try (PreparedStatement preparedStatement = connection.prepareStatement(
-//                    "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time,add_time" +
-//                            " from " + tableName + " as t1" +
-//                            " all inner join" +
-//                            " (select update_time ,max(add_time) as latest from " + tableName + " prewhere code = ? group by update_time) as t2 " +
-//                            " on (t2.update_time = t1.update_time ) and (t2.latest = t1.add_time) and (code = ? ) and (rehab_type = ?) and (t1.update_time >= ?) and (t1.update_time <= ?)" +
-//                            " order by t1.update_time"
-//            )) {
-//                preparedStatement.setString(1, request.getCode());
-//                preparedStatement.setString(2, request.getCode());
-//                preparedStatement.setInt(3, request.getRehabType());
-//                preparedStatement.setString(4, request.getStart());
-//                preparedStatement.setString(5, request.getEnd());
-//                ResultSet resultSet = preparedStatement.executeQuery();
-//                while (resultSet.next()) {
-//                    KLineDto kLineDto = new KLineDto();
-//                    kLineDto.setMarket(resultSet.getInt(1));
-//                    kLineDto.setCode(resultSet.getString(2));
-//                    kLineDto.setRehabType(resultSet.getInt(3));
-//                    kLineDto.setHighPrice(resultSet.getDouble(4) == 0D ? "-"
-//                            : Double.valueOf(resultSet.getDouble(4)));
-//                    kLineDto.setOpenPrice(resultSet.getDouble(5) == 0D ? "-"
-//                            : Double.valueOf(resultSet.getDouble(5)));
-//                    kLineDto.setLowPrice(resultSet.getDouble(6) == 0D ? "-"
-//                            : Double.valueOf(resultSet.getDouble(6)));
-//                    kLineDto.setClosePrice(resultSet.getDouble(7) == 0D ? "-"
-//                            : Double.valueOf(resultSet.getDouble(7)));
-//                    kLineDto.setLastClosePrice(resultSet.getDouble(8));
-//                    kLineDto.setVolume(resultSet.getLong(9));
-//                    kLineDto.setTurnover(resultSet.getDouble(10));
-//                    kLineDto.setTurnoverRate(resultSet.getDouble(11));
-//                    kLineDto.setPe(resultSet.getDouble(12));
-//                    kLineDto.setChangeRate(resultSet.getDouble(13));
-//                    kLineDto.setUpdateTime(resultSet.getString(14));
-//                    kLineDto.setAddTime(resultSet.getString(15));
-//                    kLineDtos.add(kLineDto);
-//                }
-//            }
-//            return kLineDtos;
-//        } catch (SQLException throwables) {
-//            LOGGER.error("查询K线数据出错", throwables);
-//            return null;
-//        }
-//    }
 
 }

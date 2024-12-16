@@ -1,12 +1,15 @@
 package io.futakotome.analyze.service;
 
-import org.hibernate.validator.internal.constraintvalidators.bv.AssertTrueValidator;
+import io.futakotome.analyze.job.QuantxJobListener;
+import io.futakotome.analyze.job.QuantxSchedulerListener;
+import io.futakotome.analyze.job.QuantxTriggerListener;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -19,11 +22,14 @@ public class QuartzService {
 
     private final Scheduler scheduler;
 
-    public QuartzService(Scheduler scheduler) {
+    public QuartzService(Scheduler scheduler, QuantxSchedulerListener schedulerListener, QuantxJobListener jobListener, QuantxTriggerListener triggerListener) throws SchedulerException {
         this.scheduler = scheduler;
+        this.scheduler.getListenerManager().addSchedulerListener(schedulerListener);
+        this.scheduler.getListenerManager().addJobListener(jobListener);
+        this.scheduler.getListenerManager().addTriggerListener(triggerListener);
     }
 
-    public String addJob(String jobName, String jobGroup, String triggerName, String triggerGroup, String cron, Class<? extends Job> jobClass) {
+    public String addJob(String jobName, String jobGroup, String triggerName, String triggerGroup, String cron, JobDataMap dataMap, Class<? extends Job> jobClass) {
         try {
             JobKey jobKey = JobKey.jobKey(jobName,
                     Objects.nonNull(jobGroup) ? jobGroup : DEFAULT_JOB_GROUP);
@@ -34,6 +40,7 @@ public class QuartzService {
             JobDetail job = JobBuilder.newJob()
                     .ofType(jobClass)
                     .withIdentity(jobKey)
+                    .usingJobData(dataMap)
                     .build();
             TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
                     .withIdentity(TriggerKey.triggerKey(
@@ -57,12 +64,20 @@ public class QuartzService {
         }
     }
 
+    public String addJob(String jobName, String cron, JobDataMap dataMap, Class<? extends Job> jobClass) {
+        return addJob(jobName, null, null, null, cron, dataMap, jobClass);
+    }
+
     public String addJob(String jobName, String cron, Class<? extends Job> jobClass) {
-        return addJob(jobName, null, null, null, cron, jobClass);
+        return addJob(jobName, null, null, null, cron, new JobDataMap(), jobClass);
+    }
+
+    public String addJob(String jobName, JobDataMap dataMap, Class<? extends Job> jobClass) {
+        return addJob(jobName, null, null, null, null, dataMap, jobClass);
     }
 
     public String addJob(String jobName, Class<? extends Job> jobClass) {
-        return addJob(jobName, null, null, null, null, jobClass);
+        return addJob(jobName, null, null, null, null, new JobDataMap(), jobClass);
     }
 
     public String delJob(String jobName) {
@@ -94,6 +109,12 @@ public class QuartzService {
     public String getTriggers() {
         try {
             Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.anyGroup());
+            for (JobKey jobKey : jobKeys) {
+                List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(jobKey);
+                for (Trigger trigger : triggersOfJob) {
+                    Trigger.TriggerState state = scheduler.getTriggerState(trigger.getKey());
+                }
+            }
 //            jobKeys.stream().flatMap(jobKey -> {
 //                        try {
 //                            return scheduler.getTriggersOfJob(jobKey);

@@ -1,6 +1,5 @@
 package io.futakotome.analyze.biz;
 
-import io.futakotome.analyze.controller.vo.KLineArchiveRequest;
 import io.futakotome.analyze.controller.vo.KLineRequest;
 import io.futakotome.analyze.controller.vo.KLineResponse;
 import io.futakotome.analyze.mapper.KLineMapper;
@@ -16,9 +15,8 @@ public class KLine {
         this.repository = repository;
     }
 
-    public int kLinesArchive(KLineArchiveRequest archiveRequest) {
-        String toTableName = archiveRequest.getTableName().replace("raw","arc");
-        return repository.kLinesRawTransToArc(archiveRequest,toTableName);
+    public int kLinesArchive(String fromTable, String toTable, String start, String end) {
+        return repository.kLinesRawTransToArc(fromTable, toTable, start, end);
     }
 
     public List<KLineResponse> kLinesUseArc(KLineRequest kLineRequest) {
