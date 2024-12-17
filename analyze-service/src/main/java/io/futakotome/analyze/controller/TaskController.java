@@ -70,11 +70,6 @@ public class TaskController {
                 try {
                     if (Objects.nonNull(request.getCron()) && !request.getCron().isEmpty()) {
                         //定时执行
-                        LocalDate now = LocalDate.now();
-                        LocalTime morning = LocalTime.of(9, 30);
-                        LocalTime afternoon = LocalTime.of(15, 0);
-                        request.setUpdateTimeStart(LocalDateTime.of(now, morning).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                        request.setUpdateTimeEnd(LocalDateTime.of(now, afternoon).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
                         responseEntityMonoSink.success(ResponseEntity.ok(quartzService.addJob(request.getJobName(), request.getCron(), request.toJobDataMap(), KLineRaw2ArcJob.class)));
                     } else {
                         //马上执行
