@@ -3,6 +3,7 @@ package io.futakotome.analyze.controller;
 import io.futakotome.analyze.biz.Meta;
 import io.futakotome.analyze.controller.vo.Granularity;
 import io.futakotome.analyze.controller.vo.MetaRequest;
+import io.futakotome.analyze.controller.vo.TableInfoRequest;
 import io.futakotome.analyze.mapper.MetaDataMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,19 @@ public class MetaController {
         this.meta = new Meta(mapper);
     }
 
-    @GetMapping(value = "/dbInfo")
+    @PostMapping("/tableInfo")
+    public Mono<ResponseEntity<?>> tableInfo(@RequestBody TableInfoRequest request) {
+        return Mono.create(responseEntityMonoSink -> {
+            try {
+                responseEntityMonoSink.success(ResponseEntity.ok(meta.tableInfo(request.getTableName())));
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+                responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
+            }
+        });
+    }
+
+    @GetMapping("/dbInfo")
     public Mono<ResponseEntity<?>> dnInfo() {
         return Mono.create(responseEntityMonoSink -> {
             try {
@@ -36,7 +49,7 @@ public class MetaController {
         });
     }
 
-    @GetMapping(value = "/tables")
+    @GetMapping("/tables")
     public Mono<ResponseEntity<?>> getTables() {
         return Mono.create(responseEntityMonoSink -> {
             try {
@@ -48,7 +61,7 @@ public class MetaController {
         });
     }
 
-    @PostMapping(value = "/codes")
+    @PostMapping("/codes")
     public Mono<ResponseEntity<?>> getMeta(@RequestBody @Validated Mono<MetaRequest> metaRequest) {
         return Mono.create(responseEntityMonoSink -> {
             metaRequest.doOnError(WebExchangeBindException.class, throwable -> {

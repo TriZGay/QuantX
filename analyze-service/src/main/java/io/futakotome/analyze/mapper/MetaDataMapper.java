@@ -1,6 +1,7 @@
 package io.futakotome.analyze.mapper;
 
 import io.futakotome.analyze.mapper.dto.AnaDatabaseInfoDto;
+import io.futakotome.analyze.mapper.dto.AnaTableInfoDto;
 import io.futakotome.analyze.mapper.dto.MetaDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,19 @@ public class MetaDataMapper {
 
     public MetaDataMapper(@Qualifier("analyzeNamedParameterJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
+
+    public List<AnaTableInfoDto> tableInfo(String tableName) {
+        try {
+            String sql = "select max (update_time) as max_time, min (update_time) as min_time ,code,rehab_type " +
+                    " from :table group by code,rehab_type order by code";
+            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
+                put("table", tableName);
+            }}, new BeanPropertyRowMapper<>(AnaTableInfoDto.class));
+        } catch (Exception e) {
+            LOGGER.error("查询表信息失败.", e);
+            return null;
+        }
     }
 
     public List<AnaDatabaseInfoDto> dbInfo() {
