@@ -56,7 +56,7 @@ public class RTKLMapper {
                 preparedStatement.setDouble(12, dto.getPe());
                 preparedStatement.setDouble(13, dto.getChangeRate() == null ? -1 : dto.getChangeRate());
                 preparedStatement.setString(14, dto.getUpdateTime());
-                preparedStatement.setString(15, LocalDateTime.now(ZoneId.of("Asia/Shanghai")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                preparedStatement.setString(15, dto.getAddTime());
                 return preparedStatement.executeUpdate() > 0;
             }
         } catch (SQLException throwables) {

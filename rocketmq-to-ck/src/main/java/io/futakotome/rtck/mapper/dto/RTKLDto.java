@@ -15,6 +15,7 @@ public class RTKLDto {
     private Double pe;
     private Double changeRate;
     private String updateTime;
+    private String addTime;
 
     public Integer getRehabType() {
         return rehabType;
@@ -128,6 +129,14 @@ public class RTKLDto {
         this.updateTime = updateTime;
     }
 
+    public String getAddTime() {
+        return addTime;
+    }
+
+    public void setAddTime(String addTime) {
+        this.addTime = addTime;
+    }
+
     @Override
     public String toString() {
         return "RTKLDto{" +
@@ -145,6 +154,7 @@ public class RTKLDto {
                 ", pe=" + pe +
                 ", changeRate=" + changeRate +
                 ", updateTime='" + updateTime + '\'' +
+                ", addTime='" + addTime + '\'' +
                 '}';
     }
 }

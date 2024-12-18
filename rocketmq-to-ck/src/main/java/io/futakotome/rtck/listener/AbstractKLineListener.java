@@ -7,6 +7,10 @@ import io.futakotome.rtck.message.dto.RealTimeKLMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 public abstract class AbstractKLineListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractKLineListener.class);
 
@@ -48,6 +52,8 @@ public abstract class AbstractKLineListener {
         dto.setPe(rtklMessage.getPe());
         dto.setChangeRate(rtklMessage.getChangeRate());
         dto.setUpdateTime(rtklMessage.getUpdateTime());
+        dto.setAddTime(LocalDateTime.now(ZoneId.of("Asia/Shanghai"))
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return dto;
     }
 }
