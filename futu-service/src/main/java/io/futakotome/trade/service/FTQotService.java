@@ -871,7 +871,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_DAY_TOPIC, message, hashKey + "-day", new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("日K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        LOGGER.info("日K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
                                 sendResult.getSendStatus());
                     }
 
@@ -885,7 +885,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_WEEK_TOPIC, message, hashKey + "-week", new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("周K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        LOGGER.info("周K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
                                 sendResult.getSendStatus());
                     }
 
@@ -898,7 +898,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MONTH_TOPIC, message, hashKey + "-month", new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("月K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        LOGGER.info("月K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
                                 sendResult.getSendStatus());
                     }
 
@@ -911,7 +911,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_QUARTER_TOPIC, message, hashKey + "-quarter", new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("季K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        LOGGER.info("季K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
                                 sendResult.getSendStatus());
                     }
 
@@ -924,7 +924,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_YEAR_TOPIC, message, hashKey + "-year", new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("年K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        LOGGER.info("年K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
                                 sendResult.getSendStatus());
                     }
 
@@ -937,7 +937,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MIN_1_TOPIC, message, hashKey + "-min1", new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("1分K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        LOGGER.info("1分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
                                 sendResult.getSendStatus());
                     }
 
@@ -950,7 +950,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MIN_3_TOPIC, message, hashKey + "-min3", new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("3分K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        LOGGER.info("3分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
                                 sendResult.getSendStatus());
                     }
 
@@ -964,7 +964,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MIN_5_TOPIC, message, hashKey + "-min5", new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("5分K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        LOGGER.info("5分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
                                 sendResult.getSendStatus());
                     }
 
@@ -977,7 +977,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MIN_15_TOPIC, message, hashKey + "-min15", new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("15分K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        LOGGER.info("15分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
                                 sendResult.getSendStatus());
                     }
 
@@ -990,7 +990,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MIN_30_TOPIC, message, hashKey + "-min30", new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("30分K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        LOGGER.info("30分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
                                 sendResult.getSendStatus());
                     }
 
@@ -1003,7 +1003,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MIN_60_TOPIC, message, hashKey + "-min60", new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("60分K线数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+                        LOGGER.info("60分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
                                 sendResult.getSendStatus());
                     }
 
