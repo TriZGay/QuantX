@@ -40,7 +40,7 @@ public class KLineRaw2ArcJob implements Job {
             updateTimeStart = params.getString("updateTimeStart");
         } else {
             LocalDate now = LocalDate.now();
-            LocalTime morning = LocalTime.of(9, 30);
+            LocalTime morning = LocalTime.of(9, 0);
             updateTimeStart = LocalDateTime.of(now, morning).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
         if (Objects.nonNull(params.getString("updateTimeEnd")) &&
@@ -48,9 +48,10 @@ public class KLineRaw2ArcJob implements Job {
             updateTimeEnd = params.getString("updateTimeEnd");
         } else {
             LocalDate now = LocalDate.now();
-            LocalTime afternoon = LocalTime.of(15, 0);
+            LocalTime afternoon = LocalTime.of(16, 0);
             updateTimeEnd = LocalDateTime.of(now, afternoon).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
+        LOGGER.info("归档时间:{}-{}", updateTimeStart, updateTimeEnd);
         int resultRowNum = kLine.kLinesArchive(params.getString("fromTable"), params.getString("toTable"),
                 updateTimeStart, updateTimeEnd);
         LOGGER.info("归档行数:{}", resultRowNum);

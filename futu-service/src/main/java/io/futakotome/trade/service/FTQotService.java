@@ -863,7 +863,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             message.setChangeRate(klMessageContent.getChangeRate());
             message.setUpdateTime(klMessageContent.getTime());
             message.setAddTime(LocalDateTime.now(ZoneId.of("Asia/Shanghai"))
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
 
             String hashKey = klMessageContent.getMarket() + "-" + klMessageContent.getCode();
             if (klMessageContent.getKlType().equals(KLType.DAY.getCode())) {
