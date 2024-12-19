@@ -25,6 +25,18 @@ public class MetaController {
         this.meta = new Meta(mapper);
     }
 
+    @PostMapping("/truncateTable")
+    public Mono<ResponseEntity<?>> truncateTable(@RequestBody TableInfoRequest request) {
+        return Mono.create(responseEntityMonoSink -> {
+            try {
+                responseEntityMonoSink.success(ResponseEntity.ok(meta.truncate(request.getTableName())));
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+                responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
+            }
+        });
+    }
+
     @PostMapping("/tableInfo")
     public Mono<ResponseEntity<?>> tableInfo(@RequestBody TableInfoRequest request) {
         return Mono.create(responseEntityMonoSink -> {

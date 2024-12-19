@@ -20,6 +20,15 @@ public class Meta {
         this.repository = mapper;
     }
 
+    public String truncate(String tableName) {
+        Integer rows = repository.truncate(tableName);
+        if (Objects.nonNull(rows)) {
+            return "成功删除条数:" + rows;
+        } else {
+            throw new RuntimeException("删除数据失败");
+        }
+    }
+
     public List<TableInfoResponse> tableInfo(String tableName) {
         List<AnaTableInfoDto> tableInfo = repository.tableInfo(tableName);
         if (Objects.nonNull(tableInfo)) {
@@ -82,4 +91,5 @@ public class Meta {
         response.setDataUncompressedBytes(dto.getDataUncompressedBytes());
         return response;
     }
+
 }

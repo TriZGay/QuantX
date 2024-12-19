@@ -22,6 +22,16 @@ public class MetaDataMapper {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
+    public Integer truncate(String tableName) {
+        try {
+            String sql = "truncate " + tableName;
+            return namedParameterJdbcTemplate.update(sql, new HashMap<>());
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
     public List<AnaTableInfoDto> tableInfo(String tableName) {
         try {
             String sql = "select max (update_time) as max_time, min (update_time) as min_time ,code,rehab_type " +
