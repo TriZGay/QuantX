@@ -52,8 +52,7 @@ public abstract class AbstractKLineListener {
         dto.setPe(rtklMessage.getPe());
         dto.setChangeRate(rtklMessage.getChangeRate());
         dto.setUpdateTime(rtklMessage.getUpdateTime());
-        dto.setAddTime(LocalDateTime.now(ZoneId.of("Asia/Shanghai"))
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        dto.setAddTime(rtklMessage.getAddTime());
         return dto;
     }
 }
