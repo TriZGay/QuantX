@@ -9,9 +9,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 
 @Component
 public class RTKLMapper {
@@ -35,7 +32,6 @@ public class RTKLMapper {
     }
 
     public boolean insertOne(RTKLDto dto, String tableName) {
-        LOGGER.info("K线数据入库:" + dto.toString());
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "insert into " + tableName +
@@ -60,7 +56,7 @@ public class RTKLMapper {
                 return preparedStatement.executeUpdate() > 0;
             }
         } catch (SQLException throwables) {
-            LOGGER.error(tableName + ",插入K线数据出现错误", throwables);
+            LOGGER.error("插入K线数据出现错误.", throwables);
             return false;
         }
     }

@@ -30,7 +30,7 @@ public class RTKLYearListener extends AbstractKLineListener implements RocketMQL
     public void onMessage(RTKLMessage rtklMessage) {
         RTKLDto dto = message2Dto(rtklMessage);
         if (mapper.insertOne(dto, RTKLMapper.KL_YEAR_TABLE_NAME)) {
-            LOGGER.info("年K数据入库成功");
+            LOGGER.info("年K数据,[代码={},复权={},入库时间={}]入库成功", dto.getCode(), dto.getRehabType(), dto.getAddTime());
         }
     }
 

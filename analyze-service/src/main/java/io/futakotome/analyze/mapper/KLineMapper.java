@@ -93,10 +93,10 @@ public class KLineMapper {
     public int kLinesRawTransToArc(String fromTableName, String toTableName, String start, String end) {
         try {
             String sql = "insert into " + toTableName +
-                    " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
+                    " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,t1.update_time as update_time" +
                     " from :fromTableName as t1 all inner join" +
-                    " (select update_time ,max(add_time) as latest from :fromTableName group by update_time ) as t2" +
-                    " on (t2.update_time = t1.update_time ) and (t2.latest = t1.add_time) and (t1.update_time >= :start) and (t1.update_time <= :end)" +
+                    " (select code,rehab_type,update_time,max(add_time) as latest from :fromTableName where (update_time >= :start) and (update_time <= :end) group by code,rehab_type,update_time ) as t2" +
+                    " on (t1.code=t2.code) and (t1.rehab_type=t2.rehab_type) and (t1.add_time = t2.latest)" +
                     " order by update_time asc";
             return namedParameterJdbcTemplate.update(sql, new HashMap<>() {{
                 put("fromTableName", fromTableName);

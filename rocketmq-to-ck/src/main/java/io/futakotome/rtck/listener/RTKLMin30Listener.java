@@ -31,7 +31,7 @@ public class RTKLMin30Listener extends AbstractKLineListener implements RocketMQ
     public void onMessage(RTKLMessage rtklMessage) {
         RTKLDto dto = message2Dto(rtklMessage);
         if (mapper.insertOne(dto, RTKLMapper.KL_MIN_30_TABLE_NAME)) {
-            LOGGER.info("30分K数据入库成功");
+            LOGGER.info("30分K数据,[代码={},复权={},入库时间={}]入库成功", dto.getCode(), dto.getRehabType(), dto.getAddTime());
             sendKLineWsMessage(rtklMessage,
                     senderMap.get(AbstractWebSocketServerHandler.KLINE_MIN30_TAG));
         }

@@ -30,7 +30,7 @@ public class RTKLDayListener extends AbstractKLineListener implements RocketMQLi
     public void onMessage(RTKLMessage rtklMessage) {
         RTKLDto dto = message2Dto(rtklMessage);
         if (mapper.insertOne(dto, RTKLMapper.KL_DAY_TABLE_NAME)) {
-            LOGGER.info("日K数据入库成功");
+            LOGGER.info("日K数据,[代码={},复权={},入库时间={}]入库成功", dto.getCode(), dto.getRehabType(), dto.getAddTime());
         }
     }
 
