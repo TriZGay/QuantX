@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-@RocketMQMessageListener(consumerGroup = MessageCommon.RT_BASIC_QUO_CONSUMER_GROUP_PLATE, topic = MessageCommon.RT_BASIC_QUO_TOPIC_PLATE)
+//@RocketMQMessageListener(consumerGroup = MessageCommon.RT_BASIC_QUO_CONSUMER_GROUP_PLATE, topic = MessageCommon.RT_BASIC_QUO_TOPIC_PLATE)
 public class RTPlateBasicQuoteListener extends AbstractBasicQuoteListener implements RocketMQListener<RTBasicQuoteMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTPlateBasicQuoteListener.class);
     private final RTBasicQuoteMapper mapper;

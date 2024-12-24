@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-@RocketMQMessageListener(consumerGroup = MessageCommon.RT_BROKER_CONSUMER_GROUP, topic = MessageCommon.RT_BROKER_TOPIC)
+//@RocketMQMessageListener(consumerGroup = MessageCommon.RT_BROKER_CONSUMER_GROUP, topic = MessageCommon.RT_BROKER_TOPIC)
 public class RTBrokerListener implements RocketMQListener<RTBrokerMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTBrokerListener.class);
     private final RTBrokerMapper mapper;

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-@RocketMQMessageListener(consumerGroup = MessageCommon.CAPITAL_FLOW_CONSUMER_GROUP, topic = MessageCommon.CAPITAL_FLOW_TOPIC)
+//@RocketMQMessageListener(consumerGroup = MessageCommon.CAPITAL_FLOW_CONSUMER_GROUP, topic = MessageCommon.CAPITAL_FLOW_TOPIC)
 public class CapitalFlowListener implements RocketMQListener<CapitalFlowMessage> {
     public static final Logger LOGGER = LoggerFactory.getLogger(CapitalFlowListener.class);
     private final CapitalFlowMapper mapper;

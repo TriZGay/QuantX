@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Component
-@RocketMQMessageListener(consumerGroup = MessageCommon.HISTORY_KL_DETAIL_CONSUMER_GROUP, topic = MessageCommon.HISTORY_KL_DETAIL_TOPIC)
+//@RocketMQMessageListener(consumerGroup = MessageCommon.HISTORY_KL_DETAIL_CONSUMER_GROUP, topic = MessageCommon.HISTORY_KL_DETAIL_TOPIC)
 public class HistoryKLDetailListener implements RocketMQListener<HistoryKLDetailMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoryKLDetailListener.class);
     private final ConcurrentHashMap<String, WebSocketSender> senderMap;

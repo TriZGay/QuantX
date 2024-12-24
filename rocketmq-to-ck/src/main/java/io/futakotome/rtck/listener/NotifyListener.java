@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-@RocketMQMessageListener(consumerGroup = MessageCommon.NOTIFY_CONSUMER_GROUP, topic = MessageCommon.NOTIFY_TOPIC)
+//@RocketMQMessageListener(consumerGroup = MessageCommon.NOTIFY_CONSUMER_GROUP, topic = MessageCommon.NOTIFY_TOPIC)
 public class NotifyListener implements RocketMQListener<NotifyMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotifyListener.class);
     private final ConcurrentHashMap<String, WebSocketSender> senderMap;

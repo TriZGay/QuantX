@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-@RocketMQMessageListener(consumerGroup = MessageCommon.MARKET_STATE_CONSUMER_GROUP, topic = MessageCommon.MARKET_STATE_TOPIC)
+//@RocketMQMessageListener(consumerGroup = MessageCommon.MARKET_STATE_CONSUMER_GROUP, topic = MessageCommon.MARKET_STATE_TOPIC)
 public class MarketStateListener implements RocketMQListener<MarketStateMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarketStateListener.class);
     private final ConcurrentHashMap<String, WebSocketSender> senderMap;

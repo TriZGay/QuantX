@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-@RocketMQMessageListener(consumerGroup = MessageCommon.REHAB_CONSUMER_GROUP, topic = MessageCommon.REHAB_TOPIC)
+//@RocketMQMessageListener(consumerGroup = MessageCommon.REHAB_CONSUMER_GROUP, topic = MessageCommon.REHAB_TOPIC)
 public class RehabsListener implements RocketMQListener<RehabMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RehabsListener.class);
 

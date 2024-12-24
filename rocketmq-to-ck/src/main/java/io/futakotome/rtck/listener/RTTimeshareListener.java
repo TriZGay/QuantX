@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-@RocketMQMessageListener(consumerGroup = MessageCommon.RT_TIMESHARE_CONSUMER_GROUP, topic = MessageCommon.RT_TIMESHARE_TOPIC)
+//@RocketMQMessageListener(consumerGroup = MessageCommon.RT_TIMESHARE_CONSUMER_GROUP, topic = MessageCommon.RT_TIMESHARE_TOPIC)
 public class RTTimeshareListener implements RocketMQListener<RTTimeShareMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTTimeshareListener.class);
     private final RTTimeShareMapper mapper;
