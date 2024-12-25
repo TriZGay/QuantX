@@ -1,5 +1,8 @@
 package io.futakotome.analyze.controller.vo;
 
+import io.futakotome.analyze.utils.EntityToJobDataMapConverter;
+import org.quartz.JobDataMap;
+
 import javax.validation.constraints.NotNull;
 
 public class JobRequest {
@@ -9,6 +12,10 @@ public class JobRequest {
     private String triggerName;
     private String triggerGroup;
     private String cron;
+
+    public static JobDataMap toJobDataMap(Object obj) {
+        return EntityToJobDataMapConverter.convert(obj);
+    }
 
     public String getJobName() {
         return jobName;

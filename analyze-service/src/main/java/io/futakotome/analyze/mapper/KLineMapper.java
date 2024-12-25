@@ -1,7 +1,9 @@
 package io.futakotome.analyze.mapper;
 
 import io.futakotome.analyze.controller.vo.KLineRequest;
+import io.futakotome.analyze.controller.vo.RangeRequest;
 import io.futakotome.analyze.mapper.dto.KLineDto;
+import io.futakotome.analyze.mapper.dto.KLineRepeatDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -72,6 +74,22 @@ public class KLineMapper {
         return 0;
     }
 
+    public List<KLineRepeatDto> queryKLineArchivedRepeated(String start, String end, String tableName) {
+        try {
+            String sql = "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time,repeat" +
+                    " from (select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time,row_number() OVER (PARTITION BY code, rehab_type, update_time) AS repeat from :tableName prewhere (update_time >= :start) and (update_time <= :end))" +
+                    " where repeat > 1";
+            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
+                put("tableName", tableName);
+                put("start", start);
+                put("end", end);
+            }}, new BeanPropertyRowMapper<>(KLineRepeatDto.class));
+        } catch (Exception e) {
+            LOGGER.error("勘误查询K线数据出错.", e);
+            return null;
+        }
+    }
+
     public List<KLineDto> queryKLineArchived(KLineRequest request, String tableName) {
         try {
             String sql = "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
@@ -90,7 +108,7 @@ public class KLineMapper {
         }
     }
 
-    public int kLinesRawTransToArc(String fromTableName, String toTableName, String start, String end) {
+    public Integer kLinesRawTransToArc(String fromTableName, String toTableName, String start, String end) {
         try {
             String sql = "insert into " + toTableName +
                     " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,t1.update_time as update_time" +
@@ -106,7 +124,7 @@ public class KLineMapper {
             }});
         } catch (Exception e) {
             LOGGER.error("归档K线数据出错.", e);
-            return 0;
+            return null;
         }
     }
 

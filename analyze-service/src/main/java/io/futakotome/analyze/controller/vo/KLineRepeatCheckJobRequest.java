@@ -3,30 +3,19 @@ package io.futakotome.analyze.controller.vo;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-public class KLineRaw2ArcJobRequest extends JobRequest {
-    @NotNull(message = "源表必填")
-    @NotEmpty(message = "源表必填")
-    private String fromTable;
-    @NotEmpty(message = "目的表必填")
-    @NotNull(message = "目的表必填")
-    private String toTable;
+public class KLineRepeatCheckJobRequest extends JobRequest {
+    @NotNull(message = "表格必填")
+    @NotEmpty(message = "表格必填")
+    public String table;
     private String updateTimeStart;
     private String updateTimeEnd;
 
-    public String getFromTable() {
-        return fromTable;
+    public String getTable() {
+        return table;
     }
 
-    public void setFromTable(String fromTable) {
-        this.fromTable = fromTable;
-    }
-
-    public String getToTable() {
-        return toTable;
-    }
-
-    public void setToTable(String toTable) {
-        this.toTable = toTable;
+    public void setTable(String table) {
+        this.table = table;
     }
 
     public String getUpdateTimeStart() {
