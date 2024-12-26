@@ -2,6 +2,7 @@ package io.futakotome.analyze.job;
 
 import io.futakotome.analyze.biz.KLine;
 import io.futakotome.analyze.mapper.KLineMapper;
+import io.futakotome.analyze.utils.DateUtils;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -27,11 +28,6 @@ public class KLineRaw2ArcJob implements Job {
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-//        LOGGER.info("jobDataMap:updateTimeStart,{}", jobExecutionContext.getJobDetail().getJobDataMap().getString("updateTimeStart"));
-//        LOGGER.info("jobDataMap:updateTimeEnd,{}", jobExecutionContext.getJobDetail().getJobDataMap().getString("updateTimeEnd"));
-//        LOGGER.info("jobDataMap:fromTable,{}", jobExecutionContext.getJobDetail().getJobDataMap().getString("fromTable"));
-//        LOGGER.info("jobDataMap:toTable,{}", jobExecutionContext.getJobDetail().getJobDataMap().getString("toTable"));
-//        LOGGER.info("本次触发时间:{}", jobExecutionContext.getFireTime());
         String updateTimeStart;
         String updateTimeEnd;
         JobDataMap params = jobExecutionContext.getJobDetail().getJobDataMap();
@@ -41,7 +37,7 @@ public class KLineRaw2ArcJob implements Job {
         } else {
             LocalDate now = LocalDate.now();
             LocalTime morning = LocalTime.of(9, 0);
-            updateTimeStart = LocalDateTime.of(now, morning).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            updateTimeStart = LocalDateTime.of(now, morning).format(DateUtils.DATE_TIME_FORMATTER);
         }
         if (Objects.nonNull(params.getString("updateTimeEnd")) &&
                 !params.getString("updateTimeEnd").isEmpty()) {
@@ -49,7 +45,7 @@ public class KLineRaw2ArcJob implements Job {
         } else {
             LocalDate now = LocalDate.now();
             LocalTime afternoon = LocalTime.of(16, 0);
-            updateTimeEnd = LocalDateTime.of(now, afternoon).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            updateTimeEnd = LocalDateTime.of(now, afternoon).format(DateUtils.DATE_TIME_FORMATTER);
         }
         LOGGER.info("归档时间:{}-{}", updateTimeStart, updateTimeEnd);
         int resultRowNum = kLine.kLinesArchive(params.getString("fromTable"), params.getString("toTable"),

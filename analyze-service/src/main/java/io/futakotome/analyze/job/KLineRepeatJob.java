@@ -1,7 +1,11 @@
 package io.futakotome.analyze.job;
 
+import io.futakotome.analyze.biz.DataQuality;
 import io.futakotome.analyze.biz.KLine;
+import io.futakotome.analyze.controller.vo.KLineRepeatResponse;
+import io.futakotome.analyze.mapper.DataQualityMapper;
 import io.futakotome.analyze.mapper.KLineMapper;
+import io.futakotome.analyze.utils.DateUtils;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -14,42 +18,38 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Objects;
 
 @Component
 public class KLineRepeatJob implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(KLineRepeatJob.class);
-    private final KLine kLine;
+    private final DataQuality dataQuality;
 
-    public KLineRepeatJob(KLineMapper kLineMapper) {
-        this.kLine = new KLine(kLineMapper);
+    public KLineRepeatJob(KLineMapper kLineMapper, DataQualityMapper dataQualityMapper) {
+        KLine kLine = new KLine(kLineMapper);
+        this.dataQuality = new DataQuality(dataQualityMapper, kLine);
     }
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         JobDataMap params = jobExecutionContext.getJobDetail().getJobDataMap();
         String tableName = params.getString("table");
-        String updateTimeStart;
-        String updateTimeEnd;
-        if (Objects.nonNull(params.getString("updateTimeStart")) &&
-                !params.getString("updateTimeStart").isEmpty()) {
-            updateTimeStart = params.getString("updateTimeStart");
+        String startDate = params.getString("startDate");
+        String endDate = params.getString("endDate");
+
+        if (Objects.nonNull(startDate) && Objects.nonNull(endDate)) {
+            List<String> dateRanges = DateUtils.splitDateByDay(
+                    LocalDate.parse(startDate, DateUtils.DATE_FORMATTER),
+                    LocalDate.parse(endDate, DateUtils.DATE_FORMATTER)
+            );
+            dateRanges.forEach(today -> {
+                LocalDate now = LocalDate.parse(today, DateUtils.DATE_FORMATTER);
+                dataQuality.checkKlineRepeat(now, tableName);
+            });
         } else {
             LocalDate now = LocalDate.now();
-            LocalTime morning = LocalTime.of(9, 0);
-            updateTimeStart = LocalDateTime.of(now, morning).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            dataQuality.checkKlineRepeat(now, tableName);
         }
-        if (Objects.nonNull(params.getString("updateTimeEnd")) &&
-                !params.getString("updateTimeEnd").isEmpty()) {
-            updateTimeEnd = params.getString("updateTimeEnd");
-        } else {
-            LocalDate now = LocalDate.now();
-            LocalTime afternoon = LocalTime.of(16, 0);
-            updateTimeEnd = LocalDateTime.of(now, afternoon).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }
-        LOGGER.info("检查时段:{}-{}", updateTimeStart, updateTimeEnd);
-        kLine.kLinesRepeat(updateTimeStart, updateTimeEnd, tableName).forEach(kLineRepeatResponse -> {
-            LOGGER.info(kLineRepeatResponse.toString());
-        });
     }
 }
