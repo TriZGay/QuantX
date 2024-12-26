@@ -1,9 +1,12 @@
 package io.futakotome.analyze.controller;
 
+import io.futakotome.analyze.biz.DataQuality;
 import io.futakotome.analyze.biz.Meta;
 import io.futakotome.analyze.controller.vo.Granularity;
 import io.futakotome.analyze.controller.vo.MetaRequest;
+import io.futakotome.analyze.controller.vo.RangeRequest;
 import io.futakotome.analyze.controller.vo.TableInfoRequest;
+import io.futakotome.analyze.mapper.DataQualityMapper;
 import io.futakotome.analyze.mapper.MetaDataMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +23,23 @@ public class MetaController {
     public static final Logger LOGGER = LoggerFactory.getLogger(MetaController.class);
     private static final String PRINT_REQUEST_TEMPLATE = "粒度:{}";
     private final Meta meta;
+    private final DataQuality dataQuality;
 
-    public MetaController(MetaDataMapper mapper) {
+    public MetaController(MetaDataMapper mapper, DataQualityMapper dataQualityMapper) {
         this.meta = new Meta(mapper);
+        this.dataQuality = new DataQuality(dataQualityMapper);
+    }
+
+    @PostMapping("/dataQaPerDay")
+    public Mono<ResponseEntity<?>> dataQaPerDay(@RequestBody RangeRequest request) {
+        return Mono.create(responseEntityMonoSink -> {
+            try {
+                responseEntityMonoSink.success(ResponseEntity.ok(dataQuality.qaPerDay(request)));
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+                responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
+            }
+        });
     }
 
     @PostMapping("/truncateTable")
