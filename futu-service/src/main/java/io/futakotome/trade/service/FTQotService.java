@@ -865,10 +865,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             message.setAddTime(LocalDateTime.now(ZoneId.of("Asia/Shanghai"))
                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
 
-            String hashKey = klMessageContent.getMarket() + "-" + klMessageContent.getCode();
             if (klMessageContent.getKlType().equals(KLType.DAY.getCode())) {
                 //日K
-                rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_DAY_TOPIC, message, hashKey + "-day", new SendCallback() {
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_DAY_TOPIC, message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         LOGGER.info("日K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
@@ -882,7 +881,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 });
             } else if (klMessageContent.getKlType().equals(KLType.WEEK.getCode())) {
                 //周K
-                rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_WEEK_TOPIC, message, hashKey + "-week", new SendCallback() {
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_WEEK_TOPIC, message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         LOGGER.info("周K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
@@ -895,7 +894,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     }
                 });
             } else if (klMessageContent.getKlType().equals(KLType.MONTH.getCode())) {
-                rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MONTH_TOPIC, message, hashKey + "-month", new SendCallback() {
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MONTH_TOPIC, message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         LOGGER.info("月K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
@@ -908,7 +907,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     }
                 });
             } else if (klMessageContent.getKlType().equals(KLType.QUARTER.getCode())) {
-                rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_QUARTER_TOPIC, message, hashKey + "-quarter", new SendCallback() {
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_QUARTER_TOPIC, message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         LOGGER.info("季K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
@@ -921,7 +920,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     }
                 });
             } else if (klMessageContent.getKlType().equals(KLType.YEAR.getCode())) {
-                rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_YEAR_TOPIC, message, hashKey + "-year", new SendCallback() {
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_YEAR_TOPIC, message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         LOGGER.info("年K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
@@ -934,7 +933,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     }
                 });
             } else if (klMessageContent.getKlType().equals(KLType.MIN_1.getCode())) {
-                rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MIN_1_TOPIC, message, hashKey + "-min1", new SendCallback() {
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_1_TOPIC, message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         LOGGER.info("1分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
@@ -947,7 +946,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     }
                 });
             } else if (klMessageContent.getKlType().equals(KLType.MIN_3.getCode())) {
-                rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MIN_3_TOPIC, message, hashKey + "-min3", new SendCallback() {
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_3_TOPIC, message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         LOGGER.info("3分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
@@ -961,7 +960,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 });
             } else if (klMessageContent.getKlType().equals(KLType.MIN_5.getCode())) {
                 //5分K
-                rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MIN_5_TOPIC, message, hashKey + "-min5", new SendCallback() {
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_5_TOPIC, message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         LOGGER.info("5分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
@@ -974,7 +973,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     }
                 });
             } else if (klMessageContent.getKlType().equals(KLType.MIN_15.getCode())) {
-                rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MIN_15_TOPIC, message, hashKey + "-min15", new SendCallback() {
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_15_TOPIC, message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         LOGGER.info("15分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
@@ -987,7 +986,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     }
                 });
             } else if (klMessageContent.getKlType().equals(KLType.MIN_30.getCode())) {
-                rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MIN_30_TOPIC, message, hashKey + "-min30", new SendCallback() {
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_30_TOPIC, message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         LOGGER.info("30分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
@@ -1000,7 +999,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     }
                 });
             } else if (klMessageContent.getKlType().equals(KLType.MIN_60.getCode())) {
-                rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_KL_MIN_60_TOPIC, message, hashKey + "-min60", new SendCallback() {
+                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_60_TOPIC, message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         LOGGER.info("60分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),

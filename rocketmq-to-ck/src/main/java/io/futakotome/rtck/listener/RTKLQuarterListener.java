@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-//@RocketMQMessageListener(consumerGroup = MessageCommon.RT_KL_QUARTER_CONSUMER_GROUP, topic = MessageCommon.RT_KL_QUARTER_TOPIC, consumeMode = ConsumeMode.ORDERLY)
+//@RocketMQMessageListener(consumerGroup = MessageCommon.RT_KL_QUARTER_CONSUMER_GROUP, topic = MessageCommon.RT_KL_QUARTER_TOPIC)
 public class RTKLQuarterListener extends AbstractKLineListener implements RocketMQListener<RTKLMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTKLQuarterListener.class);
     private final RTKLMapper mapper;

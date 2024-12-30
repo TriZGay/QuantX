@@ -1,5 +1,6 @@
 package io.futakotome.analyze.mapper;
 
+import io.futakotome.analyze.mapper.dto.DataQaRepeatDetailDto;
 import io.futakotome.analyze.mapper.dto.DataQualityDto;
 import io.futakotome.analyze.mapper.dto.KLineRepeatDetailDto;
 import org.slf4j.Logger;
@@ -21,6 +22,18 @@ public class DataQualityMapper {
 
     public DataQualityMapper(@Qualifier("offlineNamedParameterJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
+
+    public List<DataQaRepeatDetailDto> queryRepeatDetailsBy(LocalDate somedate) {
+        try {
+            String sql = "select check_date,code,rehab_type,update_time from public.t_kl_repeat_details where check_date=:somedate";
+            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
+                put("somedate", somedate);
+            }}, new BeanPropertyRowMapper<>(DataQaRepeatDetailDto.class));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            return null;
+        }
     }
 
     public List<DataQualityDto> list(LocalDate startDate, LocalDate endDate) {

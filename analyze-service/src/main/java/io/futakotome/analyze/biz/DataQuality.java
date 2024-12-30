@@ -1,10 +1,9 @@
 package io.futakotome.analyze.biz;
 
 
-import io.futakotome.analyze.controller.vo.DataQualityResponse;
-import io.futakotome.analyze.controller.vo.KLineRepeatResponse;
-import io.futakotome.analyze.controller.vo.RangeRequest;
+import io.futakotome.analyze.controller.vo.*;
 import io.futakotome.analyze.mapper.DataQualityMapper;
+import io.futakotome.analyze.mapper.dto.DataQaRepeatDetailDto;
 import io.futakotome.analyze.mapper.dto.DataQualityDto;
 import io.futakotome.analyze.mapper.dto.KLineRepeatDetailDto;
 import io.futakotome.analyze.utils.DateUtils;
@@ -14,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DataQuality {
@@ -32,6 +28,20 @@ public class DataQuality {
     public DataQuality(DataQualityMapper mapper, KLine kLine) {
         this.repository = mapper;
         this.kLine = kLine;
+    }
+
+    public DataQaDetailsResponse details(DataQaDetailsRequest request) {
+        List<DataQaRepeatDetailDto> repeatDetailDtos = repository.queryRepeatDetailsBy(LocalDate.parse(request.getDate(),
+                DateUtils.DATE_FORMATTER));
+        DataQaDetailsResponse response = new DataQaDetailsResponse();
+        if (Objects.nonNull(repeatDetailDtos)) {
+            List<DataQaDetailsResponse.RepeatDetail> repeatDetails = repeatDetailDtos
+                    .stream().map(this::repeatDetailDto2Vo).collect(Collectors.toList());
+            response.setRepeatDetails(repeatDetails);
+        } else {
+            response.setRepeatDetails(new ArrayList<>());
+        }
+        return response;
     }
 
     public Map<String, Boolean> qaPerDay(RangeRequest request) {
@@ -84,6 +94,15 @@ public class DataQuality {
                 }
             }
         }
+    }
+
+    private DataQaDetailsResponse.RepeatDetail repeatDetailDto2Vo(DataQaRepeatDetailDto dto) {
+        DataQaDetailsResponse.RepeatDetail repeatDetail = new DataQaDetailsResponse.RepeatDetail();
+        repeatDetail.setCheckDate(dto.getCheckDate().format(DateUtils.DATE_FORMATTER));
+        repeatDetail.setCode(dto.getCode());
+        repeatDetail.setRehabType(dto.getRehabType());
+        repeatDetail.setUpdateTime(dto.getUpdateTime());
+        return repeatDetail;
     }
 
     private DataQualityResponse dataQaDto2Vo(DataQualityDto dto) {

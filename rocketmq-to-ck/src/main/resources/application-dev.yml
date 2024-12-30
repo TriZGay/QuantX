@@ -1,8 +1,8 @@
 rocketmq:
-  name-server: 192.168.145.246:9876
+  name-server: 172.23.143.183:9876
 ck:
   driverClass: com.clickhouse.jdbc.ClickHouseDriver
-  url: jdbc:ch://192.168.145.246:8123/quantx
+  url: jdbc:ch://172.23.143.183:8123/quantx
   user: default
   password: 123456
 server:

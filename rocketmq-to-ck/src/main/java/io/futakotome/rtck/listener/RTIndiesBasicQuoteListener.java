@@ -18,7 +18,7 @@ import static io.futakotome.common.MessageCommon.RT_BASIC_QUO_CONSUMER_GROUP_IND
 import static io.futakotome.common.MessageCommon.RT_BASIC_QUO_TOPIC_INDEX;
 
 @Component
-//@RocketMQMessageListener(consumerGroup = RT_BASIC_QUO_CONSUMER_GROUP_INDIES, topic = RT_BASIC_QUO_TOPIC_INDEX, consumeMode = ConsumeMode.ORDERLY)
+//@RocketMQMessageListener(consumerGroup = RT_BASIC_QUO_CONSUMER_GROUP_INDIES, topic = RT_BASIC_QUO_TOPIC_INDEX)
 public class RTIndiesBasicQuoteListener extends AbstractBasicQuoteListener implements RocketMQListener<RTBasicQuoteMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTIndiesBasicQuoteListener.class);
     private final RTBasicQuoteMapper mapper;

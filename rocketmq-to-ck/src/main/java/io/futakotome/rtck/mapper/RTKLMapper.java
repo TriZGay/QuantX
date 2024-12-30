@@ -3,12 +3,11 @@ package io.futakotome.rtck.mapper;
 import io.futakotome.rtck.mapper.dto.RTKLDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
 
 @Component
 public class RTKLMapper {
@@ -25,38 +24,40 @@ public class RTKLMapper {
     public static final String KL_MIN_60_TABLE_NAME = "t_kl_min_60_raw";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RTKLMapper.class);
-    private final DataSource dataSource;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public RTKLMapper(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public RTKLMapper(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
+
+    public boolean insertBatch(List<RTKLDto> dtos, String tableName) {
+        return false;
     }
 
     public boolean insertOne(RTKLDto dto, String tableName) {
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into " + tableName +
-                            " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnoverRate,pe,change_rate,update_time,add_time " +
-                            " from input('market Int8 ,code String,rehab_type Int8,high_price Float64,open_price Float64,low_price Float64,close_price Float64,last_close_price Float64,volume Int64,turnover Float64,turnoverRate Float64, pe Float64,change_rate Float64 ,update_time DateTime64(3),add_time DateTime64(3)')"
-            )) {
-                preparedStatement.setInt(1, dto.getMarket());
-                preparedStatement.setString(2, dto.getCode());
-                preparedStatement.setInt(3, dto.getRehabType());
-                preparedStatement.setDouble(4, dto.getHighPrice());
-                preparedStatement.setDouble(5, dto.getOpenPrice());
-                preparedStatement.setDouble(6, dto.getLowPrice());
-                preparedStatement.setDouble(7, dto.getClosePrice());
-                preparedStatement.setDouble(8, dto.getLastClosePrice());
-                preparedStatement.setLong(9, dto.getVolume());
-                preparedStatement.setDouble(10, dto.getTurnover());
-                preparedStatement.setDouble(11, dto.getTurnoverRate());
-                preparedStatement.setDouble(12, dto.getPe());
-                preparedStatement.setDouble(13, dto.getChangeRate() == null ? -1 : dto.getChangeRate());
-                preparedStatement.setString(14, dto.getUpdateTime());
-                preparedStatement.setString(15, dto.getAddTime());
-                return preparedStatement.executeUpdate() > 0;
-            }
-        } catch (SQLException throwables) {
-            LOGGER.error("插入K线数据出现错误.", throwables);
+        try {
+            String sql = "insert into " + tableName + "(market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time,add_time)" +
+                    " values (:market,:code,:rehabType,:highPrice,:openPrice,:lowPrice,:closePrice,:lastClosePrice,:volume,:turnover,:turnoverRate,:pe,:changeRate,:updateTime,:addTime)";
+            int insertRow = namedParameterJdbcTemplate.update(sql, new HashMap<>() {{
+                put("market", dto.getMarket());
+                put("code", dto.getCode());
+                put("rehabType", dto.getRehabType());
+                put("highPrice", dto.getHighPrice());
+                put("openPrice", dto.getOpenPrice());
+                put("lowPrice", dto.getLowPrice());
+                put("closePrice", dto.getClosePrice());
+                put("lastClosePrice", dto.getLastClosePrice());
+                put("volume", dto.getVolume());
+                put("turnover", dto.getTurnover());
+                put("turnoverRate", dto.getTurnoverRate());
+                put("pe", dto.getPe());
+                put("changeRate", dto.getChangeRate() == null ? -1 : dto.getChangeRate());
+                put("updateTime", dto.getUpdateTime());
+                put("addTime", dto.getAddTime());
+            }});
+            return insertRow > 0;
+        } catch (Exception e) {
+            LOGGER.error("插入K线数据出现错误:{}", e.getMessage());
             return false;
         }
     }
