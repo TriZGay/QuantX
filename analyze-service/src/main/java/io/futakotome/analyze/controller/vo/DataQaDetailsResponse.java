@@ -18,6 +18,15 @@ public class DataQaDetailsResponse {
         private String code;
         private Integer rehabType;
         private String updateTime;
+        private String tableName;
+
+        public String getTableName() {
+            return tableName;
+        }
+
+        public void setTableName(String tableName) {
+            this.tableName = tableName;
+        }
 
         public String getCheckDate() {
             return checkDate;

@@ -12,8 +12,9 @@ class DateUtilsTest {
 
     @Test
     void splitDateByDay() {
-        List<String> dates = DateUtils.splitDateByDay(LocalDate.parse("2015-11-11", DateUtils.DATE_FORMATTER),
-                LocalDate.parse("2015-11-30", DateUtils.DATE_FORMATTER));
+        List<String> dates = DateUtils.splitDateByDay(
+                LocalDate.parse("2015-11-11", DateUtils.DATE_FORMATTER),
+                LocalDate.parse("2015-11-11", DateUtils.DATE_FORMATTER));
         System.out.println(dates);
     }
 }

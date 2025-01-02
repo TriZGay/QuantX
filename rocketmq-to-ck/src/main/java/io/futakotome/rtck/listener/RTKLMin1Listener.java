@@ -41,5 +41,4 @@ public class RTKLMin1Listener extends AbstractKLineListener implements RocketMQL
                     senderMap.get(AbstractWebSocketServerHandler.KLINE_MIN1_TAG));
         }
     }
-
 }

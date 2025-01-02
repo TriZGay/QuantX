@@ -1,6 +1,6 @@
 package io.futakotome.rtck.config;
 
-import com.lmax.disruptor.YieldingWaitStrategy;
+import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import io.futakotome.rtck.event.KLineReceivedEvent;
@@ -24,13 +24,13 @@ public class DisruptorConfiguration {
     @Bean
     public KLineReceivedEventProducer kLineReceivedEventProducer() {
         KLineReceivedEventFactory factory = new KLineReceivedEventFactory();
-        int bufferSize = 1024 * 8;
+        int bufferSize = 1024;
         Disruptor<KLineReceivedEvent> disruptor = new Disruptor<>(
                 factory,
                 bufferSize,
                 Executors.defaultThreadFactory(),
                 ProducerType.MULTI,
-                new YieldingWaitStrategy());
+                new BlockingWaitStrategy());
         disruptor.handleEventsWith(new KLineReceivedEventHandler(mapper));
         disruptor.start();
         return new KLineReceivedEventProducer(disruptor.getRingBuffer());

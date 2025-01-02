@@ -1,6 +1,5 @@
 package io.futakotome.analyze.mapper;
 
-import io.futakotome.analyze.mapper.dto.DataQaRepeatDetailDto;
 import io.futakotome.analyze.mapper.dto.DataQualityDto;
 import io.futakotome.analyze.mapper.dto.KLineRepeatDetailDto;
 import org.slf4j.Logger;
@@ -24,12 +23,12 @@ public class DataQualityMapper {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    public List<DataQaRepeatDetailDto> queryRepeatDetailsBy(LocalDate somedate) {
+    public List<KLineRepeatDetailDto> queryRepeatDetailsBy(LocalDate somedate) {
         try {
-            String sql = "select check_date,code,rehab_type,update_time from public.t_kl_repeat_details where check_date=:somedate";
+            String sql = "select check_date,code,rehab_type,update_time,table_name from public.t_kl_repeat_details where check_date=:somedate";
             return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
                 put("somedate", somedate);
-            }}, new BeanPropertyRowMapper<>(DataQaRepeatDetailDto.class));
+            }}, new BeanPropertyRowMapper<>(KLineRepeatDetailDto.class));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return null;
@@ -51,8 +50,8 @@ public class DataQualityMapper {
 
     public boolean insertRepeatDetails(List<KLineRepeatDetailDto> detailDtos) {
         try {
-            String sql = "insert into public.t_kl_repeat_details(check_date,code,rehab_type,update_time) values (:checkDate,:code,:rehabType,:updateTime) on conflict (check_date,code,rehab_type,update_time)" +
-                    " do update set check_date=excluded.check_date,code=excluded.code,rehab_type=excluded.rehab_type,update_time=excluded.update_time";
+            String sql = "insert into public.t_kl_repeat_details(check_date,code,rehab_type,update_time,table_name) values (:checkDate,:code,:rehabType,:updateTime,:tableName) on conflict (check_date,code,rehab_type,update_time)" +
+                    " do update set check_date=excluded.check_date,code=excluded.code,rehab_type=excluded.rehab_type,update_time=excluded.update_time,table_name=excluded.table_name";
             int[] insertRows = namedParameterJdbcTemplate.batchUpdate(sql, SqlParameterSourceUtils.createBatch(detailDtos));
             return insertRows.length != 0;
         } catch (Exception e) {

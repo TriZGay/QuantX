@@ -3,7 +3,6 @@ package io.futakotome.analyze.biz;
 
 import io.futakotome.analyze.controller.vo.*;
 import io.futakotome.analyze.mapper.DataQualityMapper;
-import io.futakotome.analyze.mapper.dto.DataQaRepeatDetailDto;
 import io.futakotome.analyze.mapper.dto.DataQualityDto;
 import io.futakotome.analyze.mapper.dto.KLineRepeatDetailDto;
 import io.futakotome.analyze.utils.DateUtils;
@@ -31,7 +30,7 @@ public class DataQuality {
     }
 
     public DataQaDetailsResponse details(DataQaDetailsRequest request) {
-        List<DataQaRepeatDetailDto> repeatDetailDtos = repository.queryRepeatDetailsBy(LocalDate.parse(request.getDate(),
+        List<KLineRepeatDetailDto> repeatDetailDtos = repository.queryRepeatDetailsBy(LocalDate.parse(request.getDate(),
                 DateUtils.DATE_FORMATTER));
         DataQaDetailsResponse response = new DataQaDetailsResponse();
         if (Objects.nonNull(repeatDetailDtos)) {
@@ -78,9 +77,10 @@ public class DataQuality {
                     LOGGER.info("日期:{},K线数据有重复,新增成功.", now.format(DateUtils.DATE_FORMATTER));
                 }
             }
-            if (repository.insertRepeatDetails(kLineRepeatResponses.stream()
-                    .map(vo -> klineRepeatVo2Dto(now, vo))
-                    .collect(Collectors.toList()))) {
+            List<KLineRepeatDetailDto> dtos = kLineRepeatResponses.stream()
+                    .map(vo -> klineRepeatVo2Dto(now, tableName, vo))
+                    .collect(Collectors.toList());
+            if (repository.insertRepeatDetails(dtos)) {
                 LOGGER.info("日期:{},K线重复细节插入成功.", now.format(DateUtils.DATE_FORMATTER));
             }
         } else {
@@ -96,12 +96,13 @@ public class DataQuality {
         }
     }
 
-    private DataQaDetailsResponse.RepeatDetail repeatDetailDto2Vo(DataQaRepeatDetailDto dto) {
+    private DataQaDetailsResponse.RepeatDetail repeatDetailDto2Vo(KLineRepeatDetailDto dto) {
         DataQaDetailsResponse.RepeatDetail repeatDetail = new DataQaDetailsResponse.RepeatDetail();
         repeatDetail.setCheckDate(dto.getCheckDate().format(DateUtils.DATE_FORMATTER));
         repeatDetail.setCode(dto.getCode());
         repeatDetail.setRehabType(dto.getRehabType());
         repeatDetail.setUpdateTime(dto.getUpdateTime());
+        repeatDetail.setTableName(dto.getTableName());
         return repeatDetail;
     }
 
@@ -112,12 +113,13 @@ public class DataQuality {
         return response;
     }
 
-    private KLineRepeatDetailDto klineRepeatVo2Dto(LocalDate checkDate, KLineRepeatResponse response) {
+    private KLineRepeatDetailDto klineRepeatVo2Dto(LocalDate checkDate, String tableName, KLineRepeatResponse response) {
         KLineRepeatDetailDto dto = new KLineRepeatDetailDto();
         dto.setCode(response.getCode());
-        dto.setCheckDate(checkDate);
         dto.setRehabType(response.getRehabType());
         dto.setUpdateTime(response.getUpdateTime());
+        dto.setCheckDate(checkDate);
+        dto.setTableName(tableName);
         return dto;
     }
 

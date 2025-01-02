@@ -2,7 +2,6 @@ package io.futakotome.analyze.job;
 
 import io.futakotome.analyze.biz.DataQuality;
 import io.futakotome.analyze.biz.KLine;
-import io.futakotome.analyze.controller.vo.KLineRepeatResponse;
 import io.futakotome.analyze.mapper.DataQualityMapper;
 import io.futakotome.analyze.mapper.KLineMapper;
 import io.futakotome.analyze.utils.DateUtils;
@@ -15,9 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 

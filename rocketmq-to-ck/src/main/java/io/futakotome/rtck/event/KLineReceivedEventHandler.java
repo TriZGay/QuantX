@@ -1,6 +1,7 @@
 package io.futakotome.rtck.event;
 
 import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.Sequence;
 import io.futakotome.rtck.mapper.RTKLMapper;
 import org.assertj.core.util.Lists;
 import org.slf4j.Logger;
@@ -22,17 +23,18 @@ public class KLineReceivedEventHandler implements EventHandler<KLineReceivedEven
 
     @Override
     public void onEvent(KLineReceivedEvent kLineReceivedEvent, long sequence, boolean endOfBatch) throws Exception {
+        LOGGER.info("sequence = {}, endOfBatch = {}", sequence, endOfBatch);
         cache.add(kLineReceivedEvent);
         if ((sequence + 1) % DB_BATCH_SIZE == 0) {
             LOGGER.info("DB_BATCH_SIZE入库:cache size-{},cache-{}", cache.size(), cache);
             cache.clear();
         }
-        if (endOfBatch) {
-            if ((sequence + 1) % RING_BATCH_SIZE != 0) {
-                LOGGER.info("endOfBatch入库:cache size-{},cache-{}", cache.size(), cache);
-                cache.clear();
-            }
-        }
+//        if (endOfBatch) {
+//            if ((sequence + 1) % RING_BATCH_SIZE != 0) {
+//                LOGGER.info("endOfBatch入库:cache size-{},cache-{}", cache.size(), cache);
+//                cache.clear();
+//            }
+//        }
     }
 
 }

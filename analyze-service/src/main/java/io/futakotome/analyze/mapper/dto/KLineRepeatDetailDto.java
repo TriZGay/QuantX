@@ -8,6 +8,7 @@ public class KLineRepeatDetailDto {
     private String code;
     private Integer rehabType;
     private String updateTime;
+    private String tableName;
 
     public Long getId() {
         return id;
@@ -48,4 +49,13 @@ public class KLineRepeatDetailDto {
     public void setUpdateTime(String updateTime) {
         this.updateTime = updateTime;
     }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
 }
