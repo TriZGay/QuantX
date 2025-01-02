@@ -113,8 +113,8 @@ public class KLineMapper {
             String sql = "insert into " + toTableName +
                     " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,t1.update_time as update_time" +
                     " from :fromTableName as t1 all inner join" +
-                    " (select code,rehab_type,update_time,max(add_time) as latest from :fromTableName where (update_time >= :start) and (update_time <= :end) group by code,rehab_type,update_time ) as t2" +
-                    " on (t1.code=t2.code) and (t1.rehab_type=t2.rehab_type) and (t1.add_time = t2.latest)" +
+                    " (select code,rehab_type,update_time,max(add_time) as latest,max(volume) as volume from :fromTableName where (update_time >= :start) and (update_time <= :end) group by code,rehab_type,update_time ) as t2" +
+                    " on (t1.code=t2.code) and (t1.rehab_type=t2.rehab_type) and (t1.add_time = t2.latest) and (t1.volume = t2.volume)" +
                     " order by update_time asc";
             return namedParameterJdbcTemplate.update(sql, new HashMap<>() {{
                 put("fromTableName", fromTableName);
