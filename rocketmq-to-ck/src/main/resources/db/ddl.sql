@@ -415,3 +415,18 @@ create table if not exists quantx.t_indies_basic_quote_raw
     update_time      DateTime64
 ) ENGINE = MergeTree()
       PRIMARY KEY (market, code, update_time);
+
+create table if not exists quantx.t_ma_min_1_arc
+(
+    market      Int8,
+    code        String,
+    rehab_type  Int8,
+    ma_5        Float64,
+    ma_10       Float64,
+    ma_20       Float64,
+    ma_30       Float64,
+    ma_60       Float64,
+    ma_120      Float64,
+    update_time DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, rehab_type, update_time);

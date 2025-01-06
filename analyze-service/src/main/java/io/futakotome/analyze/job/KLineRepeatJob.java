@@ -9,8 +9,6 @@ import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -19,7 +17,6 @@ import java.util.Objects;
 
 @Component
 public class KLineRepeatJob implements Job {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KLineRepeatJob.class);
     private final DataQuality dataQuality;
 
     public KLineRepeatJob(KLineMapper kLineMapper, DataQualityMapper dataQualityMapper) {

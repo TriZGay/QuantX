@@ -2,13 +2,16 @@ package io.futakotome.analyze.mapper;
 
 import io.futakotome.analyze.controller.vo.MaRequest;
 import io.futakotome.analyze.mapper.dto.MaDto;
+import io.futakotome.analyze.mapper.dto.MaNDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,7 +29,43 @@ public class MaNMapper {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    public List<MaDto> queryMaCommon(MaRequest maRequest, String tableName, Integer following) {
+    public boolean insetMaBatch(String toTableName, List<MaNDto> maNDtos) {
+        try {
+            String sql = "insert into " + toTableName
+                    + "(market,code,rehab_type,ma_5,ma_10,ma_20,ma_30,ma_60,ma_120,update_time) values(:market,:code,:rehabType,:ma_5,:ma_10,:ma_20,:ma_30,:ma_60,:ma_120,:updateTime)";
+            int[] updateRows = namedParameterJdbcTemplate.batchUpdate(sql, SqlParameterSourceUtils.createBatch(maNDtos));
+            LOGGER.info("插入成功:条数{}", Arrays.stream(updateRows).sum());
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("插入MA数据失败.", e);
+            return false;
+        }
+    }
+
+    public List<MaNDto> queryMaUserKArc(String fromTableName, String startDateTime, String endDateTime) {
+        try {
+            String sql = " select market,code,rehab_type," +
+                    "round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 4 following),4) as ma_5," +
+                    "round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 9 following),4) as ma_10," +
+                    "round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 19 following),4) as ma_20," +
+                    "round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 29 following),4) as ma_30," +
+                    "round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 59 following),4) as ma_60," +
+                    "round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 119 following),4) as ma_120," +
+                    "update_time" +
+                    " from :tableName" +
+                    " prewhere  (update_time >= :start) and (update_time <= :end) order by update_time asc ";
+            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
+                put("tableName", fromTableName);
+                put("start", startDateTime);
+                put("end", endDateTime);
+            }}, new BeanPropertyRowMapper<>(MaNDto.class));
+        } catch (Exception e) {
+            LOGGER.error("查询MA数据失败.", e);
+            return null;
+        }
+    }
+
+    public List<MaDto> queryMaUserKArc(MaRequest maRequest, String tableName, Integer following) {
         try {
             String sql = "select market,code ,rehab_type,update_time,round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and :following following),4) as ma_value " +
                     " from :tableName" +

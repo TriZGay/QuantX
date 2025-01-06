@@ -3,8 +3,10 @@ package io.futakotome.analyze.controller;
 import io.futakotome.analyze.controller.vo.JobRequest;
 import io.futakotome.analyze.controller.vo.KLineRaw2ArcJobRequest;
 import io.futakotome.analyze.controller.vo.KLineRepeatCheckJobRequest;
+import io.futakotome.analyze.controller.vo.KLineTransToMaJobRequest;
 import io.futakotome.analyze.job.KLineRaw2ArcJob;
 import io.futakotome.analyze.job.KLineRepeatJob;
+import io.futakotome.analyze.job.KLineTransToMaJob;
 import io.futakotome.analyze.service.QuartzService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,33 @@ public class TaskController {
                 }
             }).subscribe();
         });
+    }
+
+    @PostMapping("/addKLineTransToMaTask")
+    public Mono<ResponseEntity<?>> addKLineTransToMaTask(@RequestBody @Validated Mono<KLineTransToMaJobRequest> requestMono) {
+        return Mono.create(responseEntityMonoSink -> {
+            requestMono.doOnError(WebExchangeBindException.class, throwable -> {
+                responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors(), HttpStatus.BAD_REQUEST));
+            }).doOnError(Exception.class, throwable -> {
+                responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
+            }).doOnNext(request -> {
+                try {
+                    if (Objects.nonNull(request.getCron()) && !request.getCron().isEmpty()) {
+                        //定时执行
+                        responseEntityMonoSink.success(ResponseEntity.ok(quartzService.addJob(request.getJobName(), request.getCron(),
+                                JobRequest.toJobDataMap(request), KLineTransToMaJob.class)));
+                    } else {
+                        //马上执行
+                        responseEntityMonoSink.success(ResponseEntity.ok(quartzService.addJob(request.getJobName(),
+                                JobRequest.toJobDataMap(request), KLineTransToMaJob.class)));
+                    }
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                    responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
+                }
+            }).subscribe();
+        });
+
     }
 
     @PostMapping("/addKLineCheckTask")
