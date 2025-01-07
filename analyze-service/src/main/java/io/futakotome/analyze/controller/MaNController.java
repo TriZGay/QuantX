@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/ma")
 public class MaNController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MaNController.class);
-    private static final String PRINT_REQUEST_TEMPLATE = "请求参数:{},粒度:{},跨度:{},时间范围:start={},end={}";
+    private static final String PRINT_REQUEST_TEMPLATE = "MA数据查询,请求参数:{},粒度:{},时间范围:start={},end={}";
 
     private final MaN ma;
 
@@ -37,9 +37,9 @@ public class MaNController {
             }).doOnError(Exception.class, throwable -> {
                 responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
             }).doOnNext(maRequest -> {
-                LOGGER.info(PRINT_REQUEST_TEMPLATE, maRequest.getCode(), Granularity.mapName(maRequest.getGranularity()), MaSpan.mapName(maRequest.getSpan()), maRequest.getStart(), maRequest.getEnd());
+                LOGGER.info(PRINT_REQUEST_TEMPLATE, maRequest.getCode(), Granularity.mapName(maRequest.getGranularity()), maRequest.getStart(), maRequest.getEnd());
                 try {
-                    responseEntityMonoSink.success(ResponseEntity.ok(ma.maNDataUseArc(maRequest)));
+                    responseEntityMonoSink.success(ResponseEntity.ok(ma.maNCommon(maRequest)));
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                     responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));

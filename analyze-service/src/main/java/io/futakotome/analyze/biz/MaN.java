@@ -61,7 +61,7 @@ public class MaN {
                 List<MaNDto> toInsertMaN = maNs.stream().filter(maNDto ->
                                 LocalDateTime.parse(maNDto.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isAfter(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
                         .collect(Collectors.toList());
-                if (repository.insetMaBatch(toTableName,toInsertMaN)) {
+                if (repository.insetMaBatch(toTableName, toInsertMaN)) {
                     LOGGER.info("{}->{}时间段:{}-{}归档MA数据成功.", fromTableName, toTableName,
                             startDateTime, endDateTime);
                 }
@@ -75,16 +75,31 @@ public class MaN {
         }
     }
 
-    public List<MaResponse> maNDataUseArc(MaRequest maRequest) {
+    public List<MaResponse> maNCommon(MaRequest maRequest) {
         switch (maRequest.getGranularity()) {
             case 1:
                 //1分k
-//                return repository.queryMaUserKArc(maRequest, KLineMapper.KL_MIN_1_ARC_TABLE_NAME, followingBySpan(maRequest.getSpan())).stream().map(maDto -> new MaResponse(maDto.getMarket(), maDto.getCode(),
-//                                maDto.getRehabType(), maDto.getMaValue(), maDto.getUpdateTime()))
-//                        .collect(Collectors.toList());
+                return repository.queryMaN(MaNMapper.MA_MIN_1_TABLE_NAME, maRequest.getCode(), maRequest.getRehabType(), maRequest.getStart(), maRequest.getEnd())
+                        .stream().map(this::maNDto2Response)
+                        .collect(Collectors.toList());
             case 2:
                 return null;
         }
         return null;
+    }
+
+    private MaResponse maNDto2Response(MaNDto dto) {
+        MaResponse response = new MaResponse();
+        response.setMarket(dto.getMarket());
+        response.setCode(dto.getCode());
+        response.setRehabType(dto.getRehabType());
+        response.setMa5Value(dto.getMa_5());
+        response.setMa10Value(dto.getMa_10());
+        response.setMa20Value(dto.getMa_20());
+        response.setMa30Value(dto.getMa_30());
+        response.setMa60Value(dto.getMa_60());
+        response.setMa120Value(dto.getMa_120());
+        response.setUpdateTime(dto.getUpdateTime());
+        return response;
     }
 }

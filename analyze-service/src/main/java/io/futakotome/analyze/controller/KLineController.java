@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/k")
 public class KLineController {
     private static final Logger LOGGER = LoggerFactory.getLogger(KLineController.class);
-    private static final String PRINT_REQUEST_TEMPLATE = "请求参数:{},粒度:{},时间范围:{}-{}";
+    private static final String PRINT_REQUEST_TEMPLATE = "K线数据查询,请求参数:{},粒度:{},时间范围:{}-{}";
     private final KLine kLine;
 
     public KLineController(KLineMapper mapper) {

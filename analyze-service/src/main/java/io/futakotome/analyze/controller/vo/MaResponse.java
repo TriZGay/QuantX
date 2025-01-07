@@ -4,16 +4,13 @@ public class MaResponse {
     private Integer market;
     private String code;
     private Integer rehabType;
-    private Double maValue;
-    private String datetime;
-
-    public MaResponse(Integer market, String code, Integer rehabType, Double maValue, String datetime) {
-        this.market = market;
-        this.code = code;
-        this.rehabType = rehabType;
-        this.maValue = maValue;
-        this.datetime = datetime;
-    }
+    private Double ma5Value;
+    private Double ma10Value;
+    private Double ma20Value;
+    private Double ma30Value;
+    private Double ma60Value;
+    private Double ma120Value;
+    private String updateTime;
 
     public Integer getMarket() {
         return market;
@@ -39,19 +36,59 @@ public class MaResponse {
         this.rehabType = rehabType;
     }
 
-    public Double getMaValue() {
-        return maValue;
+    public Double getMa5Value() {
+        return ma5Value;
     }
 
-    public void setMaValue(Double maValue) {
-        this.maValue = maValue;
+    public void setMa5Value(Double ma5Value) {
+        this.ma5Value = ma5Value;
     }
 
-    public String getDatetime() {
-        return datetime;
+    public Double getMa10Value() {
+        return ma10Value;
     }
 
-    public void setDatetime(String datetime) {
-        this.datetime = datetime;
+    public void setMa10Value(Double ma10Value) {
+        this.ma10Value = ma10Value;
+    }
+
+    public Double getMa20Value() {
+        return ma20Value;
+    }
+
+    public void setMa20Value(Double ma20Value) {
+        this.ma20Value = ma20Value;
+    }
+
+    public Double getMa30Value() {
+        return ma30Value;
+    }
+
+    public void setMa30Value(Double ma30Value) {
+        this.ma30Value = ma30Value;
+    }
+
+    public Double getMa60Value() {
+        return ma60Value;
+    }
+
+    public void setMa60Value(Double ma60Value) {
+        this.ma60Value = ma60Value;
+    }
+
+    public Double getMa120Value() {
+        return ma120Value;
+    }
+
+    public void setMa120Value(Double ma120Value) {
+        this.ma120Value = ma120Value;
+    }
+
+    public String getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
     }
 }

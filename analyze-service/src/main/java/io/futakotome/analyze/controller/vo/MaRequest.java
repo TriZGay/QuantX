@@ -2,6 +2,7 @@ package io.futakotome.analyze.controller.vo;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 public class MaRequest extends RangeRequest {
     @NotNull(message = "code必填")
@@ -14,10 +15,6 @@ public class MaRequest extends RangeRequest {
     @NotNull(message = "时间粒度必填")
     @EnumValid(target = Granularity.class, message = "粒度输入错误")
     private Integer granularity;
-
-    @NotNull(message = "时间跨度必填")
-    @EnumValid(target = MaSpan.class, message = "时间跨度输入错误")
-    private Integer span;
 
     public String getCode() {
         return code;
@@ -41,13 +38,5 @@ public class MaRequest extends RangeRequest {
 
     public void setGranularity(Integer granularity) {
         this.granularity = granularity;
-    }
-
-    public Integer getSpan() {
-        return span;
-    }
-
-    public void setSpan(Integer span) {
-        this.span = span;
     }
 }
