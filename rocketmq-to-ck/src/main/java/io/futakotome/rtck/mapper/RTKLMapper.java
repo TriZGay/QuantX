@@ -58,7 +58,7 @@ public class RTKLMapper {
             return insertRow > 0;
         } catch (Exception e) {
             LOGGER.error("插入K线数据出现错误:{}", e.getMessage());
-            return false;
+            throw new RuntimeException(e);
         }
     }
 }

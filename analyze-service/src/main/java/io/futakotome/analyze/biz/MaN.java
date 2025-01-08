@@ -51,7 +51,7 @@ public class MaN {
     public void klineTransToMa(String toTableName, String fromTableName, String startDateTime, String endDateTime) {
         //Clickhouse的开窗函数的边界值需要往后算120条数据才准确
         //因为香港市场的交易时间长,所以获取香港市场的交易时间也基本上覆盖大A
-        //1分钟一条数据,2小时就120条数据,取startDateTime的前一天作为开始边界日期
+        //1分钟一条数据,2小时就120条数据,取startDateTime的前一天交易日作为开始边界日期
         LocalDate s = LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER).toLocalDate();
         List<TradeDateDto> tradeDates = tradeDateMapper.queryTradeDateByMarketPreceding(1, s, "1");
         if (Objects.nonNull(tradeDates)) {

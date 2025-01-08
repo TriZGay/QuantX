@@ -1,9 +1,9 @@
 package io.futakotome.analyze.service;
 
+import io.futakotome.analyze.controller.vo.JobRequest;
+import io.futakotome.analyze.controller.vo.JobType;
 import io.futakotome.analyze.controller.vo.TaskResponse;
-import io.futakotome.analyze.job.QuantxJobListener;
-import io.futakotome.analyze.job.QuantxSchedulerListener;
-import io.futakotome.analyze.job.QuantxTriggerListener;
+import io.futakotome.analyze.job.*;
 import io.futakotome.analyze.utils.EntityToJobDataMapConverter;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
@@ -27,6 +27,34 @@ public class QuartzService {
         this.scheduler.getListenerManager().addSchedulerListener(schedulerListener);
         this.scheduler.getListenerManager().addJobListener(jobListener);
         this.scheduler.getListenerManager().addTriggerListener(triggerListener);
+    }
+
+    public String addJob(JobRequest jobRequest) {
+        JobType jobType = jobRequest.getJobType();
+        if (jobType.toString().trim().isBlank()) {
+            throw new IllegalStateException("新增任务失败.未知任务类型");
+        } else {
+            switch (jobType) {
+                case KLINE_ARC_TO_MA:
+                    return addJob(jobRequest, KLineTransToMaJob.class);
+                case KLINE_RAW_TO_ARC:
+                    return addJob(jobRequest, KLineRaw2ArcJob.class);
+                case KLINE_REPEAT_CHECK:
+                    return addJob(jobRequest, KLineRepeatJob.class);
+                default:
+                    return "";
+            }
+        }
+    }
+
+    private String addJob(JobRequest request, Class<? extends Job> jobClass) {
+        if (Objects.nonNull(request.getCron()) && !request.getCron().isEmpty()) {
+            //定时执行
+            return addJob(request.getJobName(), request.getCron(), JobRequest.toJobDataMap(request), jobClass);
+        } else {
+            //马上执行
+            return addJob(request.getJobName(), JobRequest.toJobDataMap(request), jobClass);
+        }
     }
 
     public String addJob(String jobName, String jobGroup, String triggerName, String triggerGroup, String cron, JobDataMap dataMap, Class<? extends Job> jobClass) {

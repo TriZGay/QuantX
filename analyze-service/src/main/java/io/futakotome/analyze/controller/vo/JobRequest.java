@@ -13,8 +13,19 @@ public class JobRequest {
     private String triggerGroup;
     private String cron;
 
+    @NotNull(message = "jobType必填")
+    private JobType jobType;
+
     public static JobDataMap toJobDataMap(Object obj) {
         return EntityToJobDataMapConverter.convert(obj);
+    }
+
+    public JobType getJobType() {
+        return jobType;
+    }
+
+    public void setJobType(JobType jobType) {
+        this.jobType = jobType;
     }
 
     public String getJobName() {
