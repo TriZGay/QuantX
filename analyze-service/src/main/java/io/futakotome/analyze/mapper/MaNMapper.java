@@ -37,7 +37,7 @@ public class MaNMapper {
         }
     }
 
-    public List<MaNDto> queryMaUserKArc(String fromTableName, String startDateTime, String endDateTime) {
+    public List<MaNDto> queryMaUseKArc(String fromTableName, String startDateTime, String endDateTime) {
         try {
             String sql = " select market,code,rehab_type," +
                     "round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 4 following),4) as ma_5," +

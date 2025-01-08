@@ -3,15 +3,12 @@ package io.futakotome.analyze.biz;
 import io.futakotome.analyze.controller.vo.KLineRepeatResponse;
 import io.futakotome.analyze.controller.vo.KLineRequest;
 import io.futakotome.analyze.controller.vo.KLineResponse;
-import io.futakotome.analyze.controller.vo.RangeRequest;
 import io.futakotome.analyze.mapper.KLineMapper;
 import io.futakotome.analyze.mapper.dto.KLineDto;
 import io.futakotome.analyze.mapper.dto.KLineRepeatDto;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class KLine {

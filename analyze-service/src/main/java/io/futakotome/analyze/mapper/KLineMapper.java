@@ -1,7 +1,6 @@
 package io.futakotome.analyze.mapper;
 
 import io.futakotome.analyze.controller.vo.KLineRequest;
-import io.futakotome.analyze.controller.vo.RangeRequest;
 import io.futakotome.analyze.mapper.dto.KLineDto;
 import io.futakotome.analyze.mapper.dto.KLineRepeatDto;
 import org.slf4j.Logger;

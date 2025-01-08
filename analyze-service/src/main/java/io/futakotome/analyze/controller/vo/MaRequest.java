@@ -2,7 +2,6 @@ package io.futakotome.analyze.controller.vo;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 public class MaRequest extends RangeRequest {
     @NotNull(message = "code必填")
