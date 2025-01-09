@@ -1,10 +1,18 @@
 package io.futakotome.analyze.controller.vo;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.futakotome.analyze.utils.EntityToJobDataMapConverter;
 import org.quartz.JobDataMap;
 
 import javax.validation.constraints.NotNull;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "jobType", visible = true)
+@JsonSubTypes(value = {
+        @JsonSubTypes.Type(value = KLineRaw2ArcJobRequest.class, name = "KLINE_RAW_TO_ARC"),
+        @JsonSubTypes.Type(value = KLineRepeatCheckJobRequest.class, name = "KLINE_REPEAT_CHECK"),
+        @JsonSubTypes.Type(value = KLineTransToMaJobRequest.class, name = "KLINE_ARC_TO_MA")
+})
 public class JobRequest {
     @NotNull(message = "jobName必填")
     private String jobName;

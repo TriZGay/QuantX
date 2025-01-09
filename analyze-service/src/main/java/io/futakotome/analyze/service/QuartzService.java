@@ -2,6 +2,7 @@ package io.futakotome.analyze.service;
 
 import io.futakotome.analyze.controller.vo.JobRequest;
 import io.futakotome.analyze.controller.vo.JobType;
+import io.futakotome.analyze.controller.vo.KLineRaw2ArcJobRequest;
 import io.futakotome.analyze.controller.vo.TaskResponse;
 import io.futakotome.analyze.job.*;
 import io.futakotome.analyze.utils.EntityToJobDataMapConverter;
@@ -29,7 +30,7 @@ public class QuartzService {
         this.scheduler.getListenerManager().addTriggerListener(triggerListener);
     }
 
-    public String addJob(JobRequest jobRequest) {
+    public <T extends JobRequest> String addJob(T jobRequest) {
         JobType jobType = jobRequest.getJobType();
         if (jobType.toString().trim().isBlank()) {
             throw new IllegalStateException("新增任务失败.未知任务类型");
