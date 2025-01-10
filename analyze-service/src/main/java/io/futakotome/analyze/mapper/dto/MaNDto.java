@@ -12,22 +12,6 @@ public class MaNDto {
     private Double ma_120;
     private String updateTime;
 
-    @Override
-    public String toString() {
-        return "MaNDto{" +
-                "market=" + market +
-                ", code='" + code + '\'' +
-                ", rehabType=" + rehabType +
-                ", ma_5=" + ma_5 +
-                ", ma_10=" + ma_10 +
-                ", ma_20=" + ma_20 +
-                ", ma_30=" + ma_30 +
-                ", ma_60=" + ma_60 +
-                ", ma_120=" + ma_120 +
-                ", updateTime='" + updateTime + '\'' +
-                '}';
-    }
-
     public Integer getMarket() {
         return market;
     }

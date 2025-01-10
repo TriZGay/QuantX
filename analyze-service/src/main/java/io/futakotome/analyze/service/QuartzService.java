@@ -42,6 +42,8 @@ public class QuartzService {
                     return addJob(jobRequest, KLineRaw2ArcJob.class);
                 case KLINE_REPEAT_CHECK:
                     return addJob(jobRequest, KLineRepeatJob.class);
+                case KLINE_ARC_TO_BOLL:
+                    return addJob(jobRequest, KLineTransToBollJob.class);
                 default:
                     return "";
             }

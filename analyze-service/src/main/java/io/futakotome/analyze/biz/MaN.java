@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class MaN {
     private static final Logger LOGGER = LoggerFactory.getLogger(MaN.class);
-    private MaNMapper repository;
+    private final MaNMapper repository;
     private TradeDateMapper tradeDateMapper;
 
     public MaN(MaNMapper repository) {
@@ -29,23 +29,6 @@ public class MaN {
     public MaN(MaNMapper repository, TradeDateMapper tradeDateMapper) {
         this.repository = repository;
         this.tradeDateMapper = tradeDateMapper;
-    }
-
-    private Integer followingBySpan(Integer span) {
-        if (span.equals(MaSpan.FIVE.getCode())) {
-            return 4;
-        } else if (span.equals(MaSpan.TEN.getCode())) {
-            return 9;
-        } else if (span.equals(MaSpan.TWENTY.getCode())) {
-            return 19;
-        } else if (span.equals(MaSpan.THIRTY.getCode())) {
-            return 29;
-        } else if (span.equals(MaSpan.SIXTY.getCode())) {
-            return 59;
-        } else if (span.equals(MaSpan.ONE_HUNDRED_TWENTY.getCode())) {
-            return 119;
-        }
-        return 0;
     }
 
     public void klineTransToMa(String toTableName, String fromTableName, String startDateTime, String endDateTime) {
