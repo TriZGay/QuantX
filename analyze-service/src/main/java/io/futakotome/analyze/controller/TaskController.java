@@ -2,8 +2,6 @@ package io.futakotome.analyze.controller;
 
 import io.futakotome.analyze.controller.vo.JobRequest;
 import io.futakotome.analyze.service.QuartzService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

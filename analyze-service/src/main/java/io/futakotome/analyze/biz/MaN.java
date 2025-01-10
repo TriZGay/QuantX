@@ -2,7 +2,6 @@ package io.futakotome.analyze.biz;
 
 import io.futakotome.analyze.controller.vo.MaRequest;
 import io.futakotome.analyze.controller.vo.MaResponse;
-import io.futakotome.analyze.controller.vo.MaSpan;
 import io.futakotome.analyze.mapper.MaNMapper;
 import io.futakotome.analyze.mapper.TradeDateMapper;
 import io.futakotome.analyze.mapper.dto.MaNDto;

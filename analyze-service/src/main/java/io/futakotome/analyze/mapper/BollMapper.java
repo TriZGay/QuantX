@@ -16,10 +16,29 @@ import java.util.List;
 @Repository
 public class BollMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(BollMapper.class);
+    public static final String BOLL_MIN_1_TABLE = "t_boll_min_1_arc";
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public BollMapper(@Qualifier("analyzeNamedParameterJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
+
+    public List<BollDto> queryBolls(String table, String code, Integer rehabType, String start, String end) {
+        try {
+            String sql = "select market,code,rehab_type,ma20_mid,double_upper,double_lower,one_upper,one_lower,triple_upper,triple_lower,update_time" +
+                    " from :table" +
+                    " prewhere code=:code and rehab_type=:rehabType and update_time >= :start and update_time <= :end";
+            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
+                put("table", table);
+                put("code", code);
+                put("rehabType", rehabType);
+                put("start", start);
+                put("end", end);
+            }}, new BeanPropertyRowMapper<>(BollDto.class));
+        } catch (Exception e) {
+            LOGGER.error("查询BOLL数据失败.", e);
+            return null;
+        }
     }
 
     public List<BollDto> queryBollUseKArc(String fromTable, String startDateTime, String endDateTime) {
