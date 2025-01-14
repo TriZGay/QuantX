@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.stereotype.Component;
@@ -60,18 +61,15 @@ public class MaNMapper {
         }
     }
 
-    public List<MaNDto> queryMaN(String tableName, String code, Integer rehabType, String start, String end) {
+    public List<MaNDto> queryMaN(MaNDto maNDto) {
         try {
             String sql = "select market,code,rehab_type,ma_5,ma_10,ma_20,ma_30,ma_60,ma_120,update_time" +
                     " from :tableName" +
-                    " prewhere (rehab_type = :rehabType) and (code = :code) and (update_time >= :start) and (update_time <= :end)";
-            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
-                put("tableName", tableName);
-                put("rehabType", rehabType);
-                put("code", code);
-                put("start", start);
-                put("end", end);
-            }}, new BeanPropertyRowMapper<>(MaNDto.class));
+                    " prewhere (rehab_type = :rehabType) and (code = :code) and (update_time >= :start) and (update_time <= :end)" +
+                    " order by update_time asc";
+            return namedParameterJdbcTemplate.query(sql,
+                    new BeanPropertySqlParameterSource(maNDto),
+                    new BeanPropertyRowMapper<>(MaNDto.class));
         } catch (Exception e) {
             LOGGER.error("查询MA数据失败.", e);
             return null;

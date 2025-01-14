@@ -35,7 +35,8 @@ public class KLine {
     public List<KLineResponse> kLinesUseArc(KLineRequest kLineRequest) {
         switch (kLineRequest.getGranularity()) {
             case 1:
-                return repository.queryKLineArchived(kLineRequest, KLineMapper.KL_MIN_1_ARC_TABLE_NAME)
+                return repository.queryKLineArchived(new KLineDto(KLineMapper.KL_MIN_1_ARC_TABLE_NAME, kLineRequest.getCode(), kLineRequest.getRehabType(),
+                                kLineRequest.getStart(), kLineRequest.getEnd()))
                         .stream().map(this::dtoMapResp)
                         .collect(Collectors.toList());
             case 2:

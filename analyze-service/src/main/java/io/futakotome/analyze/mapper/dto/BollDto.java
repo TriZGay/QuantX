@@ -13,6 +13,45 @@ public class BollDto {
     private Double triple_lower;
     private String updateTime;
 
+    private String tableName;
+    private String start;
+    private String end;
+
+    public BollDto() {
+    }
+
+    public BollDto(String tableName, String code, Integer rehabType, String start, String end) {
+        this.tableName = tableName;
+        this.code = code;
+        this.rehabType = rehabType;
+        this.start = start;
+        this.end = end;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public String getStart() {
+        return start;
+    }
+
+    public void setStart(String start) {
+        this.start = start;
+    }
+
+    public String getEnd() {
+        return end;
+    }
+
+    public void setEnd(String end) {
+        this.end = end;
+    }
+
     public Integer getMarket() {
         return market;
     }

@@ -50,8 +50,9 @@ public class Boll {
         switch (bollRequest.getGranularity()) {
             case 1:
                 //1分k
-                return repository.queryBolls(BollMapper.BOLL_MIN_1_TABLE, bollRequest.getCode(), bollRequest.getRehabType(), bollRequest.getStart(), bollRequest.getEnd())
-                        .stream().map(this::dto2Vo).collect(Collectors.toList());
+                return repository.queryBolls(new BollDto(BollMapper.BOLL_MIN_1_TABLE, bollRequest.getCode(), bollRequest.getRehabType(), bollRequest.getStart(), bollRequest.getEnd()))
+                        .stream().map(this::dto2Vo)
+                        .collect(Collectors.toList());
             case 2:
                 return null;
         }

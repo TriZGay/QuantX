@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.stereotype.Repository;
@@ -23,18 +24,15 @@ public class BollMapper {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    public List<BollDto> queryBolls(String table, String code, Integer rehabType, String start, String end) {
+    public List<BollDto> queryBolls(BollDto bollDto) {
         try {
             String sql = "select market,code,rehab_type,ma20_mid,double_upper,double_lower,one_upper,one_lower,triple_upper,triple_lower,update_time" +
-                    " from :table" +
-                    " prewhere code=:code and rehab_type=:rehabType and update_time >= :start and update_time <= :end";
-            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
-                put("table", table);
-                put("code", code);
-                put("rehabType", rehabType);
-                put("start", start);
-                put("end", end);
-            }}, new BeanPropertyRowMapper<>(BollDto.class));
+                    " from :tableName" +
+                    " prewhere code=:code and rehab_type=:rehabType and update_time >= :start and update_time <= :end" +
+                    " order by update_time asc";
+            return namedParameterJdbcTemplate.query(sql,
+                    new BeanPropertySqlParameterSource(bollDto),
+                    new BeanPropertyRowMapper<>(BollDto.class));
         } catch (Exception e) {
             LOGGER.error("查询BOLL数据失败.", e);
             return null;

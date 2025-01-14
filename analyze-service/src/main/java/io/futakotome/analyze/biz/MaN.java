@@ -61,7 +61,7 @@ public class MaN {
         switch (maRequest.getGranularity()) {
             case 1:
                 //1分k
-                return repository.queryMaN(MaNMapper.MA_MIN_1_TABLE_NAME, maRequest.getCode(), maRequest.getRehabType(), maRequest.getStart(), maRequest.getEnd())
+                return repository.queryMaN(new MaNDto(MaNMapper.MA_MIN_1_TABLE_NAME, maRequest.getCode(), maRequest.getRehabType(), maRequest.getStart(), maRequest.getEnd()))
                         .stream().map(this::maNDto2Response)
                         .collect(Collectors.toList());
             case 2:

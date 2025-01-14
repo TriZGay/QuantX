@@ -19,8 +19,8 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/boll")
 public class BollController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MaNController.class);
-    private static final String PRINT_REQUEST_TEMPLATE = "MA数据查询,请求参数:{},时间范围:start={},end={}";
+    private static final Logger LOGGER = LoggerFactory.getLogger(BollController.class);
+    private static final String PRINT_REQUEST_TEMPLATE = "BOLL数据查询,请求参数:{},粒度:{},时间范围:start={},end={}";
     private final Boll boll;
 
     public BollController(BollMapper bollMapper) {
@@ -35,7 +35,7 @@ public class BollController {
             }).doOnError(Exception.class, throwable -> {
                 responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
             }).doOnNext(bollRequest -> {
-                LOGGER.info(PRINT_REQUEST_TEMPLATE, bollRequest.getCode(), bollRequest.getStart(), bollRequest.getEnd());
+                LOGGER.info(PRINT_REQUEST_TEMPLATE, bollRequest.getCode(), Granularity.mapName(bollRequest.getGranularity()), bollRequest.getStart(), bollRequest.getEnd());
                 try {
                     responseEntityMonoSink.success(ResponseEntity.ok(boll.list(bollRequest)));
                 } catch (Exception e) {
