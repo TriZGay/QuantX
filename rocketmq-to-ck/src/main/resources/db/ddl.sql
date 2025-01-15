@@ -45,55 +45,6 @@ create table if not exists quantx.t_capital_flow
 ) ENGINE = MergeTree()
       PRIMARY KEY (market, code, time);
 
-create table if not exists quantx.t_ma30_day
-(
-    market      Int8,
-    code        String,
-    rehab_type  Int8,
-    ma_value    Float64,
-    update_time DateTime64,
-    add_time    DateTime64
-) ENGINE = ReplacingMergeTree(add_time)
-      PRIMARY KEY (market, code, rehab_type, update_time)
-      ORDER BY (market, code, rehab_type, update_time);
-
-create table if not exists quantx.t_ma20_day
-(
-    market      Int8,
-    code        String,
-    rehab_type  Int8,
-    ma_value    Float64,
-    update_time DateTime64,
-    add_time    DateTime64
-) ENGINE = ReplacingMergeTree(add_time)
-      PRIMARY KEY (market, code, rehab_type, update_time)
-      ORDER BY (market, code, rehab_type, update_time);
-
-create table if not exists quantx.t_ma10_day
-(
-    market      Int8,
-    code        String,
-    rehab_type  Int8,
-    ma_value    Float64,
-    update_time DateTime64,
-    add_time    DateTime64
-) ENGINE = ReplacingMergeTree(add_time)
-      PRIMARY KEY (market, code, rehab_type, update_time)
-      ORDER BY (market, code, rehab_type, update_time);
-
-create table if not exists quantx.t_ma5_day
-(
-    market      Int8,
-    code        String,
-    rehab_type  Int8,
-    ma_value    Float64,
-    update_time DateTime64,
-    add_time    DateTime64
-) ENGINE = ReplacingMergeTree(add_time)
-      PRIMARY KEY (market, code, rehab_type, update_time)
-      ORDER BY (market, code, rehab_type, update_time);
-
-
 create table if not exists quantx.t_plate_basic_quote_raw
 (
     market           Int8,
@@ -427,6 +378,21 @@ create table if not exists quantx.t_ma_min_1_arc
     ma_30       Float64,
     ma_60       Float64,
     ma_120      Float64,
+    update_time DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, rehab_type, update_time);
+
+create table if not exists quantx.t_ema_min_1_arc
+(
+    market      Int8,
+    code        String,
+    rehab_type  Int8,
+    ema_5        Float64,
+    ema_10       Float64,
+    ema_20       Float64,
+    ema_30       Float64,
+    ema_60       Float64,
+    ema_120      Float64,
     update_time DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);

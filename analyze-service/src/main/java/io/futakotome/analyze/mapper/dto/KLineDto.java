@@ -23,6 +23,12 @@ public class KLineDto {
     public KLineDto() {
     }
 
+    public KLineDto(String tableName, String start, String end) {
+        this.tableName = tableName;
+        this.start = start;
+        this.end = end;
+    }
+
     public KLineDto(String tableName, String code, Integer rehabType, String start, String end) {
         this.code = code;
         this.rehabType = rehabType;

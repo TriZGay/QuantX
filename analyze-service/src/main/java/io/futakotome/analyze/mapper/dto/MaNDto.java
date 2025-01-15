@@ -19,6 +19,12 @@ public class MaNDto {
     public MaNDto() {
     }
 
+    public MaNDto(String tableName, String start, String end) {
+        this.tableName = tableName;
+        this.start = start;
+        this.end = end;
+    }
+
     public MaNDto(String tableName, String code, Integer rehabType, String start, String end) {
         this.tableName = tableName;
         this.code = code;

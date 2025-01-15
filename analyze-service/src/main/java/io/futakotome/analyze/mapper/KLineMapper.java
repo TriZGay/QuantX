@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class KLineMapper {
@@ -90,27 +91,24 @@ public class KLineMapper {
         }
     }
 
-    public List<KLineDto> queryKLineArchived(String start, String end, String tableName) {
-        try {
-            String sql = "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
-                    " from :tableName" +
-                    " prewhere (update_time >= :start) and (update_time <= :end) order by update_time asc";
-            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
-                put("tableName", tableName);
-                put("start", start);
-                put("end", end);
-            }}, new BeanPropertyRowMapper<>(KLineDto.class));
-        } catch (Exception e) {
-            LOGGER.error("查询K线数据出错.", e);
-            return null;
-        }
-    }
-
     public List<KLineDto> queryKLineArchived(KLineDto kLineDto) {
         try {
             String sql = "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
                     " from :tableName" +
-                    " prewhere (code = :code) and (rehab_type = :rehabType) and (update_time >= :start) and (update_time <= :end) order by update_time asc";
+                    " prewhere (1=1)";
+            if (Objects.nonNull(kLineDto.getCode())) {
+                sql += " and (code = :code)";
+            }
+            if (Objects.nonNull(kLineDto.getRehabType())) {
+                sql += " and (rehab_type = :rehabType)";
+            }
+            if (Objects.nonNull(kLineDto.getStart())) {
+                sql += " and (update_time >= :start) ";
+            }
+            if (Objects.nonNull(kLineDto.getEnd())) {
+                sql += " and (update_time <= :end) ";
+            }
+            sql += "order by update_time asc";
             return namedParameterJdbcTemplate.query(sql,
                     new BeanPropertySqlParameterSource(kLineDto),
                     new BeanPropertyRowMapper<>(KLineDto.class));

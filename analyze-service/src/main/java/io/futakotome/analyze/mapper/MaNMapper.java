@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class MaNMapper {
@@ -65,8 +66,20 @@ public class MaNMapper {
         try {
             String sql = "select market,code,rehab_type,ma_5,ma_10,ma_20,ma_30,ma_60,ma_120,update_time" +
                     " from :tableName" +
-                    " prewhere (rehab_type = :rehabType) and (code = :code) and (update_time >= :start) and (update_time <= :end)" +
-                    " order by update_time asc";
+                    " prewhere (1=1) ";
+            if (Objects.nonNull(maNDto.getRehabType())) {
+                sql += " and (rehab_type = :rehabType) ";
+            }
+            if (Objects.nonNull(maNDto.getCode())) {
+                sql += " and (code = :code) ";
+            }
+            if (Objects.nonNull(maNDto.getStart())) {
+                sql += " and (update_time >= :start) ";
+            }
+            if (Objects.nonNull(maNDto.getEnd())) {
+                sql += " and (update_time <= :end) ";
+            }
+            sql += " order by update_time asc";
             return namedParameterJdbcTemplate.query(sql,
                     new BeanPropertySqlParameterSource(maNDto),
                     new BeanPropertyRowMapper<>(MaNDto.class));
