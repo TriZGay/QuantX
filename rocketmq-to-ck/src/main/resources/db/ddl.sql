@@ -387,12 +387,24 @@ create table if not exists quantx.t_ema_min_1_arc
     market      Int8,
     code        String,
     rehab_type  Int8,
-    ema_5        Float64,
-    ema_10       Float64,
-    ema_20       Float64,
-    ema_30       Float64,
-    ema_60       Float64,
-    ema_120      Float64,
+    ema_5       Float64,
+    ema_10      Float64,
+    ema_20      Float64,
+    ema_30      Float64,
+    ema_60      Float64,
+    ema_120     Float64,
+    update_time DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, rehab_type, update_time);
+
+create table if not exists quantx.t_macd_min_1_arc
+(
+    market      Int8,
+    code        String,
+    rehab_type  Int8,
+    dif         Float64,
+    dea         Float64,
+    macd        Float64,
     update_time DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);

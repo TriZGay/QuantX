@@ -23,18 +23,6 @@ public class MaNDto {
     public MaNDto() {
     }
 
-    @Override
-    public String toString() {
-        return "MaNDto{" +
-                "market=" + market +
-                ", code='" + code + '\'' +
-                ", rehabType=" + rehabType +
-                ", ma_12=" + ma_12 +
-                ", ma_26=" + ma_26 +
-                ", updateTime='" + updateTime + '\'' +
-                '}';
-    }
-
     public MaNDto(String tableName, String code, Integer rehabType, String start, String end) {
         this.tableName = tableName;
         this.code = code;
