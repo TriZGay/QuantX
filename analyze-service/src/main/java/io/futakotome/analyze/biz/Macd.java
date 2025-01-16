@@ -30,6 +30,7 @@ public class Macd {
         this.tradeDateMapper = tradeDateMapper;
     }
 
+    //todo macd计算方式应该无误,但数据精度存在问题,推测可能是ema计算方式有出入 或者 初值的处理有问题
     public void calculate(String toTable, String fromTable, String startDateTime, String endDateTime) {
         //Clickhouse的开窗函数的边界值需要往后算120条数据才准确
         //因为香港市场的交易时间长,所以获取香港市场的交易时间也基本上覆盖大A
