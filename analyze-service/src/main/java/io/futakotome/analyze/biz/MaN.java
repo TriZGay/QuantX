@@ -39,7 +39,7 @@ public class MaN {
         if (Objects.nonNull(tradeDates)) {
             if (!tradeDates.isEmpty()) {
                 TradeDateDto sdt = tradeDates.get(0);
-                List<MaNDto> maNs = repository.queryMaUseKArc(fromTableName, sdt.getTime().atStartOfDay().toString(), endDateTime);
+                List<MaNDto> maNs = repository.queryMaUseKArc(fromTableName, sdt.getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER), endDateTime);
                 List<MaNDto> toInsertMaN = maNs.stream().filter(maNDto ->
                                 LocalDateTime.parse(maNDto.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isAfter(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
                         .collect(Collectors.toList());

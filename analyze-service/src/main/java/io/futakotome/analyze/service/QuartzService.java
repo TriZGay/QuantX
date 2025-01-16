@@ -45,6 +45,8 @@ public class QuartzService {
                     return addJob(jobRequest, KLineTransToBollJob.class);
                 case KLINE_ARC_TO_EMA:
                     return addJob(jobRequest, KLineTransToEmaJob.class);
+                case KLINE_ARC_TO_MACD:
+                    return addJob(jobRequest, KLineTransToMacdJob.class);
                 default:
                     return "";
             }

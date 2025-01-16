@@ -10,6 +10,10 @@ public class MaNDto {
     private Double ma_30;
     private Double ma_60;
     private Double ma_120;
+
+    private Double ma_12;
+    private Double ma_26;
+
     private String updateTime;
 
     private String tableName;
@@ -19,10 +23,16 @@ public class MaNDto {
     public MaNDto() {
     }
 
-    public MaNDto(String tableName, String start, String end) {
-        this.tableName = tableName;
-        this.start = start;
-        this.end = end;
+    @Override
+    public String toString() {
+        return "MaNDto{" +
+                "market=" + market +
+                ", code='" + code + '\'' +
+                ", rehabType=" + rehabType +
+                ", ma_12=" + ma_12 +
+                ", ma_26=" + ma_26 +
+                ", updateTime='" + updateTime + '\'' +
+                '}';
     }
 
     public MaNDto(String tableName, String code, Integer rehabType, String start, String end) {
@@ -31,6 +41,22 @@ public class MaNDto {
         this.rehabType = rehabType;
         this.start = start;
         this.end = end;
+    }
+
+    public Double getMa_12() {
+        return ma_12;
+    }
+
+    public void setMa_12(Double ma_12) {
+        this.ma_12 = ma_12;
+    }
+
+    public Double getMa_26() {
+        return ma_26;
+    }
+
+    public void setMa_26(Double ma_26) {
+        this.ma_26 = ma_26;
     }
 
     public String getTableName() {

@@ -69,7 +69,7 @@ public class Boll {
         if (Objects.nonNull(tradeDates)) {
             if (!tradeDates.isEmpty()) {
                 TradeDateDto sdt = tradeDates.get(0);
-                List<BollDto> bollDtos = repository.queryBollUseKArc(fromTable, sdt.getTime().atStartOfDay().toString(), endDateTime);
+                List<BollDto> bollDtos = repository.queryBollUseKArc(fromTable, sdt.getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER), endDateTime);
                 List<BollDto> toInsertBoll = bollDtos.stream().filter(bollDto ->
                                 LocalDateTime.parse(bollDto.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isAfter(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
                         .collect(Collectors.toList());

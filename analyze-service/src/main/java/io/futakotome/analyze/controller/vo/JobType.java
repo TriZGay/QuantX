@@ -5,5 +5,6 @@ public enum JobType {
     KLINE_REPEAT_CHECK,
     KLINE_ARC_TO_MA,
     KLINE_ARC_TO_BOLL,
-    KLINE_ARC_TO_EMA
+    KLINE_ARC_TO_EMA,
+    KLINE_ARC_TO_MACD
 }

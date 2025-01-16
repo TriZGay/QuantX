@@ -7,9 +7,13 @@ public class KLineTransToEmaJobRequest extends JobRequest {
     @NotNull(message = "表格必填")
     @NotEmpty(message = "表格必填")
     private String toTableName;
-    @NotNull(message = "表格必填")
-    @NotEmpty(message = "表格必填")
-    private String fromTableName;
+    @NotNull(message = "K表格必填")
+    @NotEmpty(message = "K表格必填")
+    private String kTableName;
+    @NotNull(message = "MA表格必填")
+    @NotEmpty(message = "MA表格必填")
+    private String maTableName;
+
     private String startDateTime;
     private String endDateTime;
 
@@ -21,12 +25,20 @@ public class KLineTransToEmaJobRequest extends JobRequest {
         this.toTableName = toTableName;
     }
 
-    public String getFromTableName() {
-        return fromTableName;
+    public String getkTableName() {
+        return kTableName;
     }
 
-    public void setFromTableName(String fromTableName) {
-        this.fromTableName = fromTableName;
+    public void setkTableName(String kTableName) {
+        this.kTableName = kTableName;
+    }
+
+    public String getMaTableName() {
+        return maTableName;
+    }
+
+    public void setMaTableName(String maTableName) {
+        this.maTableName = maTableName;
     }
 
     public String getStartDateTime() {

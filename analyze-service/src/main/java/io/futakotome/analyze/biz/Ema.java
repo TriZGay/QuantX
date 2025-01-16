@@ -4,29 +4,36 @@ import io.futakotome.analyze.controller.vo.EmaRequest;
 import io.futakotome.analyze.controller.vo.EmaResponse;
 import io.futakotome.analyze.mapper.EmaMapper;
 import io.futakotome.analyze.mapper.KLineMapper;
+import io.futakotome.analyze.mapper.MaNMapper;
+import io.futakotome.analyze.mapper.dto.CodeAndRehabTypeKey;
 import io.futakotome.analyze.mapper.dto.EmaDto;
 import io.futakotome.analyze.mapper.dto.KLineDto;
+import io.futakotome.analyze.mapper.dto.MaNDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Ema {
     private static final Logger LOGGER = LoggerFactory.getLogger(Ema.class);
-    private final EmaMapper emaMapper;
+    private EmaMapper emaMapper;
     private KLineMapper kLineMapper;
+    private MaNMapper maNMapper;
+
+    public Ema() {
+    }
 
     public Ema(EmaMapper emaMapper) {
         this.emaMapper = emaMapper;
     }
 
-    public Ema(EmaMapper emaMapper, KLineMapper kLineMapper) {
+    public Ema(EmaMapper emaMapper, KLineMapper kLineMapper, MaNMapper maNMapper) {
         this.emaMapper = emaMapper;
         this.kLineMapper = kLineMapper;
+        this.maNMapper = maNMapper;
     }
 
     public List<EmaResponse> list(EmaRequest emaRequest) {
@@ -43,20 +50,21 @@ public class Ema {
         return null;
     }
 
-    public void calculate(String toTable, String fromTable, String startDateTime, String endDateTime) {
-        List<KLineDto> kLineDtos = kLineMapper.queryKLineArchived(new KLineDto(fromTable, startDateTime, endDateTime));
+    public void calculate(String toTable, String kTable, String maTable, String startDateTime, String endDateTime) {
+        List<KLineDto> kLineDtos = kLineMapper.queryKLineArchived(new KLineDto(kTable, startDateTime, endDateTime));
         Map<CodeAndRehabTypeKey, List<KLineDto>> groupingKLineByCodeAndRehabType = kLineDtos.stream()
                 .collect(Collectors.groupingBy(k -> new CodeAndRehabTypeKey(k.getRehabType(), k.getCode())));
         groupingKLineByCodeAndRehabType.keySet().forEach(key -> {
-            List<KLineDto> maGroupByKey = groupingKLineByCodeAndRehabType.get(key);
+            List<KLineDto> kGroupByKey = groupingKLineByCodeAndRehabType.get(key);
+            List<MaNDto> maNs = maNMapper.queryMaN(new MaNDto(maTable, key.getCode(), key.getRehabType(), startDateTime, startDateTime));
             List<EmaDto> insertDtos = new ArrayList<>();
-            EmaInternal ema5 = new EmaInternal(5);
-            EmaInternal ema10 = new EmaInternal(10);
-            EmaInternal ema20 = new EmaInternal(20);
-            EmaInternal ema30 = new EmaInternal(30);
-            EmaInternal ema60 = new EmaInternal(60);
-            EmaInternal ema120 = new EmaInternal(120);
-            maGroupByKey.forEach(kLineDto -> {
+            EmaInternal ema5 = new EmaInternal(5, maNs.get(0).getMa_5());
+            EmaInternal ema10 = new EmaInternal(10, maNs.get(0).getMa_10());
+            EmaInternal ema20 = new EmaInternal(20, maNs.get(0).getMa_20());
+            EmaInternal ema30 = new EmaInternal(30, maNs.get(0).getMa_30());
+            EmaInternal ema60 = new EmaInternal(60, maNs.get(0).getMa_60());
+            EmaInternal ema120 = new EmaInternal(120, maNs.get(0).getMa_120());
+            kGroupByKey.forEach(kLineDto -> {
                 EmaDto insertDto = new EmaDto();
                 Double ema5Val = ema5.calculate(kLineDto.getClosePrice());
                 Double ema10Val = ema10.calculate(kLineDto.getClosePrice());
@@ -77,7 +85,7 @@ public class Ema {
                 insertDtos.add(insertDto);
             });
             if (emaMapper.insertBatch(toTable, insertDtos)) {
-                LOGGER.info("{}->{}时间段:{}-{}归档EMA数据成功.", fromTable, toTable, startDateTime, endDateTime);
+                LOGGER.info("{}&{}->{}时间段:{}-{}归档EMA数据成功.", kTable, maTable, toTable, startDateTime, endDateTime);
             }
         });
     }
@@ -107,6 +115,12 @@ public class Ema {
             this.previousEma = null;
         }
 
+        public EmaInternal(Integer period, Double initial) {
+            this.multiplier = 2.0 / (period + 1);
+            this.previousEma = initial;
+        }
+
+        //可指定初值或不指定初值
         public Double calculate(Double price) {
             if (previousEma == null) {
                 previousEma = price;
@@ -117,42 +131,4 @@ public class Ema {
         }
     }
 
-    public static class CodeAndRehabTypeKey {
-        private Integer rehabType;
-        private String code;
-
-        public CodeAndRehabTypeKey(Integer rehabType, String code) {
-            this.rehabType = rehabType;
-            this.code = code;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            CodeAndRehabTypeKey that = (CodeAndRehabTypeKey) o;
-            return Objects.equals(rehabType, that.rehabType) && Objects.equals(code, that.code);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(rehabType, code);
-        }
-
-        public Integer getRehabType() {
-            return rehabType;
-        }
-
-        public void setRehabType(Integer rehabType) {
-            this.rehabType = rehabType;
-        }
-
-        public String getCode() {
-            return code;
-        }
-
-        public void setCode(String code) {
-            this.code = code;
-        }
-    }
 }
