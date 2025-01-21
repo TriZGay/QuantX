@@ -39,27 +39,6 @@ public class MaNMapper {
         }
     }
 
-    public List<MaNDto> queryMa12AndMa26UseKArc(String kTableName, String code, Integer rehabType, String startDateTime, String endDateTime) {
-        try {
-            String sql = "select market,code,rehab_type," +
-                    "avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 11 following) as ma_12," +
-                    "avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 25 following) as ma_26," +
-                    "update_time" +
-                    " from :tableName" +
-                    " prewhere (code=:code) and (rehab_type=:rehabType) and (update_time >= :start) and (update_time <= :end) order by update_time asc ";
-            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
-                put("tableName", kTableName);
-                put("code", code);
-                put("rehabType", rehabType);
-                put("start", startDateTime);
-                put("end", endDateTime);
-            }}, new BeanPropertyRowMapper<>(MaNDto.class));
-        } catch (Exception e) {
-            LOGGER.error("查询MA数据失败.", e);
-            return null;
-        }
-    }
-
     public List<MaNDto> queryMaUseKArc(String fromTableName, String startDateTime, String endDateTime) {
         try {
             String sql = " select market,code,rehab_type," +

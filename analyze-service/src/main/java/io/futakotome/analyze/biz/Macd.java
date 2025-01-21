@@ -1,10 +1,11 @@
 package io.futakotome.analyze.biz;
 
-import io.futakotome.analyze.mapper.KLineMapper;
-import io.futakotome.analyze.mapper.MaNMapper;
 import io.futakotome.analyze.mapper.MacdMapper;
 import io.futakotome.analyze.mapper.TradeDateMapper;
-import io.futakotome.analyze.mapper.dto.*;
+import io.futakotome.analyze.mapper.dto.CodeAndRehabTypeKey;
+import io.futakotome.analyze.mapper.dto.EmaDto;
+import io.futakotome.analyze.mapper.dto.MacdDto;
+import io.futakotome.analyze.mapper.dto.TradeDateDto;
 import io.futakotome.analyze.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,72 +19,75 @@ import java.util.stream.Collectors;
 
 public class Macd {
     private static final Logger LOGGER = LoggerFactory.getLogger(Macd.class);
-    private KLineMapper kLineMapper;
-    private MaNMapper maNMapper;
     private TradeDateMapper tradeDateMapper;
     private MacdMapper macdMapper;
 
-    public Macd(MacdMapper macdMapper, KLineMapper kLineMapper, MaNMapper maNMapper, TradeDateMapper tradeDateMapper) {
+    public Macd(MacdMapper macdMapper, TradeDateMapper tradeDateMapper) {
         this.macdMapper = macdMapper;
-        this.kLineMapper = kLineMapper;
-        this.maNMapper = maNMapper;
         this.tradeDateMapper = tradeDateMapper;
     }
 
-    //todo macd计算方式应该无误,但数据精度存在问题,推测可能是ema计算方式有出入 或者 初值的处理有问题
     public void calculate(String toTable, String fromTable, String startDateTime, String endDateTime) {
-        //Clickhouse的开窗函数的边界值需要往后算120条数据才准确
-        //因为香港市场的交易时间长,所以获取香港市场的交易时间也基本上覆盖大A
-        //1分钟一条数据,2小时就120条数据,取startDateTime的前一天交易日作为开始边界日期
-        LocalDate s = LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER).toLocalDate();
-        List<TradeDateDto> tradeDates = tradeDateMapper.queryTradeDateByMarketPreceding(1, s, "1");
-        TradeDateDto sdt;
-        if (Objects.nonNull(tradeDates)) {
-            if (!tradeDates.isEmpty()) {
-                sdt = tradeDates.get(0);
-            } else {
-                LOGGER.error("{}->{}时间段:{}-{}归档MACD数据失败.交易日期缺失数据", fromTable, toTable,
-                        startDateTime, endDateTime);
-                return;
-            }
+        LocalDate startDate = LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)
+                .toLocalDate();
+        if (startDate.isEqual(LocalDate.of(2025, 1, 2))) {
+            //macd初始值从今年开始1月2日交易日开始算
+            List<MacdDto> macdDtos = macdMapper.queryDif(new EmaDto(fromTable, startDateTime, endDateTime));
+            Map<CodeAndRehabTypeKey, List<MacdDto>> groupingDifByCodeAndRehabType = macdDtos.stream()
+                    .collect(Collectors.groupingBy(dif -> new CodeAndRehabTypeKey(dif.getRehabType(), dif.getCode())));
+            groupingDifByCodeAndRehabType.keySet().forEach(key -> {
+                List<MacdDto> difByKey = groupingDifByCodeAndRehabType.get(key);
+                Ema.EmaInternal dea = new Ema.EmaInternal(9);
+                List<MacdDto> insertDtos = difByKey.stream().peek(macdDto -> {
+                    Double deaVal = dea.calculate(macdDto.getDif());
+                    macdDto.setDea(deaVal);
+                    Double macd = 2 * (macdDto.getDif() - macdDto.getDea());
+                    macdDto.setMacd(macd);
+                }).collect(Collectors.toList());
+                insertDtos.forEach(insertDto -> {
+                    LOGGER.info("code-{},rehab_type-{},dif-{},dea-{},macd-{},update_time-{}", insertDto.getCode(), insertDto.getRehabType(),
+                            insertDto.getDif(), insertDto.getDea(), insertDto.getMacd(), insertDto.getUpdateTime());
+                });
+//                if (macdMapper.insertBatch(toTable, insertDtos)) {
+//                    LOGGER.info("{}->{}时间段:{}-{}归档MACD数据成功.", fromTable, toTable, startDateTime, endDateTime);
+//                }
+            });
         } else {
-            LOGGER.error("{}->{}时间段:{}-{}归档MACD数据失败.交易日期为null", fromTable, toTable,
-                    startDateTime, endDateTime);
-            return;
-        }
-        List<KLineDto> kLineDtos = kLineMapper.queryKLineArchived(new KLineDto(fromTable, startDateTime, endDateTime));
-        Map<CodeAndRehabTypeKey, List<KLineDto>> groupingKLineByCodeAndRehabType = kLineDtos.stream()
-                .collect(Collectors.groupingBy(k -> new CodeAndRehabTypeKey(k.getRehabType(), k.getCode())));
-        groupingKLineByCodeAndRehabType.keySet().forEach(key -> {
-            List<KLineDto> kGroupByKey = groupingKLineByCodeAndRehabType.get(key);
-            List<MaNDto> maNs = maNMapper.queryMa12AndMa26UseKArc(fromTable, key.getCode(), key.getRehabType(), sdt.getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER), endDateTime);
-            MaNDto initialMa = maNs.stream().filter(maNDto ->
-                            LocalDateTime.parse(maNDto.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isAfter(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
-                    .findFirst().get();
-            Ema.EmaInternal ema12 = new Ema.EmaInternal(12, initialMa.getMa_12());
-            Ema.EmaInternal ema26 = new Ema.EmaInternal(26, initialMa.getMa_26());
-            List<MacdDto> macdDtos = kGroupByKey.stream().map(kLineDto -> {
-                Double ema12Val = ema12.calculate(kLineDto.getClosePrice());
-                Double ema26Val = ema26.calculate(kLineDto.getClosePrice());
-                Double dif = ema12Val - ema26Val;
-                MacdDto macdDto = new MacdDto();
-                macdDto.setDif(dif);
-                macdDto.setMarket(kLineDto.getMarket());
-                macdDto.setRehabType(kLineDto.getRehabType());
-                macdDto.setCode(kLineDto.getCode());
-                macdDto.setUpdateTime(kLineDto.getUpdateTime());
-                return macdDto;
-            }).collect(Collectors.toList());
-            Ema.EmaInternal fastEma = new Ema.EmaInternal(9);
-            List<MacdDto> macdInsert = macdDtos.stream().peek(macdDto -> {
-                Double dea = fastEma.calculate(macdDto.getDif());
-                macdDto.setDea(dea);
-                Double macd = 2 * (macdDto.getDif() - macdDto.getDea());
-                macdDto.setMacd(macd);
-            }).collect(Collectors.toList());
-            if (macdMapper.insertBatch(toTable, macdInsert)) {
-                LOGGER.info("{}->{}时间段:{}-{}归档EMA数据成功.", fromTable, toTable, startDateTime, endDateTime);
+            //不是1月2日的话从前一天的macd值开始算
+            List<TradeDateDto> tradeDates = tradeDateMapper.queryTradeDateByMarketPreceding(1, startDate, "1");
+            if (Objects.nonNull(tradeDates)) {
+                if (!tradeDates.isEmpty()) {
+                    TradeDateDto sdt = tradeDates.get(0);
+                    List<MacdDto> macdDtos = macdMapper.queryDif(new EmaDto(fromTable, sdt.getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER), endDateTime));
+                    Map<CodeAndRehabTypeKey, List<MacdDto>> groupingDifByCodeAndRehabType = macdDtos.stream()
+                            .collect(Collectors.groupingBy(dif -> new CodeAndRehabTypeKey(dif.getRehabType(), dif.getCode())));
+                    groupingDifByCodeAndRehabType.keySet().forEach(key -> {
+                        List<MacdDto> difByKey = groupingDifByCodeAndRehabType.get(key);
+                        MacdDto initMacd = difByKey.stream().filter(forwardDif ->
+                                LocalDateTime.parse(forwardDif.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER))).findFirst().get();
+                        Ema.EmaInternal dea = new Ema.EmaInternal(9, initMacd.getDea());
+                        List<MacdDto> insertDtos = difByKey.stream().peek(macdDto -> {
+                            Double deaVal = dea.calculate(macdDto.getDif());
+                            macdDto.setDea(deaVal);
+                            Double macd = 2 * (macdDto.getDif() - macdDto.getDea());
+                            macdDto.setMacd(macd);
+                        }).collect(Collectors.toList());
+                        insertDtos.forEach(insertDto -> {
+                            LOGGER.info("code-{},rehab_type-{},dif-{},dea-{},macd-{},update_time-{}", insertDto.getCode(), insertDto.getRehabType(),
+                                    insertDto.getDif(), insertDto.getDea(), insertDto.getMacd(), insertDto.getUpdateTime());
+                        });
+//                        if (macdMapper.insertBatch(toTable, insertDtos)) {
+//                            LOGGER.info("{}->{}时间段:{}-{}归档MACD数据成功.", fromTable, toTable, startDateTime, endDateTime);
+//                        }
+                    });
+                } else {
+                    LOGGER.error("{}->{}时间段:{}-{}归档MACD数据失败.交易日期缺失数据", fromTable, toTable,
+                            startDateTime, endDateTime);
+                }
+            } else {
+                LOGGER.error("{}->{}时间段:{}-{}归档MACD数据失败.交易日期为null", fromTable, toTable,
+                        startDateTime, endDateTime);
             }
-        });
+        }
     }
 }

@@ -65,22 +65,29 @@ public class Boll {
         //因为香港市场的交易时间长,所以获取香港市场的交易时间也基本上覆盖大A
         //1分钟一条数据,2小时就120条数据,取startDateTime的前一天交易日作为开始边界日期
         LocalDate s = LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER).toLocalDate();
-        List<TradeDateDto> tradeDates = tradeDateMapper.queryTradeDateByMarketPreceding(1, s, "1");
-        if (Objects.nonNull(tradeDates)) {
-            if (!tradeDates.isEmpty()) {
-                TradeDateDto sdt = tradeDates.get(0);
-                List<BollDto> bollDtos = repository.queryBollUseKArc(fromTable, sdt.getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER), endDateTime);
-                List<BollDto> toInsertBoll = bollDtos.stream().filter(bollDto ->
-                                LocalDateTime.parse(bollDto.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isAfter(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
-                        .collect(Collectors.toList());
-                if (repository.insetBollBatch(toTable, toInsertBoll)) {
-                    LOGGER.info("{}->{}时间段:{}-{}归档BOLL数据成功.", fromTable, toTable, startDateTime, endDateTime);
-                }
-            } else {
-                LOGGER.error("{}->{}时间段:{}-{}归档BOLL数据失败.交易日期缺失数据", fromTable, toTable, startDateTime, endDateTime);
+        if (s.isEqual(LocalDate.of(2025, 1, 2))) {
+            List<BollDto> toInsertBoll = repository.queryBollUseKArc(fromTable, startDateTime, endDateTime);
+            if (repository.insetBollBatch(toTable, toInsertBoll)) {
+                LOGGER.info("{}->{}时间段:{}-{}归档BOLL数据成功.", fromTable, toTable, startDateTime, endDateTime);
             }
         } else {
-            LOGGER.error("{}->{}时间段:{}-{}归档BOLL数据失败.交易日期为null", fromTable, toTable, startDateTime, endDateTime);
+            List<TradeDateDto> tradeDates = tradeDateMapper.queryTradeDateByMarketPreceding(1, s, "1");
+            if (Objects.nonNull(tradeDates)) {
+                if (!tradeDates.isEmpty()) {
+                    TradeDateDto sdt = tradeDates.get(0);
+                    List<BollDto> bollDtos = repository.queryBollUseKArc(fromTable, sdt.getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER), endDateTime);
+                    List<BollDto> toInsertBoll = bollDtos.stream().filter(bollDto ->
+                                    LocalDateTime.parse(bollDto.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isAfter(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
+                            .collect(Collectors.toList());
+                    if (repository.insetBollBatch(toTable, toInsertBoll)) {
+                        LOGGER.info("{}->{}时间段:{}-{}归档BOLL数据成功.", fromTable, toTable, startDateTime, endDateTime);
+                    }
+                } else {
+                    LOGGER.error("{}->{}时间段:{}-{}归档BOLL数据失败.交易日期缺失数据", fromTable, toTable, startDateTime, endDateTime);
+                }
+            } else {
+                LOGGER.error("{}->{}时间段:{}-{}归档BOLL数据失败.交易日期为null", fromTable, toTable, startDateTime, endDateTime);
+            }
         }
     }
 }

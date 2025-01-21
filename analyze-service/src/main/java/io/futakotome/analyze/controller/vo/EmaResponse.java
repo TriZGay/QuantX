@@ -7,7 +7,6 @@ public class EmaResponse {
     private Double ema5Value;
     private Double ema10Value;
     private Double ema20Value;
-    private Double ema30Value;
     private Double ema60Value;
     private Double ema120Value;
     private String updateTime;
@@ -58,14 +57,6 @@ public class EmaResponse {
 
     public void setEma20Value(Double ema20Value) {
         this.ema20Value = ema20Value;
-    }
-
-    public Double getEma30Value() {
-        return ema30Value;
-    }
-
-    public void setEma30Value(Double ema30Value) {
-        this.ema30Value = ema30Value;
     }
 
     public Double getEma60Value() {

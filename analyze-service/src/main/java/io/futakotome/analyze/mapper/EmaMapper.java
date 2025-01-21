@@ -26,8 +26,8 @@ public class EmaMapper {
 
     public List<EmaDto> queryList(EmaDto emaDto) {
         try {
-            String sql = "select market,code,rehab_type,round(ema_5,4) as ema_5,round(ema_10,4) as ema_10,round(ema_20,4) as ema_20,round(ema_30,4) as ema_30," +
-                    "round(ema_60,4) as ema_60,round(ema_120,4) as ema_120 from t_ema_min_1_arc " +
+            String sql = "select market,code,rehab_type,round(ema_5,4) as ema_5,round(ema_10,4) as ema_10,round(ema_20,4) as ema_20," +
+                    "round(ema_60,4) as ema_60,round(ema_120,4) as ema_120,update_time from :table " +
                     "prewhere (1=1) ";
             if (Objects.nonNull(emaDto.getCode())) {
                 sql += " and code=:code";
@@ -54,7 +54,7 @@ public class EmaMapper {
     public boolean insertBatch(String toTable, List<EmaDto> emas) {
         try {
             String sql = "insert into " + toTable
-                    + "(market,code,rehab_type,ema_5,ema_10,ema_20,ema_30,ema_60,ema_120,update_time) values(:market,:code,:rehabType,:ema_5,:ema_10,:ema_20,:ema_30,:ema_60,:ema_120,:updateTime)";
+                    + "(market,code,rehab_type,ema_5,ema_10,ema_12,ema_20,ema_26,ema_60,ema_120,update_time) values(:market,:code,:rehabType,:ema_5,:ema_10,:ema_12,:ema_20,:ema_26,:ema_60,:ema_120,:updateTime)";
             int[] insertedRows = namedParameterJdbcTemplate.batchUpdate(sql, SqlParameterSourceUtils.createBatch(emas));
             LOGGER.info("插入成功.条数:{}", Arrays.stream(insertedRows).sum());
             return true;

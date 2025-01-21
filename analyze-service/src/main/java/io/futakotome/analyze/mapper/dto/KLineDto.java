@@ -1,5 +1,7 @@
 package io.futakotome.analyze.mapper.dto;
 
+import java.util.Objects;
+
 public class KLineDto {
     private Integer market;
     private String code;
@@ -171,5 +173,18 @@ public class KLineDto {
 
     public void setUpdateTime(String updateTime) {
         this.updateTime = updateTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        KLineDto kLineDto = (KLineDto) o;
+        return Objects.equals(code, kLineDto.code) && Objects.equals(rehabType, kLineDto.rehabType) && Objects.equals(updateTime, kLineDto.updateTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code, rehabType, updateTime);
     }
 }

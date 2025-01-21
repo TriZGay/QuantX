@@ -46,9 +46,6 @@ public class KLineRaw2ArcJob implements Job {
             LocalTime afternoon = LocalTime.of(16, 0);
             updateTimeEnd = LocalDateTime.of(now, afternoon).format(DateUtils.DATE_TIME_FORMATTER);
         }
-        LOGGER.info("归档时间:{}-{}", updateTimeStart, updateTimeEnd);
-        int resultRowNum = kLine.kLinesArchive(params.getString("fromTable"), params.getString("toTable"),
-                updateTimeStart, updateTimeEnd);
-        LOGGER.info("归档行数:{}", resultRowNum);
+        kLine.kLinesArchive(params.getString("fromTable"), params.getString("toTable"), updateTimeStart, updateTimeEnd);
     }
 }

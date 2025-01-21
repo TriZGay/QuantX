@@ -389,8 +389,9 @@ create table if not exists quantx.t_ema_min_1_arc
     rehab_type  Int8,
     ema_5       Float64,
     ema_10      Float64,
+    ema_12      Float64,
     ema_20      Float64,
-    ema_30      Float64,
+    ema_26      Float64,
     ema_60      Float64,
     ema_120     Float64,
     update_time DateTime64

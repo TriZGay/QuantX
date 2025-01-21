@@ -6,8 +6,9 @@ public class EmaDto {
     private Integer rehabType;
     private Double ema_5;
     private Double ema_10;
+    private Double ema_12;
     private Double ema_20;
-    private Double ema_30;
+    private Double ema_26;
     private Double ema_60;
     private Double ema_120;
     private String updateTime;
@@ -17,6 +18,12 @@ public class EmaDto {
     private String end;
 
     public EmaDto() {
+    }
+
+    public EmaDto(String table, String start, String end) {
+        this.table = table;
+        this.start = start;
+        this.end = end;
     }
 
     public EmaDto(String table, String code, Integer rehabType, String start, String end) {
@@ -99,12 +106,20 @@ public class EmaDto {
         this.ema_20 = ema_20;
     }
 
-    public Double getEma_30() {
-        return ema_30;
+    public Double getEma_12() {
+        return ema_12;
     }
 
-    public void setEma_30(Double ema_30) {
-        this.ema_30 = ema_30;
+    public void setEma_12(Double ema_12) {
+        this.ema_12 = ema_12;
+    }
+
+    public Double getEma_26() {
+        return ema_26;
+    }
+
+    public void setEma_26(Double ema_26) {
+        this.ema_26 = ema_26;
     }
 
     public Double getEma_60() {

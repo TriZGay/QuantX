@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -117,20 +119,32 @@ public class KLineMapper {
         }
     }
 
-    public Integer kLinesRawTransToArc(String fromTableName, String toTableName, String start, String end) {
+    public boolean insertBatch(String kTable, List<KLineDto> kLineDtoList) {
         try {
-            String sql = "insert into " + toTableName +
-                    " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,t1.update_time as update_time" +
+            String sql = "insert into " + kTable
+                    + "(market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time)" +
+                    " values(:market,:code,:rehabType,:highPrice,:openPrice,:lowPrice,:closePrice,:lastClosePrice,:volume,:turnover,:turnoverRate,:pe,:changeRate,:updateTime)";
+            int[] updateRows = namedParameterJdbcTemplate.batchUpdate(sql, SqlParameterSourceUtils.createBatch(kLineDtoList));
+            LOGGER.info("插入成功:条数{}", Arrays.stream(updateRows).sum());
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("插入K线数据失败.", e);
+            return false;
+        }
+    }
+
+    public List<KLineDto> prefetchToInsert(String fromTableName, String start, String end) {
+        try {
+            String sql = " select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,t1.update_time as update_time" +
                     " from :fromTableName as t1 all inner join" +
                     " (select code,rehab_type,update_time,max(add_time) as latest,max(volume) as volume from :fromTableName where (update_time >= :start) and (update_time <= :end) group by code,rehab_type,update_time ) as t2" +
                     " on (t1.code=t2.code) and (t1.rehab_type=t2.rehab_type) and (t1.add_time = t2.latest) and (t1.volume = t2.volume)" +
                     " order by update_time asc";
-            return namedParameterJdbcTemplate.update(sql, new HashMap<>() {{
+            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
                 put("fromTableName", fromTableName);
-                put("toTableName", toTableName);
                 put("start", start);
                 put("end", end);
-            }});
+            }}, new BeanPropertyRowMapper<>(KLineDto.class));
         } catch (Exception e) {
             LOGGER.error("归档K线数据出错.", e);
             return null;

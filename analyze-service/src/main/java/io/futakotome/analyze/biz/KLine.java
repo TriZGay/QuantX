@@ -6,24 +6,28 @@ import io.futakotome.analyze.controller.vo.KLineResponse;
 import io.futakotome.analyze.mapper.KLineMapper;
 import io.futakotome.analyze.mapper.dto.KLineDto;
 import io.futakotome.analyze.mapper.dto.KLineRepeatDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class KLine {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KLine.class);
     private final KLineMapper repository;
 
     public KLine(KLineMapper repository) {
         this.repository = repository;
     }
 
-    public Integer kLinesArchive(String fromTable, String toTable, String start, String end) {
-        Integer archRows = repository.kLinesRawTransToArc(fromTable, toTable, start, end);
-        if (Objects.nonNull(archRows)) {
-            return archRows;
-        } else {
-            throw new RuntimeException("K线归档失败");
+    public void kLinesArchive(String fromTable, String toTable, String start, String end) {
+        List<KLineDto> toInsertDtos = repository.prefetchToInsert(fromTable, start, end)
+                .stream().distinct().collect(Collectors.toList());
+        if (repository.insertBatch(toTable, toInsertDtos)) {
+            LOGGER.info("{}->{}时间段:{}-{}归档K线数据成功.", fromTable, toTable,
+                    start, end);
         }
     }
 
@@ -37,7 +41,7 @@ public class KLine {
             case 1:
                 return repository.queryKLineArchived(new KLineDto(KLineMapper.KL_MIN_1_ARC_TABLE_NAME, kLineRequest.getCode(), kLineRequest.getRehabType(),
                                 kLineRequest.getStart(), kLineRequest.getEnd()))
-                        .stream().map(this::dtoMapResp)
+                        .stream().distinct().map(this::dto2Resp)
                         .collect(Collectors.toList());
             case 2:
                 return null;
@@ -65,7 +69,7 @@ public class KLine {
         return kLineRepeatResponse;
     }
 
-    private KLineResponse dtoMapResp(KLineDto kLineDto) {
+    private KLineResponse dto2Resp(KLineDto kLineDto) {
         return new KLineResponse(
                 kLineDto.getMarket(),
                 kLineDto.getCode(),

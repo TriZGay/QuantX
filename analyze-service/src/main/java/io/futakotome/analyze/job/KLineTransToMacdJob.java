@@ -1,10 +1,7 @@
 package io.futakotome.analyze.job;
 
 import io.futakotome.analyze.biz.Macd;
-import io.futakotome.analyze.mapper.KLineMapper;
-import io.futakotome.analyze.mapper.MaNMapper;
-import io.futakotome.analyze.mapper.MacdMapper;
-import io.futakotome.analyze.mapper.TradeDateMapper;
+import io.futakotome.analyze.mapper.*;
 import io.futakotome.analyze.utils.DateUtils;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -21,8 +18,8 @@ import java.util.Objects;
 public class KLineTransToMacdJob implements Job {
     private final Macd macd;
 
-    public KLineTransToMacdJob(MacdMapper macdMapper, KLineMapper kLineMapper, MaNMapper maNMapper, TradeDateMapper tradeDateMapper) {
-        macd = new Macd(macdMapper, kLineMapper, maNMapper, tradeDateMapper);
+    public KLineTransToMacdJob(MacdMapper macdMapper, TradeDateMapper tradeDateMapper) {
+        macd = new Macd(macdMapper, tradeDateMapper);
     }
 
     @Override

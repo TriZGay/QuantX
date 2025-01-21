@@ -144,4 +144,5 @@ public class KLineResponse {
     public void setDatetime(String datetime) {
         this.datetime = datetime;
     }
+
 }

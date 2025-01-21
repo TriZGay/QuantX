@@ -35,25 +35,34 @@ public class MaN {
         //因为香港市场的交易时间长,所以获取香港市场的交易时间也基本上覆盖大A
         //1分钟一条数据,2小时就120条数据,取startDateTime的前一天交易日作为开始边界日期
         LocalDate s = LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER).toLocalDate();
-        List<TradeDateDto> tradeDates = tradeDateMapper.queryTradeDateByMarketPreceding(1, s, "1");
-        if (Objects.nonNull(tradeDates)) {
-            if (!tradeDates.isEmpty()) {
-                TradeDateDto sdt = tradeDates.get(0);
-                List<MaNDto> maNs = repository.queryMaUseKArc(fromTableName, sdt.getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER), endDateTime);
-                List<MaNDto> toInsertMaN = maNs.stream().filter(maNDto ->
-                                LocalDateTime.parse(maNDto.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isAfter(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
-                        .collect(Collectors.toList());
-                if (repository.insetMaBatch(toTableName, toInsertMaN)) {
-                    LOGGER.info("{}->{}时间段:{}-{}归档MA数据成功.", fromTableName, toTableName,
-                            startDateTime, endDateTime);
-                }
-            } else {
-                LOGGER.error("{}->{}时间段:{}-{}归档MA数据失败.交易日期缺失数据", fromTableName, toTableName,
+        if (s.isEqual(LocalDate.of(2025, 1, 2))) {
+            //ma初始值从今年开始1月2日交易日开始算
+            List<MaNDto> toInsertMaN = repository.queryMaUseKArc(fromTableName, startDateTime, endDateTime);
+            if (repository.insetMaBatch(toTableName, toInsertMaN)) {
+                LOGGER.info("{}->{}时间段:{}-{}归档MA数据成功.", fromTableName, toTableName,
                         startDateTime, endDateTime);
             }
         } else {
-            LOGGER.error("{}->{}时间段:{}-{}归档MA数据失败.交易日期为null", fromTableName, toTableName,
-                    startDateTime, endDateTime);
+            List<TradeDateDto> tradeDates = tradeDateMapper.queryTradeDateByMarketPreceding(1, s, "1");
+            if (Objects.nonNull(tradeDates)) {
+                if (!tradeDates.isEmpty()) {
+                    TradeDateDto sdt = tradeDates.get(0);
+                    List<MaNDto> maNs = repository.queryMaUseKArc(fromTableName, sdt.getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER), endDateTime);
+                    List<MaNDto> toInsertMaN = maNs.stream().filter(maNDto ->
+                                    LocalDateTime.parse(maNDto.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isAfter(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
+                            .collect(Collectors.toList());
+                    if (repository.insetMaBatch(toTableName, toInsertMaN)) {
+                        LOGGER.info("{}->{}时间段:{}-{}归档MA数据成功.", fromTableName, toTableName,
+                                startDateTime, endDateTime);
+                    }
+                } else {
+                    LOGGER.error("{}->{}时间段:{}-{}归档MA数据失败.交易日期缺失数据", fromTableName, toTableName,
+                            startDateTime, endDateTime);
+                }
+            } else {
+                LOGGER.error("{}->{}时间段:{}-{}归档MA数据失败.交易日期为null", fromTableName, toTableName,
+                        startDateTime, endDateTime);
+            }
         }
     }
 
