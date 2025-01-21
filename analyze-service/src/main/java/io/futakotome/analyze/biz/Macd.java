@@ -44,13 +44,9 @@ public class Macd {
                     Double macd = 2 * (macdDto.getDif() - macdDto.getDea());
                     macdDto.setMacd(macd);
                 }).collect(Collectors.toList());
-                insertDtos.forEach(insertDto -> {
-                    LOGGER.info("code-{},rehab_type-{},dif-{},dea-{},macd-{},update_time-{}", insertDto.getCode(), insertDto.getRehabType(),
-                            insertDto.getDif(), insertDto.getDea(), insertDto.getMacd(), insertDto.getUpdateTime());
-                });
-//                if (macdMapper.insertBatch(toTable, insertDtos)) {
-//                    LOGGER.info("{}->{}时间段:{}-{}归档MACD数据成功.", fromTable, toTable, startDateTime, endDateTime);
-//                }
+                if (macdMapper.insertBatch(toTable, insertDtos)) {
+                    LOGGER.info("{}->{}时间段:{}-{}归档MACD数据成功.", fromTable, toTable, startDateTime, endDateTime);
+                }
             });
         } else {
             //不是1月2日的话从前一天的macd值开始算
@@ -72,13 +68,9 @@ public class Macd {
                             Double macd = 2 * (macdDto.getDif() - macdDto.getDea());
                             macdDto.setMacd(macd);
                         }).collect(Collectors.toList());
-                        insertDtos.forEach(insertDto -> {
-                            LOGGER.info("code-{},rehab_type-{},dif-{},dea-{},macd-{},update_time-{}", insertDto.getCode(), insertDto.getRehabType(),
-                                    insertDto.getDif(), insertDto.getDea(), insertDto.getMacd(), insertDto.getUpdateTime());
-                        });
-//                        if (macdMapper.insertBatch(toTable, insertDtos)) {
-//                            LOGGER.info("{}->{}时间段:{}-{}归档MACD数据成功.", fromTable, toTable, startDateTime, endDateTime);
-//                        }
+                        if (macdMapper.insertBatch(toTable, insertDtos)) {
+                            LOGGER.info("{}->{}时间段:{}-{}归档MACD数据成功.", fromTable, toTable, startDateTime, endDateTime);
+                        }
                     });
                 } else {
                     LOGGER.error("{}->{}时间段:{}-{}归档MACD数据失败.交易日期缺失数据", fromTable, toTable,

@@ -7,8 +7,6 @@ import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -18,7 +16,6 @@ import java.util.Objects;
 
 @Component
 public class KLineRaw2ArcJob implements Job {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KLineRaw2ArcJob.class);
     private final KLine kLine;
 
     public KLineRaw2ArcJob(KLineMapper kLineMapper) {
