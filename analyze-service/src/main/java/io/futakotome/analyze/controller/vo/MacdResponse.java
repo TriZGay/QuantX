@@ -1,6 +1,6 @@
-package io.futakotome.analyze.mapper.dto;
+package io.futakotome.analyze.controller.vo;
 
-public class MacdDto {
+public class MacdResponse {
     private Integer market;
     private String code;
     private Integer rehabType;
@@ -8,53 +8,6 @@ public class MacdDto {
     private Double dea;
     private Double macd;
     private String updateTime;
-
-    private String table;
-    private String start;
-    private String end;
-
-    public MacdDto() {
-    }
-
-    public MacdDto(String table, String code, Integer rehabType, String start, String end) {
-        this.table = table;
-        this.code = code;
-        this.rehabType = rehabType;
-        this.start = start;
-        this.end = end;
-    }
-
-    public String getTable() {
-        return table;
-    }
-
-    public void setTable(String table) {
-        this.table = table;
-    }
-
-    public String getStart() {
-        return start;
-    }
-
-    public void setStart(String start) {
-        this.start = start;
-    }
-
-    public String getEnd() {
-        return end;
-    }
-
-    public void setEnd(String end) {
-        this.end = end;
-    }
-
-    public String getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
-    }
 
     public Integer getMarket() {
         return market;
@@ -102,5 +55,13 @@ public class MacdDto {
 
     public void setMacd(Double macd) {
         this.macd = macd;
+    }
+
+    public String getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
     }
 }

@@ -13,15 +13,43 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class MacdMapper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EmaMapper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MacdMapper.class);
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     public static final String MACD_MIN_1_TABLE_NAME = "t_macd_min_1_arc";
 
     public MacdMapper(@Qualifier("analyzeNamedParameterJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
+
+    public List<MacdDto> queryList(MacdDto macdDto) {
+        try {
+            String sql = "select market,code,rehab_type,dif,dea,macd,update_time" +
+                    " from :table" +
+                    " prewhere (1=1)";
+            if (Objects.nonNull(macdDto.getCode())) {
+                sql += " and (code = :code)";
+            }
+            if (Objects.nonNull(macdDto.getRehabType())) {
+                sql += " and (rehab_type = :rehabType)";
+            }
+            if (Objects.nonNull(macdDto.getStart())) {
+                sql += " and (update_time >= :start) ";
+            }
+            if (Objects.nonNull(macdDto.getEnd())) {
+                sql += " and (update_time <= :end) ";
+            }
+            sql += "order by update_time asc";
+            return namedParameterJdbcTemplate.query(sql,
+                    new BeanPropertySqlParameterSource(macdDto),
+                    new BeanPropertyRowMapper<>(MacdDto.class));
+        } catch (Exception e) {
+            LOGGER.error("查询macd数据失败.", e);
+            return null;
+        }
     }
 
     public List<MacdDto> queryDif(EmaDto emaDto) {

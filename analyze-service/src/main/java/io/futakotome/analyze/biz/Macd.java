@@ -1,11 +1,11 @@
 package io.futakotome.analyze.biz;
 
+import io.futakotome.analyze.controller.vo.MacdRequest;
+import io.futakotome.analyze.controller.vo.MacdResponse;
+import io.futakotome.analyze.mapper.KLineMapper;
 import io.futakotome.analyze.mapper.MacdMapper;
 import io.futakotome.analyze.mapper.TradeDateMapper;
-import io.futakotome.analyze.mapper.dto.CodeAndRehabTypeKey;
-import io.futakotome.analyze.mapper.dto.EmaDto;
-import io.futakotome.analyze.mapper.dto.MacdDto;
-import io.futakotome.analyze.mapper.dto.TradeDateDto;
+import io.futakotome.analyze.mapper.dto.*;
 import io.futakotome.analyze.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +22,36 @@ public class Macd {
     private TradeDateMapper tradeDateMapper;
     private MacdMapper macdMapper;
 
+    public Macd(MacdMapper macdMapper) {
+        this.macdMapper = macdMapper;
+    }
+
     public Macd(MacdMapper macdMapper, TradeDateMapper tradeDateMapper) {
         this.macdMapper = macdMapper;
         this.tradeDateMapper = tradeDateMapper;
+    }
+
+    public List<MacdResponse> queryMacdList(MacdRequest macdRequest) {
+        switch (macdRequest.getGranularity()) {
+            case 1:
+                return macdMapper.queryList(new MacdDto(MacdMapper.MACD_MIN_1_TABLE_NAME, macdRequest.getCode(), macdRequest.getRehabType(), macdRequest.getStart(), macdRequest.getEnd()))
+                        .stream().map(this::dto2Vo).collect(Collectors.toList());
+            case 2:
+                return null;
+        }
+        return null;
+    }
+
+    private MacdResponse dto2Vo(MacdDto macdDto) {
+        MacdResponse response = new MacdResponse();
+        response.setMarket(macdDto.getMarket());
+        response.setCode(macdDto.getCode());
+        response.setRehabType(macdDto.getRehabType());
+        response.setDif(macdDto.getDif());
+        response.setDea(macdDto.getDea());
+        response.setMacd(macdDto.getMacd());
+        response.setUpdateTime(macdDto.getUpdateTime());
+        return response;
     }
 
     public void calculate(String toTable, String fromTable, String startDateTime, String endDateTime) {
