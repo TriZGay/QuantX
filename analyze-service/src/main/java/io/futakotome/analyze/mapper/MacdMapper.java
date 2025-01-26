@@ -27,7 +27,7 @@ public class MacdMapper {
 
     public List<MacdDto> queryList(MacdDto macdDto) {
         try {
-            String sql = "select market,code,rehab_type,dif,dea,macd,update_time" +
+            String sql = "select market,code,rehab_type,dif,round(dea,4) as dea,round(macd,4)as macd,update_time" +
                     " from :table" +
                     " prewhere (1=1)";
             if (Objects.nonNull(macdDto.getCode())) {
