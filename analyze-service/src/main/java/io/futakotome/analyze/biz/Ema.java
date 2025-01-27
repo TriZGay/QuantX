@@ -107,10 +107,22 @@ public class Ema {
                     Map<CodeAndRehabTypeKey, List<KLineDto>> groupingKLineByCodeAndRehabType = kLineDtos.stream()
                             .collect(Collectors.groupingBy(k -> new CodeAndRehabTypeKey(k.getRehabType(), k.getCode())));
                     for (CodeAndRehabTypeKey key : groupingKLineByCodeAndRehabType.keySet()) {
+                        List<KLineDto> kGroupByKey = groupingKLineByCodeAndRehabType.get(key);
                         List<EmaDto> forwardEmas = emaMapper.queryList(new EmaDto(toTable, key.getCode(), key.getRehabType(), sdt.getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER), endDateTime));
                         EmaDto initialEma = forwardEmas.stream().filter(forwardEma ->
-                                LocalDateTime.parse(forwardEma.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER))).findFirst().get();
-                        List<KLineDto> kGroupByKey = groupingKLineByCodeAndRehabType.get(key);
+                                        LocalDateTime.parse(forwardEma.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
+                                .findFirst().orElseGet(() -> {
+                                    //有些标的物不是从2025年1月2号开始收集K线数据
+                                    EmaDto initEma = new EmaDto();
+                                    initEma.setEma_5(kGroupByKey.get(0).getClosePrice());
+                                    initEma.setEma_10(kGroupByKey.get(0).getClosePrice());
+                                    initEma.setEma_12(kGroupByKey.get(0).getClosePrice());
+                                    initEma.setEma_20(kGroupByKey.get(0).getClosePrice());
+                                    initEma.setEma_26(kGroupByKey.get(0).getClosePrice());
+                                    initEma.setEma_60(kGroupByKey.get(0).getClosePrice());
+                                    initEma.setEma_120(kGroupByKey.get(0).getClosePrice());
+                                    return initEma;
+                                });
                         List<EmaDto> insertDtos = new ArrayList<>();
                         EmaInternal ema5 = new EmaInternal(5, initialEma.getEma_5());
                         EmaInternal ema10 = new EmaInternal(10, initialEma.getEma_10());

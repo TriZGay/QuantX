@@ -87,7 +87,16 @@ public class Macd {
                     groupingDifByCodeAndRehabType.keySet().forEach(key -> {
                         List<MacdDto> difByKey = groupingDifByCodeAndRehabType.get(key);
                         MacdDto initMacd = difByKey.stream().filter(forwardDif ->
-                                LocalDateTime.parse(forwardDif.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER))).findFirst().get();
+                                        LocalDateTime.parse(forwardDif.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
+                                .findFirst().orElseGet(() -> {
+                                    //有些标的物不是从2025年1月2号开始收集K线数据
+                                    MacdDto initMacdDto = new MacdDto();
+                                    //由ema9的递推式可以推出公式 DEA = 2/(9+1) * 今日DIFF + 8/(9+1) * 昨日DEA
+                                    //但由于中途收集的数据没有昨日的DEA,所以假设为0,以此为近似值
+                                    Double initDea = (1 / 5) * difByKey.get(0).getDif();
+                                    initMacdDto.setDea(initDea);
+                                    return initMacdDto;
+                                });
                         Ema.EmaInternal dea = new Ema.EmaInternal(9, initMacd.getDea());
                         List<MacdDto> insertDtos = difByKey.stream().peek(macdDto -> {
                             Double deaVal = dea.calculate(macdDto.getDif());
