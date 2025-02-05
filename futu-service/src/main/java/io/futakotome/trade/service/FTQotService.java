@@ -16,6 +16,7 @@ import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.*;
 import io.futakotome.trade.domain.*;
 import io.futakotome.trade.dto.*;
+import io.futakotome.trade.dto.message.*;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.message.*;
 import io.futakotome.trade.utils.CacheManager;
@@ -112,14 +113,15 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         market.sendTradeDateRequest();
     }
 
-    public void sendSubInfoRequest() {
+    public int sendSubInfoRequest() {
         QotGetSubInfo.Request request = QotGetSubInfo.Request.newBuilder()
                 .setC2S(QotGetSubInfo.C2S.newBuilder()
                         .setIsReqAllConn(true)
                         .build())
                 .build();
         int seqNo = qot.getSubInfo(request);
-        LOGGER.info("查询订阅信息.seqNo=" + seqNo);
+        LOGGER.info("查询订阅信息.seqNo={}", seqNo);
+        return seqNo;
     }
 
     public void syncCapitalFlow(SyncCapitalFlowRequest request) {
@@ -163,7 +165,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         LOGGER.info("请求资金分布.seqNo=" + seqNo);
     }
 
-    public void cancelSubscribe(SubscribeRequest subscribeRequest) {
+    public int cancelSubscribe(SubscribeRequest subscribeRequest) {
         QotSub.Request request = QotSub.Request.newBuilder()
                 .setC2S(QotSub.C2S.newBuilder()
                         .addAllSubTypeList(subscribeRequest.getSubTypeList())
@@ -180,10 +182,11 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         int seqNo = qot.sub(request);
         //下面订阅成功之后再拿出来插入订阅信息
         CacheManager.put(String.valueOf(seqNo), subscribeRequest);
-        LOGGER.info("取消订阅.seqNo=" + seqNo);
+        LOGGER.info("取消订阅.seqNo={}", seqNo);
+        return seqNo;
     }
 
-    public void subscribeRequest(SubscribeRequest subscribeRequest) {
+    public int subscribeRequest(SubscribeRequest subscribeRequest) {
         QotSub.Request.Builder requestBuilder = QotSub.Request.newBuilder();
         if (CollectionUtils.intersection(subscribeRequest.getSubTypeList(),
                 Arrays.asList(
@@ -233,7 +236,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         int seqNo = qot.sub(requestBuilder.build());
         //下面订阅成功之后再拿出来插入订阅信息
         CacheManager.put(String.valueOf(seqNo), subscribeRequest);
-        LOGGER.info("发起订阅.seqNo=" + seqNo);
+        LOGGER.info("发起订阅.seqNo={}", seqNo);
+        return seqNo;
     }
 
     public void sendHistoryKLineRequest(SyncHistoryKRequest syncHistoryKRequest) {

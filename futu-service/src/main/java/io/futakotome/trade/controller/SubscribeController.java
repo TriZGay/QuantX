@@ -42,31 +42,50 @@ public class SubscribeController {
     }
 
     @GetMapping("/refresh")
-    public Mono<ResponseEntity<String>> getSubInfo() {
-        ftQotService.sendSubInfoRequest();
-        return Mono.just("commit succeed.")
-                .map(str -> new ResponseEntity<>(str, HttpStatus.OK));
+    public Mono<ResponseEntity<?>> getSubInfo() {
+        return Mono.create(responseEntityMonoSink -> {
+            try {
+                int seqNo = ftQotService.sendSubInfoRequest();
+                responseEntityMonoSink.success(ResponseEntity.ok("已提交到FUTU网关.seqNo=" + seqNo));
+            } catch (Exception e) {
+                responseEntityMonoSink.success(ResponseEntity.internalServerError().body("提交到FUTU网关失败:" + e.getMessage()));
+            }
+        });
     }
 
     @PostMapping("/cancel")
     public Mono<ResponseEntity<String>> cancelSubscribe(@RequestBody @Validated Mono<SubscribeRequest> cancelRequest) {
         return Mono.create(responseEntityMonoSink -> {
-            cancelRequest.doOnError(WebExchangeBindException.class, throwable -> responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors().toString(), HttpStatus.BAD_REQUEST)))
-                    .doOnNext(r -> {
-                        ftQotService.cancelSubscribe(r);
-                        responseEntityMonoSink.success(new ResponseEntity<>("cancel succeed.", HttpStatus.OK));
-                    }).subscribe();
+            cancelRequest.doOnError(WebExchangeBindException.class, throwable -> {
+                responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors(), HttpStatus.BAD_REQUEST));
+            }).doOnError(Exception.class, throwable -> {
+                responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
+            }).doOnNext(request -> {
+                try {
+                    int seqNo = ftQotService.cancelSubscribe(request);
+                    responseEntityMonoSink.success(ResponseEntity.ok("已提交到FUTU网关.seqNo=" + seqNo));
+                } catch (Exception e) {
+                    responseEntityMonoSink.success(ResponseEntity.internalServerError().body("提交到FUTU网关失败:" + e.getMessage()));
+                }
+            }).subscribe();
         });
     }
 
     @PostMapping("/")
-    public Mono<ResponseEntity<String>> subscribe(@RequestBody @Validated Mono<SubscribeRequest> request) {
-        return Mono.create(responseEntityMonoSink ->
-                request.doOnError(WebExchangeBindException.class, throwable -> responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors().toString(), HttpStatus.BAD_REQUEST)))
-                        .doOnNext(r -> {
-                            ftQotService.subscribeRequest(r);
-                            responseEntityMonoSink.success(new ResponseEntity<>("subscribe succeed.", HttpStatus.OK));
-                        }).subscribe()
-        );
+    public Mono<ResponseEntity<?>> subscribe(@RequestBody @Validated Mono<SubscribeRequest> requestMono) {
+        return Mono.create(responseEntityMonoSink -> {
+            requestMono.doOnError(WebExchangeBindException.class, throwable -> {
+                responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors(), HttpStatus.BAD_REQUEST));
+            }).doOnError(Exception.class, throwable -> {
+                responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
+            }).doOnNext(request -> {
+                try {
+                    int seqNo = ftQotService.subscribeRequest(request);
+                    responseEntityMonoSink.success(ResponseEntity.ok("已提交到FUTU网关.seqNo=" + seqNo));
+                } catch (Exception e) {
+                    responseEntityMonoSink.success(ResponseEntity.internalServerError().body("提交到FUTU网关失败:" + e.getMessage()));
+                }
+            }).subscribe();
+        });
     }
 }

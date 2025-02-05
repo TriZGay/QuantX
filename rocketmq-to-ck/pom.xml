@@ -20,10 +20,6 @@
     </parent>
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.futakotome</groupId>
             <artifactId>quant-common</artifactId>
             <version>1.0-SNAPSHOT</version>

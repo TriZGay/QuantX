@@ -2,35 +2,8 @@ package io.futakotome.rtck.listener;
 
 import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.rtck.mapper.dto.RTKLDto;
-import io.futakotome.rtck.message.core.WebSocketSender;
-import io.futakotome.rtck.message.dto.RealTimeKLMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class AbstractKLineListener {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractKLineListener.class);
-
-    protected void sendKLineWsMessage(RTKLMessage rtklMessage, WebSocketSender sender) {
-        RealTimeKLMessage realTimeKLMessage = new RealTimeKLMessage();
-        realTimeKLMessage.setMarket(rtklMessage.getMarket());
-        realTimeKLMessage.setCode(rtklMessage.getCode());
-        realTimeKLMessage.setRehabType(rtklMessage.getRehabType());
-        realTimeKLMessage.setHighPrice(rtklMessage.getHighPrice());
-        realTimeKLMessage.setOpenPrice(rtklMessage.getOpenPrice());
-        realTimeKLMessage.setLowPrice(rtklMessage.getLowPrice());
-        realTimeKLMessage.setClosePrice(rtklMessage.getClosePrice());
-        realTimeKLMessage.setLastClosePrice(rtklMessage.getLastClosePrice());
-        realTimeKLMessage.setVolume(rtklMessage.getVolume());
-        realTimeKLMessage.setTurnover(rtklMessage.getTurnover());
-        realTimeKLMessage.setTurnoverRate(rtklMessage.getTurnoverRate());
-        realTimeKLMessage.setPe(rtklMessage.getPe());
-        realTimeKLMessage.setChangeRate(rtklMessage.getChangeRate());
-        realTimeKLMessage.setUpdateTime(rtklMessage.getUpdateTime());
-        if (sender != null) {
-            LOGGER.info("WebSocket消息:{}", realTimeKLMessage.toString());
-            sender.sendData(realTimeKLMessage);
-        }
-    }
 
     protected RTKLDto message2Dto(RTKLMessage rtklMessage) {
         RTKLDto dto = new RTKLDto();
