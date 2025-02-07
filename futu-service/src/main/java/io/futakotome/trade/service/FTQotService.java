@@ -14,11 +14,13 @@ import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.*;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.*;
+import io.futakotome.trade.controller.ws.QuantxFutuWsService;
 import io.futakotome.trade.domain.*;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.dto.message.*;
+import io.futakotome.trade.dto.ws.HistoryKLDetailWsMessage;
+import io.futakotome.trade.dto.ws.MarketStateWsMessage;
 import io.futakotome.trade.mapper.*;
-import io.futakotome.trade.message.*;
 import io.futakotome.trade.utils.CacheManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.rocketmq.client.producer.SendCallback;
@@ -60,13 +62,16 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private final FutuConfig futuConfig;
     private final RocketMQTemplate rocketMQTemplate;
 
+    private final QuantxFutuWsService quantxFutuWsService;
+
     private static final String clientID = "javaclient";
 
     public static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
     public FTQotService(PlateDtoMapper plateMapper, StockDtoMapper stockMapper, PlateStockDtoMapper plateStockMapper,
                         IpoHkDtoMapper ipoHkMapper, IpoUsDtoMapper ipoUsMapper, IpoCnDtoMapper ipoCnMapper, IpoCnExWinningDtoMapper ipoCnExWinningMapper,
-                        SubDtoMapper subDtoMapper, TradeDateDtoMapper tradeDateDtoMapper, CapitalDistributionDtoMapper capitalDistributionDtoMapper, FutuConfig futuConfig, RocketMQTemplate rocketMQTemplate) {
+                        SubDtoMapper subDtoMapper, TradeDateDtoMapper tradeDateDtoMapper, CapitalDistributionDtoMapper capitalDistributionDtoMapper,
+                        FutuConfig futuConfig, RocketMQTemplate rocketMQTemplate, QuantxFutuWsService quantxFutuWsService) {
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
@@ -79,9 +84,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         this.ipoUsMapper = ipoUsMapper;
         this.ipoCnMapper = ipoCnMapper;
         this.ipoCnExWinningMapper = ipoCnExWinningMapper;
-        this.rocketMQTemplate = rocketMQTemplate;
         this.tradeDateDtoMapper = tradeDateDtoMapper;
         this.capitalDistributionDtoMapper = capitalDistributionDtoMapper;
+        this.rocketMQTemplate = rocketMQTemplate;
+        this.quantxFutuWsService = quantxFutuWsService;
     }
 
     @Deprecated
@@ -271,7 +277,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 .setC2S(QotRequestHistoryKLQuota.C2S.newBuilder().setBGetDetail(true).build())
                 .build();
         int seqNo = qot.requestHistoryKLQuota(request);
-        LOGGER.info("查询历史K线数据额度明细.seq=" + seqNo);
+        LOGGER.info("查询历史K线数据额度明细.seq={}", seqNo);
     }
 
     public void sendGlobalMarketStateRequest() {
@@ -281,7 +287,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                         .build())
                 .build();
         int seqNo = qot.getGlobalState(request);
-        LOGGER.info("查询全局市场状态.seq=" + seqNo);
+        LOGGER.info("查询全局市场状态.seq={}", seqNo);
     }
 
     public void sendRehabRequest(SyncRehabRequest syncRehabRequest) {
@@ -626,12 +632,12 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     private void sendHistoryKLDetailMessage(HistoryKLDetailMessageContent messageContent) {
-        HistoryKLDetailMessage message = new HistoryKLDetailMessage();
+        HistoryKLDetailWsMessage message = new HistoryKLDetailWsMessage();
         message.setUsedQuota(messageContent.getUsedQuota());
         message.setRemainQuota(messageContent.getRemainQuota());
-        message.setDetailList(messageContent.getDetailList() == null ? new ArrayList<>() :
+        message.setItemList(messageContent.getDetailList() == null ? new ArrayList<>() :
                 messageContent.getDetailList().stream().map(item -> {
-                    HistoryKLDetailMessage.HistoryKLDetailItemMessage itemMessage = new HistoryKLDetailMessage.HistoryKLDetailItemMessage();
+                    HistoryKLDetailWsMessage.HistoryKLDetailItemWsMessage itemMessage = new HistoryKLDetailWsMessage.HistoryKLDetailItemWsMessage();
                     itemMessage.setMarket(item.getSecurity().getMarket());
                     itemMessage.setCode(item.getSecurity().getCode());
                     itemMessage.setName(item.getName());
@@ -639,19 +645,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     itemMessage.setRequestTimeStamp(item.getRequestTimeStamp());
                     return itemMessage;
                 }).collect(Collectors.toList()));
-
-        rocketMQTemplate.asyncSend(MessageCommon.HISTORY_KL_DETAIL_TOPIC, message, new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                LOGGER.info("历史K线额度使用明细投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-                        sendResult.getSendStatus());
-            }
-
-            @Override
-            public void onException(Throwable throwable) {
-                LOGGER.error("历史K线额度使用明细投递失败", throwable);
-            }
-        });
+        quantxFutuWsService.sendHistoryKQuotaDetails(message);
     }
 
     private void sendRehabMessage(RehabMessageContent rehabMessageContent) {
@@ -723,7 +717,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     private void sendMarketStateMessage(MarketStateVo marketStateVo) {
-        MarketStateMessage marketStateMessage = new MarketStateMessage();
+        MarketStateWsMessage marketStateMessage = new MarketStateWsMessage();
         marketStateMessage.setMarketHK(MarketState.mapFrom(marketStateVo.getMarketHK()));
         marketStateMessage.setMarketUS(MarketState.mapFrom(marketStateVo.getMarketUS()));
         marketStateMessage.setMarketSH(MarketState.mapFrom(marketStateVo.getMarketSH()));
@@ -736,35 +730,13 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         marketStateMessage.setMarketUSFuture(MarketState.mapFrom(marketStateVo.getMarketUSFuture()));
         marketStateMessage.setMarketSGFuture(MarketState.mapFrom(marketStateVo.getMarketSGFuture()));
         marketStateMessage.setMarketJPFuture(MarketState.mapFrom(marketStateVo.getMarketJPFuture()));
-        rocketMQTemplate.asyncSend(MessageCommon.MARKET_STATE_TOPIC, marketStateMessage, new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                LOGGER.info("全局市场状态投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-                        sendResult.getSendStatus());
-            }
-
-            @Override
-            public void onException(Throwable throwable) {
-                LOGGER.error("全局市场状态投递失败", throwable);
-            }
-        });
+        this.quantxFutuWsService.sendMarketStart(marketStateMessage);
     }
 
     private void sendNotifyMessage(String notifyContent) {
-        NotifyMessage notifyMessage = new NotifyMessage();
-        notifyMessage.setContent(notifyContent);
-        rocketMQTemplate.asyncSend(MessageCommon.NOTIFY_TOPIC, notifyMessage, new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                LOGGER.info("FT通知投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-                        sendResult.getSendStatus());
-            }
-
-            @Override
-            public void onException(Throwable throwable) {
-                LOGGER.error("FT通知投递失败", throwable);
-            }
-        });
+        if (Objects.nonNull(notifyContent) && !notifyContent.isEmpty()) {
+            quantxFutuWsService.sendNotify(notifyContent);
+        }
     }
 
     private void sendBrokersMessage(BrokerMessageContent content) {

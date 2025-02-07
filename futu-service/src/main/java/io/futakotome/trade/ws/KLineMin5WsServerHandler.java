@@ -1,7 +1,7 @@
 package io.futakotome.trade.ws;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.futakotome.rtck.annotation.WebSocketMapping;
+import io.futakotome.trade.annotation.WebSocketMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

@@ -1,7 +1,6 @@
 package io.futakotome.rtck.event;
 
 import com.lmax.disruptor.EventHandler;
-import com.lmax.disruptor.Sequence;
 import io.futakotome.rtck.mapper.RTKLMapper;
 import org.assertj.core.util.Lists;
 import org.slf4j.Logger;

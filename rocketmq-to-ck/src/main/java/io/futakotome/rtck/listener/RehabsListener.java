@@ -1,10 +1,8 @@
 package io.futakotome.rtck.listener;
 
-import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.RehabMessage;
 import io.futakotome.rtck.mapper.RehabsMapper;
 import io.futakotome.rtck.mapper.dto.RehabDto;
-import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
