@@ -26,6 +26,9 @@ public class SubDto implements Serializable {
     private Integer subType;
 
     @TableField(exist = false)
+    private String subTypes;
+
+    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
     public Long getId() {
@@ -58,6 +61,14 @@ public class SubDto implements Serializable {
 
     public void setSubType(Integer subType) {
         this.subType = subType;
+    }
+
+    public String getSubTypes() {
+        return subTypes;
+    }
+
+    public void setSubTypes(String subTypes) {
+        this.subTypes = subTypes;
     }
 
     public String getSecurityName() {

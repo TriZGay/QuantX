@@ -19,7 +19,9 @@ import io.futakotome.trade.domain.*;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.dto.message.*;
 import io.futakotome.trade.dto.ws.HistoryKLDetailWsMessage;
+import io.futakotome.trade.dto.ws.HistoryKLWsMessage;
 import io.futakotome.trade.dto.ws.MarketStateWsMessage;
+import io.futakotome.trade.dto.ws.SubOrUnSubWsMessage;
 import io.futakotome.trade.mapper.*;
 import io.futakotome.trade.utils.CacheManager;
 import org.apache.commons.collections4.CollectionUtils;
@@ -119,7 +121,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         market.sendTradeDateRequest();
     }
 
-    public int sendSubInfoRequest() {
+    public void sendSubInfoRequest() {
         QotGetSubInfo.Request request = QotGetSubInfo.Request.newBuilder()
                 .setC2S(QotGetSubInfo.C2S.newBuilder()
                         .setIsReqAllConn(true)
@@ -127,7 +129,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 .build();
         int seqNo = qot.getSubInfo(request);
         LOGGER.info("查询订阅信息.seqNo={}", seqNo);
-        return seqNo;
     }
 
     public void syncCapitalFlow(SyncCapitalFlowRequest request) {
@@ -171,7 +172,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         LOGGER.info("请求资金分布.seqNo=" + seqNo);
     }
 
-    public int cancelSubscribe(SubscribeRequest subscribeRequest) {
+    public void cancelSubscribe(SubOrUnSubWsMessage subscribeRequest) {
         QotSub.Request request = QotSub.Request.newBuilder()
                 .setC2S(QotSub.C2S.newBuilder()
                         .addAllSubTypeList(subscribeRequest.getSubTypeList())
@@ -189,10 +190,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         //下面订阅成功之后再拿出来插入订阅信息
         CacheManager.put(String.valueOf(seqNo), subscribeRequest);
         LOGGER.info("取消订阅.seqNo={}", seqNo);
-        return seqNo;
     }
 
-    public int subscribeRequest(SubscribeRequest subscribeRequest) {
+    public void subscribeRequest(SubOrUnSubWsMessage subscribeRequest) {
         QotSub.Request.Builder requestBuilder = QotSub.Request.newBuilder();
         if (CollectionUtils.intersection(subscribeRequest.getSubTypeList(),
                 Arrays.asList(
@@ -243,10 +243,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         //下面订阅成功之后再拿出来插入订阅信息
         CacheManager.put(String.valueOf(seqNo), subscribeRequest);
         LOGGER.info("发起订阅.seqNo={}", seqNo);
-        return seqNo;
     }
 
-    public void sendHistoryKLineRequest(SyncHistoryKRequest syncHistoryKRequest) {
+    public void sendHistoryKLineRequest(HistoryKLWsMessage syncHistoryKRequest) {
         QotCommon.Security security = QotCommon.Security.newBuilder()
                 .setMarket(syncHistoryKRequest.getMarket())
                 .setCode(syncHistoryKRequest.getCode())
@@ -268,7 +267,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     int seqNo = qot.requestHistoryKL(request);
                     String value = syncHistoryKRequest.getMarket() + "-" + syncHistoryKRequest.getCode() + "-" + syncHistoryKRequest.getKlType() + "-" + rehabType;
                     CacheManager.put(String.valueOf(seqNo), value);
-                    LOGGER.info("查询历史K线数据.seqNo=" + seqNo);
+                    LOGGER.info("查询历史K线数据.seqNo={}", seqNo);
                 });
     }
 
@@ -327,7 +326,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                             }));
             groupBySecurity.keySet()
                     .forEach(subscribeSecurity ->
-                            this.subscribeRequest(new SubscribeRequest(Collections.singletonList(subscribeSecurity),
+                            this.subscribeRequest(new SubOrUnSubWsMessage(Collections.singletonList(subscribeSecurity),
                                     groupBySecurity.get(subscribeSecurity))));
         }
     }
@@ -1222,10 +1221,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 Object cacheValue = CacheManager.get(String.valueOf(nSerialNo));
-                if (cacheValue instanceof SubscribeRequest) {
-                    if (((SubscribeRequest) cacheValue).isUnsub() != null && ((SubscribeRequest) cacheValue).isUnsub()) {
-                        ((SubscribeRequest) cacheValue).getSecurityList()
-                                .forEach(subscribeSecurity -> ((SubscribeRequest) cacheValue).getSubTypeList()
+                if (cacheValue instanceof SubOrUnSubWsMessage) {
+                    if (((SubOrUnSubWsMessage) cacheValue).getUnsub() != null && ((SubOrUnSubWsMessage) cacheValue).getUnsub()) {
+                        ((SubOrUnSubWsMessage) cacheValue).getSecurityList()
+                                .forEach(subscribeSecurity -> ((SubOrUnSubWsMessage) cacheValue).getSubTypeList()
                                         .forEach(subType -> {
                                             int delRow = subDtoMapper.deleteBySecurityCodeAndSubType(subscribeSecurity.getCode(), subType);
                                             if (delRow > 0) {
@@ -1237,8 +1236,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
                     } else {
                         List<SubDto> toAddList = new ArrayList<>();
-                        ((SubscribeRequest) cacheValue).getSecurityList()
-                                .forEach(subscribeSecurity -> ((SubscribeRequest) cacheValue).getSubTypeList()
+                        ((SubOrUnSubWsMessage) cacheValue).getSecurityList()
+                                .forEach(subscribeSecurity -> ((SubOrUnSubWsMessage) cacheValue).getSubTypeList()
                                         .forEach(subType -> {
                                             SubDto toAddSub = new SubDto();
                                             toAddSub.setSecurityCode(subscribeSecurity.getCode());

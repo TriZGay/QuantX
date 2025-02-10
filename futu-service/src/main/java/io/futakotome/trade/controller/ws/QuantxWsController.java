@@ -2,9 +2,7 @@ package io.futakotome.trade.controller.ws;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.futakotome.trade.dto.ws.ConnectWsMessage;
-import io.futakotome.trade.dto.ws.Message;
-import io.futakotome.trade.dto.ws.MessageType;
+import io.futakotome.trade.dto.ws.*;
 import io.futakotome.trade.service.FTQotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +43,24 @@ public class QuantxWsController {
             } else if (messageClz.getType().equals(MessageType.KL_HISTORY_DETAIL)) {
                 //历史K额度查询
                 ftQotService.sendHistoryKLineDetailRequest();
+            } else if (messageClz.getType().equals(MessageType.REFRESH_SUB)) {
+                //刷新订阅信息
+                ftQotService.sendSubInfoRequest();
+            } else if (messageClz.getType().equals(MessageType.SUBSCRIPTION)) {
+                //订阅或取消订阅
+                SubOrUnSubWsMessage subMessage = (SubOrUnSubWsMessage) messageClz;
+                if (subMessage.getUnsub()) {
+                    ftQotService.cancelSubscribe(subMessage);
+                } else {
+                    ftQotService.subscribeRequest(subMessage);
+                }
+            } else if (messageClz.getType().equals(MessageType.TRADE_DATE)) {
+                //请求交易日期
+                ftQotService.syncTradeDate();
+            } else if (messageClz.getType().equals(MessageType.KL_HISTORY)) {
+                //请求历史K线数据
+                HistoryKLWsMessage historyKLWsMessage = (HistoryKLWsMessage) messageClz;
+                ftQotService.sendHistoryKLineRequest(historyKLWsMessage);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

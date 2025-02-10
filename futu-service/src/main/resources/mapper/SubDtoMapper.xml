@@ -11,10 +11,12 @@
         <result property="securityName" column="security_name" jdbcType="VARCHAR"/>
         <result property="securityType" column="security_type" jdbcType="INTEGER"/>
         <result property="subType" column="sub_type" jdbcType="INTEGER"/>
+        <result property="subTypes" column="sub_types" jdbcType="VARCHAR" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,security_market,security_code,
+        id
+        ,security_market,security_code,
         sub_type,used_quota,is_own_conn
     </sql>
     <insert id="insertBatch">
@@ -22,7 +24,7 @@
         values
         <foreach collection="subDtoCollection" item="item" separator=",">
             (#{item.securityMarket,jdbcType=NUMERIC},#{item.securityCode,jdbcType=VARCHAR},
-             #{item.securityName,jdbcType=VARCHAR},#{item.securityType,jdbcType=INTEGER},#{item.subType,jdbcType=INTEGER})
+            #{item.securityName,jdbcType=VARCHAR},#{item.securityType,jdbcType=INTEGER},#{item.subType,jdbcType=INTEGER})
         </foreach>
     </insert>
     <delete id="deleteBySecurityCodeAndSubType">
@@ -31,4 +33,9 @@
         where security_code = #{securityCode,jdbcType=VARCHAR}
           AND sub_type = #{subType,jdbcType=NUMERIC}
     </delete>
+    <select id="findAllWithAggregateSubTypes" resultMap="BaseResultMap">
+        select security_market, security_code, security_name, security_type, string_agg(sub_type::varchar,',') as sub_types
+        from t_sub
+        group by security_market, security_code, security_name, security_type
+    </select>
 </mapper>

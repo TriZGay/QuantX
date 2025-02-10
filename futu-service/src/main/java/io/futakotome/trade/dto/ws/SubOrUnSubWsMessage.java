@@ -1,22 +1,19 @@
-package io.futakotome.trade.controller.vo;
+package io.futakotome.trade.dto.ws;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import io.futakotome.trade.controller.vo.SubscribeSecurity;
+
 import java.util.List;
 
-public class SubscribeRequest {
-    @NotNull
-    @Valid
+public class SubOrUnSubWsMessage implements Message {
     private List<SubscribeSecurity> securityList;
-    @NotNull
     private List<Integer> subTypeList;
 
     private Boolean unsub;
 
-    public SubscribeRequest() {
+    public SubOrUnSubWsMessage() {
     }
 
-    public SubscribeRequest(List<SubscribeSecurity> securityList, List<Integer> subTypeList) {
+    public SubOrUnSubWsMessage(List<SubscribeSecurity> securityList, List<Integer> subTypeList) {
         this.securityList = securityList;
         this.subTypeList = subTypeList;
     }
@@ -37,11 +34,16 @@ public class SubscribeRequest {
         this.subTypeList = subTypeList;
     }
 
-    public Boolean isUnsub() {
+    public Boolean getUnsub() {
         return unsub;
     }
 
     public void setUnsub(Boolean unsub) {
         this.unsub = unsub;
+    }
+
+    @Override
+    public MessageType getType() {
+        return MessageType.SUBSCRIPTION;
     }
 }

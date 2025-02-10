@@ -1,11 +1,13 @@
 package io.futakotome.trade.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.futakotome.trade.dto.SubDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author pc
@@ -18,6 +20,8 @@ public interface SubDtoMapper extends BaseMapper<SubDto> {
     int insertBatch(@Param("subDtoCollection") Collection<SubDto> subDtoCollection);
 
     int deleteBySecurityCodeAndSubType(@Param("securityCode") String securityCode, @Param("subType") Integer subType);
+
+    IPage<SubDto> findAllWithAggregateSubTypes(IPage<SubDto> page);
 }
 
 

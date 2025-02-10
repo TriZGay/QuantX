@@ -4,6 +4,10 @@ public enum MessageType {
     CONNECT,
     MARKET_STATE,
     KL_HISTORY_DETAIL,
+    REFRESH_SUB,
+    SUBSCRIPTION,
+    TRADE_DATE,
+    KL_HISTORY,
 
     RT_BASIC_QUOTE,
     RT_KL,

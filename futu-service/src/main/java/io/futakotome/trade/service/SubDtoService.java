@@ -1,6 +1,9 @@
 package io.futakotome.trade.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import io.futakotome.trade.controller.vo.ListSubscribeRequest;
+import io.futakotome.trade.controller.vo.ListSubscribeResponse;
 import io.futakotome.trade.dto.SubDto;
 
 /**
@@ -9,5 +12,7 @@ import io.futakotome.trade.dto.SubDto;
  * @createDate 2023-05-08 15:00:30
  */
 public interface SubDtoService extends IService<SubDto> {
+    IPage<ListSubscribeResponse> findDetails(ListSubscribeRequest request);
 
+    IPage<ListSubscribeResponse> findList(ListSubscribeRequest request);
 }
