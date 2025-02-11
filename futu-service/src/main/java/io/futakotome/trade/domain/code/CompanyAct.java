@@ -1,4 +1,4 @@
-package io.futakotome.trade.domain;
+package io.futakotome.trade.domain.code;
 
 public enum CompanyAct {
     NONE(0, "无"),

@@ -1,4 +1,4 @@
-package io.futakotome.trade.domain;
+package io.futakotome.trade.domain.code;
 
 public enum BrokersAskOrBid {
     ASK(1, "卖盘"),

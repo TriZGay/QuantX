@@ -1,4 +1,4 @@
-package io.futakotome.trade.domain;
+package io.futakotome.trade.domain.code;
 
 public enum OrderStatus {
     UN_SUBMITTED(0, "未提交"),

@@ -1,4 +1,4 @@
-package io.futakotome.trade.domain;
+package io.futakotome.trade.domain.code;
 
 public enum SubType {
     NONE(0, "NONE"),

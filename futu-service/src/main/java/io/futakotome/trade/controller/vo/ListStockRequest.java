@@ -1,6 +1,6 @@
 package io.futakotome.trade.controller.vo;
 
-public class StockListRequest extends PaginationRequest {
+public class ListStockRequest extends PaginationRequest {
     private Integer market;
     private Integer exchangeType;
     private Integer delisting;

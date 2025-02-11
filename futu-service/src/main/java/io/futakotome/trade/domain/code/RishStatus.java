@@ -1,4 +1,4 @@
-package io.futakotome.trade.domain;
+package io.futakotome.trade.domain.code;
 
 public enum RishStatus {
     LEVEL_1(0, "非常安全"),

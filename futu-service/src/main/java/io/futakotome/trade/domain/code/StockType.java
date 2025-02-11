@@ -1,4 +1,4 @@
-package io.futakotome.trade.domain;
+package io.futakotome.trade.domain.code;
 
 public enum StockType {
     Unknown(0, "未知"),
@@ -19,6 +19,15 @@ public enum StockType {
     StockType(Integer code, String name) {
         this.code = code;
         this.name = name;
+    }
+
+    public static String getNameByCode(Integer code) {
+        for (StockType type : StockType.values()) {
+            if (type.getCode().equals(code)) {
+                return type.getName();
+            }
+        }
+        return "";
     }
 
     public String getName() {

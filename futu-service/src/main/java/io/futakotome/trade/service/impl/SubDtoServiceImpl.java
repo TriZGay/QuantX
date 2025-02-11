@@ -11,6 +11,7 @@ import io.futakotome.trade.dto.SubDto;
 import io.futakotome.trade.mapper.SubDtoMapper;
 import io.futakotome.trade.service.SubDtoService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author pc
@@ -22,6 +23,7 @@ public class SubDtoServiceImpl extends ServiceImpl<SubDtoMapper, SubDto>
         implements SubDtoService {
 
     @Override
+    @Transactional
     public IPage<ListSubscribeResponse> findDetails(ListSubscribeRequest request) {
         QueryWrapper<SubDto> queryWrapper = Wrappers.query();
         Page<SubDto> pagination = Page.of(1, 10);
@@ -43,6 +45,7 @@ public class SubDtoServiceImpl extends ServiceImpl<SubDtoMapper, SubDto>
     }
 
     @Override
+    @Transactional
     public IPage<ListSubscribeResponse> findList(ListSubscribeRequest request) {
         Page<SubDto> pagination = Page.of(1, 10);
         if (request.getCurrent() != null) {

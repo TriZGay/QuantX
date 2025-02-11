@@ -1,16 +1,14 @@
-package io.futakotome.trade.domain;
+package io.futakotome.trade.domain.code;
 
-public enum TradeSide {
-    UNKNOWN(0, "未知"),
-    BUY(1, "买入"),
-    SELL(2, "卖出"),
-    SELL_SHORT(3, "卖空"),
-    BUY_BACK(4, "买回");
+public enum RehabType {
+    NONE(0, "不复权"),
+    FORWARD(1, "前复权"),
+    BACKWARD(2, "后复权");
 
     private final Integer code;
     private final String name;
 
-    TradeSide(Integer code, String name) {
+    RehabType(Integer code, String name) {
         this.code = code;
         this.name = name;
     }

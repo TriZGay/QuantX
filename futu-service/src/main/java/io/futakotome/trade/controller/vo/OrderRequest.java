@@ -1,6 +1,6 @@
 package io.futakotome.trade.controller.vo;
 
-import io.futakotome.trade.domain.*;
+import io.futakotome.trade.domain.code.*;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;

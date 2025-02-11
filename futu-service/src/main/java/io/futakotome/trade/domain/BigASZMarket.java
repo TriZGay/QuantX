@@ -2,6 +2,7 @@ package io.futakotome.trade.domain;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.futu.openapi.pb.*;
+import io.futakotome.trade.domain.code.StockType;
 import io.futakotome.trade.dto.PlateDto;
 import io.futakotome.trade.dto.StockDto;
 import io.futakotome.trade.mapper.PlateDtoMapper;

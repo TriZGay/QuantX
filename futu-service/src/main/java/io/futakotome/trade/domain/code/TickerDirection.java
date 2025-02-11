@@ -1,4 +1,4 @@
-package io.futakotome.trade.domain;
+package io.futakotome.trade.domain.code;
 
 public enum TickerDirection {
     UNKNOWN(0, "未知"),

@@ -14,7 +14,7 @@ import com.google.protobuf.util.JsonFormat;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.OrderRequest;
 import io.futakotome.trade.controller.vo.UnlockRequest;
-import io.futakotome.trade.domain.Currency;
+import io.futakotome.trade.domain.code.Currency;
 import io.futakotome.trade.dto.AccDto;
 import io.futakotome.trade.dto.AccInfoDto;
 import io.futakotome.trade.dto.OrderDto;
