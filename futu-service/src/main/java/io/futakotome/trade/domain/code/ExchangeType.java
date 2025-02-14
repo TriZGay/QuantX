@@ -29,6 +29,15 @@ public enum ExchangeType {
         this.name = name;
     }
 
+    public static String getNameByCode(Integer code) {
+        for (ExchangeType e : ExchangeType.values()) {
+            if (e.code.equals(code)) {
+                return e.name;
+            }
+        }
+        return "";
+    }
+
     public Integer getCode() {
         return code;
     }

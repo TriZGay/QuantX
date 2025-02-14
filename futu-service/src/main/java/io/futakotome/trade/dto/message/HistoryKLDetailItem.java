@@ -1,16 +1,16 @@
 package io.futakotome.trade.dto.message;
 
 public class HistoryKLDetailItem {
-    private BasicQuoteSecurity security;
+    private CommonSecurity security;
     private String name;
     private String requestTime;
     private Long requestTimeStamp;
 
-    public BasicQuoteSecurity getSecurity() {
+    public CommonSecurity getSecurity() {
         return security;
     }
 
-    public void setSecurity(BasicQuoteSecurity security) {
+    public void setSecurity(CommonSecurity security) {
         this.security = security;
     }
 

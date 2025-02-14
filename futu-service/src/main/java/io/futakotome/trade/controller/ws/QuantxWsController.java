@@ -61,6 +61,10 @@ public class QuantxWsController {
                 //请求历史K线数据
                 HistoryKLWsMessage historyKLWsMessage = (HistoryKLWsMessage) messageClz;
                 ftQotService.sendHistoryKLineRequest(historyKLWsMessage);
+            } else if (messageClz.getType().equals(MessageType.PLATES)) {
+                //同步板块数据
+                PlatesWsMessage platesWsMessage =(PlatesWsMessage)  messageClz;
+                ftQotService.syncPlateInfo(platesWsMessage.getMarkets());
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

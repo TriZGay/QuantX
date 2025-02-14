@@ -1,7 +1,7 @@
 package io.futakotome.trade.dto.message;
 
 public class BasicQuoteMessageContent {
-    private BasicQuoteSecurity security;
+    private CommonSecurity security;
     private boolean isSuspended;
     private String listTime;
     private Double priceSpread;
@@ -18,11 +18,11 @@ public class BasicQuoteMessageContent {
     private Integer darkStatus;
     private Integer secStatus;
 
-    public BasicQuoteSecurity getSecurity() {
+    public CommonSecurity getSecurity() {
         return security;
     }
 
-    public void setSecurity(BasicQuoteSecurity security) {
+    public void setSecurity(CommonSecurity security) {
         this.security = security;
     }
 

@@ -8,33 +8,21 @@
    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <changeSet id="1" author="futakotome">
-        <sqlFile path="db/sql/InitAccTable.sql"/>
-    </changeSet>
-    <changeSet id="2" author="futakotome">
-        <sqlFile path="db/sql/InitAccInfoTable.sql"/>
-    </changeSet>
-    <changeSet id="3" author="futakotome">
         <sqlFile path="db/sql/InitOrderTable.sql"/>
     </changeSet>
-    <changeSet id="4" author="futakotome">
+    <changeSet id="2" author="futakotome">
         <sqlFile path="db/sql/InitPositionTable.sql"/>
     </changeSet>
-    <changeSet id="5" author="futakotome">
+    <changeSet id="3" author="futakotome">
         <sqlFile path="db/sql/InitPlateTable.sql"/>
     </changeSet>
-    <changeSet id="6" author="futakotome">
+    <changeSet id="4" author="futakotome">
         <sqlFile path="db/sql/InitStockTable.sql"/>
     </changeSet>
-    <changeSet id="7" author="futakotome">
-        <sqlFile path="db/sql/InitIpoTable.sql"/>
-    </changeSet>
-    <changeSet id="8" author="futakotome">
+    <changeSet id="5" author="futakotome">
         <sqlFile path="db/sql/InitSubscribeInfoTable.sql"/>
     </changeSet>
-    <changeSet id="9" author="futakotome">
+    <changeSet id="6" author="futakotome">
         <sqlFile path="db/sql/InitTradeDateTable.sql"/>
-    </changeSet>
-    <changeSet id="10" author="futakotome">
-        <sqlFile path="db/sql/InitCapitalDistributionTable.sql"/>
     </changeSet>
 </databaseChangeLog>

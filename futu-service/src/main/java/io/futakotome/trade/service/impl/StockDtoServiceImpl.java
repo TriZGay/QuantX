@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.futakotome.trade.controller.vo.ListStockRequest;
 import io.futakotome.trade.controller.vo.ListStockResponse;
+import io.futakotome.trade.domain.code.DelistingType;
+import io.futakotome.trade.domain.code.ExchangeType;
 import io.futakotome.trade.domain.code.MarketType;
 import io.futakotome.trade.domain.code.StockType;
 import io.futakotome.trade.dto.StockDto;
@@ -40,9 +42,6 @@ public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
         if (listStockRequest.getMarket() != null) {
             queryWrapper.eq("market", listStockRequest.getMarket());
         }
-        if (listStockRequest.getExchangeType() != null) {
-            queryWrapper.eq("exchange_type", listStockRequest.getExchangeType());
-        }
         if (listStockRequest.getDelisting() != null) {
             queryWrapper.eq("delisting", listStockRequest.getDelisting());
         }
@@ -52,30 +51,31 @@ public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
         if (listStockRequest.getSize() != null) {
             pagination.setSize(listStockRequest.getSize());
         }
-        return getBaseMapper().selectPage(pagination, queryWrapper)
-                .convert(stockDto -> {
-                    ListStockResponse response = new ListStockResponse();
-                    response.setId(stockDto.getId());
-                    response.setName(stockDto.getName());
-                    response.setMarket(MarketType.getNameByCode(stockDto.getMarket()));
-                    response.setCode(stockDto.getCode());
-                    response.setLotSize(stockDto.getLotSize());
-                    response.setStockType(StockType.getNameByCode(stockDto.getStockType()));
+        return page(pagination, queryWrapper).convert(stockDto -> {
+            ListStockResponse response = new ListStockResponse();
+            response.setId(stockDto.getId());
+            response.setName(stockDto.getName());
+            response.setMarket(MarketType.getNameByCode(stockDto.getMarket()));
+            response.setMarketCode(stockDto.getMarket());
+            response.setCode(stockDto.getCode());
+            response.setLotSize(stockDto.getLotSize());
+            response.setStockType(StockType.getNameByCode(stockDto.getStockType()));
+            response.setStockTypeCode(stockDto.getStockType());
 //                    response.setStockChildType(StockType.getNameByCode(stockDto.getStockChildType()));
 //                    response.setStockOwner(stockDto.getStockOwner());
 //                    response.setOptionType(stockDto.getOptionType());
 //                    response.setStrikeTime(stockDto.getStrikeTime());
 //                    response.setStrikePrice(stockDto.getStrikePrice());
 //                    response.setSuspension(stockDto.getSuspension());
-//                    response.setListingDate(stockDto.getListingDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            response.setListingDate(stockDto.getListingDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 //                    response.setStockId(stockDto.getStockId());
-//                    response.setDelisting(stockDto.getDelisting());
+            response.setDelisting(DelistingType.getNameByCode(stockDto.getDelisting()));
 //                    response.setIndexOptionType(stockDto.getIndexOptionType());
 //                    response.setMainContract(stockDto.getMainContract());
 //                    response.setLastTradeTime(stockDto.getLastTradeTime());
-//                    response.setExchangeType(stockDto.getExchangeType());
-                    return response;
-                });
+            response.setExchangeType(ExchangeType.getNameByCode(stockDto.getExchangeType()));
+            return response;
+        });
     }
 }
 

@@ -10,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = HistoryKLDetailWsMessage.class, name = "KL_HISTORY_DETAIL"),
         @JsonSubTypes.Type(value = SubOrUnSubWsMessage.class, name = "SUBSCRIPTION"),
         @JsonSubTypes.Type(value = HistoryKLWsMessage.class, name = "KL_HISTORY"),
+        @JsonSubTypes.Type(value = PlatesWsMessage.class, name = "PLATES"),
+
         @JsonSubTypes.Type(value = RealTimeBaseQuoteMessage.class, name = "RT_BASIC_QUOTE"),
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),
         @JsonSubTypes.Type(value = RealTimeTickerMessage.class, name = "RT_TICKER"),

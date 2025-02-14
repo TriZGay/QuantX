@@ -1,7 +1,5 @@
 package io.futakotome.trade.controller.vo;
 
-import java.time.LocalDate;
-
 public class ListStockResponse {
     private Long id;
     private String name;
@@ -22,6 +20,24 @@ public class ListStockResponse {
     private String lastTradeTime;
     private String exchangeType;
     private String market;
+    private Integer marketCode;
+    private Integer stockTypeCode;
+
+    public Integer getMarketCode() {
+        return marketCode;
+    }
+
+    public void setMarketCode(Integer marketCode) {
+        this.marketCode = marketCode;
+    }
+
+    public Integer getStockTypeCode() {
+        return stockTypeCode;
+    }
+
+    public void setStockTypeCode(Integer stockTypeCode) {
+        this.stockTypeCode = stockTypeCode;
+    }
 
     public Long getId() {
         return id;

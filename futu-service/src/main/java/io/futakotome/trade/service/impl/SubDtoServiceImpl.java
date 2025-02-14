@@ -36,6 +36,7 @@ public class SubDtoServiceImpl extends ServiceImpl<SubDtoMapper, SubDto>
         return getBaseMapper().selectPage(pagination, queryWrapper).convert(dto -> {
             ListSubscribeResponse response = new ListSubscribeResponse();
             response.setId(dto.getId());
+            response.setSecurityName(dto.getSecurityName());
             response.setSecurityCode(dto.getSecurityCode());
             response.setSecurityMarket(dto.getSecurityMarket());
             response.setSecurityType(dto.getSecurityType());

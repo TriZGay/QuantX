@@ -2,7 +2,6 @@ package io.futakotome.trade.controller.vo;
 
 public class ListStockRequest extends PaginationRequest {
     private Integer market;
-    private Integer exchangeType;
     private Integer delisting;
     private Integer stockType;
     private String name;
@@ -21,14 +20,6 @@ public class ListStockRequest extends PaginationRequest {
 
     public void setStockType(Integer stockType) {
         this.stockType = stockType;
-    }
-
-    public Integer getExchangeType() {
-        return exchangeType;
-    }
-
-    public void setExchangeType(Integer exchangeType) {
-        this.exchangeType = exchangeType;
     }
 
     public Integer getDelisting() {

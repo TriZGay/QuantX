@@ -1,6 +1,6 @@
 package io.futakotome.trade.dto.message;
 
-public class BasicQuoteSecurity {
+public class CommonSecurity {
     private Integer market;
     private String code;
 

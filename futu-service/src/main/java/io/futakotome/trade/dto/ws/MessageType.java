@@ -8,6 +8,7 @@ public enum MessageType {
     SUBSCRIPTION,
     TRADE_DATE,
     KL_HISTORY,
+    PLATES,
 
     RT_BASIC_QUOTE,
     RT_KL,
