@@ -9,6 +9,11 @@ public enum MessageType {
     TRADE_DATE,
     KL_HISTORY,
     PLATES,
+    STOCK_IN_PLATE, //查板块下的股票
+    STOCKS,
+    STOCK_OWNER_PLATE, //查股票所属的板块
+    CAPITAL_FLOW,
+    CAPITAL_DISTRIBUTION,
 
     RT_BASIC_QUOTE,
     RT_KL,

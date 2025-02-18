@@ -16,6 +16,14 @@ public class PlateDto implements Serializable {
     private Integer market;
     private Integer plateType;
 
+    public PlateDto() {
+    }
+
+    public PlateDto(Integer market, String code) {
+        this.code = code;
+        this.market = market;
+    }
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 

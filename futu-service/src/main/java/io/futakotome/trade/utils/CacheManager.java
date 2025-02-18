@@ -34,7 +34,7 @@ public final class CacheManager {
         return CacheBuilder.newBuilder()
                 .maximumSize(GUAVA_CACHE_SIZE)
                 .expireAfterAccess(GUAVA_CACHE_DAY, TimeUnit.DAYS)
-                .removalListener(removalNotification -> LOGGER.info("缓存被清除:" + removalNotification.getCause().name()))
+                .removalListener(removalNotification -> LOGGER.info("缓存被清除:{}", removalNotification.getCause().name()))
                 .build(cacheLoader);
     }
 

@@ -1,5 +1,6 @@
 package io.futakotome.trade.controller.ws;
 
+import io.futakotome.trade.dto.ws.CapitalDistributionWsMessage;
 import io.futakotome.trade.dto.ws.HistoryKLDetailWsMessage;
 import io.futakotome.trade.dto.ws.MarketStateWsMessage;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -24,7 +25,11 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + HISTORY_KLINE_QUOTA_URI, message);
     }
 
-    public void sendMarketStart(MarketStateWsMessage marketStateMessage) {
+    public void sendMarketState(MarketStateWsMessage marketStateMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MARKET_STATE_URI, marketStateMessage);
+    }
+
+    public void sendCapitalDistribution(CapitalDistributionWsMessage capitalDistributionMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + CAPITAL_DISTR_URI, capitalDistributionMessage);
     }
 }

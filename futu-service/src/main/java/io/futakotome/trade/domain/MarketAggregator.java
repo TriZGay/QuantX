@@ -12,8 +12,7 @@ public class MarketAggregator implements
     private static final List<RequestPlateInfo> allMarketPlateInfo = Arrays.asList(
             new HKMarket(),
             new BigASHMarket(),
-            new BigASZMarket(),
-            new USMarket()
+            new BigASZMarket()
 //            new SGMarket(),
 //            new JPMarket()
     );
@@ -21,8 +20,7 @@ public class MarketAggregator implements
     private static final List<RequestStockInfo> allMarketStockInfo = Arrays.asList(
             new HKMarket(),
             new BigASZMarket(),
-            new BigASHMarket(),
-            new USMarket()
+            new BigASHMarket()
 //            new SGMarket(),
 //            new JPMarket()
     );
@@ -30,22 +28,19 @@ public class MarketAggregator implements
     private static final List<RequestStaticInfo> allMarketStaticInfo = Arrays.asList(
             new HKMarket(),
             new BigASHMarket(),
-            new BigASZMarket(),
-            new USMarket()
+            new BigASZMarket()
     );
 
     private static final List<RequestStaticInfo> allMarketIpoInfo = Arrays.asList(
             new HKMarket(),
             new BigASHMarket(),
-            new BigASZMarket(),
-            new USMarket()
+            new BigASZMarket()
     );
 
     private static final List<RequestTradeDate> allMarketTradeDate = Arrays.asList(
             new HKMarket(),
 //            new BigASZMarket(), 统一传 3:A股
-            new BigASHMarket(),
-            new USMarket()
+            new BigASHMarket()
     );
 
     @Override

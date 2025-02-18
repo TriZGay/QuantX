@@ -44,62 +44,62 @@ public class HKMarket implements
         //一次最多请求200个股票
         //每30秒最多10次请求,也就是30秒最多请求2000个股票
         int requestStockLimit = 200;
-        RequestCount requestCount = new RequestCount();
-        while (stockSize > requestStockLimit) {
-            QotGetOwnerPlate.Request request = QotGetOwnerPlate.Request.newBuilder()
-                    .setC2S(QotGetOwnerPlate.C2S.newBuilder()
-                            .addAllSecurityList(hkStocks
-                                    .subList(i, i + requestStockLimit)
-                                    .stream().map(stockDto -> QotCommon.Security.newBuilder()
-                                            .setMarket(stockDto.getMarket())
-                                            .setCode(stockDto.getCode())
-                                            .build())
-                                    .collect(Collectors.toList()))
-                            .build())
-                    .build();
-            i = i + requestStockLimit;
-            stockSize = stockSize - requestStockLimit;
-            int seqNo = FTQotService.qot.getOwnerPlate(request);
-            LOGGER.info("SeqNo:" + seqNo + "香港市场请求板块信息:" + request.toString() + "count:" + request);
-            requestCount.count();
-        }
-        if (stockSize > 0) {
-            QotGetOwnerPlate.Request request = QotGetOwnerPlate.Request.newBuilder()
-                    .setC2S(QotGetOwnerPlate.C2S.newBuilder()
-                            .addAllSecurityList(hkStocks
-                                    .subList(i, i + stockSize)
-                                    .stream().map(stockDto -> QotCommon.Security.newBuilder()
-                                            .setMarket(stockDto.getMarket())
-                                            .setCode(stockDto.getCode())
-                                            .build())
-                                    .collect(Collectors.toList()))
-                            .build())
-                    .build();
-            int seqNo = 0;
-            LOGGER.info("SeqNo:" + seqNo + "香港市场请求板块信息:" + request.toString());
-        }
+//        RequestCount requestCount = new RequestCount();
+//        while (stockSize > requestStockLimit) {
+//            QotGetOwnerPlate.Request request = QotGetOwnerPlate.Request.newBuilder()
+//                    .setC2S(QotGetOwnerPlate.C2S.newBuilder()
+//                            .addAllSecurityList(hkStocks
+//                                    .subList(i, i + requestStockLimit)
+//                                    .stream().map(stockDto -> QotCommon.Security.newBuilder()
+//                                            .setMarket(stockDto.getMarket())
+//                                            .setCode(stockDto.getCode())
+//                                            .build())
+//                                    .collect(Collectors.toList()))
+//                            .build())
+//                    .build();
+//            i = i + requestStockLimit;
+//            stockSize = stockSize - requestStockLimit;
+//            int seqNo = FTQotService.qot.getOwnerPlate(request);
+//            LOGGER.info("SeqNo:" + seqNo + "香港市场请求板块信息:" + request.toString() + "count:" + request);
+//            requestCount.count();
+//        }
+//        if (stockSize > 0) {
+//            QotGetOwnerPlate.Request request = QotGetOwnerPlate.Request.newBuilder()
+//                    .setC2S(QotGetOwnerPlate.C2S.newBuilder()
+//                            .addAllSecurityList(hkStocks
+//                                    .subList(i, i + stockSize)
+//                                    .stream().map(stockDto -> QotCommon.Security.newBuilder()
+//                                            .setMarket(stockDto.getMarket())
+//                                            .setCode(stockDto.getCode())
+//                                            .build())
+//                                    .collect(Collectors.toList()))
+//                            .build())
+//                    .build();
+//            int seqNo = 0;
+//            LOGGER.info("SeqNo:" + seqNo + "香港市场请求板块信息:" + request.toString());
+//        }
 
     }
 
     @Override
     public void sendStockInfoRequest(PlateDtoMapper plateDtoMapper) {
         List<PlateDto> hkAllPlates = plateDtoMapper.searchByMarketEquals(QotCommon.QotMarket.QotMarket_HK_Security_VALUE);
-        RequestCount requestCount = new RequestCount();
-        for (int i = 0; i < hkAllPlates.size(); i++) {
-            String plateCode = hkAllPlates.get(i).getCode();
-            QotGetPlateSecurity.Request request = QotGetPlateSecurity.Request.newBuilder()
-                    .setC2S(QotGetPlateSecurity.C2S.newBuilder()
-                            .setPlate(QotCommon.Security.newBuilder()
-                                    .setMarket(QotCommon.QotMarket.QotMarket_HK_Security_VALUE)
-                                    .setCode(plateCode)
-                                    .build())
-                            .build())
-                    .build();
-            int seqNo = FTQotService.qot.getPlateSecurity(request);
-            LOGGER.info("SeqNo:" + seqNo + "香港市场请求股票信息:" + request.toString());
-            CacheManager.put(String.valueOf(seqNo), plateCode);
-            requestCount.count();
-        }
+//        RequestCount requestCount = new RequestCount();
+//        for (int i = 0; i < hkAllPlates.size(); i++) {
+//            String plateCode = hkAllPlates.get(i).getCode();
+//            QotGetPlateSecurity.Request request = QotGetPlateSecurity.Request.newBuilder()
+//                    .setC2S(QotGetPlateSecurity.C2S.newBuilder()
+//                            .setPlate(QotCommon.Security.newBuilder()
+//                                    .setMarket(QotCommon.QotMarket.QotMarket_HK_Security_VALUE)
+//                                    .setCode(plateCode)
+//                                    .build())
+//                            .build())
+//                    .build();
+//            int seqNo = FTQotService.qot.getPlateSecurity(request);
+//            LOGGER.info("SeqNo:" + seqNo + "香港市场请求股票信息:" + request.toString());
+//            CacheManager.put(String.valueOf(seqNo), plateCode);
+//            requestCount.count();
+//        }
         try {
             LOGGER.info("香港市场请求股票信息结束.sleep....");
             Thread.sleep(30000L);

@@ -1,6 +1,6 @@
 package io.futakotome.trade.dto.message;
 
-public class MarketStateVo {
+public class MarketStateContent {
     private Integer marketHK;
     private Integer marketUS;
     private Integer marketSH;

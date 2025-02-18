@@ -1,5 +1,6 @@
 package io.futakotome.trade.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -10,12 +11,23 @@ import io.futakotome.trade.controller.vo.ListPlateResponse;
 import io.futakotome.trade.domain.code.MarketType;
 import io.futakotome.trade.domain.code.PlateSetType;
 import io.futakotome.trade.dto.PlateDto;
+import io.futakotome.trade.dto.PlateStockDto;
+import io.futakotome.trade.dto.StockDto;
 import io.futakotome.trade.mapper.PlateDtoMapper;
+import io.futakotome.trade.mapper.PlateStockDtoMapper;
 import io.futakotome.trade.service.PlateDtoService;
+import io.futakotome.trade.service.PlateStockDtoService;
+import io.futakotome.trade.service.StockDtoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * @author pc
@@ -25,16 +37,94 @@ import java.util.List;
 @Service
 public class PlateDtoServiceImpl extends ServiceImpl<PlateDtoMapper, PlateDto>
         implements PlateDtoService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlateDtoServiceImpl.class);
+    private static final ReentrantLock lock = new ReentrantLock();
+    private final StockDtoService stockService;
+    private final PlateStockDtoService plateStockService;
+
+    public PlateDtoServiceImpl(StockDtoService stockService, PlateStockDtoService plateStockService) {
+        this.stockService = stockService;
+        this.plateStockService = plateStockService;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int insertBatch(List<PlateDto> newPlates) {
-        List<PlateDto> allPlates = list();
-        newPlates.removeIf(allPlates::contains);
-        if (!newPlates.isEmpty()) {
-            return getBaseMapper().insertBatch(newPlates);
-        } else {
-            return 0;
+        lock.lock();
+        try {
+            List<PlateDto> allPlates = list();
+            newPlates.removeIf(allPlates::contains);
+            if (!newPlates.isEmpty()) {
+                return getBaseMapper().insertBatch(newPlates);
+            } else {
+                return 0;
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int insertBatch(StockDto stockDto, List<PlateDto> toInsertPlates) {
+        lock.lock();
+        try {
+            StockDto oneStock = stockService.getOne(Wrappers.query(stockDto)
+                    .eq("market", stockDto.getMarket())
+                    .eq("code", stockDto.getCode()));
+            if (Objects.isNull(oneStock)) {
+                return 0;
+            }
+            List<PlateDto> existPlates = new ArrayList<>();
+            List<PlateDto> newPlates = new ArrayList<>();
+            for (PlateDto plateDto : toInsertPlates) {
+                PlateDto isExistPlate = getOne(Wrappers.query(plateDto)
+                        .eq("market", plateDto.getMarket())
+                        .eq("code", plateDto.getCode()));
+                if (Objects.nonNull(isExistPlate)) {
+                    existPlates.add(isExistPlate);
+                } else {
+                    newPlates.add(plateDto);
+                }
+            }
+            int totalInsertRow = 0;
+            if (!newPlates.isEmpty()) {
+                int insertRow = getBaseMapper().insertBatch(newPlates);
+                List<PlateStockDto> relations = newPlates.stream()
+                        .map(plateDto -> {
+                            PlateStockDto plateStockDto = new PlateStockDto();
+                            plateStockDto.setPlateId(plateDto.getId());
+                            plateStockDto.setStockId(oneStock.getId());
+                            return plateStockDto;
+                        }).collect(Collectors.toList());
+                PlateStockDtoMapper plateStockDtoMapper = (PlateStockDtoMapper) plateStockService.getBaseMapper();
+                if (plateStockDtoMapper.insertBatch(relations) > 0) {
+                    totalInsertRow += insertRow;
+                }
+            }
+            if (!existPlates.isEmpty()) {
+                PlateStockDtoMapper plateStockDtoMapper = (PlateStockDtoMapper) plateStockService.getBaseMapper();
+                List<PlateStockDto> relations = new ArrayList<>();
+                for (PlateDto existPlateDto : existPlates) {
+                    boolean relationExist = plateStockDtoMapper.exists(Wrappers.query(new PlateStockDto())
+                            .eq("plate_id", existPlateDto.getId())
+                            .eq("stock_id", oneStock.getId()));
+                    if (!relationExist) {
+                        PlateStockDto relation = new PlateStockDto();
+                        relation.setPlateId(existPlateDto.getId());
+                        relation.setStockId(oneStock.getId());
+                        relations.add(relation);
+                    }
+                }
+                if (!relations.isEmpty()) {
+                    if (plateStockDtoMapper.insertBatch(relations) > 0) {
+                        totalInsertRow += relations.size();
+                    }
+                }
+            }
+            return totalInsertRow;
+        } finally {
+            lock.unlock();
         }
     }
 

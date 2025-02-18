@@ -11,6 +11,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = SubOrUnSubWsMessage.class, name = "SUBSCRIPTION"),
         @JsonSubTypes.Type(value = HistoryKLWsMessage.class, name = "KL_HISTORY"),
         @JsonSubTypes.Type(value = PlatesWsMessage.class, name = "PLATES"),
+        @JsonSubTypes.Type(value = StockInPlateWsMessage.class, name = "STOCK_IN_PLATE"),
+        @JsonSubTypes.Type(value = StocksWsMessage.class, name = "STOCKS"),
+        @JsonSubTypes.Type(value = StockOwnerPlateWsMessage.class, name = "STOCK_OWNER_PLATE"),
+        @JsonSubTypes.Type(value = CapitalFlowWsMessage.class, name = "CAPITAL_FLOW"),
+        @JsonSubTypes.Type(value = CapitalDistributionWsMessage.class, name = "CAPITAL_DISTRIBUTION"),
 
         @JsonSubTypes.Type(value = RealTimeBaseQuoteMessage.class, name = "RT_BASIC_QUOTE"),
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),

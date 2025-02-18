@@ -15,6 +15,8 @@ public class StockDto implements Serializable {
 
     private String name;
 
+    private Integer market;
+
     private String code;
 
     private Integer lotSize;
@@ -25,13 +27,15 @@ public class StockDto implements Serializable {
 
     private String stockOwner;
 
-    private String optionType;
+    private Integer optionType;
 
     private String strikeTime;
 
     private Double strikePrice;
 
-    private Integer suspension;
+    private String optionMarket;
+
+    private Boolean suspension;
 
     private LocalDate listingDate;
 
@@ -39,7 +43,7 @@ public class StockDto implements Serializable {
 
     private Integer delisting;
 
-    private String indexOptionType;
+    private Integer indexOptionType;
 
     private Integer mainContract;
 
@@ -47,7 +51,6 @@ public class StockDto implements Serializable {
 
     private Integer exchangeType;
 
-    private Integer market;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
@@ -108,12 +111,20 @@ public class StockDto implements Serializable {
         this.stockOwner = stockOwner;
     }
 
-    public String getOptionType() {
+    public Integer getOptionType() {
         return optionType;
     }
 
-    public void setOptionType(String optionType) {
+    public void setOptionType(Integer optionType) {
         this.optionType = optionType;
+    }
+
+    public String getOptionMarket() {
+        return optionMarket;
+    }
+
+    public void setOptionMarket(String optionMarket) {
+        this.optionMarket = optionMarket;
     }
 
     public String getStrikeTime() {
@@ -132,11 +143,11 @@ public class StockDto implements Serializable {
         this.strikePrice = strikePrice;
     }
 
-    public Integer getSuspension() {
+    public Boolean getSuspension() {
         return suspension;
     }
 
-    public void setSuspension(Integer suspension) {
+    public void setSuspension(Boolean suspension) {
         this.suspension = suspension;
     }
 
@@ -164,11 +175,11 @@ public class StockDto implements Serializable {
         this.delisting = delisting;
     }
 
-    public String getIndexOptionType() {
+    public Integer getIndexOptionType() {
         return indexOptionType;
     }
 
-    public void setIndexOptionType(String indexOptionType) {
+    public void setIndexOptionType(Integer indexOptionType) {
         this.indexOptionType = indexOptionType;
     }
 
@@ -217,28 +228,4 @@ public class StockDto implements Serializable {
         return Objects.hash(code, market);
     }
 
-    @Override
-    public String toString() {
-        return "StockDto{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", code='" + code + '\'' +
-                ", lotSize=" + lotSize +
-                ", stockType=" + stockType +
-                ", stockChildType=" + stockChildType +
-                ", stockOwner='" + stockOwner + '\'' +
-                ", optionType='" + optionType + '\'' +
-                ", strikeTime='" + strikeTime + '\'' +
-                ", strikePrice=" + strikePrice +
-                ", suspension=" + suspension +
-                ", listingDate=" + listingDate +
-                ", stockId='" + stockId + '\'' +
-                ", delisting=" + delisting +
-                ", indexOptionType='" + indexOptionType + '\'' +
-                ", mainContract=" + mainContract +
-                ", lastTradeTime='" + lastTradeTime + '\'' +
-                ", exchangeType=" + exchangeType +
-                ", market=" + market +
-                '}';
-    }
 }

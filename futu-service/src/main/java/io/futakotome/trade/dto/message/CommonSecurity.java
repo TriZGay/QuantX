@@ -4,6 +4,14 @@ public class CommonSecurity {
     private Integer market;
     private String code;
 
+    public CommonSecurity() {
+    }
+
+    public CommonSecurity(Integer market, String code) {
+        this.market = market;
+        this.code = code;
+    }
+
     public Integer getMarket() {
         return market;
     }

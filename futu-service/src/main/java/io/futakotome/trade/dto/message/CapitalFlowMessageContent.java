@@ -1,41 +1,13 @@
 package io.futakotome.trade.dto.message;
 
 public class CapitalFlowMessageContent {
-    private Integer market;
-    private String code;
     private Double inFlow;
-    private String time;
-    private Double timestamp;
     private Double mainInFlow;
     private Double superInFlow;
     private Double bigInFlow;
     private Double midInFlow;
     private Double smlInFlow;
-    private String lastValidTime;
-
-    public String getLastValidTime() {
-        return lastValidTime;
-    }
-
-    public void setLastValidTime(String lastValidTime) {
-        this.lastValidTime = lastValidTime;
-    }
-
-    public Integer getMarket() {
-        return market;
-    }
-
-    public void setMarket(Integer market) {
-        this.market = market;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
+    private String time;
 
     public Double getInFlow() {
         return inFlow;
@@ -43,22 +15,6 @@ public class CapitalFlowMessageContent {
 
     public void setInFlow(Double inFlow) {
         this.inFlow = inFlow;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    public Double getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Double timestamp) {
-        this.timestamp = timestamp;
     }
 
     public Double getMainInFlow() {
@@ -99,5 +55,13 @@ public class CapitalFlowMessageContent {
 
     public void setSmlInFlow(Double smlInFlow) {
         this.smlInFlow = smlInFlow;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }

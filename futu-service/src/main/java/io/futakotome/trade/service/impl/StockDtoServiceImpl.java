@@ -14,10 +14,14 @@ import io.futakotome.trade.domain.code.StockType;
 import io.futakotome.trade.dto.StockDto;
 import io.futakotome.trade.mapper.StockDtoMapper;
 import io.futakotome.trade.service.StockDtoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author pc
@@ -27,6 +31,43 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
         implements StockDtoService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StockDtoServiceImpl.class);
+    private static final ReentrantLock lock = new ReentrantLock();
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int insertBatch(List<StockDto> toInsertStocks) {
+        lock.lock();
+        try {
+            List<StockDto> allStocks = list();
+            toInsertStocks.removeIf(allStocks::contains);
+            if (!toInsertStocks.isEmpty()) {
+                int totalInsertRow = 0;
+                int insertLength = toInsertStocks.size();
+                int i = 0;
+                int batchLimit = 1000;
+                while (insertLength > batchLimit) {
+                    List<StockDto> batchInsertStocks = toInsertStocks.subList(i, i + batchLimit);
+                    int insertRow = getBaseMapper().insertBatch(batchInsertStocks);
+                    i = i + batchLimit;
+                    insertLength = insertLength - batchLimit;
+                    totalInsertRow += insertRow;
+                    LOGGER.info("批量插入静态标的物条数={}", insertRow);
+                }
+                if (insertLength > 0) {
+                    List<StockDto> remainingInsertStocks = toInsertStocks.subList(i, i + insertLength);
+                    int insertRow = getBaseMapper().insertBatch(remainingInsertStocks);
+                    totalInsertRow += insertRow;
+                    LOGGER.info("批量插入静态标的物条数={}", insertRow);
+                }
+                return totalInsertRow;
+            } else {
+                return 0;
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
 
     @Override
     @Transactional

@@ -1,8 +1,8 @@
-package io.futakotome.trade.controller.vo;
+package io.futakotome.trade.dto.ws;
 
 import java.util.Objects;
 
-public class SubscribeSecurity {
+public  class SubscribeSecurity {
     private Integer market;
     private String code;
     private String name;
@@ -48,16 +48,4 @@ public class SubscribeSecurity {
         this.type = type;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SubscribeSecurity that = (SubscribeSecurity) o;
-        return market.equals(that.market) && code.equals(that.code);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(market, code);
-    }
 }

@@ -1,7 +1,5 @@
 package io.futakotome.trade.dto.ws;
 
-import io.futakotome.trade.controller.vo.SubscribeSecurity;
-
 import java.util.List;
 
 public class SubOrUnSubWsMessage implements Message {

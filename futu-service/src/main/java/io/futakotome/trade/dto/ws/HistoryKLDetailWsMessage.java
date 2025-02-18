@@ -7,15 +7,6 @@ public class HistoryKLDetailWsMessage implements Message {
     private Integer remainQuota;
     private List<HistoryKLDetailItemWsMessage> itemList;
 
-    @Override
-    public String toString() {
-        return "HistoryKLDetailWsMessage{" +
-                "usedQuota=" + usedQuota +
-                ", remainQuota=" + remainQuota +
-                ", itemList=" + itemList +
-                '}';
-    }
-
     public Integer getUsedQuota() {
         return usedQuota;
     }
@@ -51,17 +42,6 @@ public class HistoryKLDetailWsMessage implements Message {
         private String name;
         private String requestTime;
         private Long requestTimeStamp;
-
-        @Override
-        public String toString() {
-            return "HistoryKLDetailItemWsMessage{" +
-                    "market=" + market +
-                    ", code='" + code + '\'' +
-                    ", name='" + name + '\'' +
-                    ", requestTime='" + requestTime + '\'' +
-                    ", requestTimeStamp=" + requestTimeStamp +
-                    '}';
-        }
 
         public String getCode() {
             return code;
