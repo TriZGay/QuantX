@@ -1,12 +1,34 @@
 package io.futakotome.trade.dto.ws;
 
+import io.futakotome.trade.dto.message.CapitalFlowMessageContent;
 import io.futakotome.trade.dto.message.CommonSecurity;
+
+import java.util.List;
 
 public class CapitalFlowWsMessage implements Message {
     private CommonSecurity security;
     private Integer periodType;
     private String beginTime;
     private String endTime;
+
+    private String lastValidTime;
+    private List<CapitalFlowMessageContent> contentList;
+
+    public String getLastValidTime() {
+        return lastValidTime;
+    }
+
+    public void setLastValidTime(String lastValidTime) {
+        this.lastValidTime = lastValidTime;
+    }
+
+    public List<CapitalFlowMessageContent> getContentList() {
+        return contentList;
+    }
+
+    public void setContentList(List<CapitalFlowMessageContent> contentList) {
+        this.contentList = contentList;
+    }
 
     public CommonSecurity getSecurity() {
         return security;

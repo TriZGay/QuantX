@@ -1,8 +1,6 @@
 package io.futakotome.trade.controller.ws;
 
-import io.futakotome.trade.dto.ws.CapitalDistributionWsMessage;
-import io.futakotome.trade.dto.ws.HistoryKLDetailWsMessage;
-import io.futakotome.trade.dto.ws.MarketStateWsMessage;
+import io.futakotome.trade.dto.ws.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -31,5 +29,13 @@ public class QuantxFutuWsService {
 
     public void sendCapitalDistribution(CapitalDistributionWsMessage capitalDistributionMessage) {
         this.template.convertAndSend(BROKER_PREFIX + CAPITAL_DISTR_URI, capitalDistributionMessage);
+    }
+
+    public void sendCapitalFlow(CapitalFlowWsMessage capitalFlowWsMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + CAPITAL_FLOW_URI, capitalFlowWsMessage);
+    }
+
+    public void sendRehabs(RehabsWsMessage rehabsWsMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + REHABS_URI, rehabsWsMessage);
     }
 }

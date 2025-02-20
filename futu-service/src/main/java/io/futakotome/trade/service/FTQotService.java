@@ -15,12 +15,10 @@ import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.*;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
-import io.futakotome.trade.domain.MarketAggregator;
+import io.futakotome.trade.domain.Snapshot;
+import io.futakotome.trade.domain.SnapshotService;
 import io.futakotome.trade.domain.code.*;
-import io.futakotome.trade.dto.PlateDto;
-import io.futakotome.trade.dto.StockDto;
-import io.futakotome.trade.dto.SubDto;
-import io.futakotome.trade.dto.TradeDateDto;
+import io.futakotome.trade.dto.*;
 import io.futakotome.trade.dto.message.*;
 import io.futakotome.trade.dto.ws.*;
 import io.futakotome.trade.mapper.SubDtoMapper;
@@ -34,6 +32,7 @@ import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -50,12 +49,13 @@ import static java.util.stream.Collectors.toMap;
 public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(FTQotService.class);
     private static final Gson GSON = new Gson();
-    private static final MarketAggregator market = new MarketAggregator();
 
     private final PlateDtoService plateService;
     private final StockDtoService stockService;
-    private final SubDtoMapper subDtoMapper;
-    private final TradeDateDtoMapper tradeDateDtoMapper;
+    private final SnapshotService snapshotService;
+
+    private final SubDtoService subService;
+    private final TradeDateDtoService tradeDateService;
     private final FutuConfig futuConfig;
     private final RocketMQTemplate rocketMQTemplate;
 
@@ -63,10 +63,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     private static final String clientID = "javaclient";
 
-    public static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
+    private static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
-    public FTQotService(PlateDtoService plateService, StockDtoService stockService,
-                        SubDtoMapper subDtoMapper, TradeDateDtoMapper tradeDateDtoMapper,
+    public FTQotService(PlateDtoService plateService, StockDtoService stockService, SnapshotService snapshotService,
+                        SubDtoService subService, TradeDateDtoService tradeDateService,
                         FutuConfig futuConfig, RocketMQTemplate rocketMQTemplate,
                         QuantxFutuWsService quantxFutuWsService) {
         qot.setClientInfo(clientID, 1);
@@ -74,10 +74,11 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         qot.setQotSpi(this);
         this.plateService = plateService;
         this.stockService = stockService;
+        this.snapshotService = snapshotService;
+        this.subService = subService;
+        this.tradeDateService = tradeDateService;
 
-        this.subDtoMapper = subDtoMapper;
         this.futuConfig = futuConfig;
-        this.tradeDateDtoMapper = tradeDateDtoMapper;
         this.rocketMQTemplate = rocketMQTemplate;
         this.quantxFutuWsService = quantxFutuWsService;
     }
@@ -117,11 +118,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
-    @Deprecated
-    public void syncStockInfo() {
-//        market.sendStockInfoRequest(plateMapper);
-    }
-
     public void syncStaticInfo(Integer market, Integer stockType) {
         QotGetStaticInfo.C2S c2S = QotGetStaticInfo.C2S.newBuilder()
                 .setMarket(market)
@@ -148,13 +144,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
-    //    @Scheduled(cron = "0 0 2 * * *")
-    public void syncIpoInfo() {
-        market.sendIpoInfoRequest();
-    }
-
     public void syncTradeDate() {
-        market.sendTradeDateRequest();
+//        market.sendTradeDateRequest();
     }
 
     public void sendSubInfoRequest() {
@@ -168,11 +159,18 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     public void syncCapitalFlow(Integer market, String code) {
-//        QotCommon.Security security = QotCommon.Security.newBuilder()
-//                .setMarket(market)
-//                .setCode(code)
-//                .build();
-//        QotGetCapitalFlow.Request.Builder ftRequest = QotGetCapitalFlow.Request.newBuilder();
+        QotCommon.Security security = QotCommon.Security.newBuilder()
+                .setMarket(market)
+                .setCode(code)
+                .build();
+        QotGetCapitalFlow.Request request = QotGetCapitalFlow.Request.newBuilder()
+                .setC2S(QotGetCapitalFlow.C2S.newBuilder()
+                        .setSecurity(security).build())
+                .build();
+        int seqNo = qot.getCapitalFlow(request);
+        CommonSecurity commonSecurity = new CommonSecurity(market, code);
+        CacheManager.put(String.valueOf(seqNo), commonSecurity);
+        LOGGER.info("{}-{}请求资金流向.seqNo={}", MarketType.getNameByCode(market), code, seqNo);
 //        if (request.getPeriodType() == 1) {
 //            //实时
 //            ftRequest.setC2S(QotGetCapitalFlow.C2S.newBuilder()
@@ -328,18 +326,18 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     public void sendRehabRequest(Integer market, String code) {
-//        QotRequestRehab.Request request = QotRequestRehab.Request.newBuilder()
-//                .setC2S(QotRequestRehab.C2S.newBuilder()
-//                        .setSecurity(QotCommon.Security.newBuilder()
-//                                .setMarket(syncRehabRequest.getMarket())
-//                                .setCode(syncRehabRequest.getCode())
-//                                .build())
-//                        .build())
-//                .build();
-//        int seqNo = qot.requestRehab(request);
-//        String marketAndCode = syncRehabRequest.getMarket() + "-" + syncRehabRequest.getCode();
-//        CacheManager.put(String.valueOf(seqNo), marketAndCode);
-//        LOGGER.info("查询复权因子.seq=" + seqNo);
+        QotRequestRehab.Request request = QotRequestRehab.Request.newBuilder()
+                .setC2S(QotRequestRehab.C2S.newBuilder()
+                        .setSecurity(QotCommon.Security.newBuilder()
+                                .setMarket(market)
+                                .setCode(code)
+                                .build())
+                        .build())
+                .build();
+        int seqNo = qot.requestRehab(request);
+        CommonSecurity commonSecurity = new CommonSecurity(market, code);
+        CacheManager.put(String.valueOf(seqNo), commonSecurity);
+        LOGGER.info("{}-{}查询复权因子.seq={}", MarketType.getNameByCode(market), code, seqNo);
     }
 
     @Override
@@ -349,7 +347,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     private void subscribeOnStartup() {
-        List<SubDto> subscribeInfos = this.subDtoMapper.selectList(null);
+        List<SubDto> subscribeInfos = this.subService.list();
         if (subscribeInfos.size() > 0) {
             Map<SubscribeSecurity, List<Integer>> groupBySecurity = subscribeInfos.stream().collect(
                     toMap(subDto -> new SubscribeSecurity(subDto.getSecurityMarket(), subDto.getSecurityCode()),
@@ -464,19 +462,15 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取复权因子失败,code:" + rsp.getRetType()));
             sendNotifyMessage(notify);
         } else {
-            String[] marketAndCode = ((String) CacheManager.get(String.valueOf(nSerialNo))).split("-");
-            Integer market = Integer.valueOf(marketAndCode[0]);
-            String code = marketAndCode[1];
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                Iterator<JsonElement> rehabListIterator = ftGrpcReturnResult.getS2c().get("rehabList").getAsJsonArray().iterator();
-                while (rehabListIterator.hasNext()) {
-                    JsonObject rehab = rehabListIterator.next().getAsJsonObject();
-                    RehabMessageContent messageContent = GSON.fromJson(rehab, RehabMessageContent.class);
-                    messageContent.setMarket(market);
-                    messageContent.setCode(code);
-                    sendRehabMessage(messageContent);
-                }
+                CommonSecurity commonSecurity = (CommonSecurity) CacheManager.get(String.valueOf(nSerialNo));
+                List<RehabMessageContent> rehabMessageContents = GSON.fromJson(ftGrpcReturnResult.getS2c().get("rehabList").getAsJsonArray(), new TypeToken<List<RehabMessageContent>>() {
+                }.getType());
+                RehabsWsMessage rehabsWsMessage = new RehabsWsMessage();
+                rehabsWsMessage.setSecurity(commonSecurity);
+                rehabsWsMessage.setRehabs(rehabMessageContents);
+                quantxFutuWsService.sendRehabs(rehabsWsMessage);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析复权因子结果失败.", e);
             }
@@ -492,20 +486,15 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                String[] marketAndCode = ((String) CacheManager.get(String.valueOf(nSerialNo))).split("-");
-                Integer market = Integer.valueOf(marketAndCode[0]);
-                String code = marketAndCode[1];
-                Iterator<JsonElement> flowItemListIterator = ftGrpcReturnResult.getS2c().get("flowItemList").getAsJsonArray().iterator();
+                CommonSecurity security = (CommonSecurity) CacheManager.get(String.valueOf(nSerialNo));
+                List<CapitalFlowMessageContent> capitalFlowMessageContents = GSON.fromJson(ftGrpcReturnResult.getS2c().get("flowItemList").getAsJsonArray(), new TypeToken<List<CapitalFlowMessageContent>>() {
+                }.getType());
                 String lastValidTime = ftGrpcReturnResult.getS2c().get("lastValidTime").getAsString();
-                // 历史周期 会断开连接?
-                while (flowItemListIterator.hasNext()) {
-                    JsonObject flowItem = flowItemListIterator.next().getAsJsonObject();
-                    CapitalFlowMessageContent messageContent = GSON.fromJson(flowItem, CapitalFlowMessageContent.class);
-//                    messageContent.setMarket(market);
-//                    messageContent.setCode(code);
-//                    messageContent.setLastValidTime(lastValidTime);
-//                    sendCapitalFlowMessage(messageContent);
-                }
+                CapitalFlowWsMessage capitalFlowWsMessage = new CapitalFlowWsMessage();
+                capitalFlowWsMessage.setContentList(capitalFlowMessageContents);
+                capitalFlowWsMessage.setSecurity(security);
+                capitalFlowWsMessage.setLastValidTime(lastValidTime);
+                quantxFutuWsService.sendCapitalFlow(capitalFlowWsMessage);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析资金流向结果失败.", e);
             }
@@ -639,47 +628,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     return itemMessage;
                 }).collect(Collectors.toList()));
         quantxFutuWsService.sendHistoryKQuotaDetails(message);
-    }
-
-    private void sendRehabMessage(RehabMessageContent rehabMessageContent) {
-        RehabMessage message = new RehabMessage();
-        message.setMarket(rehabMessageContent.getMarket());
-        message.setCode(rehabMessageContent.getCode());
-        message.setCompanyActFlag(rehabMessageContent.getCompanyActFlag());
-        message.setFwdFactorA(rehabMessageContent.getFwdFactorA());
-        message.setFwdFactorB(rehabMessageContent.getFwdFactorB());
-        message.setBwdFactorA(rehabMessageContent.getBwdFactorA());
-        message.setBwdFactorB(rehabMessageContent.getBwdFactorB());
-        message.setSplitBase(rehabMessageContent.getSplitBase());
-        message.setSplitErt(rehabMessageContent.getSplitErt());
-        message.setJoinBase(rehabMessageContent.getJoinBase());
-        message.setJoinErt(rehabMessageContent.getJoinErt());
-        message.setBonusBase(rehabMessageContent.getBonusBase());
-        message.setBonusErt(rehabMessageContent.getBonusErt());
-        message.setTransferBase(rehabMessageContent.getTransferBase());
-        message.setTransferErt(rehabMessageContent.getTransferErt());
-        message.setAllotBase(rehabMessageContent.getAllotBase());
-        message.setAllotErt(rehabMessageContent.getAllotErt());
-        message.setAllotPrice(rehabMessageContent.getAllotPrice());
-        message.setAddBase(rehabMessageContent.getAddBase());
-        message.setAddErt(rehabMessageContent.getAddErt());
-        message.setAddPrice(rehabMessageContent.getAddPrice());
-        message.setDividend(rehabMessageContent.getDividend());
-        message.setSpDividend(rehabMessageContent.getSpDividend());
-        message.setTime(rehabMessageContent.getTime());
-
-        rocketMQTemplate.asyncSend(MessageCommon.REHAB_TOPIC, message, new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                LOGGER.info("复权因子投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-                        sendResult.getSendStatus());
-            }
-
-            @Override
-            public void onException(Throwable throwable) {
-                LOGGER.error("复权因子投递失败", throwable);
-            }
-        });
     }
 
     private void sendMarketStateMessage(MarketStateContent marketStateVo) {
@@ -1509,7 +1457,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 LOGGER.info(notify);
                 sendNotifyMessage(notify);
             } catch (InvalidProtocolBufferException e) {
-                LOGGER.error("查询股票信息解析结果失败!", e);
+                LOGGER.error("查询板块下股票解析结果失败!", e);
             }
         }
     }
@@ -1573,5 +1521,273 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             }
         }
 
+    }
+
+    public void syncSnapshotData(List<CommonSecurity> securities) {
+        for (CommonSecurity security : securities) {
+            QotGetSecuritySnapshot.C2S c2S = QotGetSecuritySnapshot.C2S.newBuilder()
+                    .addSecurityList(QotCommon.Security.newBuilder()
+                            .setMarket(security.getMarket())
+                            .setCode(security.getCode())
+                            .build())
+                    .build();
+            QotGetSecuritySnapshot.Request request = QotGetSecuritySnapshot.Request
+                    .newBuilder().setC2S(c2S).build();
+            int seqNo = qot.getSecuritySnapshot(request);
+            LOGGER.info("{}-{}请求快照数据.seqNo={}", MarketType.getNameByCode(security.getMarket()), security.getCode(), seqNo);
+        }
+    }
+
+    @Override
+    public void onReply_GetSecuritySnapshot(FTAPI_Conn client, int nSerialNo, QotGetSecuritySnapshot.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询快照数据失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询板块信息失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                List<SnapshotContent> snapshotContents = GSON.fromJson(ftGrpcReturnResult.getS2c().getAsJsonArray("snapshotList"), new TypeToken<List<SnapshotContent>>() {
+                }.getType());
+                Snapshot snapshot = getSnapshot(snapshotContents);
+                int insertRow = snapshotService.insertBatch(snapshot);
+                String str = "同步快照数据,插入条数:" + insertRow;
+                LOGGER.info(str);
+                sendNotifyMessage(str);
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("查询快照数据解析结果失败!", e);
+            }
+        }
+    }
+
+    private Snapshot getSnapshot(List<SnapshotContent> snapshotContents) {
+        Snapshot snapshot = new Snapshot();
+        List<SnapshotBaseDto> baseDtoList = new ArrayList<>();
+        List<SnapshotEquityExDto> equityExDtoList = new ArrayList<>();
+        List<SnapshotOptionExDto> optionExDtoList = new ArrayList<>();
+        List<SnapshotFutureExDto> futureExDtoList = new ArrayList<>();
+        List<SnapshotIndexExDto> indexExDtoList = new ArrayList<>();
+        List<SnapshotPlateExDto> plateExDtoList = new ArrayList<>();
+        List<SnapshotTrustExDto> trustExDtoList = new ArrayList<>();
+        List<SnapshotWarrantExDto> warrantExDtoList = new ArrayList<>();
+        for (SnapshotContent snapshotContent : snapshotContents) {
+            SnapshotBaseDto baseDto = getSnapshotBase(snapshotContent);
+            baseDtoList.add(baseDto);
+            if (Objects.nonNull(snapshotContent.getEquityExData())) {
+                SnapshotEquityExDto equityExDto = getSnapshotEquityEx(snapshotContent);
+                equityExDtoList.add(equityExDto);
+            }
+            if (Objects.nonNull(snapshotContent.getFutureExData())) {
+                SnapshotFutureExDto futureExDto = getSnapshotFutureEx(snapshotContent);
+                futureExDtoList.add(futureExDto);
+            }
+            if (Objects.nonNull(snapshotContent.getIndexExData())) {
+                SnapshotIndexExDto indexExDto = getSnapshotIndexEx(snapshotContent);
+                indexExDtoList.add(indexExDto);
+            }
+            if (Objects.nonNull(snapshotContent.getOptionExData())) {
+                SnapshotOptionExDto optionExDto = getSnapshotOptionEx(snapshotContent);
+                optionExDtoList.add(optionExDto);
+            }
+            if (Objects.nonNull(snapshotContent.getPlateExData())) {
+                SnapshotPlateExDto plateExDto = getSnapshotPlateEx(snapshotContent);
+                plateExDtoList.add(plateExDto);
+            }
+            if (Objects.nonNull(snapshotContent.getTrustExData())) {
+                SnapshotTrustExDto trustExDto = getSnapshotTrustEx(snapshotContent);
+                trustExDtoList.add(trustExDto);
+            }
+            if (Objects.nonNull(snapshotContent.getWarrantExData())) {
+                SnapshotWarrantExDto warrantExDto = getSnapshotWarrantEx(snapshotContent);
+                warrantExDtoList.add(warrantExDto);
+            }
+        }
+        snapshot.setBaseDtoList(baseDtoList);
+        snapshot.setEquityExDtoList(equityExDtoList);
+        snapshot.setOptionExDtoList(optionExDtoList);
+        snapshot.setFutureExDtoList(futureExDtoList);
+        snapshot.setIndexExDtoList(indexExDtoList);
+        snapshot.setPlateExDtoList(plateExDtoList);
+        snapshot.setTrustExDtoList(trustExDtoList);
+        snapshot.setWarrantExDtoList(warrantExDtoList);
+        return snapshot;
+    }
+
+    private SnapshotWarrantExDto getSnapshotWarrantEx(SnapshotContent snapshotContent) {
+        SnapshotWarrantExDto warrantExDto = new SnapshotWarrantExDto();
+        warrantExDto.setOwnerMarket(snapshotContent.getWarrantExData().getOwner().getMarket());
+        warrantExDto.setOwnerCode(snapshotContent.getWarrantExData().getOwner().getCode());
+        warrantExDto.setConversionRate(snapshotContent.getWarrantExData().getConversionRate());
+        warrantExDto.setWarrantType(snapshotContent.getWarrantExData().getWarrantType());
+        warrantExDto.setStrikePrice(snapshotContent.getWarrantExData().getStrikePrice());
+        warrantExDto.setMaturityTime(snapshotContent.getWarrantExData().getMaturityTime());
+        warrantExDto.setEndTradeTime(snapshotContent.getWarrantExData().getEndTradeTime());
+        warrantExDto.setRecoveryPrice(snapshotContent.getWarrantExData().getRecoveryPrice());
+        warrantExDto.setStreetVolumn(snapshotContent.getWarrantExData().getStreetVolumn());
+        warrantExDto.setIssueVolumn(snapshotContent.getWarrantExData().getIssueVolumn());
+        warrantExDto.setStreetRate(snapshotContent.getWarrantExData().getStreetRate());
+        warrantExDto.setDelta(snapshotContent.getWarrantExData().getDelta());
+        warrantExDto.setImpliedVolatility(snapshotContent.getWarrantExData().getImpliedVolatility());
+        warrantExDto.setPremium(snapshotContent.getWarrantExData().getPremium());
+        warrantExDto.setMaturityTimestamp(LocalDateTime.parse(snapshotContent.getWarrantExData().getMaturityTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        warrantExDto.setEndTradeTimestamp(LocalDateTime.parse(snapshotContent.getWarrantExData().getEndTradeTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        warrantExDto.setLeverage(snapshotContent.getWarrantExData().getLeverage());
+        warrantExDto.setIpop(snapshotContent.getWarrantExData().getIpop());
+        warrantExDto.setBreakEventPoint(snapshotContent.getWarrantExData().getBreakEvenPoint());
+        warrantExDto.setConversionPrice(snapshotContent.getWarrantExData().getConversionPrice());
+        warrantExDto.setPriceRecoveryRatio(snapshotContent.getWarrantExData().getPriceRecoveryRatio());
+        warrantExDto.setScore(snapshotContent.getWarrantExData().getScore());
+        warrantExDto.setUpperStrikePrice(snapshotContent.getWarrantExData().getUpperStrikePrice());
+        warrantExDto.setLowerStrikePrice(snapshotContent.getWarrantExData().getLowerStrikePrice());
+        warrantExDto.setInlinePriceStatus(snapshotContent.getWarrantExData().getInLinePriceStatus());
+        warrantExDto.setIssuerCode(snapshotContent.getWarrantExData().getIssuerCode());
+        return warrantExDto;
+    }
+
+    private SnapshotTrustExDto getSnapshotTrustEx(SnapshotContent snapshotContent) {
+        SnapshotTrustExDto trustExDto = new SnapshotTrustExDto();
+        trustExDto.setMarket(snapshotContent.getBasic().getSecurity().getMarket());
+        trustExDto.setCode(snapshotContent.getBasic().getSecurity().getCode());
+        trustExDto.setDividendYield(snapshotContent.getTrustExData().getDividendYield());
+        trustExDto.setAum(snapshotContent.getTrustExData().getAum());
+        trustExDto.setOutstandingUnits(snapshotContent.getTrustExData().getOutstandingUnits());
+        trustExDto.setNetAssetValue(snapshotContent.getTrustExData().getNetAssetValue());
+        trustExDto.setPremium(snapshotContent.getTrustExData().getPremium());
+        trustExDto.setAssetClass(snapshotContent.getTrustExData().getAssetClass());
+        return trustExDto;
+    }
+
+    private SnapshotPlateExDto getSnapshotPlateEx(SnapshotContent snapshotContent) {
+        SnapshotPlateExDto plateExDto = new SnapshotPlateExDto();
+        plateExDto.setMarket(snapshotContent.getBasic().getSecurity().getMarket());
+        plateExDto.setCode(snapshotContent.getBasic().getSecurity().getCode());
+        plateExDto.setRaiseCount(snapshotContent.getPlateExData().getRaiseCount());
+        plateExDto.setFallCount(snapshotContent.getPlateExData().getFallCount());
+        plateExDto.setEqualCount(snapshotContent.getPlateExData().getEqualCount());
+        return plateExDto;
+    }
+
+    private SnapshotOptionExDto getSnapshotOptionEx(SnapshotContent snapshotContent) {
+        SnapshotOptionExDto optionExDto = new SnapshotOptionExDto();
+        optionExDto.setOwnerMarket(snapshotContent.getOptionExData().getOwner().getMarket());
+        optionExDto.setOwnerCode(snapshotContent.getOptionExData().getOwner().getCode());
+        optionExDto.setOptionType(snapshotContent.getOptionExData().getType());
+        optionExDto.setStrikeTime(snapshotContent.getOptionExData().getStrikeTime());
+        optionExDto.setStrikePrice(snapshotContent.getOptionExData().getStrikePrice());
+        optionExDto.setContractSize(snapshotContent.getOptionExData().getContractSize());
+        optionExDto.setContractSizeFloat(snapshotContent.getOptionExData().getContractSizeFloat());
+        optionExDto.setOpenInterest(snapshotContent.getOptionExData().getOpenInterest());
+        optionExDto.setImpliedVolatility(snapshotContent.getOptionExData().getImpliedVolatility());
+        optionExDto.setPremium(snapshotContent.getOptionExData().getPremium());
+        optionExDto.setDelta(snapshotContent.getOptionExData().getDelta());
+        optionExDto.setGamma(snapshotContent.getOptionExData().getGamma());
+        optionExDto.setVega(snapshotContent.getOptionExData().getVega());
+        optionExDto.setTheta(snapshotContent.getOptionExData().getTheta());
+        optionExDto.setRho(snapshotContent.getOptionExData().getRho());
+        optionExDto.setIndexOptionType(snapshotContent.getOptionExData().getIndexOptionType());
+        optionExDto.setNetOpenInterest(snapshotContent.getOptionExData().getNetOpenInterest());
+        optionExDto.setExpiryDateDistance(snapshotContent.getOptionExData().getExpiryDateDistance());
+        optionExDto.setContractNominalValue(snapshotContent.getOptionExData().getContractNominalValue());
+        optionExDto.setOwnerLotMultiplier(snapshotContent.getOptionExData().getOwnerLotMultiplier());
+        optionExDto.setOptionAreaType(snapshotContent.getOptionExData().getOptionAreaType());
+        optionExDto.setContractMultiplier(snapshotContent.getOptionExData().getContractMultiplier());
+        return optionExDto;
+    }
+
+    private SnapshotIndexExDto getSnapshotIndexEx(SnapshotContent snapshotContent) {
+        SnapshotIndexExDto indexExDto = new SnapshotIndexExDto();
+        indexExDto.setMarket(snapshotContent.getBasic().getSecurity().getMarket());
+        indexExDto.setCode(snapshotContent.getBasic().getSecurity().getCode());
+        indexExDto.setRaiseCount(snapshotContent.getIndexExData().getRaiseCount());
+        indexExDto.setFallCount(snapshotContent.getIndexExData().getFallCount());
+        indexExDto.setEqualCount(snapshotContent.getIndexExData().getEqualCount());
+        return indexExDto;
+    }
+
+    private SnapshotFutureExDto getSnapshotFutureEx(SnapshotContent snapshotContent) {
+        SnapshotFutureExDto futureExDto = new SnapshotFutureExDto();
+        futureExDto.setMarket(snapshotContent.getBasic().getSecurity().getMarket());
+        futureExDto.setCode(snapshotContent.getBasic().getSecurity().getCode());
+        futureExDto.setLastSettlePrice(snapshotContent.getFutureExData().getLastSettlePrice());
+        futureExDto.setPosition(snapshotContent.getFutureExData().getPosition());
+        futureExDto.setPositionChange(snapshotContent.getFutureExData().getPositionChange());
+        futureExDto.setLastTradeTime(LocalDate.parse(snapshotContent.getFutureExData().getLastTradeTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        futureExDto.setIsMainContract(snapshotContent.getFutureExData().getMainContract());
+        return futureExDto;
+    }
+
+    private SnapshotEquityExDto getSnapshotEquityEx(SnapshotContent snapshotContent) {
+        SnapshotEquityExDto equityExDto = new SnapshotEquityExDto();
+        equityExDto.setMarket(snapshotContent.getBasic().getSecurity().getMarket());
+        equityExDto.setCode(snapshotContent.getBasic().getSecurity().getCode());
+        equityExDto.setIssuedShares(snapshotContent.getEquityExData().getIssuedShares());
+        equityExDto.setIssuedMarketVal(snapshotContent.getEquityExData().getIssuedMarketVal());
+        equityExDto.setNetAsset(snapshotContent.getEquityExData().getNetAsset());
+        equityExDto.setNetProfit(snapshotContent.getEquityExData().getNetProfit());
+        equityExDto.setEarningsPerShare(snapshotContent.getEquityExData().getEarningsPershare());
+        equityExDto.setOutstandingShares(snapshotContent.getEquityExData().getOutstandingShares());
+        equityExDto.setOutstandingMarketVal(snapshotContent.getEquityExData().getOutstandingMarketVal());
+        equityExDto.setNetAssetPerShare(snapshotContent.getEquityExData().getNetAssetPershare());
+        equityExDto.setEyRate(snapshotContent.getEquityExData().getEyRate());
+        equityExDto.setPeRate(snapshotContent.getEquityExData().getPeRate());
+        equityExDto.setPbRate(snapshotContent.getEquityExData().getPbRate());
+        equityExDto.setPeTtmRate(snapshotContent.getEquityExData().getPeTTMRate());
+        equityExDto.setDividendTtm(snapshotContent.getEquityExData().getDividendTTM());
+        equityExDto.setDividendRatioTtm(snapshotContent.getEquityExData().getDividendRatioTTM());
+        equityExDto.setDividendLfy(snapshotContent.getEquityExData().getDividendLFY());
+        equityExDto.setDividendLfyRatio(snapshotContent.getEquityExData().getDividendLFYRatio());
+        return equityExDto;
+    }
+
+    private SnapshotBaseDto getSnapshotBase(SnapshotContent snapshotContent) {
+        SnapshotBaseDto baseDto = new SnapshotBaseDto();
+        baseDto.setMarket(snapshotContent.getBasic().getSecurity().getMarket());
+        baseDto.setCode(snapshotContent.getBasic().getSecurity().getCode());
+        baseDto.setName(snapshotContent.getBasic().getName());
+        baseDto.setType(snapshotContent.getBasic().getType());
+        baseDto.setIsSuspend(snapshotContent.getBasic().getSuspend());
+        baseDto.setListTime(LocalDate.parse(snapshotContent.getBasic().getListTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        baseDto.setLotSize(snapshotContent.getBasic().getLotSize());
+        baseDto.setPriceSpread(snapshotContent.getBasic().getPriceSpread());
+        baseDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        baseDto.setHighPrice(snapshotContent.getBasic().getHighPrice());
+        baseDto.setOpenPrice(snapshotContent.getBasic().getOpenPrice());
+        baseDto.setLowPrice(snapshotContent.getBasic().getLowPrice());
+        baseDto.setLastClosePrice(snapshotContent.getBasic().getLastClosePrice());
+        baseDto.setCurPrice(snapshotContent.getBasic().getCurPrice());
+        baseDto.setVolume(snapshotContent.getBasic().getVolume());
+        baseDto.setTurnover(snapshotContent.getBasic().getTurnover());
+        baseDto.setTurnoverRate(snapshotContent.getBasic().getTurnoverRate());
+        baseDto.setAskPrice(snapshotContent.getBasic().getAskPrice());
+        baseDto.setBidPrice(snapshotContent.getBasic().getBidPrice());
+        baseDto.setAskVol(snapshotContent.getBasic().getAskVol());
+        baseDto.setBidVol(snapshotContent.getBasic().getBidVol());
+        baseDto.setAmplitude(snapshotContent.getBasic().getAmplitude());
+        baseDto.setAvgPrice(snapshotContent.getBasic().getAvgPrice());
+        baseDto.setBidAskRatio(snapshotContent.getBasic().getBidAskRatio());
+        baseDto.setVolumeRatio(snapshotContent.getBasic().getVolumeRatio());
+        baseDto.setHighest52WeeksPrice(snapshotContent.getBasic().getHighest52WeeksPrice());
+        baseDto.setLowest52WeeksPrice(snapshotContent.getBasic().getLowest52WeeksPrice());
+        baseDto.setHighestHistoryPrice(snapshotContent.getBasic().getHighestHistoryPrice());
+        baseDto.setLowestHistoryPrice(snapshotContent.getBasic().getLowestHistoryPrice());
+        baseDto.setPrePrice(snapshotContent.getBasic().getPreMarket().getPrice());
+        baseDto.setPreHighPrice(snapshotContent.getBasic().getPreMarket().getHighPrice());
+        baseDto.setPreLowPrice(snapshotContent.getBasic().getPreMarket().getLowPrice());
+        baseDto.setPreVolume(snapshotContent.getBasic().getPreMarket().getVolume());
+        baseDto.setPreTurnover(snapshotContent.getBasic().getPreMarket().getTurnover());
+        baseDto.setPreChangeVal(snapshotContent.getBasic().getPreMarket().getChangeVal());
+        baseDto.setPreChangeRate(snapshotContent.getBasic().getPreMarket().getChangeRate());
+        baseDto.setPreAmplitude(snapshotContent.getBasic().getPreMarket().getAmplitude());
+        baseDto.setAfterPrice(snapshotContent.getBasic().getAfterMarket().getPrice());
+        baseDto.setAfterHighPrice(snapshotContent.getBasic().getAfterMarket().getHighPrice());
+        baseDto.setAfterLowPrice(snapshotContent.getBasic().getAfterMarket().getLowPrice());
+        baseDto.setAfterVolume(snapshotContent.getBasic().getAfterMarket().getVolume());
+        baseDto.setAfterTurnover(snapshotContent.getBasic().getAfterMarket().getTurnover());
+        baseDto.setAfterChangeVal(snapshotContent.getBasic().getAfterMarket().getChangeVal());
+        baseDto.setAfterChangeRate(snapshotContent.getBasic().getAfterMarket().getChangeRate());
+        baseDto.setAfterAmplitude(snapshotContent.getBasic().getAfterMarket().getAmplitude());
+        baseDto.setSecStatus(snapshotContent.getBasic().getSecStatus());
+        baseDto.setClosePrice5Minute(snapshotContent.getBasic().getClosePrice5Minute());
+        return baseDto;
     }
 }

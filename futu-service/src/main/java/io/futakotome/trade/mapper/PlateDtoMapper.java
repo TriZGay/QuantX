@@ -8,7 +8,6 @@ import org.apache.ibatis.annotations.Param;
 import java.util.Collection;
 import java.util.List;
 
-@Mapper
 public interface PlateDtoMapper extends BaseMapper<PlateDto> {
     int insertBatch(@Param("plateDtoCollection") Collection<PlateDto> plateDtoCollection);
 

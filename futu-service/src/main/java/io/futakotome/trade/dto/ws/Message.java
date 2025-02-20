@@ -16,6 +16,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = StockOwnerPlateWsMessage.class, name = "STOCK_OWNER_PLATE"),
         @JsonSubTypes.Type(value = CapitalFlowWsMessage.class, name = "CAPITAL_FLOW"),
         @JsonSubTypes.Type(value = CapitalDistributionWsMessage.class, name = "CAPITAL_DISTRIBUTION"),
+        @JsonSubTypes.Type(value = RehabsWsMessage.class, name = "REHABS"),
+        @JsonSubTypes.Type(value = SnapshotWsMessage.class, name = "SNAPSHOT"),
 
         @JsonSubTypes.Type(value = RealTimeBaseQuoteMessage.class, name = "RT_BASIC_QUOTE"),
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),

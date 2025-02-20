@@ -21,6 +21,8 @@ public class QuantxWsController {
     public static final String HISTORY_KLINE_QUOTA_URI = "/history_k_quo";
     public static final String MARKET_STATE_URI = "/market_state";
     public static final String CAPITAL_DISTR_URI = "/capital_distr";
+    public static final String CAPITAL_FLOW_URI = "/capital_flow";
+    public static final String REHABS_URI = "/rehabs";
 
     private final FTQotService ftQotService;
     private final PlateDtoService plateService;
@@ -101,6 +103,16 @@ public class QuantxWsController {
                 ftQotService.syncCapitalDistribution(capitalDistributionWsMessage.getSecurity().getMarket(), capitalDistributionWsMessage.getSecurity().getCode());
             } else if (messageClz.getType().equals(MessageType.CAPITAL_FLOW)) {
                 //查询资金流向
+                CapitalFlowWsMessage capitalFlowWsMessage = (CapitalFlowWsMessage) messageClz;
+                ftQotService.syncCapitalFlow(capitalFlowWsMessage.getSecurity().getMarket(), capitalFlowWsMessage.getSecurity().getCode());
+            } else if (messageClz.getType().equals(MessageType.REHABS)) {
+                //查询复权因子
+                RehabsWsMessage rehabsWsMessage = (RehabsWsMessage) messageClz;
+                ftQotService.sendRehabRequest(rehabsWsMessage.getSecurity().getMarket(), rehabsWsMessage.getSecurity().getCode());
+            } else if (messageClz.getType().equals(MessageType.SNAPSHOT)) {
+                //查询快照数据
+                SnapshotWsMessage snapshotWsMessage = (SnapshotWsMessage) messageClz;
+                ftQotService.syncSnapshotData(snapshotWsMessage.getSecurities());
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

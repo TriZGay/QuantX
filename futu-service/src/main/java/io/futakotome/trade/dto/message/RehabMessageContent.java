@@ -1,48 +1,42 @@
 package io.futakotome.trade.dto.message;
 
 public class RehabMessageContent {
-    private Integer market;
-    private String code;
-
     private String time;
+    //公司行动(CompanyAct)组合标志位,指定某些字段值是否有效
     private Long companyActFlag;
+    //前复权因子 A
     private Double fwdFactorA;
+    //前复权因子 B
     private Double fwdFactorB;
+    //后复权因子 A
     private Double bwdFactorA;
+    //后复权因子 B
     private Double bwdFactorB;
+    //拆股(例如，1拆5，Base 为1，Ert 为5)
     private Integer splitBase;
     private Integer splitErt;
+    //合股(例如，50合1，Base 为50，Ert 为1)
     private Integer joinBase;
     private Integer joinErt;
+    //送股(例如，10送3, Base 为10,Ert 为3)
     private Integer bonusBase;
     private Integer bonusErt;
+    //转赠股(例如，10转3, Base 为10,Ert 为3)
     private Integer transferBase;
     private Integer transferErt;
+    //配股(例如，10送2, 配股价为6.3元, Base 为10, Ert 为2, Price 为6.3)
     private Integer allotBase;
     private Integer allotErt;
     private Double allotPrice;
+    //增发股(例如，10送2, 增发股价为6.3元, Base 为10, Ert 为2, Price 为6.3)
     private Integer addBase;
     private Integer addErt;
     private Double addPrice;
+    //增发股(例如，10送2, 增发股价为6.3元, Base 为10, Ert 为2, Price 为6.3)
     private Double dividend;
+    //特别股息(例如，每10股派特别股息0.5元,则该字段值为0.05)
     private Double spDividend;
     private Double timestamp;
-
-    public Integer getMarket() {
-        return market;
-    }
-
-    public void setMarket(Integer market) {
-        this.market = market;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
 
     public String getTime() {
         return time;

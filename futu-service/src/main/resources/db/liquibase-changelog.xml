@@ -25,4 +25,7 @@
     <changeSet id="6" author="futakotome">
         <sqlFile path="db/sql/InitTradeDateTable.sql"/>
     </changeSet>
+    <changeSet id="7" author="futakotome">
+        <sqlFile path="db/sql/InitSnapshotTable.sql"/>
+    </changeSet>
 </databaseChangeLog>

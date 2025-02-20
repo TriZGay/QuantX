@@ -14,6 +14,8 @@ public enum MessageType {
     STOCK_OWNER_PLATE, //查股票所属的板块
     CAPITAL_FLOW,
     CAPITAL_DISTRIBUTION,
+    REHABS,
+    SNAPSHOT,
 
     RT_BASIC_QUOTE,
     RT_KL,
