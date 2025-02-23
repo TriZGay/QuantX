@@ -1,77 +1,22 @@
-package io.futakotome.trade.dto;
+package io.futakotome.trade.controller.vo;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-
-import java.io.Serializable;
-
-/**
- * @TableName t_snapshot_equity_ex
- */
-@TableName(value ="t_snapshot_equity_ex")
-public class SnapshotEquityExDto implements Serializable {
-    private Long id;
-
-    private Integer market;
-
-    private String code;
-
+public class SnapshotEquityResponse extends SnapshotBaseResponse {
     private Long issuedShares;
-
     private Double issuedMarketVal;
-
     private Double netAsset;
-
     private Double netProfit;
-
     private Double earningsPerShare;
-
     private Long outstandingShares;
-
     private Double outstandingMarketVal;
-
     private Double netAssetPerShare;
-
     private Double eyRate;
-
     private Double peRate;
-
     private Double pbRate;
-
     private Double peTtmRate;
-
     private Double dividendTtm;
-
     private Double dividendRatioTtm;
-
     private Double dividendLfy;
-
     private Double dividendLfyRatio;
-
-    private static final long serialVersionUID = 1L;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Integer getMarket() {
-        return market;
-    }
-
-    public void setMarket(Integer market) {
-        this.market = market;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
 
     public Long getIssuedShares() {
         return issuedShares;

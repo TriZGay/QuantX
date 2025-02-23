@@ -2,8 +2,8 @@ package io.futakotome.trade.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.futakotome.trade.dto.SnapshotFutureExDto;
-import io.futakotome.trade.service.SnapshotFutureExDtoService;
 import io.futakotome.trade.mapper.SnapshotFutureExDtoMapper;
+import io.futakotome.trade.service.SnapshotFutureExDtoService;
 import org.springframework.stereotype.Service;
 
 /**

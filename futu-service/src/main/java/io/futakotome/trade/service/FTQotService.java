@@ -6,7 +6,6 @@ import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -21,8 +20,6 @@ import io.futakotome.trade.domain.code.*;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.dto.message.*;
 import io.futakotome.trade.dto.ws.*;
-import io.futakotome.trade.mapper.SubDtoMapper;
-import io.futakotome.trade.mapper.TradeDateDtoMapper;
 import io.futakotome.trade.utils.CacheManager;
 import io.futakotome.trade.utils.RequestCount;
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,7 +29,6 @@ import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -348,7 +344,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     private void subscribeOnStartup() {
         List<SubDto> subscribeInfos = this.subService.list();
-        if (subscribeInfos.size() > 0) {
+        if (!subscribeInfos.isEmpty()) {
             Map<SubscribeSecurity, List<Integer>> groupBySecurity = subscribeInfos.stream().collect(
                     toMap(subDto -> new SubscribeSecurity(subDto.getSecurityMarket(), subDto.getSecurityCode()),
                             subDto -> {
@@ -363,7 +359,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             groupBySecurity.keySet()
                     .forEach(subscribeSecurity ->
                             this.subscribeRequest(new SubOrUnSubWsMessage(Collections.singletonList(subscribeSecurity),
-                                    groupBySecurity.get(subscribeSecurity))));
+                                    groupBySecurity.get(subscribeSecurity), false)));
         }
     }
 
@@ -523,60 +519,61 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
+    //todo trade date
     public void onReply_RequestTradeDate(FTAPI_Conn client, int nSerialNo, QotRequestTradeDate.Response rsp) {
         if (rsp.getRetType() != 0) {
             String notify = "获取交易日失败:" + rsp.getRetMsg();
             LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取交易日失败,code:" + rsp.getRetType()));
             sendNotifyMessage(notify);
         } else {
-            try {
-                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                Object marketType = CacheManager.get(String.valueOf(nSerialNo));
-                Iterator<JsonElement> tradeDateList = ftGrpcReturnResult.getS2c().getAsJsonArray("tradeDateList").iterator();
-                if (marketType instanceof Integer) {
-                    Integer tradeDateMarket = (Integer) marketType;
-                    List<TradeDateDto> newTradeDateDtos = new ArrayList<>();
-                    if (tradeDateMarket.equals(TradeDateMarketType.HK.getCode())) {
-                        while (tradeDateList.hasNext()) {
-                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
-                            TradeDateDto tradeDateDto = new TradeDateDto();
-                            tradeDateDto.setMarketOrSecurity(String.valueOf(MarketType.HK.getCode()));
-                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
-                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
-                            newTradeDateDtos.add(tradeDateDto);
-                        }
-                    } else if (tradeDateMarket.equals(TradeDateMarketType.CN.getCode())) {
-                        while (tradeDateList.hasNext()) {
-                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
-                            TradeDateDto tradeDateDto = new TradeDateDto();
-                            tradeDateDto.setMarketOrSecurity(MarketType.CN_SH.getCode() + "," + MarketType.CN_SZ.getCode());
-                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
-                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
-                            newTradeDateDtos.add(tradeDateDto);
-                        }
-                    } else if (tradeDateMarket.equals(TradeDateMarketType.US.getCode())) {
-                        while (tradeDateList.hasNext()) {
-                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
-                            TradeDateDto tradeDateDto = new TradeDateDto();
-                            tradeDateDto.setMarketOrSecurity(String.valueOf(MarketType.US.getCode()));
-                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
-                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
-                            newTradeDateDtos.add(tradeDateDto);
-                        }
-                    }
-                    //todo 其他的以后再算
-                    List<TradeDateDto> existTradeDates = tradeDateDtoMapper.selectList(null);
-                    newTradeDateDtos.removeIf(existTradeDates::contains);
-                    int insertRow = tradeDateDtoMapper.insertBatch(newTradeDateDtos);
-                    if (insertRow > 0) {
-                        String str = "交易日数据插入条数" + insertRow;
-                        LOGGER.info(str);
-                        sendNotifyMessage(str);
-                    }
-                }
-            } catch (InvalidProtocolBufferException e) {
-                LOGGER.error("解析交易日结果失败.", e);
-            }
+//            try {
+//                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+//                Object marketType = CacheManager.get(String.valueOf(nSerialNo));
+//                Iterator<JsonElement> tradeDateList = ftGrpcReturnResult.getS2c().getAsJsonArray("tradeDateList").iterator();
+//                if (marketType instanceof Integer) {
+//                    Integer tradeDateMarket = (Integer) marketType;
+//                    List<TradeDateDto> newTradeDateDtos = new ArrayList<>();
+//                    if (tradeDateMarket.equals(TradeDateMarketType.HK.getCode())) {
+//                        while (tradeDateList.hasNext()) {
+//                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
+//                            TradeDateDto tradeDateDto = new TradeDateDto();
+//                            tradeDateDto.setMarketOrSecurity(String.valueOf(MarketType.HK.getCode()));
+//                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
+//                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
+//                            newTradeDateDtos.add(tradeDateDto);
+//                        }
+//                    } else if (tradeDateMarket.equals(TradeDateMarketType.CN.getCode())) {
+//                        while (tradeDateList.hasNext()) {
+//                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
+//                            TradeDateDto tradeDateDto = new TradeDateDto();
+//                            tradeDateDto.setMarketOrSecurity(MarketType.CN_SH.getCode() + "," + MarketType.CN_SZ.getCode());
+//                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
+//                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
+//                            newTradeDateDtos.add(tradeDateDto);
+//                        }
+//                    } else if (tradeDateMarket.equals(TradeDateMarketType.US.getCode())) {
+//                        while (tradeDateList.hasNext()) {
+//                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
+//                            TradeDateDto tradeDateDto = new TradeDateDto();
+//                            tradeDateDto.setMarketOrSecurity(String.valueOf(MarketType.US.getCode()));
+//                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
+//                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
+//                            newTradeDateDtos.add(tradeDateDto);
+//                        }
+//                    }
+//                    //todo 其他的以后再算
+//                    List<TradeDateDto> existTradeDates = tradeDateDtoMapper.selectList(null);
+//                    newTradeDateDtos.removeIf(existTradeDates::contains);
+//                    int insertRow = tradeDateDtoMapper.insertBatch(newTradeDateDtos);
+//                    if (insertRow > 0) {
+//                        String str = "交易日数据插入条数" + insertRow;
+//                        LOGGER.info(str);
+//                        sendNotifyMessage(str);
+//                    }
+//                }
+//            } catch (InvalidProtocolBufferException e) {
+//                LOGGER.error("解析交易日结果失败.", e);
+//            }
         }
     }
 
@@ -1135,45 +1132,46 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                Object cacheValue = CacheManager.get(String.valueOf(nSerialNo));
-                if (cacheValue instanceof SubOrUnSubWsMessage) {
-                    if (((SubOrUnSubWsMessage) cacheValue).getUnsub() != null && ((SubOrUnSubWsMessage) cacheValue).getUnsub()) {
-                        ((SubOrUnSubWsMessage) cacheValue).getSecurityList()
-                                .forEach(subscribeSecurity -> ((SubOrUnSubWsMessage) cacheValue).getSubTypeList()
-                                        .forEach(subType -> {
-                                            int delRow = subDtoMapper.deleteBySecurityCodeAndSubType(subscribeSecurity.getCode(), subType);
-                                            if (delRow > 0) {
-                                                String notify = "取消订阅成功";
-                                                LOGGER.info(notify);
-                                                sendNotifyMessage(notify);
-                                            }
-                                        }));
-
-                    } else {
-                        List<SubDto> toAddList = new ArrayList<>();
-                        ((SubOrUnSubWsMessage) cacheValue).getSecurityList()
-                                .forEach(subscribeSecurity -> ((SubOrUnSubWsMessage) cacheValue).getSubTypeList()
-                                        .forEach(subType -> {
-                                            SubDto toAddSub = new SubDto();
-                                            toAddSub.setSecurityCode(subscribeSecurity.getCode());
-                                            toAddSub.setSecurityName(subscribeSecurity.getName());
-                                            toAddSub.setSecurityMarket(subscribeSecurity.getMarket());
-                                            toAddSub.setSecurityType(subscribeSecurity.getType());
-                                            toAddSub.setSubType(subType);
-                                            toAddList.add(toAddSub);
-                                        }));
-                        //新增时候会判断是否存在,对已存在的数据不会更新
-                        List<SubDto> existSubList = subDtoMapper.selectList(null);
-                        toAddList.removeIf(existSubList::contains);
-                        if (toAddList.size() > 0) {
-                            int insertRow = subDtoMapper.insertBatch(toAddList);
-                            if (insertRow > 0) {
-                                String notify = "订阅成功";
-                                LOGGER.info(notify);
-                                sendNotifyMessage(notify);
-                            }
-                        }
+                SubOrUnSubWsMessage subOrUnSubWsMessage = (SubOrUnSubWsMessage) CacheManager.get(String.valueOf(nSerialNo));
+                if (subOrUnSubWsMessage.getUnsub() != null && subOrUnSubWsMessage.getUnsub()) {
+                    List<SubDto> toDelList = new ArrayList<>();
+                    subOrUnSubWsMessage.getSecurityList().forEach(subscribeSecurity -> {
+                        subOrUnSubWsMessage.getSubTypeList().forEach(subType -> {
+                            SubDto toDelSub = new SubDto();
+                            toDelSub.setSecurityCode(subscribeSecurity.getCode());
+                            toDelSub.setSecurityName(subscribeSecurity.getName());
+                            toDelSub.setSecurityMarket(subscribeSecurity.getMarket());
+                            toDelSub.setSecurityType(subscribeSecurity.getType());
+                            toDelSub.setSubType(subType);
+                            toDelList.add(toDelSub);
+                        });
+                    });
+                    int unsubRow = subService.cancelSubscribe(toDelList);
+                    if (unsubRow > 0) {
+                        String notify = "取消订阅成功";
+                        LOGGER.info(notify);
+                        sendNotifyMessage(notify);
                     }
+                } else {
+                    List<SubDto> toAddList = new ArrayList<>();
+                    subOrUnSubWsMessage.getSecurityList().forEach(subscribeSecurity -> {
+                        subOrUnSubWsMessage.getSubTypeList().forEach(subType -> {
+                            SubDto toAddSub = new SubDto();
+                            toAddSub.setSecurityCode(subscribeSecurity.getCode());
+                            toAddSub.setSecurityName(subscribeSecurity.getName());
+                            toAddSub.setSecurityMarket(subscribeSecurity.getMarket());
+                            toAddSub.setSecurityType(subscribeSecurity.getType());
+                            toAddSub.setSubType(subType);
+                            toAddList.add(toAddSub);
+                        });
+                    });
+                    //todo 不进入这个方法 会卡死
+//                    int subRow = subService.subscribe(toAddList);
+//                    if (subRow > 0) {
+//                        String notify = "订阅成功";
+//                        LOGGER.info(notify);
+//                        sendNotifyMessage(notify);
+//                    }
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("订阅解结果解析失败.", e);
@@ -1183,66 +1181,67 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
+    //todo GetSubInfo
     public void onReply_GetSubInfo(FTAPI_Conn client, int nSerialNo, QotGetSubInfo.Response rsp) {
         if (rsp.getRetType() != 0) {
             String notify = "查询订阅信息失败:" + rsp.getRetMsg();
             LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询订阅信息失败,code:" + rsp.getRetType()));
             sendNotifyMessage(notify);
         } else {
-            try {
-                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                if (ftGrpcReturnResult.getS2c().has("connSubInfoList")) {
-                    JsonArray connSubInfoList = ftGrpcReturnResult.getS2c().get("connSubInfoList").getAsJsonArray();
-                    Iterator<JsonElement> connSubInfoListIterator = connSubInfoList.iterator();
-                    List<SubDto> subDtoList = new ArrayList<>();
-                    while (connSubInfoListIterator.hasNext()) {
-                        JsonObject perConnSubInfo = connSubInfoListIterator.next().getAsJsonObject();
-                        JsonArray subInfoList = perConnSubInfo.getAsJsonArray("subInfoList");
-                        Iterator<JsonElement> subInfoIterator = subInfoList.iterator();
-                        while (subInfoIterator.hasNext()) {
-                            JsonObject perSubInfo = subInfoIterator.next().getAsJsonObject();
-                            Integer subType = perSubInfo.get("subType").getAsInt();
-                            JsonArray securityList = perSubInfo.getAsJsonArray("securityList");
-                            Iterator<JsonElement> securityIterator = securityList.iterator();
-                            while (securityIterator.hasNext()) {
-                                JsonObject perSecurity = securityIterator.next().getAsJsonObject();
-                                SubDto subDto = new SubDto();
-//                                subDto.setUsedQuota(perConnSubInfo.get("usedQuota").getAsInt());
-//                                subDto.setIsOwnConn(perConnSubInfo.get("isOwnConnData").getAsBoolean() ? 1 : 0);
-                                subDto.setSecurityMarket(perSecurity.get("market").getAsInt());
-                                subDto.setSecurityCode(perSecurity.get("code").getAsString());
-                                subDto.setSubType(subType);
-                                subDtoList.add(subDto);
-                            }
-                        }
-                    }
-                    List<SubDto> existSubscribeInfo = subDtoMapper.selectList(null);
-                    //差集,新增数据
-                    Collection<SubDto> subtractForInsert = CollectionUtils.subtract(subDtoList, existSubscribeInfo);
-                    if (subtractForInsert.size() > 0) {
-                        int insertRow = subDtoMapper.insertBatch(subtractForInsert);
-                        String notify = "订阅信息表插入条数." + insertRow;
-                        LOGGER.info(notify);
-                        sendNotifyMessage(notify);
-                    }
-                    //差集,删除数据
-                    Collection<SubDto> subtractForDel = CollectionUtils.subtract(existSubscribeInfo, subDtoList);
-                    if (subtractForDel.size() > 0) {
-                        int delRow = subDtoMapper.deleteBatchIds(subtractForDel
-                                .stream().map(SubDto::getId).collect(Collectors.toList()));
-                        String notify = "订阅信息表删除条数." + delRow;
-                        LOGGER.info(notify);
-                        sendNotifyMessage(notify);
-                    }
-                }
-            } catch (InvalidProtocolBufferException e) {
-                LOGGER.error("查询订阅信息解析结果失败.", e);
-            }
+//            try {
+//                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+//                if (ftGrpcReturnResult.getS2c().has("connSubInfoList")) {
+//                    JsonArray connSubInfoList = ftGrpcReturnResult.getS2c().get("connSubInfoList").getAsJsonArray();
+//                    Iterator<JsonElement> connSubInfoListIterator = connSubInfoList.iterator();
+//                    List<SubDto> subDtoList = new ArrayList<>();
+//                    while (connSubInfoListIterator.hasNext()) {
+//                        JsonObject perConnSubInfo = connSubInfoListIterator.next().getAsJsonObject();
+//                        JsonArray subInfoList = perConnSubInfo.getAsJsonArray("subInfoList");
+//                        Iterator<JsonElement> subInfoIterator = subInfoList.iterator();
+//                        while (subInfoIterator.hasNext()) {
+//                            JsonObject perSubInfo = subInfoIterator.next().getAsJsonObject();
+//                            Integer subType = perSubInfo.get("subType").getAsInt();
+//                            JsonArray securityList = perSubInfo.getAsJsonArray("securityList");
+//                            Iterator<JsonElement> securityIterator = securityList.iterator();
+//                            while (securityIterator.hasNext()) {
+//                                JsonObject perSecurity = securityIterator.next().getAsJsonObject();
+//                                SubDto subDto = new SubDto();
+////                                subDto.setUsedQuota(perConnSubInfo.get("usedQuota").getAsInt());
+////                                subDto.setIsOwnConn(perConnSubInfo.get("isOwnConnData").getAsBoolean() ? 1 : 0);
+//                                subDto.setSecurityMarket(perSecurity.get("market").getAsInt());
+//                                subDto.setSecurityCode(perSecurity.get("code").getAsString());
+//                                subDto.setSubType(subType);
+//                                subDtoList.add(subDto);
+//                            }
+//                        }
+//                    }
+//                    List<SubDto> existSubscribeInfo = subDtoMapper.selectList(null);
+//                    //差集,新增数据
+//                    Collection<SubDto> subtractForInsert = CollectionUtils.subtract(subDtoList, existSubscribeInfo);
+//                    if (subtractForInsert.size() > 0) {
+//                        int insertRow = subDtoMapper.insertBatch(subtractForInsert);
+//                        String notify = "订阅信息表插入条数." + insertRow;
+//                        LOGGER.info(notify);
+//                        sendNotifyMessage(notify);
+//                    }
+//                    //差集,删除数据
+//                    Collection<SubDto> subtractForDel = CollectionUtils.subtract(existSubscribeInfo, subDtoList);
+//                    if (subtractForDel.size() > 0) {
+//                        int delRow = subDtoMapper.deleteBatchIds(subtractForDel
+//                                .stream().map(SubDto::getId).collect(Collectors.toList()));
+//                        String notify = "订阅信息表删除条数." + delRow;
+//                        LOGGER.info(notify);
+//                        sendNotifyMessage(notify);
+//                    }
+//                }
+//            } catch (InvalidProtocolBufferException e) {
+//                LOGGER.error("查询订阅信息解析结果失败.", e);
+//            }
         }
     }
 
     @Override
-    //todo ipo callback
+    //todo GetIpoList
     public void onReply_GetIpoList(FTAPI_Conn client, int nSerialNo, QotGetIpoList.Response rsp) {
 //        if (rsp.getRetType() != 0) {
 //            String notify = "查询IPO信息失败:" + rsp.getRetMsg();
@@ -1770,22 +1769,26 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         baseDto.setLowest52WeeksPrice(snapshotContent.getBasic().getLowest52WeeksPrice());
         baseDto.setHighestHistoryPrice(snapshotContent.getBasic().getHighestHistoryPrice());
         baseDto.setLowestHistoryPrice(snapshotContent.getBasic().getLowestHistoryPrice());
-        baseDto.setPrePrice(snapshotContent.getBasic().getPreMarket().getPrice());
-        baseDto.setPreHighPrice(snapshotContent.getBasic().getPreMarket().getHighPrice());
-        baseDto.setPreLowPrice(snapshotContent.getBasic().getPreMarket().getLowPrice());
-        baseDto.setPreVolume(snapshotContent.getBasic().getPreMarket().getVolume());
-        baseDto.setPreTurnover(snapshotContent.getBasic().getPreMarket().getTurnover());
-        baseDto.setPreChangeVal(snapshotContent.getBasic().getPreMarket().getChangeVal());
-        baseDto.setPreChangeRate(snapshotContent.getBasic().getPreMarket().getChangeRate());
-        baseDto.setPreAmplitude(snapshotContent.getBasic().getPreMarket().getAmplitude());
-        baseDto.setAfterPrice(snapshotContent.getBasic().getAfterMarket().getPrice());
-        baseDto.setAfterHighPrice(snapshotContent.getBasic().getAfterMarket().getHighPrice());
-        baseDto.setAfterLowPrice(snapshotContent.getBasic().getAfterMarket().getLowPrice());
-        baseDto.setAfterVolume(snapshotContent.getBasic().getAfterMarket().getVolume());
-        baseDto.setAfterTurnover(snapshotContent.getBasic().getAfterMarket().getTurnover());
-        baseDto.setAfterChangeVal(snapshotContent.getBasic().getAfterMarket().getChangeVal());
-        baseDto.setAfterChangeRate(snapshotContent.getBasic().getAfterMarket().getChangeRate());
-        baseDto.setAfterAmplitude(snapshotContent.getBasic().getAfterMarket().getAmplitude());
+        if (Objects.nonNull(snapshotContent.getBasic().getPreMarket())) {
+            baseDto.setPrePrice(snapshotContent.getBasic().getPreMarket().getPrice());
+            baseDto.setPreHighPrice(snapshotContent.getBasic().getPreMarket().getHighPrice());
+            baseDto.setPreLowPrice(snapshotContent.getBasic().getPreMarket().getLowPrice());
+            baseDto.setPreVolume(snapshotContent.getBasic().getPreMarket().getVolume());
+            baseDto.setPreTurnover(snapshotContent.getBasic().getPreMarket().getTurnover());
+            baseDto.setPreChangeVal(snapshotContent.getBasic().getPreMarket().getChangeVal());
+            baseDto.setPreChangeRate(snapshotContent.getBasic().getPreMarket().getChangeRate());
+            baseDto.setPreAmplitude(snapshotContent.getBasic().getPreMarket().getAmplitude());
+        }
+        if (Objects.nonNull(snapshotContent.getBasic().getAfterMarket())) {
+            baseDto.setAfterPrice(snapshotContent.getBasic().getAfterMarket().getPrice());
+            baseDto.setAfterHighPrice(snapshotContent.getBasic().getAfterMarket().getHighPrice());
+            baseDto.setAfterLowPrice(snapshotContent.getBasic().getAfterMarket().getLowPrice());
+            baseDto.setAfterVolume(snapshotContent.getBasic().getAfterMarket().getVolume());
+            baseDto.setAfterTurnover(snapshotContent.getBasic().getAfterMarket().getTurnover());
+            baseDto.setAfterChangeVal(snapshotContent.getBasic().getAfterMarket().getChangeVal());
+            baseDto.setAfterChangeRate(snapshotContent.getBasic().getAfterMarket().getChangeRate());
+            baseDto.setAfterAmplitude(snapshotContent.getBasic().getAfterMarket().getAmplitude());
+        }
         baseDto.setSecStatus(snapshotContent.getBasic().getSecStatus());
         baseDto.setClosePrice5Minute(snapshotContent.getBasic().getClosePrice5Minute());
         return baseDto;

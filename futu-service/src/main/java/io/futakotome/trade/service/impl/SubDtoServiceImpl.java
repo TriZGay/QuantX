@@ -13,6 +13,9 @@ import io.futakotome.trade.service.SubDtoService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * @author pc
  * @description 针对表【t_sub】的数据库操作Service实现
@@ -21,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SubDtoServiceImpl extends ServiceImpl<SubDtoMapper, SubDto>
         implements SubDtoService {
+    private static final ReentrantLock lock = new ReentrantLock();
 
     @Override
     @Transactional
@@ -64,6 +68,38 @@ public class SubDtoServiceImpl extends ServiceImpl<SubDtoMapper, SubDto>
             response.setSubTypes(subDto.getSubTypes());
             return response;
         });
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int cancelSubscribe(List<SubDto> toDelList) {
+        lock.lock();
+        try {
+            int delRow = 0;
+            for (SubDto delSub : toDelList) {
+                delRow += getBaseMapper().deleteBySecurityCodeAndSubType(delSub.getSecurityCode(), delSub.getSubType());
+            }
+            return delRow;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int subscribe(List<SubDto> toAddList) {
+        lock.lock();
+        try {
+            List<SubDto> existSubList = list();
+            toAddList.removeIf(existSubList::contains);
+            if (!toAddList.isEmpty()) {
+                return getBaseMapper().insertBatch(toAddList);
+            }
+            return 0;
+        } finally {
+            lock.unlock();
+        }
+
     }
 }
 

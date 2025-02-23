@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Collection;
-
+@Mapper
 public interface PlateStockDtoMapper extends BaseMapper<PlateStockDto> {
     int insertBatch(@Param("plateStockDtoCollection") Collection<PlateStockDto> plateStockDtoCollection);
 

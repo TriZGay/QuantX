@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import io.futakotome.trade.controller.vo.ListStockRequest;
 import io.futakotome.trade.controller.vo.ListStockResponse;
-import io.futakotome.trade.dto.PlateDto;
 import io.futakotome.trade.dto.StockDto;
 
 import java.util.List;

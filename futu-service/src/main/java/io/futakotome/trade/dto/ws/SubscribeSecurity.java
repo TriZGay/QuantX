@@ -1,7 +1,5 @@
 package io.futakotome.trade.dto.ws;
 
-import java.util.Objects;
-
 public  class SubscribeSecurity {
     private Integer market;
     private String code;

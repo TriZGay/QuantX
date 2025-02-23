@@ -11,9 +11,10 @@ public class SubOrUnSubWsMessage implements Message {
     public SubOrUnSubWsMessage() {
     }
 
-    public SubOrUnSubWsMessage(List<SubscribeSecurity> securityList, List<Integer> subTypeList) {
+    public SubOrUnSubWsMessage(List<SubscribeSecurity> securityList, List<Integer> subTypeList, boolean unsub) {
         this.securityList = securityList;
         this.subTypeList = subTypeList;
+        this.unsub = unsub;
     }
 
     public List<SubscribeSecurity> getSecurityList() {

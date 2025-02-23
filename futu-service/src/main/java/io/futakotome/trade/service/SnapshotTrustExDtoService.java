@@ -1,7 +1,7 @@
 package io.futakotome.trade.service;
 
-import io.futakotome.trade.dto.SnapshotTrustExDto;
 import com.baomidou.mybatisplus.extension.service.IService;
+import io.futakotome.trade.dto.SnapshotTrustExDto;
 
 /**
 * @author 86131

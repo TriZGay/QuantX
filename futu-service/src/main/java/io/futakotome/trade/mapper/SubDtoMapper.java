@@ -14,6 +14,7 @@ import java.util.Collection;
  * @createDate 2023-05-08 15:00:30
  * @Entity io.futakotome.sub.dto.SubDto
  */
+@Mapper
 public interface SubDtoMapper extends BaseMapper<SubDto> {
     int insertBatch(@Param("subDtoCollection") Collection<SubDto> subDtoCollection);
 

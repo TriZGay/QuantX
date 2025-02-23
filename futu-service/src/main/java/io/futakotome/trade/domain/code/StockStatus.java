@@ -32,6 +32,15 @@ public enum StockStatus {
         this.name = name;
     }
 
+    public static String getNameByCode(Integer code) {
+        for (StockStatus s : StockStatus.values()) {
+            if (s.getCode().equals(code)) {
+                return s.getName();
+            }
+        }
+        return "";
+    }
+
     public Integer getCode() {
         return code;
     }

@@ -1,127 +1,59 @@
-package io.futakotome.trade.dto;
+package io.futakotome.trade.controller.vo;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
-/**
- * @TableName t_snapshot_base
- */
-@TableName(value = "t_snapshot_base")
-public class SnapshotBaseDto implements Serializable {
-    private Long id;
-
-    private Integer market;
-
+public class SnapshotBaseResponse {
+    private String market;
     private String code;
-
     private String name;
-
-    private Integer type;
-
-    private Boolean isSuspend;
-
-    private LocalDate listTime;
-
+    private String type;
+    private String isSuspend;
+    private String listTime;
     private Integer lotSize;
-
     private Double priceSpread;
-
-    private LocalDateTime updateTime;
-
+    private String updateTime;
     private Double highPrice;
-
     private Double openPrice;
-
     private Double lowPrice;
-
     private Double lastClosePrice;
-
     private Double curPrice;
-
     private Long volume;
-
     private Double turnover;
-
     private Double turnoverRate;
-
     private Double askPrice;
-
     private Double bidPrice;
-
     private Long askVol;
-
     private Long bidVol;
-
     private Double amplitude;
-
     private Double avgPrice;
-
     private Double bidAskRatio;
-
     private Double volumeRatio;
-    @TableField(value = "highest_52_weeks_price")
     private Double highest52WeeksPrice;
-    @TableField(value = "lowest_52_weeks_price")
     private Double lowest52WeeksPrice;
-
     private Double highestHistoryPrice;
-
     private Double lowestHistoryPrice;
-
     private Double prePrice;
-
     private Double preHighPrice;
-
     private Double preLowPrice;
-
     private Long preVolume;
-
     private Double preTurnover;
-
     private Double preChangeVal;
-
     private Double preChangeRate;
-
     private Double preAmplitude;
-
     private Double afterPrice;
-
     private Double afterHighPrice;
-
     private Double afterLowPrice;
-
     private Long afterVolume;
-
     private Double afterTurnover;
-
     private Double afterChangeVal;
-
     private Double afterChangeRate;
-
     private Double afterAmplitude;
-
-    private Integer secStatus;
-    @TableField(value = "close_price_5_minute")
+    private String secStatus;
     private Double closePrice5Minute;
-    private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Integer getMarket() {
+    public String getMarket() {
         return market;
     }
 
-    public void setMarket(Integer market) {
+    public void setMarket(String market) {
         this.market = market;
     }
 
@@ -141,27 +73,27 @@ public class SnapshotBaseDto implements Serializable {
         this.name = name;
     }
 
-    public Integer getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(Integer type) {
+    public void setType(String type) {
         this.type = type;
     }
 
-    public Boolean getIsSuspend() {
+    public String getIsSuspend() {
         return isSuspend;
     }
 
-    public void setIsSuspend(Boolean isSuspend) {
+    public void setIsSuspend(String isSuspend) {
         this.isSuspend = isSuspend;
     }
 
-    public LocalDate getListTime() {
+    public String getListTime() {
         return listTime;
     }
 
-    public void setListTime(LocalDate listTime) {
+    public void setListTime(String listTime) {
         this.listTime = listTime;
     }
 
@@ -181,11 +113,11 @@ public class SnapshotBaseDto implements Serializable {
         this.priceSpread = priceSpread;
     }
 
-    public LocalDateTime getUpdateTime() {
+    public String getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(LocalDateTime updateTime) {
+    public void setUpdateTime(String updateTime) {
         this.updateTime = updateTime;
     }
 
@@ -477,11 +409,11 @@ public class SnapshotBaseDto implements Serializable {
         this.afterAmplitude = afterAmplitude;
     }
 
-    public Integer getSecStatus() {
+    public String getSecStatus() {
         return secStatus;
     }
 
-    public void setSecStatus(Integer secStatus) {
+    public void setSecStatus(String secStatus) {
         this.secStatus = secStatus;
     }
 

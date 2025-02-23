@@ -1,6 +1,5 @@
 package io.futakotome.trade.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -18,8 +17,6 @@ import io.futakotome.trade.mapper.PlateStockDtoMapper;
 import io.futakotome.trade.service.PlateDtoService;
 import io.futakotome.trade.service.PlateStockDtoService;
 import io.futakotome.trade.service.StockDtoService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +34,6 @@ import java.util.stream.Collectors;
 @Service
 public class PlateDtoServiceImpl extends ServiceImpl<PlateDtoMapper, PlateDto>
         implements PlateDtoService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PlateDtoServiceImpl.class);
     private static final ReentrantLock lock = new ReentrantLock();
     private final StockDtoService stockService;
     private final PlateStockDtoService plateStockService;

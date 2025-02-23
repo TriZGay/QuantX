@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
  * @createDate 2023-05-18 17:29:48
  * @Entity io.futakotome.trade.dto.PositionDto
  */
+@Mapper
 public interface PositionDtoMapper extends BaseMapper<PositionDto> {
     int insertSelective(PositionDto positionDto);
 }
