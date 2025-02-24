@@ -38,4 +38,8 @@ public class QuantxFutuWsService {
     public void sendRehabs(RehabsWsMessage rehabsWsMessage) {
         this.template.convertAndSend(BROKER_PREFIX + REHABS_URI, rehabsWsMessage);
     }
+
+    public void sendAccounts(AccountsWsMessage accountsWsMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + ACCOUNTS_URI, accountsWsMessage);
+    }
 }

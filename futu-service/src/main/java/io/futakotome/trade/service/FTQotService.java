@@ -374,14 +374,14 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     @Override
     public void onInitConnect(FTAPI_Conn client, long errCode, String desc) {
-        String content = "FUTU API 初始化连接 onInitConnect: ret=" + errCode + ",desc=" + desc + ",connID=" + client.getConnectID();
+        String content = "FUTU API 初始化行情连接 onInitConnect: ret=" + errCode + ",desc=" + desc + ",connID=" + client.getConnectID();
         LOGGER.info(content);
         sendNotifyMessage(content);
     }
 
     @Override
     public void onDisconnect(FTAPI_Conn client, long errCode) {
-        String content = "FUTU API 关闭连接 onDisconnect: connID=" + client.getConnectID() + ",ret=" + errCode;
+        String content = "FUTU API 关闭行情连接 onDisconnect: connID=" + client.getConnectID() + ",ret=" + errCode;
         LOGGER.info(content);
         sendNotifyMessage(content);
     }

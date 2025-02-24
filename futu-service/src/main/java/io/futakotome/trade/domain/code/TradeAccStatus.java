@@ -1,22 +1,20 @@
 package io.futakotome.trade.domain.code;
 
-public enum TradeAccType {
-    UNKNOWN(0, "未知"),
-    CASH(1, "现金账户"),
-    MARGIN(2, "保证金账户");
-
+public enum TradeAccStatus {
+    ACTIVE(0, "生效"),
+    DISABLED(1, "失效");
     private final Integer code;
     private final String name;
 
-    TradeAccType(Integer code, String name) {
+    TradeAccStatus(Integer code, String name) {
         this.code = code;
         this.name = name;
     }
 
     public static String getNameByCode(Integer code) {
-        for (TradeAccType type : TradeAccType.values()) {
-            if (type.getCode().equals(code)) {
-                return type.getName();
+        for (TradeAccStatus status : TradeAccStatus.values()) {
+            if (status.getCode().equals(code)) {
+                return status.getName();
             }
         }
         return "";

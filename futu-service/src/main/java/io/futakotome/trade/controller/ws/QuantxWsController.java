@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.trade.dto.message.CommonSecurity;
 import io.futakotome.trade.dto.ws.*;
 import io.futakotome.trade.service.FTQotService;
+import io.futakotome.trade.service.FTTradeService;
 import io.futakotome.trade.service.PlateDtoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +24,16 @@ public class QuantxWsController {
     public static final String CAPITAL_DISTR_URI = "/capital_distr";
     public static final String CAPITAL_FLOW_URI = "/capital_flow";
     public static final String REHABS_URI = "/rehabs";
+    public static final String ACCOUNTS_URI = "/accounts";
 
     private final FTQotService ftQotService;
+    private final FTTradeService ftTradeService;
     private final PlateDtoService plateService;
     private final ObjectMapper objectMapper;
 
-    public QuantxWsController(FTQotService ftQotService, PlateDtoService plateService, ObjectMapper objectMapper) {
+    public QuantxWsController(FTQotService ftQotService, FTTradeService ftTradeService, PlateDtoService plateService, ObjectMapper objectMapper) {
         this.ftQotService = ftQotService;
+        this.ftTradeService = ftTradeService;
         this.plateService = plateService;
         this.objectMapper = objectMapper;
     }
@@ -113,6 +117,9 @@ public class QuantxWsController {
                 //查询快照数据
                 SnapshotWsMessage snapshotWsMessage = (SnapshotWsMessage) messageClz;
                 ftQotService.syncSnapshotData(snapshotWsMessage.getSecurities());
+            } else if (messageClz.getType().equals(MessageType.ACCOUNTS)) {
+                //查询交易账号
+                ftTradeService.requestAccounts();
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

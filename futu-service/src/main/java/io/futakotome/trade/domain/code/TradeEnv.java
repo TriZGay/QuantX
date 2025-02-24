@@ -12,6 +12,15 @@ public enum TradeEnv {
         this.name = name;
     }
 
+    public static String getNameByCode(Integer code) {
+        for (TradeEnv tradeEnv : values()) {
+            if (tradeEnv.getCode().equals(code)) {
+                return tradeEnv.getName();
+            }
+        }
+        return "";
+    }
+
     public Integer getCode() {
         return code;
     }

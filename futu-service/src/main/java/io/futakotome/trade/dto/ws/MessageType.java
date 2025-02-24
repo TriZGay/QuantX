@@ -16,6 +16,7 @@ public enum MessageType {
     CAPITAL_DISTRIBUTION,
     REHABS,
     SNAPSHOT,
+    ACCOUNTS,
 
     RT_BASIC_QUOTE,
     RT_KL,
