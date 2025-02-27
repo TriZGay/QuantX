@@ -11,21 +11,21 @@
         <sqlFile path="db/sql/InitOrderTable.sql"/>
     </changeSet>
     <changeSet id="2" author="futakotome">
-        <sqlFile path="db/sql/InitPositionTable.sql"/>
-    </changeSet>
-    <changeSet id="3" author="futakotome">
         <sqlFile path="db/sql/InitPlateTable.sql"/>
     </changeSet>
-    <changeSet id="4" author="futakotome">
+    <changeSet id="3" author="futakotome">
         <sqlFile path="db/sql/InitStockTable.sql"/>
     </changeSet>
-    <changeSet id="5" author="futakotome">
+    <changeSet id="4" author="futakotome">
         <sqlFile path="db/sql/InitSubscribeInfoTable.sql"/>
     </changeSet>
-    <changeSet id="6" author="futakotome">
+    <changeSet id="5" author="futakotome">
         <sqlFile path="db/sql/InitTradeDateTable.sql"/>
     </changeSet>
-    <changeSet id="7" author="futakotome">
+    <changeSet id="6" author="futakotome">
         <sqlFile path="db/sql/InitSnapshotTable.sql"/>
+    </changeSet>
+    <changeSet id="7" author="futakotome">
+        <sqlFile path="db/sql/InitAccSubscribeInfoTable.sql"/>
     </changeSet>
 </databaseChangeLog>

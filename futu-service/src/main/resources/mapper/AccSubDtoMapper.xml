@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.trade.mapper.AccSubDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.AccSubDto">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="accId" column="acc_id" jdbcType="VARCHAR"/>
+            <result property="cardNum" column="card_num" jdbcType="VARCHAR"/>
+            <result property="uniCardNum" column="uni_card_num" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,acc_id,card_num,
+        uni_card_num
+    </sql>
+    <insert id="insertBatch">
+        insert into t_acc_sub(acc_id,card_num,
+        uni_card_num)
+        values
+        <foreach collection="accSubDtoCollection" item="item" separator=",">
+            (#{item.accId,jdbcType=VARCHAR},#{item.cardNum,jdbcType=VARCHAR},
+            #{item.uniCardNum,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+</mapper>

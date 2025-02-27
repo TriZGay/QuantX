@@ -25,6 +25,7 @@ public class QuantxWsController {
     public static final String CAPITAL_FLOW_URI = "/capital_flow";
     public static final String REHABS_URI = "/rehabs";
     public static final String ACCOUNTS_URI = "/accounts";
+    public static final String POSITION_URI = "/positions";
 
     private final FTQotService ftQotService;
     private final FTTradeService ftTradeService;
@@ -48,6 +49,7 @@ public class QuantxWsController {
                 ftQotService.sendGlobalMarketStateRequest();
             } else if (messageClz.getType().equals(MessageType.CONNECT)) {
                 //连接或断开连接
+                //todo 区分行情连接和交易连接
                 ConnectWsMessage connectWsMessage = (ConnectWsMessage) messageClz;
                 if (connectWsMessage.isConnect()) {
                     ftQotService.connect();
@@ -120,6 +122,14 @@ public class QuantxWsController {
             } else if (messageClz.getType().equals(MessageType.ACCOUNTS)) {
                 //查询交易账号
                 ftTradeService.requestAccounts();
+            } else if (messageClz.getType().equals(MessageType.ACC_SUBSCRIBE)) {
+                //订阅账号
+                AccSubscribeWsMessage accSubscribeWsMessage = (AccSubscribeWsMessage) messageClz;
+                ftTradeService.accSubscribe(accSubscribeWsMessage);
+            } else if (messageClz.getType().equals(MessageType.ACC_POSITION)) {
+                //查询账号持仓
+                AccPositionWsMessage accPositionWsMessage = (AccPositionWsMessage) messageClz;
+                ftTradeService.requestAccPosition(accPositionWsMessage);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

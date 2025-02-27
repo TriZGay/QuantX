@@ -2,11 +2,22 @@ package io.futakotome.trade.domain.code;
 
 public enum TradeMarket {
     UNKNOWN(0, "未知市场"),
-    HK(1, "香港市场（证券、期权）"),
-    US(2,"美国市场（证券、期权）"),
-    CN(3,"A 股市场（仅用于模拟交易）"),
-    HKCC(4,"A 股通市场（股票）"),
-    FUTURES(5,"期货市场（环球期货）");
+    HK(1, "香港市场"),
+    US(2, "美国市场"),
+    CN(3, "A股市场(模拟)"),
+    HKCC(4, "A股通市场(股票)"),
+    FUTURES(5, "期货市场(环球期货)"),
+    SG(6, "新加坡市场"),
+    AU(8, "澳洲市场"),
+    FUTURES_SIM_HK(10, "香港期货模拟市场"),
+    FUTURES_SIM_US(11, "美国期货模拟市场"),
+    FUTURES_SIM_SG(12, "新加坡期货模拟市场"),
+    FUTURES_SIM_JP(13, "日本期货模拟市场"),
+    JP(15, "日本市场"),
+    MY(111, "马来西亚市场"),
+    CA(112, "加拿大市场"),
+    HK_FUND(113, "香港基金市场"),
+    US_FUND(123, "美国基金市场");
 
     private final Integer code;
     private final String name;
@@ -16,6 +27,15 @@ public enum TradeMarket {
         this.name = name;
     }
 
+    public static String getNameByCode(Integer code) {
+        for (TradeMarket tradeMarket : TradeMarket.values()) {
+            if (tradeMarket.getCode().equals(code)) {
+                return tradeMarket.getName();
+            }
+        }
+        return "";
+    }
+
     public Integer getCode() {
         return code;
     }
@@ -23,4 +43,4 @@ public enum TradeMarket {
     public String getName() {
         return name;
     }
-    }
+}

@@ -13,6 +13,15 @@ public enum PositionSide {
         this.name = name;
     }
 
+    public static String getNameByCode(Integer code) {
+        for (PositionSide positionSide : PositionSide.values()) {
+            if (positionSide.getCode().equals(code)) {
+                return positionSide.getName();
+            }
+        }
+        return "";
+    }
+
     public Integer getCode() {
         return code;
     }

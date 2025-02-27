@@ -42,4 +42,8 @@ public class QuantxFutuWsService {
     public void sendAccounts(AccountsWsMessage accountsWsMessage) {
         this.template.convertAndSend(BROKER_PREFIX + ACCOUNTS_URI, accountsWsMessage);
     }
+
+    public void sendAccPosition(AccPositionWsMessage accPositionWsMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + POSITION_URI, accPositionWsMessage);
+    }
 }

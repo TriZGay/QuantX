@@ -16,6 +16,15 @@ public enum Currency {
         this.name = name;
     }
 
+    public static String getNameByCode(Integer code) {
+        for (Currency currency : Currency.values()) {
+            if (currency.getCode().equals(code)) {
+                return currency.name;
+            }
+        }
+        return "";
+    }
+
     public Integer getCode() {
         return code;
     }

@@ -17,6 +17,8 @@ public enum MessageType {
     REHABS,
     SNAPSHOT,
     ACCOUNTS,
+    ACC_SUBSCRIBE,
+    ACC_POSITION,
 
     RT_BASIC_QUOTE,
     RT_KL,

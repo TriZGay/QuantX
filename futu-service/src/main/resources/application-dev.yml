@@ -8,7 +8,7 @@ spring:
   liquibase:
     change-log: classpath:db/liquibase-changelog.xml
 rocketmq:
-  name-server: 172.23.28.160:9876
+  name-server: 172.27.133.93:9876
   producer:
     group: ft-rt-producer
 ft:

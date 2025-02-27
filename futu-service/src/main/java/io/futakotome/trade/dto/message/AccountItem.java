@@ -7,6 +7,7 @@ public class AccountItem {
     private String trdEnvStr;
     private String accID;
     private List<Integer> trdMarketAuthList;
+    private List<String> trdMarketAuthStrList;
     private Integer accType;
     private String accTypeStr;
     private String cardNum;
@@ -17,6 +18,14 @@ public class AccountItem {
     private String uniCardNum;
     private Integer accStatus;
     private String accStatusStr;
+
+    public List<String> getTrdMarketAuthStrList() {
+        return trdMarketAuthStrList;
+    }
+
+    public void setTrdMarketAuthStrList(List<String> trdMarketAuthStrList) {
+        this.trdMarketAuthStrList = trdMarketAuthStrList;
+    }
 
     public String getTrdEnvStr() {
         return trdEnvStr;

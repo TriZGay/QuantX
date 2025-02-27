@@ -4,7 +4,6 @@ import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -13,12 +12,15 @@ import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.vo.OrderRequest;
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
 import io.futakotome.trade.domain.code.*;
+import io.futakotome.trade.dto.AccSubDto;
 import io.futakotome.trade.dto.OrderDto;
-import io.futakotome.trade.dto.PositionDto;
 import io.futakotome.trade.dto.message.AccountItem;
+import io.futakotome.trade.dto.message.PositionMessageContent;
+import io.futakotome.trade.dto.ws.AccPositionWsMessage;
+import io.futakotome.trade.dto.ws.AccSubscribeWsMessage;
 import io.futakotome.trade.dto.ws.AccountsWsMessage;
 import io.futakotome.trade.mapper.OrderDtoMapper;
-import io.futakotome.trade.mapper.PositionDtoMapper;
+import io.futakotome.trade.utils.CacheManager;
 import org.bouncycastle.jcajce.provider.digest.MD5;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
@@ -44,16 +46,17 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     private static final FTAPI_Conn_Trd trd = new FTAPI_Conn_Trd();
 
     private final OrderDtoMapper orderDtoMapper;
-    private final PositionDtoMapper positionDtoMapper;
+
+    private final AccSubDtoService accSubService;
     private final QuantxFutuWsService quantxFutuWsService;
 
-    public FTTradeService(FutuConfig futuConfig, OrderDtoMapper orderDtoMapper, PositionDtoMapper positionDtoMapper, QuantxFutuWsService quantxFutuWsService) {
+    public FTTradeService(FutuConfig futuConfig, OrderDtoMapper orderDtoMapper, AccSubDtoService accSubService, QuantxFutuWsService quantxFutuWsService) {
         trd.setClientInfo(clientID, 1);
         trd.setConnSpi(this);
         trd.setTrdSpi(this);
         this.orderDtoMapper = orderDtoMapper;
-        this.positionDtoMapper = positionDtoMapper;
         this.quantxFutuWsService = quantxFutuWsService;
+        this.accSubService = accSubService;
         this.futuConfig = futuConfig;
     }
 
@@ -72,6 +75,35 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         String lowerCasePwdMd5 = Hex.toHexString(md5Bytes).toLowerCase();
         LOGGER.info("pwd md5 & lowerCase:{}", lowerCasePwdMd5);
         return lowerCasePwdMd5;
+    }
+
+    public void accSubscribe(AccSubscribeWsMessage accSubscribeWsMessage) {
+        TrdSubAccPush.C2S c2S = TrdSubAccPush.C2S
+                .newBuilder().addAllAccIDList(accSubscribeWsMessage
+                        .getAccSubscribeItems().stream()
+                        .map(item -> Long.parseLong(item.getAccId()))
+                        .collect(Collectors.toList()))
+                .build();
+        TrdSubAccPush.Request request = TrdSubAccPush.Request.newBuilder()
+                .setC2S(c2S).build();
+        int seqNo = trd.subAccPush(request);
+        CacheManager.put(String.valueOf(seqNo), accSubscribeWsMessage);
+        LOGGER.info("账户订阅交易推送,seqNo={}", seqNo);
+    }
+
+    public void requestAccPosition(AccPositionWsMessage accPositionWsMessage) {
+        TrdCommon.TrdHeader header = TrdCommon.TrdHeader.newBuilder()
+                .setAccID(Long.parseLong(accPositionWsMessage.getAccId()))
+                .setTrdEnv(accPositionWsMessage.getTradeEnv())
+                .setTrdMarket(accPositionWsMessage.getTradeMarket())
+                .build();
+        TrdGetPositionList.C2S c2S = TrdGetPositionList.C2S
+                .newBuilder().setHeader(header).build();
+        TrdGetPositionList.Request request = TrdGetPositionList.Request
+                .newBuilder()
+                .setC2S(c2S).build();
+        int seqNo = trd.getPositionList(request);
+        LOGGER.info("请求账户持仓,seqNo={}", seqNo);
     }
 
     public void requestAccounts() {
@@ -125,6 +157,11 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        this.connect();
+
+    }
+
+    public void connect() {
         FTAPI.init();
         trd.initConnect(futuConfig.getUrl(), futuConfig.getPort(), futuConfig.isEnableEncrypt());
     }
@@ -146,6 +183,10 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                     accountItem.setSecurityFirmStr(SecurityFirm.getNameByCode(accountItem.getSecurityFirm()));
                     accountItem.setSimAccTypeStr(SimAccType.getNameByCode(accountItem.getSimAccType()));
                     accountItem.setAccStatusStr(TradeAccStatus.getNameByCode(accountItem.getAccStatus()));
+                    accountItem.setTrdMarketAuthStrList(
+                            accountItem.getTrdMarketAuthList().stream().map(TradeMarket::getNameByCode)
+                                    .collect(Collectors.toList())
+                    );
                 }).collect(Collectors.toList());
                 AccountsWsMessage accountsWsMessage = new AccountsWsMessage();
                 accountsWsMessage.setAccounts(accountItems);
@@ -210,15 +251,54 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     }
 
     @Override
-    public void onReply_SubAccPush(FTAPI_Conn client, int nSerialNo, TrdSubAccPush.Response rsp) {
+    public void onReply_GetPositionList(FTAPI_Conn client, int nSerialNo, TrdGetPositionList.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("下单失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("请求序列号:" + nSerialNo + "订阅失败,code:" + rsp.getRetType()));
+            String notify = "查询账户持仓失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "查询账户持仓失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
-            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "订阅...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
+                List<PositionMessageContent> positionMessageContents = GSON.fromJson(ftGrpcReturnResult.getS2c().getAsJsonArray("positionList"), new TypeToken<List<PositionMessageContent>>() {
+                }.getType());
+                AccPositionWsMessage accPositionWsMessage = new AccPositionWsMessage();
+                accPositionWsMessage.setPositions(positionMessageContents
+                        .stream().peek(positionMessageContent -> {
+                            positionMessageContent.setPositionSideStr(PositionSide.getNameByCode(positionMessageContent.getPositionSide()));
+                            positionMessageContent.setSecMarketStr(TradeSecurityMarket.getNameByCode(positionMessageContent.getSecMarket()));
+                            positionMessageContent.setTrdMarketStr(TradeMarket.getNameByCode(positionMessageContent.getTrdMarket()));
+                            positionMessageContent.setCurrencyStr(Currency.getNameByCode(positionMessageContent.getCurrency()));
+                        }).collect(Collectors.toList()));
+                quantxFutuWsService.sendAccPosition(accPositionWsMessage);
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析账户持仓结果失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onReply_SubAccPush(FTAPI_Conn client, int nSerialNo, TrdSubAccPush.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "交易账号订阅失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "交易账号订阅失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                AccSubscribeWsMessage accSubscribeWsMessage = (AccSubscribeWsMessage) CacheManager.get(String.valueOf(nSerialNo));
+                List<AccSubDto> accSubDtos = accSubscribeWsMessage.getAccSubscribeItems()
+                        .stream().map(accSubscribeItem -> {
+                            AccSubDto dto = new AccSubDto();
+                            dto.setAccId(accSubscribeItem.getAccId());
+                            dto.setCardNum(accSubscribeItem.getCardNum());
+                            dto.setUniCardNum(accSubscribeItem.getUniCardNum());
+                            return dto;
+                        }).collect(Collectors.toList());
+                int insertRow = accSubService.insertBatch(accSubDtos);
+                if (insertRow > 0) {
+                    LOGGER.info("账号订阅插入条数:{}", insertRow);
+                    sendNotifyMessage("订阅成功");
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("订阅结果解析失败.", e);
             }
@@ -301,150 +381,6 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 LOGGER.error("账号解锁结果解析失败.", e);
             }
 
-        }
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void onReply_GetPositionList(FTAPI_Conn client, int nSerialNo, TrdGetPositionList.Response rsp) {
-        if (rsp.getRetType() != 0) {
-            LOGGER.error("查询账户持仓失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询账户持仓失败,code:" + rsp.getRetType()));
-//            webSocketService.onNext(new NotifyMessage(String.valueOf(nSerialNo), "查询账户持仓失败" + rsp.getRetMsg()), this.sessionId);
-        } else {
-            try {
-                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                List<PositionDto> existPositions = positionDtoMapper.selectList(null);
-                JsonObject header = ftGrpcReturnResult.getS2c().get("header").getAsJsonObject();
-                PositionDto position = new PositionDto();
-                position.setAccId(header.get("accID").getAsString());
-                position.setTradeEnv(header.get("trdEnv").getAsInt());
-                position.setAccTradeMarket(header.get("trdMarket").getAsInt());
-                if (ftGrpcReturnResult.getS2c().has("positionList")) {
-                    JsonArray positionList = ftGrpcReturnResult.getS2c().get("positionList").getAsJsonArray();
-                    Iterator<JsonElement> positionIterator = positionList.iterator();
-                    while (positionIterator.hasNext()) {
-                        JsonObject onePosition = positionIterator.next().getAsJsonObject();
-                        if (onePosition.has("positionID")) {
-                            position.setPositionId(onePosition.get("positionID").getAsLong());
-                        }
-                        if (onePosition.has("positionSide")) {
-                            position.setPositionSide(onePosition.get("positionSide").getAsInt());
-                        }
-                        if (onePosition.has("code")) {
-                            position.setCode(onePosition.get("code").getAsString());
-                        }
-                        if (onePosition.has("name")) {
-                            position.setName(onePosition.get("name").getAsString());
-                        }
-                        if (onePosition.has("qty")) {
-                            position.setQty(onePosition.get("qty").getAsDouble());
-                        }
-                        if (onePosition.has("canSellQty")) {
-                            position.setCanSellQty(onePosition.get("canSellQty").getAsDouble());
-                        }
-                        if (onePosition.has("price")) {
-                            position.setPrice(onePosition.get("price").getAsDouble());
-                        }
-                        if (onePosition.has("costPrice")) {
-                            position.setCostPrice(onePosition.get("costPrice").getAsDouble());
-                        }
-                        if (onePosition.has("val")) {
-                            position.setVal(onePosition.get("val").getAsDouble());
-                        }
-                        if (onePosition.has("plVal")) {
-                            position.setPlVal(onePosition.get("plVal").getAsDouble());
-                        }
-                        if (onePosition.has("plRatio")) {
-                            position.setPlRatio(onePosition.get("plRatio").getAsDouble());
-                        }
-                        if (onePosition.has("secMarket")) {
-                            position.setSecurityMarket(onePosition.get("secMarket").getAsInt());
-                        }
-                        if (onePosition.has("td_plVal")) {
-                            position.setTdPlVal(onePosition.get("td_plVal").getAsDouble());
-                        }
-                        if (onePosition.has("td_trdVal")) {
-                            position.setTdTrdVal(onePosition.get("td_trdVal").getAsDouble());
-                        }
-                        if (onePosition.has("td_buyVal")) {
-                            position.setTdBuyVal(onePosition.get("td_buyVal").getAsDouble());
-                        }
-                        if (onePosition.has("td_buyQty")) {
-                            position.setTdBuyQty(onePosition.get("td_buyQty").getAsDouble());
-                        }
-                        if (onePosition.has("td_sellVal")) {
-                            position.setTdSellVal(onePosition.get("td_sellVal").getAsDouble());
-                        }
-                        if (onePosition.has("td_sellQty")) {
-                            position.setTdSellQty(onePosition.get("td_sellQty").getAsDouble());
-                        }
-                        if (onePosition.has("unrealizedPL")) {
-                            position.setUnrealizedPl(onePosition.get("unrealizedPL").getAsDouble());
-                        }
-                        if (onePosition.has("realizedPL")) {
-                            position.setRealizedPl(onePosition.get("realizedPL").getAsDouble());
-                        }
-                        if (onePosition.has("currency")) {
-                            position.setCurrency(onePosition.get("currency").getAsInt());
-                        }
-                        if (onePosition.has("trdMarket")) {
-                            position.setTradeMarket(onePosition.get("trdMarket").getAsInt());
-                        }
-                        if (existPositions.contains(position)) {
-                            //库里有 update
-                            PositionDto findOne = existPositions.stream()
-                                    .filter(exist -> exist.getPositionId().equals(position.getPositionId()))
-                                    .collect(Collectors.toList()).get(0);
-                            findOne.setTradeEnv(position.getTradeEnv());
-                            findOne.setAccId(position.getAccId());
-                            findOne.setAccTradeMarket(position.getAccTradeMarket());
-                            findOne.setPositionId(position.getPositionId());
-                            findOne.setPositionSide(position.getPositionSide());
-                            findOne.setCode(position.getCode());
-                            findOne.setName(position.getName());
-                            findOne.setQty(position.getQty());
-                            findOne.setCanSellQty(position.getCanSellQty());
-                            findOne.setPrice(position.getPrice());
-                            findOne.setCostPrice(position.getCostPrice());
-                            findOne.setVal(position.getVal());
-                            findOne.setPlVal(position.getPlVal());
-                            findOne.setPlRatio(position.getPlRatio());
-                            findOne.setSecurityMarket(position.getSecurityMarket());
-                            findOne.setTdPlVal(position.getTdPlVal());
-                            findOne.setTdTrdVal(position.getTdTrdVal());
-                            findOne.setTdBuyVal(position.getTdBuyVal());
-                            findOne.setTdBuyQty(position.getTdBuyQty());
-                            findOne.setTdSellVal(position.getTdSellVal());
-                            findOne.setTdSellQty(position.getTdSellQty());
-                            findOne.setUnrealizedPl(position.getUnrealizedPl());
-                            findOne.setRealizedPl(position.getRealizedPl());
-                            findOne.setCurrency(position.getCurrency());
-                            findOne.setTradeMarket(position.getTradeMarket());
-                            int updateRow = positionDtoMapper.updateById(findOne);
-                            if (updateRow > 0) {
-                                LOGGER.info("持仓信息修改成功.条数:" + updateRow);
-//                                webSocketService.onNext(new NotifyMessage(String.valueOf(updateRow), "持仓信息修改成功.条数:" + updateRow), this.sessionId);
-                            } else {
-                                LOGGER.info("持仓信息已最新");
-//                                webSocketService.onNext(new NotifyMessage(String.valueOf(0), "持仓信息已最新"), this.sessionId);
-                            }
-                        } else {
-                            //库里没有新增
-                            int insertRow = positionDtoMapper.insertSelective(position);
-                            if (insertRow > 0) {
-                                LOGGER.info("持仓信息插入成功.条数:" + insertRow);
-//                                webSocketService.onNext(new NotifyMessage(String.valueOf(insertRow), "持仓信息插入成功.条数:" + insertRow), this.sessionId);
-                            } else {
-                                LOGGER.info("持仓信息插入失败");
-//                                webSocketService.onNext(new NotifyMessage(String.valueOf(0), "持仓信息插入失败"), this.sessionId);
-                            }
-                        }
-                    }
-                }
-            } catch (InvalidProtocolBufferException e) {
-                LOGGER.error("解析账户持仓结果失败.", e);
-            }
         }
     }
 
