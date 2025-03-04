@@ -1,7 +1,19 @@
-rocketmq:
-  name-server: 172.27.133.93:9876
 ck:
   driverClass: com.clickhouse.jdbc.ClickHouseDriver
-  url: jdbc:ch://172.27.133.93:8123/quantx
+  url: jdbc:ch://172.20.105.219:8123/quantx
   user: default
   password: 123456
+spring:
+  kafka:
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      bootstrap-servers: 172.20.105.219:9092
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: '*'
+      max-poll-records: 500
+    listener:
+      type: batch

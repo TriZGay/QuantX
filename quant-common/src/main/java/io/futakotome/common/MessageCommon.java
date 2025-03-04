@@ -11,6 +11,7 @@ public interface MessageCommon {
     String RT_KL_QUARTER_CONSUMER_GROUP = "rt_klq_consumer_group";
     String RT_KL_YEAR_CONSUMER_GROUP = "rt_kly_consumer_group";
     String RT_KL_MIN_1_CONSUMER_GROUP = "rt_klm1_consumer_group";
+    String RT_KL_MIN_1_CONSUMER_GROUP_STREAM = "rt_klm1_consumer_group_stream";
     String RT_KL_MIN_3_CONSUMER_GROUP = "rt_klm3_consumer_group";
     String RT_KL_MIN_5_CONSUMER_GROUP = "rt_klm5_consumer_group";
     String RT_KL_MIN_15_CONSUMER_GROUP = "rt_klm15_consumer_group";

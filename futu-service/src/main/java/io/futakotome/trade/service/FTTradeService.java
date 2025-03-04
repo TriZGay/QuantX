@@ -261,15 +261,17 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 List<PositionMessageContent> positionMessageContents = GSON.fromJson(ftGrpcReturnResult.getS2c().getAsJsonArray("positionList"), new TypeToken<List<PositionMessageContent>>() {
                 }.getType());
-                AccPositionWsMessage accPositionWsMessage = new AccPositionWsMessage();
-                accPositionWsMessage.setPositions(positionMessageContents
-                        .stream().peek(positionMessageContent -> {
-                            positionMessageContent.setPositionSideStr(PositionSide.getNameByCode(positionMessageContent.getPositionSide()));
-                            positionMessageContent.setSecMarketStr(TradeSecurityMarket.getNameByCode(positionMessageContent.getSecMarket()));
-                            positionMessageContent.setTrdMarketStr(TradeMarket.getNameByCode(positionMessageContent.getTrdMarket()));
-                            positionMessageContent.setCurrencyStr(Currency.getNameByCode(positionMessageContent.getCurrency()));
-                        }).collect(Collectors.toList()));
-                quantxFutuWsService.sendAccPosition(accPositionWsMessage);
+                if (Objects.nonNull(positionMessageContents)) {
+                    AccPositionWsMessage accPositionWsMessage = new AccPositionWsMessage();
+                    accPositionWsMessage.setPositions(positionMessageContents
+                            .stream().peek(positionMessageContent -> {
+                                positionMessageContent.setPositionSideStr(PositionSide.getNameByCode(positionMessageContent.getPositionSide()));
+                                positionMessageContent.setSecMarketStr(TradeSecurityMarket.getNameByCode(positionMessageContent.getSecMarket()));
+                                positionMessageContent.setTrdMarketStr(TradeMarket.getNameByCode(positionMessageContent.getTrdMarket()));
+                                positionMessageContent.setCurrencyStr(Currency.getNameByCode(positionMessageContent.getCurrency()));
+                            }).collect(Collectors.toList()));
+                    quantxFutuWsService.sendAccPosition(accPositionWsMessage);
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析账户持仓结果失败.", e);
             }

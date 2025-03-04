@@ -26,8 +26,8 @@ under the License.
     <packaging>jar</packaging>
 
     <properties>
-        <!--        <maven.compiler.source>11</maven.compiler.source>-->
-        <!--        <maven.compiler.target>11</maven.compiler.target>-->
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <flink.version>1.17.1</flink.version>
         <target.java.version>11</target.java.version>
@@ -38,6 +38,11 @@ under the License.
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>io.futakotome</groupId>
+            <artifactId>quant-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <!-- Apache Flink dependencies -->
         <!-- These dependencies are provided, because they should not be packaged into the JAR file. -->
         <dependency>
@@ -56,6 +61,11 @@ under the License.
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-jdbc</artifactId>
             <version>3.1.0-1.17</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-rocketmq</artifactId>
+            <version>1.15.0</version>
         </dependency>
         <dependency>
             <groupId>com.clickhouse</groupId>

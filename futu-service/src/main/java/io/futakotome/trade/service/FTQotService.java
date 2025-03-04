@@ -29,6 +29,7 @@ import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -53,18 +54,16 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private final SubDtoService subService;
     private final TradeDateDtoService tradeDateService;
     private final FutuConfig futuConfig;
-    private final RocketMQTemplate rocketMQTemplate;
-
     private final QuantxFutuWsService quantxFutuWsService;
+    private final KafkaService kafkaService;
 
     private static final String clientID = "javaclient";
 
     private static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
     public FTQotService(PlateDtoService plateService, StockDtoService stockService, SnapshotService snapshotService,
-                        SubDtoService subService, TradeDateDtoService tradeDateService,
-                        FutuConfig futuConfig, RocketMQTemplate rocketMQTemplate,
-                        QuantxFutuWsService quantxFutuWsService) {
+                        SubDtoService subService, TradeDateDtoService tradeDateService, FutuConfig futuConfig,
+                        QuantxFutuWsService quantxFutuWsService, KafkaService kafkaService) {
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
@@ -75,8 +74,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         this.tradeDateService = tradeDateService;
 
         this.futuConfig = futuConfig;
-        this.rocketMQTemplate = rocketMQTemplate;
         this.quantxFutuWsService = quantxFutuWsService;
+        this.kafkaService = kafkaService;
     }
 
     public void syncStockInPlate(List<CommonSecurity> plates) {
@@ -426,7 +425,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     klMessageContent.setRehabType(rehabType);
                     klMessageContent.setMarket(market);
                     klMessageContent.setCode(code);
-                    sendKLMessage(klMessageContent);
+                    kafkaService.sendRTKLineMessage(klMessageContent);
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析历史K线额度使用明细结果失败.", e);
@@ -661,18 +660,18 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         brokerMessage.setOrderId(content.getOrderID());
         brokerMessage.setVolume(content.getVolume());
 
-        rocketMQTemplate.asyncSend(MessageCommon.RT_BROKER_TOPIC, brokerMessage, new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                LOGGER.info("经纪队列数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-                        sendResult.getSendStatus());
-            }
-
-            @Override
-            public void onException(Throwable throwable) {
-                LOGGER.error("经纪队列数据投递失败", throwable);
-            }
-        });
+//        rocketMQTemplate.asyncSend(MessageCommon.RT_BROKER_TOPIC, brokerMessage, new SendCallback() {
+//            @Override
+//            public void onSuccess(SendResult sendResult) {
+//                LOGGER.info("经纪队列数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+//                        sendResult.getSendStatus());
+//            }
+//
+//            @Override
+//            public void onException(Throwable throwable) {
+//                LOGGER.error("经纪队列数据投递失败", throwable);
+//            }
+//        });
     }
 
     private void sendTimeShareMessage(TimeShareMessageContent content) {
@@ -689,18 +688,18 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             message.setTurnover(content.getTurnover());
             message.setUpdateTime(content.getTime());
 
-            rocketMQTemplate.asyncSend(MessageCommon.RT_TIMESHARE_TOPIC, message, new SendCallback() {
-                @Override
-                public void onSuccess(SendResult sendResult) {
-                    LOGGER.info("分时数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-                            sendResult.getSendStatus());
-                }
-
-                @Override
-                public void onException(Throwable throwable) {
-                    LOGGER.error("分时数据投递失败", throwable);
-                }
-            });
+//            rocketMQTemplate.asyncSend(MessageCommon.RT_TIMESHARE_TOPIC, message, new SendCallback() {
+//                @Override
+//                public void onSuccess(SendResult sendResult) {
+//                    LOGGER.info("分时数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+//                            sendResult.getSendStatus());
+//                }
+//
+//                @Override
+//                public void onException(Throwable throwable) {
+//                    LOGGER.error("分时数据投递失败", throwable);
+//                }
+//            });
         }
     }
 
@@ -716,191 +715,21 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         message.setTickerType(content.getType());
         message.setTypeSign(content.getTypeSign());
         message.setUpdateTime(content.getTime());
-        rocketMQTemplate.asyncSend(MessageCommon.RT_TICKER_TOPIC, message, new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                LOGGER.info("逐笔数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-                        sendResult.getSendStatus());
-            }
-
-            @Override
-            public void onException(Throwable throwable) {
-                LOGGER.error("逐笔数据投递失败", throwable);
-            }
-        });
+//        rocketMQTemplate.asyncSend(MessageCommon.RT_TICKER_TOPIC, message, new SendCallback() {
+//            @Override
+//            public void onSuccess(SendResult sendResult) {
+//                LOGGER.info("逐笔数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+//                        sendResult.getSendStatus());
+//            }
+//
+//            @Override
+//            public void onException(Throwable throwable) {
+//                LOGGER.error("逐笔数据投递失败", throwable);
+//            }
+//        });
 
     }
 
-    private void sendKLMessage(KLMessageContent klMessageContent) {
-        if (!klMessageContent.getBlank()) {
-            //内容不为空才发
-            RTKLMessage message = new RTKLMessage();
-            message.setMarket(klMessageContent.getMarket());
-            message.setCode(klMessageContent.getCode());
-            message.setRehabType(klMessageContent.getRehabType());
-            message.setHighPrice(klMessageContent.getHighPrice());
-            message.setOpenPrice(klMessageContent.getOpenPrice());
-            message.setLowPrice(klMessageContent.getLowPrice());
-            message.setClosePrice(klMessageContent.getClosePrice());
-            message.setLastClosePrice(klMessageContent.getLastClosePrice());
-            message.setVolume(klMessageContent.getVolume());
-            message.setTurnover(klMessageContent.getTurnover());
-            message.setTurnoverRate(klMessageContent.getTurnoverRate());
-            message.setPe(klMessageContent.getPe());
-            message.setChangeRate(klMessageContent.getChangeRate());
-            message.setUpdateTime(klMessageContent.getTime());
-            message.setAddTime(LocalDateTime.now(ZoneId.of("Asia/Shanghai"))
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
-
-            if (klMessageContent.getKlType().equals(KLType.DAY.getCode())) {
-                //日K
-                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_DAY_TOPIC, message, new SendCallback() {
-                    @Override
-                    public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("日K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
-                                sendResult.getSendStatus());
-                    }
-
-                    @Override
-                    public void onException(Throwable throwable) {
-                        LOGGER.error("日K线数据投递失败", throwable);
-                    }
-                });
-            } else if (klMessageContent.getKlType().equals(KLType.WEEK.getCode())) {
-                //周K
-                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_WEEK_TOPIC, message, new SendCallback() {
-                    @Override
-                    public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("周K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
-                                sendResult.getSendStatus());
-                    }
-
-                    @Override
-                    public void onException(Throwable throwable) {
-                        LOGGER.error("周K线数据投递失败", throwable);
-                    }
-                });
-            } else if (klMessageContent.getKlType().equals(KLType.MONTH.getCode())) {
-                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MONTH_TOPIC, message, new SendCallback() {
-                    @Override
-                    public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("月K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
-                                sendResult.getSendStatus());
-                    }
-
-                    @Override
-                    public void onException(Throwable throwable) {
-                        LOGGER.error("月K线数据投递失败", throwable);
-                    }
-                });
-            } else if (klMessageContent.getKlType().equals(KLType.QUARTER.getCode())) {
-                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_QUARTER_TOPIC, message, new SendCallback() {
-                    @Override
-                    public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("季K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
-                                sendResult.getSendStatus());
-                    }
-
-                    @Override
-                    public void onException(Throwable throwable) {
-                        LOGGER.error("季K线数据投递失败", throwable);
-                    }
-                });
-            } else if (klMessageContent.getKlType().equals(KLType.YEAR.getCode())) {
-                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_YEAR_TOPIC, message, new SendCallback() {
-                    @Override
-                    public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("年K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
-                                sendResult.getSendStatus());
-                    }
-
-                    @Override
-                    public void onException(Throwable throwable) {
-                        LOGGER.error("年K线数据投递失败", throwable);
-                    }
-                });
-            } else if (klMessageContent.getKlType().equals(KLType.MIN_1.getCode())) {
-                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_1_TOPIC, message, new SendCallback() {
-                    @Override
-                    public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("1分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
-                                sendResult.getSendStatus());
-                    }
-
-                    @Override
-                    public void onException(Throwable throwable) {
-                        LOGGER.error("1分K线数据投递失败", throwable);
-                    }
-                });
-            } else if (klMessageContent.getKlType().equals(KLType.MIN_3.getCode())) {
-                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_3_TOPIC, message, new SendCallback() {
-                    @Override
-                    public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("3分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
-                                sendResult.getSendStatus());
-                    }
-
-                    @Override
-                    public void onException(Throwable throwable) {
-                        LOGGER.error("3分K线数据投递失败", throwable);
-                    }
-                });
-            } else if (klMessageContent.getKlType().equals(KLType.MIN_5.getCode())) {
-                //5分K
-                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_5_TOPIC, message, new SendCallback() {
-                    @Override
-                    public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("5分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
-                                sendResult.getSendStatus());
-                    }
-
-                    @Override
-                    public void onException(Throwable throwable) {
-                        LOGGER.error("5分K线数据投递失败", throwable);
-                    }
-                });
-            } else if (klMessageContent.getKlType().equals(KLType.MIN_15.getCode())) {
-                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_15_TOPIC, message, new SendCallback() {
-                    @Override
-                    public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("15分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
-                                sendResult.getSendStatus());
-                    }
-
-                    @Override
-                    public void onException(Throwable throwable) {
-                        LOGGER.error("15分K线数据投递失败", throwable);
-                    }
-                });
-            } else if (klMessageContent.getKlType().equals(KLType.MIN_30.getCode())) {
-                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_30_TOPIC, message, new SendCallback() {
-                    @Override
-                    public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("30分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
-                                sendResult.getSendStatus());
-                    }
-
-                    @Override
-                    public void onException(Throwable throwable) {
-                        LOGGER.error("30分K线数据投递失败", throwable);
-                    }
-                });
-            } else if (klMessageContent.getKlType().equals(KLType.MIN_60.getCode())) {
-                rocketMQTemplate.asyncSend(MessageCommon.RT_KL_MIN_60_TOPIC, message, new SendCallback() {
-                    @Override
-                    public void onSuccess(SendResult sendResult) {
-                        LOGGER.info("60分K线数据投递成功.[代码:{}-复权:{}.{}]", message.getCode(), message.getRehabType(),
-                                sendResult.getSendStatus());
-                    }
-
-                    @Override
-                    public void onException(Throwable throwable) {
-                        LOGGER.error("60分K线数据投递失败", throwable);
-                    }
-                });
-            }
-        }
-    }
 
     private void sendBasicQuoteMessage(BasicQuoteMessageContent basicQuoteMessageContent) {
         String cacheKey = basicQuoteMessageContent.getSecurity().getMarket() + "+" + basicQuoteMessageContent.getSecurity().getCode();
@@ -936,50 +765,50 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         String hashKey = rtBasicQuoteMessage.getMarket() + "-" + rtBasicQuoteMessage.getCode();
         if (stockDto.getStockType().equals(StockType.Eqty.getCode())) {
             //正股
-            rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_BASIC_QUO_TOPIC_STOCK, rtBasicQuoteMessage, hashKey + "-stock", new SendCallback() {
-                @Override
-                public void onSuccess(SendResult sendResult) {
-                    LOGGER.info("实时正股报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-                            sendResult.getSendStatus());
-                }
-
-                @Override
-                public void onException(Throwable throwable) {
-                    LOGGER.error("实时正股报价信息投递失败", throwable);
-                }
-            });
+//            rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_BASIC_QUO_TOPIC_STOCK, rtBasicQuoteMessage, hashKey + "-stock", new SendCallback() {
+//                @Override
+//                public void onSuccess(SendResult sendResult) {
+//                    LOGGER.info("实时正股报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+//                            sendResult.getSendStatus());
+//                }
+//
+//                @Override
+//                public void onException(Throwable throwable) {
+//                    LOGGER.error("实时正股报价信息投递失败", throwable);
+//                }
+//            });
         } else if (stockDto.getStockType().equals(StockType.Index.getCode())) {
             //指数
-            rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_BASIC_QUO_TOPIC_INDEX, rtBasicQuoteMessage, hashKey + "-index", new SendCallback() {
-                @Override
-                public void onSuccess(SendResult sendResult) {
-                    LOGGER.info("实时指数报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-                            sendResult.getSendStatus());
-                }
-
-                @Override
-                public void onException(Throwable throwable) {
-                    LOGGER.error("实时指数报价信息投递失败", throwable);
-                }
-            });
+//            rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_BASIC_QUO_TOPIC_INDEX, rtBasicQuoteMessage, hashKey + "-index", new SendCallback() {
+//                @Override
+//                public void onSuccess(SendResult sendResult) {
+//                    LOGGER.info("实时指数报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+//                            sendResult.getSendStatus());
+//                }
+//
+//                @Override
+//                public void onException(Throwable throwable) {
+//                    LOGGER.error("实时指数报价信息投递失败", throwable);
+//                }
+//            });
         } else if (stockDto.getStockType().equals(StockType.Future.getCode())) {
             //期货
 
 
         } else if (stockDto.getStockType().equals(StockType.Plate.getCode())) {
             //板块
-            rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_BASIC_QUO_TOPIC_PLATE, rtBasicQuoteMessage, hashKey + "-plate", new SendCallback() {
-                @Override
-                public void onSuccess(SendResult sendResult) {
-                    LOGGER.info("实时板块报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-                            sendResult.getSendStatus());
-                }
-
-                @Override
-                public void onException(Throwable throwable) {
-                    LOGGER.error("实时板块报价信息投递失败", throwable);
-                }
-            });
+//            rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_BASIC_QUO_TOPIC_PLATE, rtBasicQuoteMessage, hashKey + "-plate", new SendCallback() {
+//                @Override
+//                public void onSuccess(SendResult sendResult) {
+//                    LOGGER.info("实时板块报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+//                            sendResult.getSendStatus());
+//                }
+//
+//                @Override
+//                public void onException(Throwable throwable) {
+//                    LOGGER.error("实时板块报价信息投递失败", throwable);
+//                }
+//            });
         }
     }
 
@@ -1026,7 +855,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     klMessageContent.setRehabType(rehabType);
                     klMessageContent.setMarket(market);
                     klMessageContent.setCode(code);
-                    sendKLMessage(klMessageContent);
+                    kafkaService.sendRTKLineMessage(klMessageContent);
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("K线推送结果解析失败.", e);
