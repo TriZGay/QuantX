@@ -46,6 +46,7 @@ public class RTKLMapper {
         }
     }
 
+    @Deprecated
     public boolean insertOne(RTKLDto dto, String tableName) {
         try {
             String sql = "insert into " + tableName + "(market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time,add_time)" +

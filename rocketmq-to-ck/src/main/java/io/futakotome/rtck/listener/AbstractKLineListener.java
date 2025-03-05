@@ -19,7 +19,7 @@ public abstract class AbstractKLineListener {
         dto.setTurnover(rtklMessage.getTurnover());
         dto.setTurnoverRate(rtklMessage.getTurnoverRate());
         dto.setPe(rtklMessage.getPe());
-        dto.setChangeRate(rtklMessage.getChangeRate());
+        dto.setChangeRate(rtklMessage.getChangeRate() == null ? -1 : rtklMessage.getChangeRate());
         dto.setUpdateTime(rtklMessage.getUpdateTime());
         dto.setAddTime(rtklMessage.getAddTime());
         return dto;
