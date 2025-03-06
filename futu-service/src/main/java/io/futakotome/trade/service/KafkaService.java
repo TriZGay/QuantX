@@ -29,8 +29,7 @@ public class KafkaService {
         return new ListenableFutureCallback<>() {
             @Override
             public void onSuccess(SendResult<String, Object> result) {
-                LOGGER.info("发送消息成功:{}", result.getRecordMetadata());
-                LOGGER.info("发送消息成功:{}", result.getProducerRecord());
+                LOGGER.info("发送消息成功:{},{}", result.getRecordMetadata(), result.getProducerRecord());
             }
 
             @Override

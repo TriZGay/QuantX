@@ -23,7 +23,8 @@ public class RTKLineListener extends AbstractKLineListener {
         this.mapper = mapper;
     }
 
-    @KafkaListener(groupId = MessageCommon.RT_KL_MIN_1_CONSUMER_GROUP, topics = {MessageCommon.RT_KL_MIN_1_TOPIC})
+    @KafkaListener(groupId = MessageCommon.RT_KL_MIN_1_CONSUMER_GROUP, topics = {MessageCommon.RT_KL_MIN_1_TOPIC},
+            errorHandler = "rtKLineErrorHandler")
     public void min1Listener(List<RTKLMessage> rtklMessages) {
         List<RTKLDto> toAddKLines = rtklMessages.stream()
                 .map(this::message2Dto).collect(Collectors.toList());

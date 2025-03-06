@@ -12,7 +12,7 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       retries: 5
-      bootstrap-servers: 172.28.253.8:9092
+      bootstrap-servers: 172.25.160.223:9092
 ft:
   url: 127.0.0.1
   port: 11111

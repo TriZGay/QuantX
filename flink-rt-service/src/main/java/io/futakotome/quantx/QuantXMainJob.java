@@ -1,57 +1,43 @@
 package io.futakotome.quantx;
 
 import io.futakotome.common.MessageCommon;
+import io.futakotome.common.message.RTKLMessage;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.connector.rocketmq.legacy.RocketMQConfig;
-import org.apache.flink.connector.rocketmq.legacy.RocketMQSourceFunction;
-import org.apache.flink.connector.rocketmq.legacy.common.config.OffsetResetStrategy;
-import org.apache.flink.connector.rocketmq.legacy.common.serialization.SimpleKeyValueDeserializationSchema;
-import org.apache.flink.connector.rocketmq.source.RocketMQSource;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.flink.formats.json.JsonDeserializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.ProcessFunction;
-import org.apache.flink.util.Collector;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 public class QuantXMainJob {
 
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-//        env.enableCheckpointing(3000);
         ParameterTool configs = ParameterTool.fromPropertiesFile(QuantXMainJob.class.getResourceAsStream("/base_config.properties"));
-        Properties consumerProps = new Properties();
-        consumerProps.setProperty(RocketMQConfig.NAME_SERVER_ADDR, configs.getRequired("rocketmq.nameserver"));
-        consumerProps.setProperty(RocketMQConfig.CONSUMER_GROUP, MessageCommon.RT_KL_MIN_1_CONSUMER_GROUP_STREAM);
-        consumerProps.setProperty(RocketMQConfig.CONSUMER_TOPIC, MessageCommon.RT_KL_MIN_1_TOPIC);
 
-        RocketMQSourceFunction<Map<String, String>> source = new RocketMQSourceFunction<>(
-                new SimpleKeyValueDeserializationSchema("id", "address"), consumerProps
-        );
-        source.setStartFromGroupOffsets(OffsetResetStrategy.LATEST);
-        env.addSource(source)
-                .name("rocketmq-source")
-                .setParallelism(2)
-                .process(new ProcessFunction<Map<String, String>, Map<String, String>>() {
-                    @Override
-                    public void processElement(Map<String, String> in, ProcessFunction<Map<String, String>, Map<String, String>>.Context context, Collector<Map<String, String>> out) throws Exception {
-                        System.out.println(in);
-                        HashMap result = new HashMap();
-                        result.put("id", in.get("id"));
-                        String[] arr = in.get("address").toString().split("\\s+");
-                        result.put("province", arr[arr.length - 1]);
-                        out.collect(result);
-                    }
-                });
-        try {
-            env.execute("rocket-flink-example");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        KafkaSource<RTKLMessage> source = KafkaSource.<RTKLMessage>builder()
+                .setBootstrapServers(configs.getRequired("kafka.bootstrapServers"))
+                .setTopics(MessageCommon.RT_KL_MIN_1_TOPIC)
+                .setGroupId(MessageCommon.RT_KL_MIN_1_CONSUMER_GROUP_STREAM)
+                .setStartingOffsets(OffsetsInitializer.latest())
+                .setValueOnlyDeserializer(new JsonDeserializationSchema<>(RTKLMessage.class))
+                .build();
+        DataStream<RTKLMessage> rtklMin1Source = env.fromSource(source, WatermarkStrategy.forMonotonousTimestamps(), "rtk_min1_source")
+                .setParallelism(1);
+        KeyedStream<RTKLMessage, Tuple3<Integer, String, Integer>> keyedStream = rtklMin1Source.keyBy(new KeySelector<RTKLMessage, Tuple3<Integer, String, Integer>>() {
+            @Override
+            public Tuple3<Integer, String, Integer> getKey(RTKLMessage value) throws Exception {
+                return Tuple3.of(value.getMarket(), value.getCode(), value.getRehabType());
+            }
+        });
+        keyedStream.print();
+        env.execute(QuantXMainJob.class.getName());
 //        env.setParallelism(1);
-//        DataStream<String> text = env.fromElements("hello", "apache", "flink");
+//        DataStream<String> text = env.fromElements("hello", "apache", "flink")
 //        DataStream<String> upperCaseText = text.map(String::toUpperCase);
 //        upperCaseText.print();
 //        env.execute("hello flink");
