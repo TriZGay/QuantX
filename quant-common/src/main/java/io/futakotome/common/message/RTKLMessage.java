@@ -1,6 +1,6 @@
 package io.futakotome.common.message;
 
-public class RTKLMessage {
+public class RTKLMessage  {
     private Integer market;
     private String code;
     private Integer rehabType;
@@ -135,5 +135,26 @@ public class RTKLMessage {
 
     public void setUpdateTime(String updateTime) {
         this.updateTime = updateTime;
+    }
+
+    @Override
+    public String toString() {
+        return "RTKLMessage{" +
+                "market=" + market +
+                ", code='" + code + '\'' +
+                ", rehabType=" + rehabType +
+                ", highPrice=" + highPrice +
+                ", openPrice=" + openPrice +
+                ", lowPrice=" + lowPrice +
+                ", closePrice=" + closePrice +
+                ", lastClosePrice=" + lastClosePrice +
+                ", volume=" + volume +
+                ", turnover=" + turnover +
+                ", turnoverRate=" + turnoverRate +
+                ", pe=" + pe +
+                ", changeRate=" + changeRate +
+                ", updateTime='" + updateTime + '\'' +
+                ", addTime='" + addTime + '\'' +
+                '}';
     }
 }

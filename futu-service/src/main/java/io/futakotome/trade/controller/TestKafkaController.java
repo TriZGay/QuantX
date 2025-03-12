@@ -19,9 +19,11 @@ public class TestKafkaController {
 
     @GetMapping("/sendKL")
     public ResponseEntity<String> sendKL() {
-        for (int i = 0; i <= 10; i++) {
+        for (int i = 0; i < 10; i++) {
             KLMessageContent klMessageContent = new KLMessageContent();
-            klMessageContent.setRehabType(1);
+            klMessageContent.setRehabType(0);
+            klMessageContent.setMarket(1);
+            klMessageContent.setCode("ddddd");
             klMessageContent.setTime("2025-03-04 12:00:00");
             klMessageContent.setHighPrice(0D);
             klMessageContent.setOpenPrice(0D);
@@ -35,8 +37,48 @@ public class TestKafkaController {
             klMessageContent.setChangeRate(0D);
             klMessageContent.setTimestamp(0D);
             klMessageContent.setBlank(false);
+            klMessageContent.setKlType(KLType.MIN_1.getCode());
+            kafkaService.sendRTKLineMessage(klMessageContent);
+        }
+        for (int i = 0; i < 10; i++) {
+            KLMessageContent klMessageContent = new KLMessageContent();
+            klMessageContent.setRehabType(2);
             klMessageContent.setMarket(1);
             klMessageContent.setCode("ddddd");
+            klMessageContent.setTime("2025-03-04 12:00:00");
+            klMessageContent.setHighPrice(0D);
+            klMessageContent.setOpenPrice(0D);
+            klMessageContent.setLowPrice(0D);
+            klMessageContent.setClosePrice(0D);
+            klMessageContent.setLastClosePrice(0D);
+            klMessageContent.setVolume(0L);
+            klMessageContent.setTurnover(0D);
+            klMessageContent.setTurnoverRate(0D);
+            klMessageContent.setPe(0D);
+            klMessageContent.setChangeRate(0D);
+            klMessageContent.setTimestamp(0D);
+            klMessageContent.setBlank(false);
+            klMessageContent.setKlType(KLType.MIN_1.getCode());
+            kafkaService.sendRTKLineMessage(klMessageContent);
+        }
+        for (int i = 0; i < 10; i++) {
+            KLMessageContent klMessageContent = new KLMessageContent();
+            klMessageContent.setRehabType(1);
+            klMessageContent.setMarket(1);
+            klMessageContent.setCode("ddddd");
+            klMessageContent.setTime("2025-03-04 12:00:00");
+            klMessageContent.setHighPrice(0D);
+            klMessageContent.setOpenPrice(0D);
+            klMessageContent.setLowPrice(0D);
+            klMessageContent.setClosePrice(0D);
+            klMessageContent.setLastClosePrice(0D);
+            klMessageContent.setVolume(0L);
+            klMessageContent.setTurnover(0D);
+            klMessageContent.setTurnoverRate(0D);
+            klMessageContent.setPe(0D);
+            klMessageContent.setChangeRate(0D);
+            klMessageContent.setTimestamp(0D);
+            klMessageContent.setBlank(false);
             klMessageContent.setKlType(KLType.MIN_1.getCode());
             kafkaService.sendRTKLineMessage(klMessageContent);
         }

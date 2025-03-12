@@ -819,13 +819,11 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                Iterator<JsonElement> basicQotIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("basicQotList").iterator();
-                while (basicQotIterator.hasNext()) {
-                    JsonObject oneBasicQotInfo = basicQotIterator.next().getAsJsonObject();
-                    BasicQuoteMessageContent messageContent = GSON.fromJson(oneBasicQotInfo, BasicQuoteMessageContent.class);
-                    sendBasicQuoteMessage(messageContent);
+                List<BasicQuoteMessageContent> basicQuoteMessageContents = GSON.fromJson(ftGrpcReturnResult.getS2c().getAsJsonArray("basicQotList"), new TypeToken<List<BasicQuoteMessageContent>>() {
+                }.getType());
+                for (BasicQuoteMessageContent basicQuoteMessageContent : basicQuoteMessageContents) {
+                    sendBasicQuoteMessage(basicQuoteMessageContent);
                 }
-
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("报价推送结果解析失败.", e);
             }
