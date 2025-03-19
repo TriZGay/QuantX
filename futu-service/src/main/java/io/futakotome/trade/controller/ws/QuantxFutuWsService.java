@@ -1,5 +1,6 @@
 package io.futakotome.trade.controller.ws;
 
+import io.futakotome.common.message.RTEmaMessage;
 import io.futakotome.trade.dto.ws.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -45,5 +46,9 @@ public class QuantxFutuWsService {
 
     public void sendAccPosition(AccPositionWsMessage accPositionWsMessage) {
         this.template.convertAndSend(BROKER_PREFIX + POSITION_URI, accPositionWsMessage);
+    }
+
+    public void sendRtEma5(RTEmaMessage emaMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + EMA5_URI, emaMessage);
     }
 }

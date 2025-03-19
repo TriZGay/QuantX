@@ -1,4 +1,4 @@
-package io.futakotome.quantx.process;
+package io.futakotome.quantx.utils;
 
 public final class Ema {
 

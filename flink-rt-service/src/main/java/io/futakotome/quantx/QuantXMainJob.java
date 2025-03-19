@@ -3,10 +3,10 @@ package io.futakotome.quantx;
 import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.quantx.key.RTKLineKey;
 import io.futakotome.quantx.key.RTKLineKeySelector;
+import io.futakotome.quantx.map.EmaMapFunction;
 import io.futakotome.quantx.process.EmaProcessFunction;
-import io.futakotome.quantx.process.MaProcessFunction;
-import io.futakotome.quantx.process.MacdProcessFunction;
-import io.futakotome.quantx.source.RTKLineSource;
+import io.futakotome.quantx.source.RTEma;
+import io.futakotome.quantx.source.RTKLine;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.kafka.source.KafkaSource;
@@ -14,17 +14,17 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
-import static io.futakotome.common.MessageCommon.RT_KL_MIN_1_CONSUMER_GROUP_STREAM;
-import static io.futakotome.common.MessageCommon.RT_KL_MIN_1_TOPIC;
+import static io.futakotome.common.MessageCommon.*;
 
 public class QuantXMainJob {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         ParameterTool configs = ParameterTool.fromPropertiesFile(QuantXMainJob.class.getResourceAsStream("/base_config.properties"));
 
-        KafkaSource<RTKLMessage> source = RTKLineSource.from(configs, RT_KL_MIN_1_CONSUMER_GROUP_STREAM, RT_KL_MIN_1_TOPIC);
+        KafkaSource<RTKLMessage> source = RTKLine.fromKafka(configs, RT_KL_MIN_1_CONSUMER_GROUP_STREAM, RT_KL_MIN_1_TOPIC);
+
         DataStream<RTKLMessage> rtklMin1Source = env.fromSource(source, WatermarkStrategy.forMonotonousTimestamps(), "rtk_min1_source")
-                .setParallelism(1);
+                .setParallelism(2);
         KeyedStream<RTKLMessage, RTKLineKey> keyedStream = rtklMin1Source.keyBy(new RTKLineKeySelector());
 //        keyedStream.countWindow(5, -4)
 //                .process(new MaProcessFunction(5))
@@ -44,10 +44,12 @@ public class QuantXMainJob {
 //        keyedStream.countWindow(120, -119)
 //                .process(new MaProcessFunction(120))
 //                .print("ma120-stream");
-        keyedStream.process(new MacdProcessFunction(12, 26, 9))
-                .print("macd-stream");
-//        keyedStream.process(new EmaProcessFunction(5))
-//                .print("ema5-stream");
+//        keyedStream.process(new MacdProcessFunction(12, 26, 9))
+//                .print("macd-stream");
+        keyedStream.process(new EmaProcessFunction(5))
+                .map(new EmaMapFunction())
+                .sinkTo(RTEma.toKafka(configs, RT_EMA5_TOPIC))
+                .setParallelism(2);
 //        keyedStream.process(new EmaProcessFunction(10))
 //                .print("ema10-stream");
 //        DataStream<Tuple2<Tuple3<Integer, String, Integer>, Double>> ema12Stream = keyedStream.process(new EmaProcessFunction(12));

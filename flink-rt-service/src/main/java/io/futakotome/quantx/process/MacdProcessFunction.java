@@ -3,6 +3,7 @@ package io.futakotome.quantx.process;
 import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.quantx.key.RTKLineKey;
 import io.futakotome.quantx.pojo.Macd;
+import io.futakotome.quantx.utils.Ema;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.configuration.Configuration;
@@ -47,7 +48,6 @@ public class MacdProcessFunction extends KeyedProcessFunction<RTKLineKey, RTKLMe
         fastEmaState.update(currentFastEma);
         slowEmaState.update(currentSlowEma);
         deaState.update(currentDeaEma);
-        RTKLineKey key = new RTKLineKey(value.getCode(), value.getRehabType(), value.getUpdateTime());
-        out.collect(new Macd(key, dif, currentDeaEma, macd));
+        out.collect(new Macd(ctx.getCurrentKey(), dif, currentDeaEma, macd));
     }
 }

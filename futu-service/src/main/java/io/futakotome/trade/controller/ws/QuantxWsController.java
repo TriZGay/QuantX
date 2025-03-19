@@ -15,6 +15,8 @@ import org.springframework.stereotype.Controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.futakotome.trade.config.WebSocketMessageBrokerConfig.ENDPOINT_NOTIFY;
+
 @Controller
 public class QuantxWsController {
     private static final Logger LOGGER = LoggerFactory.getLogger(QuantxWsController.class);
@@ -26,6 +28,8 @@ public class QuantxWsController {
     public static final String REHABS_URI = "/rehabs";
     public static final String ACCOUNTS_URI = "/accounts";
     public static final String POSITION_URI = "/positions";
+
+    public static final String EMA5_URI = "/ema5";
 
     private final FTQotService ftQotService;
     private final FTTradeService ftTradeService;
@@ -40,7 +44,7 @@ public class QuantxWsController {
     }
 
     //这里的`/notify`是stomp client给server发送数据的destination,是有/quantx/ft前缀拼接的
-    @MessageMapping(NOTIFY_URI)
+    @MessageMapping(ENDPOINT_NOTIFY)
     public void notifyMessage(String message) {
         try {
             Message messageClz = objectMapper.readValue(message, Message.class);
