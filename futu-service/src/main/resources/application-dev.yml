@@ -1,6 +1,18 @@
 server:
   port: 9090
 spring:
+  mail:
+    host: smtp.qq.com
+    port: 465
+    username: 983528987@qq.com
+    password: oegcduscilenbece
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+          ssl.enable: true
   datasource:
     url: jdbc:postgresql://localhost:5432/quantx_3rd_futu
     username: postgres
@@ -8,7 +20,7 @@ spring:
   liquibase:
     change-log: classpath:db/liquibase-changelog.xml
   kafka:
-    bootstrap-servers: 172.20.66.184:9092
+    bootstrap-servers: 172.27.98.60:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

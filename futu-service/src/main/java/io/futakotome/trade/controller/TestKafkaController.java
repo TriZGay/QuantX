@@ -3,18 +3,29 @@ package io.futakotome.trade.controller;
 import io.futakotome.trade.domain.code.KLType;
 import io.futakotome.trade.dto.message.KLMessageContent;
 import io.futakotome.trade.service.KafkaService;
+import io.futakotome.trade.service.MailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static io.futakotome.trade.service.MailService.ME;
+
 @RestController
 @RequestMapping("/testKafka")
 public class TestKafkaController {
     private final KafkaService kafkaService;
+    private final MailService mailService;
 
-    public TestKafkaController(KafkaService kafkaService) {
+    public TestKafkaController(KafkaService kafkaService, MailService mailService) {
         this.kafkaService = kafkaService;
+        this.mailService = mailService;
+    }
+
+    @GetMapping("/sendMail")
+    public ResponseEntity<String> sendMail() {
+        mailService.sendSimpleMail(ME, "测试", "测试");
+        return ResponseEntity.ok("ok~");
     }
 
     @GetMapping("/sendKL")

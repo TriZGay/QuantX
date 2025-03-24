@@ -46,3 +46,7 @@ GET http://localhost:9090/testKafka/sendKL
 Accept: text/plain
 
 ###
+GET http://localhost:9090/testKafka/sendMail
+Accept: text/plain
+
+###
