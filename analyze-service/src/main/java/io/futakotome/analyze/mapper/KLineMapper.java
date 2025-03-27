@@ -76,6 +76,7 @@ public class KLineMapper {
         return 0;
     }
 
+    //查询K线归档表里的重复数据
     public List<KLineRepeatDto> queryKLineArchivedRepeated(String start, String end, String tableName) {
         try {
             String sql = "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time,repeat" +
@@ -92,6 +93,7 @@ public class KLineMapper {
         }
     }
 
+    //查询K线归档数据
     public List<KLineDto> queryKLineArchived(KLineDto kLineDto) {
         try {
             String sql = "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +

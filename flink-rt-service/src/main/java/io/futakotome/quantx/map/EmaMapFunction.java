@@ -8,9 +8,9 @@ public class EmaMapFunction implements MapFunction<EmaResult, RTEmaMessage> {
     @Override
     public RTEmaMessage map(EmaResult value) throws Exception {
         RTEmaMessage rtEmaMessage = new RTEmaMessage();
-        rtEmaMessage.setCode(value.f0.f0);
-        rtEmaMessage.setRehabType(value.f0.f1);
-        rtEmaMessage.setUpdateTime(value.f0.f2);
+        rtEmaMessage.setCode(value.f0.f1);
+        rtEmaMessage.setRehabType(value.f0.f2);
+        rtEmaMessage.setUpdateTime(value.f0.f3);
         rtEmaMessage.setValue(value.f1);
         return rtEmaMessage;
     }

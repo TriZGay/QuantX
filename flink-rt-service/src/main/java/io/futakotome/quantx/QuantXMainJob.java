@@ -3,18 +3,19 @@ package io.futakotome.quantx;
 import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.quantx.key.RTKLineKey;
 import io.futakotome.quantx.key.RTKLineKeySelector;
-import io.futakotome.quantx.map.EmaMapFunction;
-import io.futakotome.quantx.process.EmaProcessFunction;
-import io.futakotome.quantx.source.RTEma;
+import io.futakotome.quantx.pojo.Macd;
+import io.futakotome.quantx.process.MacdProcessFunction;
 import io.futakotome.quantx.source.RTKLine;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
-import static io.futakotome.common.MessageCommon.*;
+import static io.futakotome.common.MessageCommon.RT_KL_MIN_1_CONSUMER_GROUP_STREAM;
+import static io.futakotome.common.MessageCommon.RT_KL_MIN_1_TOPIC;
 
 public class QuantXMainJob {
     public static void main(String[] args) throws Exception {
@@ -44,12 +45,16 @@ public class QuantXMainJob {
 //        keyedStream.countWindow(120, -119)
 //                .process(new MaProcessFunction(120))
 //                .print("ma120-stream");
-//        keyedStream.process(new MacdProcessFunction(12, 26, 9))
-//                .print("macd-stream");
-        keyedStream.process(new EmaProcessFunction(5))
-                .map(new EmaMapFunction())
-                .sinkTo(RTEma.toKafka(configs, RT_EMA5_TOPIC))
-                .setParallelism(2);
+        SingleOutputStreamOperator<Macd> macdStream = keyedStream.process(new MacdProcessFunction(12, 26, 9));
+        macdStream.getSideOutput(MacdProcessFunction.TRADE_SIGNAL_OUTPUT_TAG)
+                .print("signal-stream");
+//                .sinkTo()
+//                .setParallelism(2);
+        macdStream.print("macd-stream");
+//        keyedStream.process(new EmaProcessFunction(5))
+//                .map(new EmaMapFunction())
+//                .sinkTo(RTEmaSink.toKafka(configs, RT_EMA5_TOPIC))
+//                .setParallelism(2);
 //        keyedStream.process(new EmaProcessFunction(10))
 //                .print("ema10-stream");
 //        DataStream<Tuple2<Tuple3<Integer, String, Integer>, Double>> ema12Stream = keyedStream.process(new EmaProcessFunction(12));

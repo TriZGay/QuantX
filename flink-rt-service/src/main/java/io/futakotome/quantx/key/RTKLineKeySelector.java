@@ -7,6 +7,6 @@ public class RTKLineKeySelector implements KeySelector<RTKLMessage, RTKLineKey> 
 
     @Override
     public RTKLineKey getKey(RTKLMessage value) throws Exception {
-        return new RTKLineKey(value.getCode(), value.getRehabType(), value.getUpdateTime());
+        return new RTKLineKey(value.getMarket(), value.getCode(), value.getRehabType(), value.getUpdateTime());
     }
 }

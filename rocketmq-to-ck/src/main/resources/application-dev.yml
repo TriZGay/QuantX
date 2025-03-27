@@ -1,13 +1,13 @@
 ck:
   driverClass: com.clickhouse.jdbc.ClickHouseDriver
-  url: jdbc:ch://172.27.98.60:8123/quantx
+  url: jdbc:ch://172.24.69.52:8123/quantx
   user: default
   password: 123456
 spring:
   kafka:
     listener:
       type: batch
-    bootstrap-servers: 172.27.98.60:9092
+    bootstrap-servers: 172.24.69.52:9092
     consumer:
       max-poll-records: 500
       key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
