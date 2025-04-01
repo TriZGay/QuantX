@@ -1,5 +1,9 @@
 package io.futakotome.analyze.biz.backtest;
 
+import io.futakotome.analyze.controller.vo.BackTestTradeSignalResponse;
+
+import java.util.Objects;
+
 public class TradeSignal {
     private String datetime;
     private Action action;
@@ -49,6 +53,16 @@ public class TradeSignal {
     }
 
     public enum Action {
-        BUY, SELL
+        BUY, SELL, NONE
     }
+
+    public static BackTestTradeSignalResponse dto2Vo(TradeSignal dto) {
+        BackTestTradeSignalResponse response = new BackTestTradeSignalResponse();
+        response.setDatetime(dto.getDatetime());
+        response.setAction(dto.getAction().toString());
+        response.setPrice(dto.getPrice());
+        response.setQuantity(dto.getQuantity());
+        return response;
+    }
+
 }

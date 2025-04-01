@@ -1,6 +1,10 @@
 package io.futakotome.analyze.biz.backtest;
 
+import io.futakotome.analyze.utils.DateUtils;
+
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BackTestEngine {
     private final Double initialCapital;
@@ -11,7 +15,7 @@ public class BackTestEngine {
         this.commission = commission;
     }
 
-    public void run(TradingStrategy strategy, List<MarketData> data) {
+    public BackTestResult run(TradingStrategy strategy, List<MarketData> data) {
         List<TradeSignal> signals = strategy.generateSignals(data);
         Double cash = initialCapital;
         int position = 0;
@@ -30,8 +34,33 @@ public class BackTestEngine {
             }
         }
         Double finalValue = cash + position * data.get(data.size() - 1).getClose();
-        totalProfit = finalValue - initialCapital;
-        System.out.printf("\n初始资金:%.2f\n最终价值:%.2f\n总收益:%.2f (%.2f%%)", initialCapital, finalValue, totalProfit, (totalProfit / initialCapital) * 100);
-
+        totalProfit = ((finalValue - initialCapital) / initialCapital) * 100;
+        System.out.printf("\n初始资金:%.2f\n最终价值:%.2f\n总收益:%.2f%%", initialCapital, finalValue, totalProfit);
+        BackTestResult backTestResult = new BackTestResult();
+        fillSignals(signals, data);
+        backTestResult.setSignals(signals);
+        backTestResult.setBackTestOvr(new BackTestResult.BackTestOvr(finalValue, totalProfit, initialCapital, commission));
+        return backTestResult;
     }
+
+    private void fillSignals(List<TradeSignal> signals, List<MarketData> data) {
+        List<String> marketDates = data.stream().map(MarketData::getDatetime).collect(Collectors.toList());
+        List<String> signalDates = signals.stream().map(TradeSignal::getDatetime).collect(Collectors.toList());
+        for (String marketDate : marketDates) {
+            if (!signalDates.contains(marketDate)) {
+                signals.add(new TradeSignal(
+                        marketDate,
+                        TradeSignal.Action.NONE,
+                        null,
+                        null
+                ));
+            }
+        }
+        signals.sort((o1, o2) -> {
+            LocalDateTime d1 = LocalDateTime.parse(o1.getDatetime(), DateUtils.DATE_TIME_FORMATTER);
+            LocalDateTime d2 = LocalDateTime.parse(o2.getDatetime(), DateUtils.DATE_TIME_FORMATTER);
+            return d1.compareTo(d2);
+        });
+    }
+
 }

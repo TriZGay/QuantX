@@ -15,6 +15,26 @@ public class BackTestRequest extends RangeRequest {
     @EnumValid(target = Granularity.class, message = "粒度输入错误")
     private Integer granularity;
 
+    private Double initialCapital;
+
+    private Double commission;
+
+    public Double getInitialCapital() {
+        return initialCapital;
+    }
+
+    public void setInitialCapital(Double initialCapital) {
+        this.initialCapital = initialCapital;
+    }
+
+    public Double getCommission() {
+        return commission;
+    }
+
+    public void setCommission(Double commission) {
+        this.commission = commission;
+    }
+
     public Integer getGranularity() {
         return granularity;
     }

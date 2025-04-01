@@ -6,8 +6,10 @@ import io.futakotome.quantx.pojo.Macd;
 import io.futakotome.quantx.pojo.TradeDirection;
 import io.futakotome.quantx.pojo.TradeSignal;
 import io.futakotome.quantx.utils.Ema;
+import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
+import org.apache.flink.api.common.time.Time;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
@@ -18,12 +20,13 @@ public class MacdProcessFunction extends KeyedProcessFunction<RTKLineKey, RTKLMe
     private final Integer slowPeriod;
     private final Integer deaPeriod;
 
-    private ValueState<Double> fastEmaState;
-    private ValueState<Double> slowEmaState;
-    private ValueState<Double> deaState;
-    private ValueState<Double> difState;
+    private transient ValueState<Double> fastEmaState;
+    private transient ValueState<Double> slowEmaState;
+    private transient ValueState<Double> deaState;
+    private transient ValueState<Double> difState;
 
-    public static final OutputTag<TradeSignal> TRADE_SIGNAL_OUTPUT_TAG = new OutputTag<>("tradeSignal"){};
+    public static final OutputTag<TradeSignal> TRADE_SIGNAL_OUTPUT_TAG = new OutputTag<>("tradeSignal") {
+    };
 
     public MacdProcessFunction(Integer fastPeriod, Integer slowPeriod, Integer deaPeriod) {
         this.fastPeriod = fastPeriod;
@@ -53,6 +56,17 @@ public class MacdProcessFunction extends KeyedProcessFunction<RTKLineKey, RTKLMe
         Double currentSlowEma = Ema.calculate(value.getClosePrice(), prevSlowEma, slowPeriod);
         Double currentDif = currentFastEma - currentSlowEma;
         Double currentDeaEma = Ema.calculate(currentDif, prevDeaEma, deaPeriod);
+        if (ctx.getCurrentKey().f1.equals("00700") && ctx.getCurrentKey().f2.equals(1)) {
+            System.out.println(ctx.getCurrentKey() + " preFastEma = " + prevFastEma);
+            System.out.println(ctx.getCurrentKey() + " preSlowEma = " + prevSlowEma);
+            System.out.println(ctx.getCurrentKey() + " preDeaEma = " + prevDeaEma);
+            System.out.println(ctx.getCurrentKey() + " preDif = " + prevDif);
+
+            System.out.println(ctx.getCurrentKey() + " currentFastEma = " + currentFastEma);
+            System.out.println(ctx.getCurrentKey() + " currentSlowEma = " + currentSlowEma);
+            System.out.println(ctx.getCurrentKey() + " currentDif = " + currentDif);
+            System.out.println(ctx.getCurrentKey() + " currentDeaEma = " + currentDeaEma);
+        }
         Double macd = 2 * (currentDif - currentDeaEma);
         if (currentDif > currentDeaEma && prevDif <= prevDeaEma) {
             ctx.output(TRADE_SIGNAL_OUTPUT_TAG, new TradeSignal(ctx.getCurrentKey(), TradeDirection.BUY.getDirection(), value.getClosePrice()));

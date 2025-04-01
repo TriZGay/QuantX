@@ -50,7 +50,7 @@ public class QuantXMainJob {
                 .print("signal-stream");
 //                .sinkTo()
 //                .setParallelism(2);
-        macdStream.print("macd-stream");
+//        macdStream.print("macd-stream");
 //        keyedStream.process(new EmaProcessFunction(5))
 //                .map(new EmaMapFunction())
 //                .sinkTo(RTEmaSink.toKafka(configs, RT_EMA5_TOPIC))

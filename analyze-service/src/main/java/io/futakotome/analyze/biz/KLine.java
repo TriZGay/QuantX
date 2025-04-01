@@ -41,7 +41,7 @@ public class KLine {
             case 1:
                 return repository.queryKLineArchived(new KLineDto(KLineMapper.KL_MIN_1_ARC_TABLE_NAME, kLineRequest.getCode(), kLineRequest.getRehabType(),
                                 kLineRequest.getStart(), kLineRequest.getEnd()))
-                        .stream().distinct().map(this::dto2Resp)
+                        .stream().distinct().map(KLine::dto2Resp)
                         .collect(Collectors.toList());
             case 2:
                 return null;
@@ -69,7 +69,7 @@ public class KLine {
         return kLineRepeatResponse;
     }
 
-    private KLineResponse dto2Resp(KLineDto kLineDto) {
+    public static KLineResponse dto2Resp(KLineDto kLineDto) {
         return new KLineResponse(
                 kLineDto.getMarket(),
                 kLineDto.getCode(),
