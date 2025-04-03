@@ -9,14 +9,14 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-@Component
+@Repository
 public class KLineMapper {
     public static final String KL_DAY_TABLE_NAME = "t_kl_day_raw";
     public static final String KL_DAY_ARC_TABLE_NAME = "t_kl_day_arc";
@@ -48,33 +48,6 @@ public class KLineMapper {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    private Integer fillStep(String archedTableName) {
-        switch (archedTableName) {
-            case KL_MIN_1_ARC_TABLE_NAME:
-                return 60;
-            case KL_MIN_3_ARC_TABLE_NAME:
-                return 60 * 3;
-            case KL_MIN_5_ARC_TABLE_NAME:
-                return 60 * 5;
-            case KL_MIN_15_ARC_TABLE_NAME:
-                return 60 * 15;
-            case KL_MIN_30_ARC_TABLE_NAME:
-                return 60 * 30;
-            case KL_MIN_60_ARC_TABLE_NAME:
-                return 60 * 60;
-            case KL_DAY_ARC_TABLE_NAME:
-                return 60 * 60 * 24;
-            case KL_MONTH_ARC_TABLE_NAME:
-                return 60 * 60 * 24 * 30;
-            case KL_WEEK_ARC_TABLE_NAME:
-                return 60 * 60 * 24 * 7;
-            case KL_QUARTER_ARC_TABLE_NAME:
-                return 60 * 60 * 24 * 120;
-            case KL_YEAR_ARC_TABLE_NAME:
-                return 60 * 60 * 24 * 365;
-        }
-        return 0;
-    }
 
     //查询K线归档表里的重复数据
     public List<KLineRepeatDto> queryKLineArchivedRepeated(String start, String end, String tableName) {

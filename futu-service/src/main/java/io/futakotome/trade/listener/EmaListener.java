@@ -23,7 +23,7 @@ public class EmaListener {
         this.objectMapper = objectMapper;
     }
 
-    @KafkaListener(groupId = RT_EMA5_CONSUMER_GROUP_STREAM, topics = {RT_EMA5_TOPIC}, errorHandler = "commonErrorHandler")
+//    @KafkaListener(groupId = RT_EMA5_CONSUMER_GROUP_STREAM, topics = {RT_EMA5_TOPIC}, errorHandler = "commonErrorHandler")
     public void ema5Listener(String emaMessage) throws JsonProcessingException {
         RTEmaMessage rtEmaMessage = objectMapper.readValue(emaMessage, RTEmaMessage.class);
         wsService.sendRtEma5(rtEmaMessage);

@@ -367,6 +367,46 @@ create table if not exists quantx.t_indies_basic_quote_raw
 ) ENGINE = MergeTree()
       PRIMARY KEY (market, code, update_time);
 
+create table quantx.t_kl_min_1_arc as quantx.t_kl_min_1_raw;
+alter table quantx.t_kl_min_1_arc
+    drop column add_time;
+
+create table quantx.t_kl_min_3_arc as quantx.t_kl_min_3_raw;
+alter table quantx.t_kl_min_3_arc
+    drop column add_time;
+
+create table quantx.t_kl_min_5_arc as quantx.t_kl_min_5_raw;
+alter table quantx.t_kl_min_5_arc
+    drop column add_time;
+
+create table quantx.t_kl_min_30_arc as quantx.t_kl_min_30_raw;
+alter table quantx.t_kl_min_30_arc
+    drop column add_time;
+
+create table quantx.t_kl_min_60_arc as quantx.t_kl_min_60_raw;
+alter table quantx.t_kl_min_60_arc
+    drop column add_time;
+
+create table quantx.t_kl_day_arc as quantx.t_kl_day_raw;
+alter table quantx.t_kl_day_arc
+    drop column add_time;
+
+create table quantx.t_kl_month_arc as quantx.t_kl_month_raw;
+alter table quantx.t_kl_month_arc
+    drop column add_time;
+
+create table quantx.t_kl_quarter_arc as quantx.t_kl_quarter_raw;
+alter table quantx.t_kl_quarter_arc
+    drop column add_time;
+
+create table quantx.t_kl_week_arc as quantx.t_kl_week_raw;
+alter table quantx.t_kl_week_arc
+    drop column add_time;
+
+create table quantx.t_kl_year_arc as quantx.t_kl_year_raw;
+alter table quantx.t_kl_year_arc
+    drop column add_time;
+
 create table if not exists quantx.t_ma_min_1_arc
 (
     market      Int8,
@@ -423,5 +463,17 @@ create table if not exists quantx.t_boll_min_1_arc
     triple_upper Float64,
     triple_lower Float64,
     update_time  DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, rehab_type, update_time);
+
+create table if not exists quantx.t_rsi_min_1_arc
+(
+    market      Int8,
+    code        String,
+    rehab_type  Int8,
+    rsi_6       Float64,
+    rsi_12      Float64,
+    rsi_24      Float64,
+    update_time DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
