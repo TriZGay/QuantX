@@ -1,7 +1,11 @@
 package io.futakotome.analyze.biz;
 
+import io.futakotome.analyze.controller.vo.RsiRequest;
+import io.futakotome.analyze.controller.vo.RsiResponse;
+import io.futakotome.analyze.mapper.MacdMapper;
 import io.futakotome.analyze.mapper.RsiMapper;
 import io.futakotome.analyze.mapper.TradeDateMapper;
+import io.futakotome.analyze.mapper.dto.MacdDto;
 import io.futakotome.analyze.mapper.dto.RsiDto;
 import io.futakotome.analyze.mapper.dto.TradeDateDto;
 import io.futakotome.analyze.utils.DateUtils;
@@ -12,15 +16,22 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static io.futakotome.analyze.mapper.RsiMapper.RSI_MIN_1_TABLE_NAME;
 
 public class Rsi {
     private static final Logger LOGGER = LoggerFactory.getLogger(Rsi.class);
     private final RsiMapper rsiMapper;
-    private final TradeDateMapper tradeDateMapper;
+    private TradeDateMapper tradeDateMapper;
 
     public Rsi(RsiMapper rsiMapper, TradeDateMapper tradeDateMapper) {
         this.rsiMapper = rsiMapper;
         this.tradeDateMapper = tradeDateMapper;
+    }
+
+    public Rsi(RsiMapper rsiMapper) {
+        this.rsiMapper = rsiMapper;
     }
 
     public void calculate(String toTableName, String fromTableName, String startDateTime, String endDateTime) {
@@ -52,5 +63,28 @@ public class Rsi {
                         startDateTime, endDateTime);
             }
         }
+    }
+
+    public List<RsiResponse> queryRsiList(RsiRequest rsiRequest) {
+        switch (rsiRequest.getGranularity()) {
+            case 1:
+                return rsiMapper.queryList(new RsiDto(RSI_MIN_1_TABLE_NAME, rsiRequest.getCode(), rsiRequest.getRehabType(), rsiRequest.getStart(), rsiRequest.getEnd()))
+                        .stream().map(this::dto2Vo).collect(Collectors.toList());
+            case 2:
+                return null;
+        }
+        return null;
+    }
+
+    private RsiResponse dto2Vo(RsiDto dto) {
+        RsiResponse response = new RsiResponse();
+        response.setMarket(dto.getMarket());
+        response.setCode(dto.getCode());
+        response.setRehabType(dto.getRehabType());
+        response.setRsi6(dto.getRsi_6());
+        response.setRsi12(dto.getRsi_12());
+        response.setRsi24(dto.getRsi_24());
+        response.setUpdateTime(dto.getUpdateTime());
+        return response;
     }
 }

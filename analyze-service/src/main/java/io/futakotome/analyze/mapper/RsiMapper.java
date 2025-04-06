@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.stereotype.Repository;
@@ -12,11 +13,14 @@ import org.springframework.stereotype.Repository;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class RsiMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(RsiMapper.class);
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    public static final String RSI_MIN_1_TABLE_NAME = "t_rsi_min_1_arc";
+
 
     public RsiMapper(@Qualifier("analyzeNamedParameterJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
@@ -88,6 +92,33 @@ public class RsiMapper {
             }}, new BeanPropertyRowMapper<>(RsiDto.class));
         } catch (Exception e) {
             LOGGER.error("预查询rsi数据失败.", e);
+            return null;
+        }
+    }
+
+    public List<RsiDto> queryList(RsiDto rsiDto) {
+        try {
+            String sql = "select market,code,rehab_type,round(rsi_6,4) as rsi_6,round(rsi_12,4)as rsi_12,round(rsi_24,4)as rsi_24,update_time" +
+                    " from :table" +
+                    " prewhere (1=1)";
+            if (Objects.nonNull(rsiDto.getCode())) {
+                sql += " and (code = :code)";
+            }
+            if (Objects.nonNull(rsiDto.getRehabType())) {
+                sql += " and (rehab_type = :rehabType)";
+            }
+            if (Objects.nonNull(rsiDto.getStart())) {
+                sql += " and (update_time >= :start) ";
+            }
+            if (Objects.nonNull(rsiDto.getEnd())) {
+                sql += " and (update_time <= :end) ";
+            }
+            sql += "order by update_time asc";
+            return namedParameterJdbcTemplate.query(sql,
+                    new BeanPropertySqlParameterSource(rsiDto),
+                    new BeanPropertyRowMapper<>(RsiDto.class));
+        } catch (Exception e) {
+            LOGGER.error("查询rsi数据失败.", e);
             return null;
         }
     }

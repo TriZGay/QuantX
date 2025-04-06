@@ -9,6 +9,45 @@ public class RsiDto {
     private Double rsi_24;
     private String updateTime;
 
+    private String table;
+    private String start;
+    private String end;
+
+    public RsiDto() {
+    }
+
+    public RsiDto(String table, String code, Integer rehabType, String start, String end) {
+        this.code = code;
+        this.rehabType = rehabType;
+        this.table = table;
+        this.start = start;
+        this.end = end;
+    }
+
+    public String getTable() {
+        return table;
+    }
+
+    public void setTable(String table) {
+        this.table = table;
+    }
+
+    public String getStart() {
+        return start;
+    }
+
+    public void setStart(String start) {
+        this.start = start;
+    }
+
+    public String getEnd() {
+        return end;
+    }
+
+    public void setEnd(String end) {
+        this.end = end;
+    }
+
     public String getUpdateTime() {
         return updateTime;
     }
