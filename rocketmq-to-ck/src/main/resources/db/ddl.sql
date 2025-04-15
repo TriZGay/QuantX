@@ -477,3 +477,15 @@ create table if not exists quantx.t_rsi_min_1_arc
     update_time DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
+
+create table if not exists quantx.t_kdj_min_1_arc
+(
+    market      Int8,
+    code        String,
+    rehab_type  Int8,
+    k           Float64,
+    d           Float64,
+    j           Float64,
+    update_time DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (market, code, rehab_type, update_time);

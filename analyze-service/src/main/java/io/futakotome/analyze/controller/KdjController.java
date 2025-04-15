@@ -1,9 +1,12 @@
 package io.futakotome.analyze.controller;
 
 import io.futakotome.analyze.biz.Boll;
+import io.futakotome.analyze.biz.Kdj;
 import io.futakotome.analyze.controller.vo.BollRequest;
 import io.futakotome.analyze.controller.vo.Granularity;
+import io.futakotome.analyze.controller.vo.KdjRequest;
 import io.futakotome.analyze.mapper.BollMapper;
+import io.futakotome.analyze.mapper.KdjMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -17,27 +20,27 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/boll")
-public class BollController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BollController.class);
-    private static final String PRINT_REQUEST_TEMPLATE = "BOLL数据查询,请求参数:{},粒度:{},时间范围:start={},end={}";
-    private final Boll boll;
+@RequestMapping("/kdj")
+public class KdjController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KdjController.class);
+    private static final String PRINT_REQUEST_TEMPLATE = "KDJ数据查询,请求参数:{},粒度:{},时间范围:start={},end={}";
+    private final Kdj kdj;
 
-    public BollController(BollMapper bollMapper) {
-        this.boll = new Boll(bollMapper);
+    public KdjController(KdjMapper kdjMapper) {
+        this.kdj = new Kdj(kdjMapper);
     }
 
-    @PostMapping("/boll202")
-    public Mono<ResponseEntity<?>> boll2002(@RequestBody @Validated Mono<BollRequest> bollRequestMono) {
+    @PostMapping("/kdj933")
+    public Mono<ResponseEntity<?>> boll2002(@RequestBody @Validated Mono<KdjRequest> kdjRequestMono) {
         return Mono.create(responseEntityMonoSink -> {
-            bollRequestMono.doOnError(WebExchangeBindException.class, throwable -> {
+            kdjRequestMono.doOnError(WebExchangeBindException.class, throwable -> {
                 responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors(), HttpStatus.BAD_REQUEST));
             }).doOnError(Exception.class, throwable -> {
                 responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
-            }).doOnNext(bollRequest -> {
-                LOGGER.info(PRINT_REQUEST_TEMPLATE, bollRequest.getCode(), Granularity.mapName(bollRequest.getGranularity()), bollRequest.getStart(), bollRequest.getEnd());
+            }).doOnNext(kdjRequest -> {
+                LOGGER.info(PRINT_REQUEST_TEMPLATE, kdjRequest.getCode(), Granularity.mapName(kdjRequest.getGranularity()), kdjRequest.getStart(), kdjRequest.getEnd());
                 try {
-                    responseEntityMonoSink.success(ResponseEntity.ok(boll.list(bollRequest)));
+                    responseEntityMonoSink.success(ResponseEntity.ok(kdj.queryKdjList(kdjRequest)));
                 } catch (Exception e) {
                     responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
                 }

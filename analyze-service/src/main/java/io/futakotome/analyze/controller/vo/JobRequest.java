@@ -15,7 +15,8 @@ import javax.validation.constraints.NotNull;
         @JsonSubTypes.Type(value = KLineTransToBollJobRequest.class, name = "KLINE_ARC_TO_BOLL"),
         @JsonSubTypes.Type(value = KLineTransToEmaJobRequest.class, name = "KLINE_ARC_TO_EMA"),
         @JsonSubTypes.Type(value = KLineTransToMacdJobRequest.class, name = "KLINE_ARC_TO_MACD"),
-        @JsonSubTypes.Type(value = KLineTransToRsiJobRequest.class, name = "KLINE_ARC_TO_RSI")
+        @JsonSubTypes.Type(value = KLineTransToRsiJobRequest.class, name = "KLINE_ARC_TO_RSI"),
+        @JsonSubTypes.Type(value = KLineTransToKdjJobRequest.class, name = "KLINE_ARC_TO_KDJ")
 })
 public class JobRequest {
     @NotNull(message = "jobName必填")

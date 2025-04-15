@@ -2,8 +2,6 @@ package io.futakotome.analyze.biz.backtest;
 
 import io.futakotome.analyze.controller.vo.BackTestTradeSignalResponse;
 
-import java.util.Objects;
-
 public class TradeSignal {
     private String datetime;
     private Action action;
