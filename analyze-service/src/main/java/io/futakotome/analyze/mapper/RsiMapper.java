@@ -47,8 +47,8 @@ public class RsiMapper {
                     "                 code, " +
                     "                 rehab_type, " +
                     "                 close_price, " +
-                    "                 leadInFrame(close_price, 1, close_price) " +
-                    "                             over (partition by (code, rehab_type) order by update_time desc rows between unbounded preceding and unbounded following) as pre_close_price, " +
+                    "                 lagInFrame(close_price, 1, close_price) " +
+                    "                             over (partition by (code, rehab_type) order by update_time  rows between unbounded preceding and unbounded following) as pre_close_price, " +
                     "                 close_price - pre_close_price                                                                                                         as delta, " +
                     "                 update_time " +
                     "          from :fromTable " +
@@ -66,16 +66,16 @@ public class RsiMapper {
                     "                            update_time " +
                     "                     from close_price_change " +
                     "                     window w as ( " +
-                    "                             partition by (code, rehab_type) order by update_time desc " +
-                    "                             rows between current row and 5 following " +
+                    "                             partition by (code, rehab_type) order by update_time  " +
+                    "                             rows between 5 preceding and current row " +
                     "                             ), " +
                     "                            w1 as ( " +
-                    "                                    partition by (code, rehab_type) order by update_time desc " +
-                    "                                    rows between current row and 11 following " +
+                    "                                    partition by (code, rehab_type) order by update_time  " +
+                    "                                    rows between 11 preceding and current row " +
                     "                                    ), " +
                     "                            w2 as ( " +
-                    "                                    partition by (code, rehab_type) order by update_time desc " +
-                    "                                    rows between current row and 23 following " +
+                    "                                    partition by (code, rehab_type) order by update_time  " +
+                    "                                    rows between 23 preceding and current row " +
                     "                                    )) " +
                     "select market," +
                     "       code," +
