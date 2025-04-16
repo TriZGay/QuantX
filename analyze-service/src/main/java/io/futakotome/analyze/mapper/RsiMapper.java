@@ -21,7 +21,6 @@ public class RsiMapper {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     public static final String RSI_MIN_1_TABLE_NAME = "t_rsi_min_1_arc";
 
-
     public RsiMapper(@Qualifier("analyzeNamedParameterJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
