@@ -2,6 +2,7 @@ package io.futakotome.analyze.service;
 
 import io.futakotome.analyze.controller.vo.JobRequest;
 import io.futakotome.analyze.controller.vo.JobType;
+import io.futakotome.analyze.controller.vo.KLineTransToARBRJobRequest;
 import io.futakotome.analyze.controller.vo.TaskResponse;
 import io.futakotome.analyze.job.*;
 import io.futakotome.analyze.utils.EntityToJobDataMapConverter;
@@ -51,6 +52,8 @@ public class QuartzService {
                     return addJob(jobRequest, KLineTransToRsiJob.class);
                 case KLINE_ARC_TO_KDJ:
                     return addJob(jobRequest, KLineTransToKdjJob.class);
+                case KLINE_ARC_TO_ARBR:
+                    return addJob(jobRequest, KLineTransToARBRJob.class);
                 default:
                     return "";
             }

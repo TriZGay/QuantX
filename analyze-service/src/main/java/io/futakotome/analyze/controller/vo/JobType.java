@@ -8,5 +8,6 @@ public enum JobType {
     KLINE_ARC_TO_EMA,
     KLINE_ARC_TO_MACD,
     KLINE_ARC_TO_RSI,
-    KLINE_ARC_TO_KDJ
+    KLINE_ARC_TO_KDJ,
+    KLINE_ARC_TO_ARBR
 }
