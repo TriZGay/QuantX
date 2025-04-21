@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class ArbrMapper {
@@ -21,6 +23,33 @@ public class ArbrMapper {
 
     public ArbrMapper(@Qualifier("analyzeNamedParameterJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
+
+    public List<ArbrDto> queryArbrList(ArbrDto arbrDto) {
+        try {
+            String sql = "select market,code,rehab_type,round(ar,4) as ar,round(br,4)as br,update_time" +
+                    " from :table" +
+                    " prewhere (1=1)";
+            if (Objects.nonNull(arbrDto.getCode())) {
+                sql += " and (code = :code)";
+            }
+            if (Objects.nonNull(arbrDto.getRehabType())) {
+                sql += " and (rehab_type = :rehabType)";
+            }
+            if (Objects.nonNull(arbrDto.getStart())) {
+                sql += " and (update_time >= :start) ";
+            }
+            if (Objects.nonNull(arbrDto.getEnd())) {
+                sql += " and (update_time <= :end) ";
+            }
+            sql += "order by update_time asc";
+            return namedParameterJdbcTemplate.query(sql,
+                    new BeanPropertySqlParameterSource(arbrDto),
+                    new BeanPropertyRowMapper<>(ArbrDto.class));
+        } catch (Exception e) {
+            LOGGER.error("查询Arbr数据失败.", e);
+            return null;
+        }
     }
 
     public boolean insertBatch(String toTable, List<ArbrDto> arbrDtos) {

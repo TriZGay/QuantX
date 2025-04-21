@@ -1,51 +1,12 @@
-package io.futakotome.analyze.mapper.dto;
+package io.futakotome.analyze.controller.vo;
 
-public class ArbrDto {
+public class ArbrResponse {
     private Integer market;
     private String code;
     private Integer rehabType;
     private Double ar;
     private Double br;
     private String updateTime;
-
-    private String table;
-    private String start;
-    private String end;
-
-    public ArbrDto() {
-    }
-
-    public ArbrDto(String table, String code, Integer rehabType, String start, String end) {
-        this.table = table;
-        this.code = code;
-        this.rehabType = rehabType;
-        this.start = start;
-        this.end = end;
-    }
-
-    public String getTable() {
-        return table;
-    }
-
-    public void setTable(String table) {
-        this.table = table;
-    }
-
-    public String getStart() {
-        return start;
-    }
-
-    public void setStart(String start) {
-        this.start = start;
-    }
-
-    public String getEnd() {
-        return end;
-    }
-
-    public void setEnd(String end) {
-        this.end = end;
-    }
 
     public Integer getMarket() {
         return market;

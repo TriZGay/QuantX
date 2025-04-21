@@ -1,5 +1,7 @@
 package io.futakotome.analyze.biz;
 
+import io.futakotome.analyze.controller.vo.ArbrRequest;
+import io.futakotome.analyze.controller.vo.ArbrResponse;
 import io.futakotome.analyze.mapper.ArbrMapper;
 import io.futakotome.analyze.mapper.TradeDateMapper;
 import io.futakotome.analyze.mapper.dto.ArbrDto;
@@ -26,6 +28,30 @@ public class Arbr {
     public Arbr(ArbrMapper arbrMapper, TradeDateMapper tradeDateMapper) {
         this.arbrMapper = arbrMapper;
         this.tradeDateMapper = tradeDateMapper;
+    }
+
+    public List<ArbrResponse> list(ArbrRequest arbrRequest) {
+        switch (arbrRequest.getGranularity()) {
+            case 1:
+                //1分k
+                return arbrMapper.queryArbrList(new ArbrDto(ArbrMapper.ARBR_MIN_1_TABLE_NAME, arbrRequest.getCode(), arbrRequest.getRehabType(), arbrRequest.getStart(), arbrRequest.getEnd()))
+                        .stream().map(this::dto2Vo)
+                        .collect(Collectors.toList());
+            case 2:
+                return null;
+        }
+        return null;
+    }
+
+    private ArbrResponse dto2Vo(ArbrDto arbrDto) {
+        ArbrResponse arbrResponse = new ArbrResponse();
+        arbrResponse.setMarket(arbrDto.getMarket());
+        arbrResponse.setCode(arbrDto.getCode());
+        arbrResponse.setRehabType(arbrDto.getRehabType());
+        arbrResponse.setAr(arbrDto.getAr());
+        arbrResponse.setBr(arbrDto.getBr());
+        arbrResponse.setUpdateTime(arbrDto.getUpdateTime());
+        return arbrResponse;
     }
 
     public void calculate(String toTableName, String fromTableName, String startDateTime, String endDateTime) {
