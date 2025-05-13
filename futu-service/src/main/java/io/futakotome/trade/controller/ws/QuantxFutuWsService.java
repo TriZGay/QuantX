@@ -48,7 +48,12 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + POSITION_URI, accPositionWsMessage);
     }
 
+    public void sendStockFilterMessage(StockFilterWsMessage wsMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + STOCK_FILTER_URL, wsMessage);
+    }
+
     public void sendRtEma5(RTEmaMessage emaMessage) {
         this.template.convertAndSend(BROKER_PREFIX + EMA5_URI, emaMessage);
     }
+
 }

@@ -948,6 +948,124 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void sendStockFilterRequest(StockFilterWsMessage request) {
+        QotStockFilter.C2S.Builder c2s = QotStockFilter.C2S.newBuilder()
+                .setBegin(request.getBegin())
+                .setNum(request.getNum())
+                .setMarket(request.getMarket());
+        if (Objects.nonNull(request.getPlate())) {
+            c2s.setPlate(QotCommon.Security.newBuilder()
+                    .setMarket(request.getPlate().getMarket())
+                    .setCode(request.getPlate().getCode())
+                    .build());
+        }
+        if (Objects.nonNull(request.getBaseFilterList())
+                && !request.getBaseFilterList().isEmpty()) {
+            List<QotStockFilter.BaseFilter> baseFilters = request.getBaseFilterList()
+                    .stream().map(baseFilterWsMessage -> QotStockFilter.BaseFilter
+                            .newBuilder()
+                            .setFieldName(baseFilterWsMessage.getFieldName())
+                            .setFilterMin(baseFilterWsMessage.getFilterMin())
+                            .setFilterMax(baseFilterWsMessage.getFilterMax())
+                            .setIsNoFilter(baseFilterWsMessage.isNoFilter())
+                            .setSortDir(baseFilterWsMessage.getSortDir())
+                            .build())
+                    .collect(Collectors.toList());
+            c2s.addAllBaseFilterList(baseFilters);
+        }
+        if (Objects.nonNull(request.getAccumulateFilterList())
+                && !request.getAccumulateFilterList().isEmpty()) {
+            List<QotStockFilter.AccumulateFilter> accumulateFilters = request.getAccumulateFilterList()
+                    .stream()
+                    .map(accumulateFilterWsMessage -> QotStockFilter.AccumulateFilter.newBuilder()
+                            .setFieldName(accumulateFilterWsMessage.getFieldName())
+                            .setFilterMin(accumulateFilterWsMessage.getFilterMin())
+                            .setFilterMax(accumulateFilterWsMessage.getFilterMax())
+                            .setIsNoFilter(accumulateFilterWsMessage.isNoFilter())
+                            .setSortDir(accumulateFilterWsMessage.getSortDir())
+                            .setDays(accumulateFilterWsMessage.getDays())
+                            .build())
+                    .collect(Collectors.toList());
+            c2s.addAllAccumulateFilterList(accumulateFilters);
+        }
+        if (Objects.nonNull(request.getFinancialFilterList())
+                && !request.getFinancialFilterList().isEmpty()) {
+            List<QotStockFilter.FinancialFilter> financialFilters = request.getFinancialFilterList()
+                    .stream()
+                    .map(financialFilterWsMessage -> QotStockFilter.FinancialFilter.newBuilder()
+                            .setFieldName(financialFilterWsMessage.getFieldName())
+                            .setFilterMin(financialFilterWsMessage.getFilterMin())
+                            .setFilterMax(financialFilterWsMessage.getFilterMax())
+                            .setIsNoFilter(financialFilterWsMessage.isNoFilter())
+                            .setSortDir(financialFilterWsMessage.getSortDir())
+                            .setQuarter(financialFilterWsMessage.getQuarter())
+                            .build())
+                    .collect(Collectors.toList());
+            c2s.addAllFinancialFilterList(financialFilters);
+        }
+        if (Objects.nonNull(request.getPatternFilterList())
+                && !request.getPatternFilterList().isEmpty()) {
+            List<QotStockFilter.PatternFilter> patternFilters = request.getPatternFilterList()
+                    .stream()
+                    .map(patternFilterWsMessage -> {
+                        return QotStockFilter.PatternFilter.newBuilder()
+                                .setFieldName(patternFilterWsMessage.getFieldName())
+                                .setKlType(patternFilterWsMessage.getKlType())
+                                .setIsNoFilter(patternFilterWsMessage.isNoFilter())
+                                .setConsecutivePeriod(patternFilterWsMessage.getConsecutivePeriod())
+                                .build();
+                    }).collect(Collectors.toList());
+            c2s.addAllPatternFilterList(patternFilters);
+        }
+        if (Objects.nonNull(request.getCustomIndicatorFilterList())
+                && !request.getCustomIndicatorFilterList().isEmpty()) {
+            List<QotStockFilter.CustomIndicatorFilter> customIndicatorFilters = request.getCustomIndicatorFilterList()
+                    .stream()
+                    .map(customIndicatorFilterWsMessage -> QotStockFilter.CustomIndicatorFilter.newBuilder()
+                            .setFirstFieldName(customIndicatorFilterWsMessage.getFirstFieldName())
+                            .setSecondFieldName(customIndicatorFilterWsMessage.getSecondFieldName())
+                            .setRelativePosition(customIndicatorFilterWsMessage.getRelativePosition())
+                            .setFieldValue(customIndicatorFilterWsMessage.getFieldValue())
+                            .setKlType(customIndicatorFilterWsMessage.getKlType())
+                            .setIsNoFilter(customIndicatorFilterWsMessage.isNoFilter())
+                            .addAllFirstFieldParaList(customIndicatorFilterWsMessage.getFirstFieldParaList())
+                            .addAllSecondFieldParaList(customIndicatorFilterWsMessage.getSecondFieldParaList())
+                            .setConsecutivePeriod(customIndicatorFilterWsMessage.getConsecutivePeriod())
+                            .build())
+                    .collect(Collectors.toList());
+            c2s.addAllCustomIndicatorFilterList(customIndicatorFilters);
+        }
+        QotStockFilter.Request req = QotStockFilter.Request.newBuilder()
+                .setC2S(c2s.build())
+                .build();
+        int seq = qot.stockFilter(req);
+        LOGGER.info("选股.seq={}", seq);
+    }
+
+    @Override
+    public void onReply_StockFilter(FTAPI_Conn client, int nSerialNo, QotStockFilter.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "选股失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "选股失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                StockFilterContent stockFilterContent = GSON.fromJson(ftGrpcReturnResult.getS2c(), new TypeToken<StockFilterContent>() {
+                }.getType());
+                sendStockFilterResult(stockFilterContent);
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("选股结果解析失败.", e);
+            }
+        }
+    }
+
+    private void sendStockFilterResult(StockFilterContent content) {
+        StockFilterWsMessage wsMessage = new StockFilterWsMessage();
+        wsMessage.setStockFilterContent(content);
+        quantxFutuWsService.sendStockFilterMessage(wsMessage);
+    }
+
     @Override
     public void onReply_Sub(FTAPI_Conn client, int nSerialNo, QotSub.Response rsp) {
         if (rsp.getRetType() != 0) {
@@ -999,7 +1117,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 //                    }
                 }
             } catch (InvalidProtocolBufferException e) {
-                LOGGER.error("订阅解结果解析失败.", e);
+                LOGGER.error("订阅结果解析失败.", e);
             }
 
         }

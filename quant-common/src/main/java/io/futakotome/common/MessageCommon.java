@@ -14,6 +14,7 @@ public interface MessageCommon {
     String RT_KL_MIN_15_CONSUMER_GROUP = "rt_klm15_consumer_group";
     String RT_KL_MIN_30_CONSUMER_GROUP = "rt_klm30_consumer_group";
     String RT_KL_MIN_60_CONSUMER_GROUP = "rt_klm60_consumer_group";
+    //todo 指标 should be removed
     String RT_EMA5_TOPIC = "rk_ema5_topic";
     String RT_EMA5_CONSUMER_GROUP_STREAM = "rk_ema5_consumer_group_stream";
     //K

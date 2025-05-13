@@ -19,6 +19,7 @@ public enum MessageType {
     ACCOUNTS,
     ACC_SUBSCRIBE,
     ACC_POSITION,
+    STOCK_FILTER,
 
     RT_BASIC_QUOTE,
     RT_KL,

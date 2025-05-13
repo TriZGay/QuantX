@@ -28,6 +28,7 @@ public class QuantxWsController {
     public static final String REHABS_URI = "/rehabs";
     public static final String ACCOUNTS_URI = "/accounts";
     public static final String POSITION_URI = "/positions";
+    public static final String STOCK_FILTER_URL = "/stock_filter";
 
     public static final String EMA5_URI = "/ema5";
 
@@ -134,6 +135,10 @@ public class QuantxWsController {
                 //查询账号持仓
                 AccPositionWsMessage accPositionWsMessage = (AccPositionWsMessage) messageClz;
                 ftTradeService.requestAccPosition(accPositionWsMessage);
+            } else if (messageClz.getType().equals(MessageType.STOCK_FILTER)) {
+                //选股
+                StockFilterWsMessage stockFilterWsMessage = (StockFilterWsMessage) messageClz;
+                ftQotService.sendStockFilterRequest(stockFilterWsMessage);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
