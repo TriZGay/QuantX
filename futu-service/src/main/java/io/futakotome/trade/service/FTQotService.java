@@ -1007,14 +1007,12 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 && !request.getPatternFilterList().isEmpty()) {
             List<QotStockFilter.PatternFilter> patternFilters = request.getPatternFilterList()
                     .stream()
-                    .map(patternFilterWsMessage -> {
-                        return QotStockFilter.PatternFilter.newBuilder()
-                                .setFieldName(patternFilterWsMessage.getFieldName())
-                                .setKlType(patternFilterWsMessage.getKlType())
-                                .setIsNoFilter(patternFilterWsMessage.isNoFilter())
-                                .setConsecutivePeriod(patternFilterWsMessage.getConsecutivePeriod())
-                                .build();
-                    }).collect(Collectors.toList());
+                    .map(patternFilterWsMessage -> QotStockFilter.PatternFilter.newBuilder()
+                            .setFieldName(patternFilterWsMessage.getFieldName())
+                            .setKlType(patternFilterWsMessage.getKlType())
+                            .setIsNoFilter(patternFilterWsMessage.isNoFilter())
+                            .setConsecutivePeriod(patternFilterWsMessage.getConsecutivePeriod())
+                            .build()).collect(Collectors.toList());
             c2s.addAllPatternFilterList(patternFilters);
         }
         if (Objects.nonNull(request.getCustomIndicatorFilterList())
