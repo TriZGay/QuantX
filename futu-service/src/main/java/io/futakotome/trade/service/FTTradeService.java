@@ -14,8 +14,10 @@ import io.futakotome.trade.controller.ws.QuantxFutuWsService;
 import io.futakotome.trade.domain.code.*;
 import io.futakotome.trade.dto.AccSubDto;
 import io.futakotome.trade.dto.OrderDto;
+import io.futakotome.trade.dto.message.AccFundsContent;
 import io.futakotome.trade.dto.message.AccountItem;
 import io.futakotome.trade.dto.message.PositionMessageContent;
+import io.futakotome.trade.dto.ws.AccFundsWsMessage;
 import io.futakotome.trade.dto.ws.AccPositionWsMessage;
 import io.futakotome.trade.dto.ws.AccSubscribeWsMessage;
 import io.futakotome.trade.dto.ws.AccountsWsMessage;
@@ -106,6 +108,21 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         LOGGER.info("请求账户持仓,seqNo={}", seqNo);
     }
 
+    public void requestAccFunds(AccFundsWsMessage accFundsWsMessage) {
+        TrdCommon.TrdHeader header = TrdCommon.TrdHeader.newBuilder()
+                .setAccID(Long.parseLong(accFundsWsMessage.getAccId()))
+                .setTrdEnv(accFundsWsMessage.getTradeEnv())
+                .setTrdMarket(accFundsWsMessage.getTradeMarket())
+                .build();
+        TrdGetFunds.C2S c2S = TrdGetFunds.C2S.newBuilder()
+                .setHeader(header)
+                .build();
+        TrdGetFunds.Request request = TrdGetFunds.Request.newBuilder()
+                .setC2S(c2S).build();
+        int seqNo = trd.getFunds(request);
+        LOGGER.info("请求账户资金,seqNo={}", seqNo);
+    }
+
     public void requestAccounts() {
         TrdGetAccList.C2S c2S = TrdGetAccList.C2S.newBuilder()
                 .setUserID(0)
@@ -164,6 +181,29 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     public void connect() {
         FTAPI.init();
         trd.initConnect(futuConfig.getUrl(), futuConfig.getPort(), futuConfig.isEnableEncrypt());
+    }
+
+    @Override
+    public void onReply_GetFunds(FTAPI_Conn client, int nSerialNo, TrdGetFunds.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "请求账户资金失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取请求账户资金失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                AccFundsContent funds = GSON.fromJson(ftGrpcReturnResult.getS2c().get("funds").getAsString(), AccFundsContent.class);
+                sendAccFunds(funds);
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("查询账户资金结果解析失败.", e);
+            }
+        }
+    }
+
+    private void sendAccFunds(AccFundsContent fundsContent) {
+        AccFundsWsMessage message = new AccFundsWsMessage();
+        message.setAccFundsContent(fundsContent);
+        quantxFutuWsService.sendAccFundsMessage(message);
     }
 
     @Override

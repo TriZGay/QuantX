@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = AccSubscribeWsMessage.class, name = "ACC_SUBSCRIBE"),
         @JsonSubTypes.Type(value = AccPositionWsMessage.class, name = "ACC_POSITION"),
         @JsonSubTypes.Type(value = StockFilterWsMessage.class, name = "STOCK_FILTER"),
+        @JsonSubTypes.Type(value = AccFundsWsMessage.class, name = "ACC_FUNDS"),
 
         @JsonSubTypes.Type(value = RealTimeBaseQuoteMessage.class, name = "RT_BASIC_QUOTE"),
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),

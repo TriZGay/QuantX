@@ -29,6 +29,7 @@ public class QuantxWsController {
     public static final String ACCOUNTS_URI = "/accounts";
     public static final String POSITION_URI = "/positions";
     public static final String STOCK_FILTER_URL = "/stock_filter";
+    public static final String ACC_FUNDS_URI = "/acc_funds";
 
     public static final String EMA5_URI = "/ema5";
 
@@ -87,7 +88,7 @@ public class QuantxWsController {
                 PlatesWsMessage platesWsMessage = (PlatesWsMessage) messageClz;
                 ftQotService.syncPlateInfo(platesWsMessage.getMarkets());
             } else if (messageClz.getType().equals(MessageType.STOCK_IN_PLATE)) {
-                //同步板块下股票数据
+                //todo 同步板块下股票数据 (优化代码
                 StockInPlateWsMessage stockInPlateWsMessage = (StockInPlateWsMessage) messageClz;
                 if (stockInPlateWsMessage.isAll()) {
                     List<CommonSecurity> allPlates = plateService.list().stream().map(plateDto -> {
@@ -139,6 +140,10 @@ public class QuantxWsController {
                 //选股
                 StockFilterWsMessage stockFilterWsMessage = (StockFilterWsMessage) messageClz;
                 ftQotService.sendStockFilterRequest(stockFilterWsMessage);
+            } else if (messageClz.getType().equals(MessageType.ACC_FUNDS)) {
+                //账户资金
+                AccFundsWsMessage accFundsWsMessage = (AccFundsWsMessage) messageClz;
+                ftTradeService.requestAccFunds(accFundsWsMessage);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
