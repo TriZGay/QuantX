@@ -192,7 +192,7 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                AccFundsContent funds = GSON.fromJson(ftGrpcReturnResult.getS2c().get("funds").getAsString(), AccFundsContent.class);
+                AccFundsContent funds = GSON.fromJson(ftGrpcReturnResult.getS2c().get("funds").getAsJsonObject(), AccFundsContent.class);
                 sendAccFunds(funds);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询账户资金结果解析失败.", e);

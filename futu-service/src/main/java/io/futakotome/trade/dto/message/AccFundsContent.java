@@ -18,7 +18,7 @@ public class AccFundsContent {
     private Double initialMargin;      //初始保证金
     private Double maintenanceMargin;  //维持保证金
 
-    List<AccFundsCashInfo> cashInfoList;  //分币种的现金、现金可提和现金购买力（仅综合账户适用）
+    private List<AccFundsCashInfo> cashInfoList;  //分币种的现金、现金可提和现金购买力（仅综合账户适用）
     private Double maxPowerShort; //卖空购买力（此字段是按照 60% 的融券保证金率计算得到的近似值。但事实上，每个标的的融券保证金率并不相同。我们建议您使用 查询最大可买可卖 接口返回的 可卖空 字段，来判断实际可卖空的最大数量。）
     private Double netCashPower;  //现金购买力（仅单币种账户使用此字段，综合账户请使用 cashInfoList 获取分币种现金购买力）
     private Double longMv;        //多头市值
