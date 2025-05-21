@@ -55,12 +55,13 @@ public class QuantxWsController {
                 ftQotService.sendGlobalMarketStateRequest();
             } else if (messageClz.getType().equals(MessageType.CONNECT)) {
                 //连接或断开连接
-                //todo 区分行情连接和交易连接
                 ConnectWsMessage connectWsMessage = (ConnectWsMessage) messageClz;
                 if (connectWsMessage.isConnect()) {
                     ftQotService.connect();
+                    ftTradeService.connect();
                 } else {
                     ftQotService.disconnect();
+                    ftTradeService.disconnect();
                 }
             } else if (messageClz.getType().equals(MessageType.KL_HISTORY_DETAIL)) {
                 //历史K额度查询

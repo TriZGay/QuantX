@@ -1,5 +1,8 @@
 package io.futakotome.trade.domain.code;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum OrderType {
     UNKNOWN(0, "未知"),
     NORMAL(1, "普通订单(港股的增强限价单、港股期权的限价单，A 股限价委托、美股的限价单，港股期货的限价单，CME 期货的限价单)。目前港股期权只能指定此订单类型"),
@@ -18,10 +21,21 @@ public enum OrderType {
 
     private final Integer code;
     private final String name;
+    private static final Map<Integer, String> ORDER_TYPE_MAP = new HashMap<>();
+
+    static {
+        for (OrderType orderType : OrderType.values()) {
+            ORDER_TYPE_MAP.put(orderType.code, orderType.name);
+        }
+    }
 
     OrderType(Integer code, String name) {
         this.code = code;
         this.name = name;
+    }
+
+    public static String getName(Integer code) {
+        return ORDER_TYPE_MAP.getOrDefault(code, "未知订单类型");
     }
 
     public Integer getCode() {

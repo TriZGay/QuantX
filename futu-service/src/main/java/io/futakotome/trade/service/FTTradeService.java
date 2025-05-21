@@ -94,11 +94,9 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     }
 
     public void requestAccPosition(AccPositionWsMessage accPositionWsMessage) {
-        TrdCommon.TrdHeader header = TrdCommon.TrdHeader.newBuilder()
-                .setAccID(Long.parseLong(accPositionWsMessage.getAccId()))
-                .setTrdEnv(accPositionWsMessage.getTradeEnv())
-                .setTrdMarket(accPositionWsMessage.getTradeMarket())
-                .build();
+        TrdCommon.TrdHeader header = this.trdHeader(accPositionWsMessage.getAccId(),
+                accPositionWsMessage.getTradeEnv(),
+                accPositionWsMessage.getTradeMarket());
         TrdGetPositionList.C2S c2S = TrdGetPositionList.C2S
                 .newBuilder().setHeader(header).build();
         TrdGetPositionList.Request request = TrdGetPositionList.Request
@@ -109,11 +107,7 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     }
 
     public void requestAccFunds(AccFundsWsMessage accFundsWsMessage) {
-        TrdCommon.TrdHeader header = TrdCommon.TrdHeader.newBuilder()
-                .setAccID(Long.parseLong(accFundsWsMessage.getAccId()))
-                .setTrdEnv(accFundsWsMessage.getTradeEnv())
-                .setTrdMarket(accFundsWsMessage.getTradeMarket())
-                .build();
+        TrdCommon.TrdHeader header = this.trdHeader(accFundsWsMessage.getAccId(), accFundsWsMessage.getTradeEnv(), accFundsWsMessage.getTradeMarket());
         TrdGetFunds.C2S c2S = TrdGetFunds.C2S.newBuilder()
                 .setHeader(header)
                 .build();
@@ -171,6 +165,11 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         LOGGER.info(content);
         sendNotifyMessage(content);
     }
+
+    public void disconnect() {
+        trd.close();
+    }
+
 
     @Override
     public void afterPropertiesSet() throws Exception {

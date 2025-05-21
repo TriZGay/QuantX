@@ -1,9 +1,6 @@
 package io.futakotome.trade.controller;
 
-import io.futakotome.trade.controller.vo.CommonSecurityRequest;
-import io.futakotome.trade.controller.vo.ListPlateRequest;
-import io.futakotome.trade.controller.vo.ListStockRequest;
-import io.futakotome.trade.controller.vo.StockFilterMetaResponse;
+import io.futakotome.trade.controller.vo.*;
 import io.futakotome.trade.domain.SnapshotService;
 import io.futakotome.trade.domain.code.*;
 import io.futakotome.trade.service.PlateDtoService;
@@ -58,47 +55,83 @@ public class BaseDataController {
         return ResponseEntity.ok(stockFilterMetaResponse);
     }
 
-    private List<StockFilterMetaResponse.AntDesignSelectOptions> toSelectOptions(StockPatternField[] values) {
-        return Arrays.stream(values).map(stockPatternField -> new StockFilterMetaResponse.AntDesignSelectOptions(stockPatternField.getDesc(), stockPatternField.getCode()))
+    @GetMapping("/tradeMeta")
+    public ResponseEntity<?> tradeMetaCodes() {
+        TradeMetaResponse tradeMetaResponse = new TradeMetaResponse();
+        tradeMetaResponse.setTradeSides(toSelectOptions(TradeSide.values()));
+        tradeMetaResponse.setTrailTypes(toSelectOptions(TrailType.values()));
+        tradeMetaResponse.setTimeInForces(toSelectOptions(TimeInForce.values()));
+        tradeMetaResponse.setTradeSecMarkets(toSelectOptions(TradeSecurityMarket.values()));
+        tradeMetaResponse.setOrderTypes(toSelectOptions(OrderType.values()));
+        return ResponseEntity.ok(tradeMetaResponse);
+    }
+
+    private List<AntDesignSelectOptions> toSelectOptions(OrderType[] values) {
+        return Arrays.stream(values).map(t -> new AntDesignSelectOptions(t.getName(), t.getCode()))
                 .collect(Collectors.toList());
     }
 
-    private List<StockFilterMetaResponse.AntDesignSelectOptions> toSelectOptions(StockAccumulateField[] values) {
-        return Arrays.stream(values).map(stockAccumulateField -> new StockFilterMetaResponse.AntDesignSelectOptions(stockAccumulateField.getDesc(), stockAccumulateField.getCode()))
+    private List<AntDesignSelectOptions> toSelectOptions(TradeSecurityMarket[] values) {
+        return Arrays.stream(values).map(t -> new AntDesignSelectOptions(t.getName(), t.getCode()))
                 .collect(Collectors.toList());
     }
 
-    private List<StockFilterMetaResponse.AntDesignSelectOptions> toSelectOptions(StockFinancialQuarter[] values) {
-        return Arrays.stream(values).map(stockFinancialQuarter -> new StockFilterMetaResponse.AntDesignSelectOptions(stockFinancialQuarter.getDesc(), stockFinancialQuarter.getCode()))
+    private List<AntDesignSelectOptions> toSelectOptions(TimeInForce[] values) {
+        return Arrays.stream(values).map(t -> new AntDesignSelectOptions(t.getName(), t.getCode()))
                 .collect(Collectors.toList());
     }
 
-    private List<StockFilterMetaResponse.AntDesignSelectOptions> toSelectOptions(StockIndicatorField[] values) {
+    private List<AntDesignSelectOptions> toSelectOptions(TrailType[] values) {
+        return Arrays.stream(values).map(trailType -> new AntDesignSelectOptions(trailType.getName(), trailType.getCode()))
+                .collect(Collectors.toList());
+    }
+
+    private List<AntDesignSelectOptions> toSelectOptions(TradeSide[] values) {
+        return Arrays.stream(values).map(tradeSide -> new AntDesignSelectOptions(tradeSide.getName(), tradeSide.getCode()))
+                .collect(Collectors.toList());
+    }
+
+    private List<AntDesignSelectOptions> toSelectOptions(StockPatternField[] values) {
+        return Arrays.stream(values).map(stockPatternField -> new AntDesignSelectOptions(stockPatternField.getDesc(), stockPatternField.getCode()))
+                .collect(Collectors.toList());
+    }
+
+    private List<AntDesignSelectOptions> toSelectOptions(StockAccumulateField[] values) {
+        return Arrays.stream(values).map(stockAccumulateField -> new AntDesignSelectOptions(stockAccumulateField.getDesc(), stockAccumulateField.getCode()))
+                .collect(Collectors.toList());
+    }
+
+    private List<AntDesignSelectOptions> toSelectOptions(StockFinancialQuarter[] values) {
+        return Arrays.stream(values).map(stockFinancialQuarter -> new AntDesignSelectOptions(stockFinancialQuarter.getDesc(), stockFinancialQuarter.getCode()))
+                .collect(Collectors.toList());
+    }
+
+    private List<AntDesignSelectOptions> toSelectOptions(StockIndicatorField[] values) {
         return null;
     }
 
-    private List<StockFilterMetaResponse.AntDesignSelectOptions> toSelectOptions(StockFinancialField[] values) {
-        return Arrays.stream(values).map(stockFinancialField -> new StockFilterMetaResponse.AntDesignSelectOptions(stockFinancialField.getDesc(), stockFinancialField.getCode()))
+    private List<AntDesignSelectOptions> toSelectOptions(StockFinancialField[] values) {
+        return Arrays.stream(values).map(stockFinancialField -> new AntDesignSelectOptions(stockFinancialField.getDesc(), stockFinancialField.getCode()))
                 .collect(Collectors.toList());
     }
 
-    private List<StockFilterMetaResponse.AntDesignSelectOptions> toSelectOptions(StockBaseField[] values) {
-        return Arrays.stream(values).map(stockBaseField -> new StockFilterMetaResponse.AntDesignSelectOptions(stockBaseField.getDesc(), stockBaseField.getCode()))
+    private List<AntDesignSelectOptions> toSelectOptions(StockBaseField[] values) {
+        return Arrays.stream(values).map(stockBaseField -> new AntDesignSelectOptions(stockBaseField.getDesc(), stockBaseField.getCode()))
                 .collect(Collectors.toList());
     }
 
-    private List<StockFilterMetaResponse.AntDesignSelectOptions> toSelectOptions(RelativePosition[] values) {
-        return Arrays.stream(values).map(relativePosition -> new StockFilterMetaResponse.AntDesignSelectOptions(relativePosition.getDesc(), relativePosition.getCode()))
+    private List<AntDesignSelectOptions> toSelectOptions(RelativePosition[] values) {
+        return Arrays.stream(values).map(relativePosition -> new AntDesignSelectOptions(relativePosition.getDesc(), relativePosition.getCode()))
                 .collect(Collectors.toList());
     }
 
-    private List<StockFilterMetaResponse.AntDesignSelectOptions> toSelectOptions(SortDir[] sortDirs) {
-        return Arrays.stream(sortDirs).map(sortDir -> new StockFilterMetaResponse.AntDesignSelectOptions(sortDir.getDesc(), sortDir.getCode()))
+    private List<AntDesignSelectOptions> toSelectOptions(SortDir[] sortDirs) {
+        return Arrays.stream(sortDirs).map(sortDir -> new AntDesignSelectOptions(sortDir.getDesc(), sortDir.getCode()))
                 .collect(Collectors.toList());
     }
 
-    private List<StockFilterMetaResponse.AntDesignSelectOptions> toSelectOptions(KLType[] klTypes) {
-        return Arrays.stream(klTypes).map(klType -> new StockFilterMetaResponse.AntDesignSelectOptions(klType.getName(), klType.getCode()))
+    private List<AntDesignSelectOptions> toSelectOptions(KLType[] klTypes) {
+        return Arrays.stream(klTypes).map(klType -> new AntDesignSelectOptions(klType.getName(), klType.getCode()))
                 .collect(Collectors.toList());
     }
 }

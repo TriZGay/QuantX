@@ -1,5 +1,8 @@
 package io.futakotome.trade.domain.code;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum TradeSecurityMarket {
     UNKNOWN(0, "未知"),
     HK(1, "香港市场（股票、窝轮、牛熊、期权、期货等）"),
@@ -15,10 +18,21 @@ public enum TradeSecurityMarket {
 
     private final Integer code;
     private final String name;
+    private static final Map<Integer, String> TRADE_SEC_MARKET_MAP = new HashMap<>();
+
+    static {
+        for (TradeSecurityMarket tradeMarket : TradeSecurityMarket.values()) {
+            TRADE_SEC_MARKET_MAP.put(tradeMarket.getCode(), tradeMarket.getName());
+        }
+    }
 
     TradeSecurityMarket(Integer code, String name) {
         this.code = code;
         this.name = name;
+    }
+
+    public static String getName(Integer code) {
+        return TRADE_SEC_MARKET_MAP.getOrDefault(code, "未知证券所属市场");
     }
 
     public static String getNameByCode(Integer code) {
