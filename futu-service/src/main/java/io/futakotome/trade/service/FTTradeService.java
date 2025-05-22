@@ -9,18 +9,15 @@ import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.trade.config.FutuConfig;
-import io.futakotome.trade.controller.vo.OrderRequest;
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
 import io.futakotome.trade.domain.code.*;
 import io.futakotome.trade.dto.AccSubDto;
 import io.futakotome.trade.dto.OrderDto;
 import io.futakotome.trade.dto.message.AccFundsContent;
 import io.futakotome.trade.dto.message.AccountItem;
+import io.futakotome.trade.dto.message.PlaceOrderContent;
 import io.futakotome.trade.dto.message.PositionMessageContent;
-import io.futakotome.trade.dto.ws.AccFundsWsMessage;
-import io.futakotome.trade.dto.ws.AccPositionWsMessage;
-import io.futakotome.trade.dto.ws.AccSubscribeWsMessage;
-import io.futakotome.trade.dto.ws.AccountsWsMessage;
+import io.futakotome.trade.dto.ws.*;
 import io.futakotome.trade.mapper.OrderDtoMapper;
 import io.futakotome.trade.utils.CacheManager;
 import org.bouncycastle.jcajce.provider.digest.MD5;
@@ -47,16 +44,15 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
 
     private static final FTAPI_Conn_Trd trd = new FTAPI_Conn_Trd();
 
-    private final OrderDtoMapper orderDtoMapper;
-
+    private final OrderDtoService orderService;
     private final AccSubDtoService accSubService;
     private final QuantxFutuWsService quantxFutuWsService;
 
-    public FTTradeService(FutuConfig futuConfig, OrderDtoMapper orderDtoMapper, AccSubDtoService accSubService, QuantxFutuWsService quantxFutuWsService) {
+    public FTTradeService(FutuConfig futuConfig, OrderDtoService orderService, AccSubDtoService accSubService, QuantxFutuWsService quantxFutuWsService) {
         trd.setClientInfo(clientID, 1);
         trd.setConnSpi(this);
         trd.setTrdSpi(this);
-        this.orderDtoMapper = orderDtoMapper;
+        this.orderService = orderService;
         this.quantxFutuWsService = quantxFutuWsService;
         this.accSubService = accSubService;
         this.futuConfig = futuConfig;
@@ -129,34 +125,93 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         LOGGER.info("请求交易账户,seqNo={}", seqNo);
     }
 
-    public void sendOrderRequest(OrderRequest orderRequest) {
+    public void requestPlaceOrder(PlaceOrderWsMessage request) {
         TrdPlaceOrder.C2S.Builder builder = TrdPlaceOrder.C2S.newBuilder();
         builder.setPacketID(trd.nextPacketID());
-        builder.setHeader(this.trdHeader(orderRequest.getAccId(), orderRequest.getTradeEnv(), orderRequest.getTradeMarket()));
-        builder.setTrdSide(orderRequest.getTradeSide());
-        builder.setOrderType(orderRequest.getOrderType());
-        if (orderRequest.getSecurityMarket() != null) {
-            builder.setSecMarket(orderRequest.getSecurityMarket());
+        builder.setHeader(this.trdHeader(request.getAccId(), request.getTradeEnv(), request.getTradeMarket()));
+        builder.setTrdSide(request.getTradeSide());
+        builder.setOrderType(request.getOrderType());
+        builder.setCode(request.getCode());
+        builder.setQty(request.getQty());
+        if (Objects.nonNull(request.getPrice())) {
+            builder.setPrice(request.getPrice());
         }
-        builder.setCode(orderRequest.getCode());
-        builder.setQty(orderRequest.getQty());
-        if (orderRequest.getPrice() != null) {
-            builder.setPrice(orderRequest.getPrice());
+        if (Objects.nonNull(request.getAdjustPrice())) {
+            builder.setAdjustPrice(request.getAdjustPrice());
         }
-        TrdPlaceOrder.Request request = TrdPlaceOrder.Request
+        if (Objects.nonNull(request.getAdjustSideAndLimit())) {
+            builder.setAdjustSideAndLimit(request.getAdjustSideAndLimit());
+        }
+        if (Objects.nonNull(request.getSecMarket())) {
+            builder.setSecMarket(request.getSecMarket());
+        }
+        if (Objects.nonNull(request.getRemark())) {
+            builder.setRemark(request.getRemark());
+        }
+        if (Objects.nonNull(request.getTimeInForce())) {
+            builder.setTimeInForce(request.getTimeInForce());
+        }
+        if (Objects.nonNull(request.getFillOutsideRTH())) {
+            builder.setFillOutsideRTH(request.getFillOutsideRTH());
+        }
+        if (Objects.nonNull(request.getAuxPrice())) {
+            builder.setAuxPrice(request.getAuxPrice());
+        }
+        if (Objects.nonNull(request.getTrailType())) {
+            builder.setTrailType(request.getTrailType());
+        }
+        if (Objects.nonNull(request.getTrailValue())) {
+            builder.setTrailValue(request.getTrailValue());
+        }
+        if (Objects.nonNull(request.getTrailSpread())) {
+            builder.setTrailSpread(request.getTrailSpread());
+        }
+        TrdPlaceOrder.Request ftRequest = TrdPlaceOrder.Request
                 .newBuilder()
                 .setC2S(builder.build())
                 .build();
-        int seqNo = trd.placeOrder(request);
-        LOGGER.info("下单!!!.seqNo=" + seqNo);
+        int seqNo = trd.placeOrder(ftRequest);
+        LOGGER.info("下单,seqNo={}", seqNo);
     }
 
+    @Override
+    public void onReply_PlaceOrder(FTAPI_Conn client, int nSerialNo, TrdPlaceOrder.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "下单失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "下单失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info("下单结果:{}", ftGrpcReturnResult.getS2c().toString());
+                sendNotifyMessage(ftGrpcReturnResult.getS2c().toString());
+                PlaceOrderContent result = GSON.fromJson(ftGrpcReturnResult.getS2c(), PlaceOrderContent.class);
+                orderService.placeOrder(result);
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("下单结果解析失败.", e);
+            }
+
+        }
+    }
 
     @Override
     public void onInitConnect(FTAPI_Conn client, long errCode, String desc) {
         String content = "FUTU API 初始化交易连接 onInitConnect: ret=" + errCode + ",desc=" + desc + ",connID=" + client.getConnectID();
         LOGGER.info(content);
         sendNotifyMessage(content);
+        requestAccSubOnConnect();
+    }
+
+    private void requestAccSubOnConnect() {
+        List<AccSubDto> subDtos = accSubService.list();
+        AccSubscribeWsMessage subscribeWsMessage = new AccSubscribeWsMessage();
+        subscribeWsMessage.setAccSubscribeItems(subDtos.stream()
+                .map(dto -> {
+                    AccSubscribeWsMessage.AccSubscribeItem subItem = new AccSubscribeWsMessage.AccSubscribeItem();
+                    subItem.setAccId(dto.getAccId());
+                    return subItem;
+                }).collect(Collectors.toList()));
+        accSubscribe(subscribeWsMessage);
     }
 
     @Override
@@ -174,7 +229,6 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         this.connect();
-
     }
 
     public void connect() {
@@ -237,39 +291,38 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void onReply_GetOrderList(FTAPI_Conn client, int nSerialNo, TrdGetOrderList.Response rsp) {
-        if (rsp.getRetType() != 0) {
-            LOGGER.error("查询今日订单失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询今日订单失败,code:" + rsp.getRetType()));
-        } else {
-            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询今日订单...");
-            try {
-                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
-                List<OrderDto> existOrders = orderDtoMapper.selectList(null);
-                JsonObject header = ftGrpcReturnResult.getS2c().get("header").getAsJsonObject();
-                OrderDto order = new OrderDto();
-                order.setTradeEnv(header.get("trdEnv").getAsInt());
-                order.setAccId(header.get("accID").getAsString());
-                order.setTradeMarket(header.get("trdMarket").getAsInt());
-                if (ftGrpcReturnResult.getS2c().has("orderList")) {
-                    Iterator<JsonElement> orderListIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("orderList").iterator();
-                    while (orderListIterator.hasNext()) {
-                        JsonObject oneOrder = orderListIterator.next().getAsJsonObject();
-
-                        if (existOrders.contains(order)) {
-                            //在库里update
-                        } else {
-                            //不在库里新增
-                        }
-
-                    }
-                }
-            } catch (InvalidProtocolBufferException e) {
-                LOGGER.error("查询今日订单结果解析失败.", e);
-            }
-        }
+        //        if (rsp.getRetType() != 0) {
+        //            LOGGER.error("查询今日订单失败:" + rsp.getRetMsg(),
+        //                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询今日订单失败,code:" + rsp.getRetType()));
+        //        } else {
+        //            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询今日订单...");
+        //            try {
+        //                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+        //                LOGGER.info(ftGrpcReturnResult.toString());
+        //                List<OrderDto> existOrders = orderDtoMapper.selectList(null);
+        //                JsonObject header = ftGrpcReturnResult.getS2c().get("header").getAsJsonObject();
+        //                OrderDto order = new OrderDto();
+        //                order.setTradeEnv(header.get("trdEnv").getAsInt());
+        //                order.setAccId(header.get("accID").getAsString());
+        //                order.setTradeMarket(header.get("trdMarket").getAsInt());
+        //                if (ftGrpcReturnResult.getS2c().has("orderList")) {
+        //                    Iterator<JsonElement> orderListIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("orderList").iterator();
+        //                    while (orderListIterator.hasNext()) {
+        //                        JsonObject oneOrder = orderListIterator.next().getAsJsonObject();
+        //
+        //                        if (existOrders.contains(order)) {
+        //                            //在库里update
+        //                        } else {
+        //                            //不在库里新增
+        //                        }
+        //
+        //                    }
+        //                }
+        //            } catch (InvalidProtocolBufferException e) {
+        //                LOGGER.error("查询今日订单结果解析失败.", e);
+        //            }
+        //        }
     }
 
     @Override
@@ -377,28 +430,6 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("接收成交推送结果解析失败.", e);
             }
-        }
-    }
-
-    @Override
-    public void onReply_PlaceOrder(FTAPI_Conn client, int nSerialNo, TrdPlaceOrder.Response rsp) {
-        if (rsp.getRetType() != 0) {
-            LOGGER.error("下单失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("请求序列号:" + nSerialNo + "账号解锁失败,code:" + rsp.getRetType()));
-        } else {
-            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "下单...");
-            try {
-                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                if (ftGrpcReturnResult.getRetType() == 0) {
-                    LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "下单成功!!");
-                } else {
-                    LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "下单失败:" + ftGrpcReturnResult.getRetType());
-                    LOGGER.error("失败原因:" + ftGrpcReturnResult.getRetMsg());
-                }
-            } catch (InvalidProtocolBufferException e) {
-                LOGGER.error("下单结果解析失败.", e);
-            }
-
         }
     }
 

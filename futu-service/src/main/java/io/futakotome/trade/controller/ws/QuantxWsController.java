@@ -145,6 +145,10 @@ public class QuantxWsController {
                 //账户资金
                 AccFundsWsMessage accFundsWsMessage = (AccFundsWsMessage) messageClz;
                 ftTradeService.requestAccFunds(accFundsWsMessage);
+            } else if (messageClz.getType().equals(MessageType.PLACE_ORDER)) {
+                //下单
+                PlaceOrderWsMessage placeOrderWsMessage = (PlaceOrderWsMessage) messageClz;
+                ftTradeService.requestPlaceOrder(placeOrderWsMessage);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
