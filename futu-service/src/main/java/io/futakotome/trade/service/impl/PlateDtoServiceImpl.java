@@ -55,6 +55,8 @@ public class PlateDtoServiceImpl extends ServiceImpl<PlateDtoMapper, PlateDto>
             } else {
                 return 0;
             }
+        } catch (Exception e) {
+            throw new RuntimeException("批量插入出错", e);
         } finally {
             lock.unlock();
         }
@@ -119,13 +121,14 @@ public class PlateDtoServiceImpl extends ServiceImpl<PlateDtoMapper, PlateDto>
                 }
             }
             return totalInsertRow;
+        } catch (Exception e) {
+            throw new RuntimeException("批量插入出错", e);
         } finally {
             lock.unlock();
         }
     }
 
     @Override
-    @Transactional
     public IPage<ListPlateResponse> page(ListPlateRequest request) {
         QueryWrapper<PlateDto> queryWrapper = Wrappers.query();
         Page<PlateDto> pagination = Page.of(1, 10);

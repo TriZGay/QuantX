@@ -76,11 +76,11 @@
         values
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="accId != null">#{accId,jdbcType=VARCHAR},</if>
-            <if test="tradeEnv != null">#{tradeEnv,jdbcType=OTHER},</if>
-            <if test="accTradeMarket != null">#{accTradeMarket,jdbcType=OTHER},</if>
-            <if test="tradeSide != null">#{tradeSide,jdbcType=OTHER},</if>
-            <if test="orderType != null">#{orderType,jdbcType=OTHER},</if>
-            <if test="orderStatus != null">#{orderStatus,jdbcType=OTHER},</if>
+            <if test="tradeEnv != null">#{tradeEnv,jdbcType=INTEGER},</if>
+            <if test="accTradeMarket != null">#{accTradeMarket,jdbcType=INTEGER},</if>
+            <if test="tradeSide != null">#{tradeSide,jdbcType=INTEGER},</if>
+            <if test="orderType != null">#{orderType,jdbcType=INTEGER},</if>
+            <if test="orderStatus != null">#{orderStatus,jdbcType=INTEGER},</if>
             <if test="orderId != null">#{orderId,jdbcType=VARCHAR},</if>
             <if test="orderIdEx != null">#{orderIdEx,jdbcType=VARCHAR},</if>
             <if test="code != null">#{code,jdbcType=VARCHAR},</if>
@@ -92,14 +92,37 @@
             <if test="fillQty != null">#{fillQty,jdbcType=DOUBLE},</if>
             <if test="fillAvgPrice != null">#{fillAvgPrice,jdbcType=DOUBLE},</if>
             <if test="lastErrMsg != null">#{lastErrMsg,jdbcType=VARCHAR},</if>
-            <if test="securityMarket != null">#{securityMarket,jdbcType=OTHER},</if>
+            <if test="securityMarket != null">#{securityMarket,jdbcType=INTEGER},</if>
             <if test="remark != null">#{remark,jdbcType=VARCHAR},</if>
             <if test="auxPrice != null">#{auxPrice,jdbcType=DOUBLE},</if>
-            <if test="trailType != null">#{trailType,jdbcType=OTHER},</if>
+            <if test="trailType != null">#{trailType,jdbcType=INTEGER},</if>
             <if test="trailValue != null">#{trailValue,jdbcType=DOUBLE},</if>
             <if test="trailSpread != null">#{trailSpread,jdbcType=DOUBLE},</if>
-            <if test="currency != null">#{currency,jdbcType=OTHER},</if>
-            <if test="tradeMarket != null">#{tradeMarket,jdbcType=OTHER},</if>
+            <if test="currency != null">#{currency,jdbcType=INTEGER},</if>
+            <if test="tradeMarket != null">#{tradeMarket,jdbcType=INTEGER},</if>
         </trim>
+    </insert>
+    <insert id="insertBatch">
+        insert into t_order(id,acc_id,trade_env,
+        acc_trade_market,trade_side,order_type,
+        order_status,order_id,order_id_ex,
+        code,name,qty,
+        price,create_time,update_time,
+        fill_qty,fill_avg_price,last_err_msg,
+        security_market,remark,aux_price,
+        trail_type,trail_value,trail_spread,
+        currency,trade_market)
+        values
+        <foreach collection="orderDtoCollection" item="item" separator=",">
+            (#{item.id,jdbcType=INTEGER},#{item.accId,jdbcType=VARCHAR},#{item.tradeEnv,jdbcType=INTEGER},
+            #{item.accTradeMarket,jdbcType=INTEGER},#{item.tradeSide,jdbcType=INTEGER},#{item.orderType,jdbcType=INTEGER},
+            #{item.orderStatus,jdbcType=INTEGER},#{item.orderId,jdbcType=VARCHAR},#{item.orderIdEx,jdbcType=VARCHAR},
+            #{item.code,jdbcType=VARCHAR},#{item.name,jdbcType=VARCHAR},#{item.qty,jdbcType=DOUBLE},
+            #{item.price,jdbcType=DOUBLE},#{item.createTime},#{item.updateTime},
+            #{item.fillQty,jdbcType=DOUBLE},#{item.fillAvgPrice,jdbcType=DOUBLE},#{item.lastErrMsg,jdbcType=VARCHAR},
+            #{item.securityMarket,jdbcType=INTEGER},#{item.remark,jdbcType=VARCHAR},#{item.auxPrice,jdbcType=DOUBLE},
+            #{item.trailType,jdbcType=INTEGER},#{item.trailValue,jdbcType=DOUBLE},#{item.trailSpread,jdbcType=DOUBLE},
+            #{item.currency,jdbcType=INTEGER},#{item.tradeMarket,jdbcType=INTEGER})
+        </foreach>
     </insert>
 </mapper>

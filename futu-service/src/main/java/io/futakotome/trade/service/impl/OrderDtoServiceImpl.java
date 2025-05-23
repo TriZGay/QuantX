@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.futakotome.trade.dto.AccSubDto;
 import io.futakotome.trade.dto.OrderDto;
+import io.futakotome.trade.dto.message.OrderContent;
+import io.futakotome.trade.dto.message.OrderPushContent;
 import io.futakotome.trade.dto.message.PlaceOrderContent;
 import io.futakotome.trade.mapper.OrderDtoMapper;
 import io.futakotome.trade.service.AccSubDtoService;
@@ -13,9 +15,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * @author pc
@@ -59,6 +65,58 @@ public class OrderDtoServiceImpl extends ServiceImpl<OrderDtoMapper, OrderDto>
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int saveOrderBatch(OrderPushContent orderPush) {
+        lock.lock();
+        try {
+            if (!orderPush.getOrderList().isEmpty()) {
+                List<OrderDto> orderDtoList = orderPush.getOrderList()
+                        .stream().map(orderVo -> this.messageVo2Dto(orderPush, orderVo))
+                        .collect(Collectors.toList());
+                return getBaseMapper().insertBatch(orderDtoList);
+            }
+            return 0;
+        } catch (Exception e) {
+            LOGGER.error("账号:{}插入订单失败", orderPush.getHeader().getAccID(), e);
+            throw new RuntimeException("账号:" + orderPush.getHeader().getAccID() + "插入订单失败", e);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private OrderDto messageVo2Dto(OrderPushContent vo, OrderContent orderVo) {
+        OrderDto orderDto = new OrderDto();
+        orderDto.setAccId(vo.getHeader().getAccID());
+        orderDto.setTradeEnv(vo.getHeader().getTrdEnv());
+        orderDto.setAccTradeMarket(vo.getHeader().getTrdMarket());
+        orderDto.setTradeSide(orderVo.getTrdSide());
+        orderDto.setOrderType(orderVo.getOrderType());
+        orderDto.setOrderStatus(orderVo.getOrderStatus());
+        orderDto.setOrderId(orderVo.getOrderID());
+        orderDto.setOrderIdEx(orderVo.getOrderIDEx());
+        orderDto.setCode(orderVo.getCode());
+        orderDto.setName(orderVo.getName());
+        orderDto.setQty(orderVo.getQty());
+        orderDto.setPrice(orderVo.getPrice());
+        orderDto.setCreateTime(LocalDateTime.parse(orderVo.getCreateTime(),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        orderDto.setUpdateTime(LocalDateTime.parse(orderVo.getUpdateTime(),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        orderDto.setFillQty(orderVo.getFillQty());
+        orderDto.setFillAvgPrice(orderVo.getFillAvgPrice());
+        orderDto.setLastErrMsg(orderVo.getLastErrMsg());
+        orderDto.setSecurityMarket(orderVo.getSecMarket());
+        orderDto.setRemark(orderVo.getRemark());
+        orderDto.setAuxPrice(orderVo.getAuxPrice());
+        orderDto.setTrailType(orderVo.getTrailType());
+        orderDto.setTrailValue(orderVo.getTrailValue());
+        orderDto.setTrailSpread(orderVo.getTrailSpread());
+        orderDto.setCurrency(orderVo.getCurrency());
+        orderDto.setTradeMarket(orderVo.getTrdMarket());
+        return orderDto;
     }
 }
 

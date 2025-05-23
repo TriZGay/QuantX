@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author 86131
@@ -17,16 +18,24 @@ import java.util.List;
 @Service
 public class AccSubDtoServiceImpl extends ServiceImpl<AccSubDtoMapper, AccSubDto>
         implements AccSubDtoService {
+    private static final ReentrantLock lock = new ReentrantLock();
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int insertBatch(List<AccSubDto> accSubDtos) {
-        List<AccSubDto> existAccSubDtos = list();
-        accSubDtos.removeIf(existAccSubDtos::contains);
-        if (!accSubDtos.isEmpty()) {
-            return getBaseMapper().insertBatch(accSubDtos);
+        lock.lock();
+        try {
+            List<AccSubDto> existAccSubDtos = list();
+            accSubDtos.removeIf(existAccSubDtos::contains);
+            if (!accSubDtos.isEmpty()) {
+                return getBaseMapper().insertBatch(accSubDtos);
+            }
+            return 0;
+        } catch (Exception e) {
+            throw new RuntimeException("插入出错", e);
+        } finally {
+            lock.unlock();
         }
-        return 0;
     }
 }
 

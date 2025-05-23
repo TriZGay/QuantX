@@ -13,10 +13,7 @@ import io.futakotome.trade.controller.ws.QuantxFutuWsService;
 import io.futakotome.trade.domain.code.*;
 import io.futakotome.trade.dto.AccSubDto;
 import io.futakotome.trade.dto.OrderDto;
-import io.futakotome.trade.dto.message.AccFundsContent;
-import io.futakotome.trade.dto.message.AccountItem;
-import io.futakotome.trade.dto.message.PlaceOrderContent;
-import io.futakotome.trade.dto.message.PositionMessageContent;
+import io.futakotome.trade.dto.message.*;
 import io.futakotome.trade.dto.ws.*;
 import io.futakotome.trade.mapper.OrderDtoMapper;
 import io.futakotome.trade.utils.CacheManager;
@@ -403,13 +400,15 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     @Override
     public void onPush_UpdateOrder(FTAPI_Conn client, TrdUpdateOrder.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("下单失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("接收订单推送失败,code:" + rsp.getRetType()));
+            String notify = "订单推送失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "订单推送失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
-            LOGGER.info("connID=" + client.getConnectID() + "接收订单推送...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
+                OrderPushContent orderPush = GSON.fromJson(ftGrpcReturnResult.getS2c(), OrderPushContent.class);
+                int insertRow = orderService.saveOrderBatch(orderPush);
+                LOGGER.info("账号:{}订单结果入库:{}条", orderPush.getHeader().getAccID(), insertRow);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("接收订单推送结果解析失败.", e);
             }
