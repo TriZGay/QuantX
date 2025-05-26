@@ -12,4 +12,8 @@ public interface StockDtoService extends IService<StockDto> {
     int insertBatch(List<StockDto> list);
 
     IPage<ListStockResponse> page(ListStockRequest listStockRequest);
+
+    List<ListStockResponse> fetchAll(ListStockRequest listStockRequest);
+
+    ListStockResponse fetchById(Long id);
 }

@@ -8,6 +8,15 @@ public class TradeMetaResponse {
     private List<AntDesignSelectOptions> timeInForces;
     private List<AntDesignSelectOptions> tradeSecMarkets;
     private List<AntDesignSelectOptions> orderTypes;
+    private List<AntDesignSelectOptions> marketTypes;
+
+    public List<AntDesignSelectOptions> getMarketTypes() {
+        return marketTypes;
+    }
+
+    public void setMarketTypes(List<AntDesignSelectOptions> marketTypes) {
+        this.marketTypes = marketTypes;
+    }
 
     public List<AntDesignSelectOptions> getTradeSides() {
         return tradeSides;

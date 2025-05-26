@@ -21,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * @author pc
@@ -70,7 +72,6 @@ public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
     }
 
     @Override
-    @Transactional
     public IPage<ListStockResponse> page(ListStockRequest listStockRequest) {
         QueryWrapper<StockDto> queryWrapper = Wrappers.query();
         Page<StockDto> pagination = Page.of(1, 10);
@@ -92,31 +93,48 @@ public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
         if (listStockRequest.getSize() != null) {
             pagination.setSize(listStockRequest.getSize());
         }
-        return page(pagination, queryWrapper).convert(stockDto -> {
-            ListStockResponse response = new ListStockResponse();
-            response.setId(stockDto.getId());
-            response.setName(stockDto.getName());
-            response.setMarket(MarketType.getNameByCode(stockDto.getMarket()));
-            response.setMarketCode(stockDto.getMarket());
-            response.setCode(stockDto.getCode());
-            response.setLotSize(stockDto.getLotSize());
-            response.setStockType(StockType.getNameByCode(stockDto.getStockType()));
-            response.setStockTypeCode(stockDto.getStockType());
-//                    response.setStockChildType(StockType.getNameByCode(stockDto.getStockChildType()));
-//                    response.setStockOwner(stockDto.getStockOwner());
-//                    response.setOptionType(stockDto.getOptionType());
-//                    response.setStrikeTime(stockDto.getStrikeTime());
-//                    response.setStrikePrice(stockDto.getStrikePrice());
-//                    response.setSuspension(stockDto.getSuspension());
-            response.setListingDate(stockDto.getListingDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-//                    response.setStockId(stockDto.getStockId());
-            response.setDelisting(DelistingType.getNameByCode(stockDto.getDelisting()));
-//                    response.setIndexOptionType(stockDto.getIndexOptionType());
-//                    response.setMainContract(stockDto.getMainContract());
-//                    response.setLastTradeTime(stockDto.getLastTradeTime());
-            response.setExchangeType(ExchangeType.getNameByCode(stockDto.getExchangeType()));
-            return response;
-        });
+        return page(pagination, queryWrapper).convert(this::dto2Vo);
+    }
+
+    @Override
+    public List<ListStockResponse> fetchAll(ListStockRequest listStockRequest) {
+        QueryWrapper<StockDto> queryWrapper = Wrappers.query();
+        if (Objects.nonNull(listStockRequest.getMarket())) {
+            queryWrapper.eq("market", listStockRequest.getMarket());
+        }
+        return list(queryWrapper).stream().map(this::dto2Vo)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ListStockResponse fetchById(Long id) {
+        return this.dto2Vo(getById(id));
+    }
+
+    private ListStockResponse dto2Vo(StockDto stockDto) {
+        ListStockResponse response = new ListStockResponse();
+        response.setId(stockDto.getId());
+        response.setName(stockDto.getName());
+        response.setMarket(MarketType.getNameByCode(stockDto.getMarket()));
+        response.setMarketCode(stockDto.getMarket());
+        response.setCode(stockDto.getCode());
+        response.setLotSize(stockDto.getLotSize());
+        response.setStockType(StockType.getNameByCode(stockDto.getStockType()));
+        response.setStockTypeCode(stockDto.getStockType());
+        //                    response.setStockChildType(StockType.getNameByCode(stockDto.getStockChildType()));
+        //                    response.setStockOwner(stockDto.getStockOwner());
+        //                    response.setOptionType(stockDto.getOptionType());
+        //                    response.setStrikeTime(stockDto.getStrikeTime());
+        //                    response.setStrikePrice(stockDto.getStrikePrice());
+        //                    response.setSuspension(stockDto.getSuspension());
+        response.setListingDate(stockDto.getListingDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        //                    response.setStockId(stockDto.getStockId());
+        response.setDelisting(DelistingType.getNameByCode(stockDto.getDelisting()));
+        //                    response.setIndexOptionType(stockDto.getIndexOptionType());
+        //                    response.setMainContract(stockDto.getMainContract());
+        //                    response.setLastTradeTime(stockDto.getLastTradeTime());
+        response.setExchangeType(ExchangeType.getNameByCode(stockDto.getExchangeType()));
+        return response;
     }
 }
 

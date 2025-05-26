@@ -30,6 +30,16 @@ public class BaseDataController {
         return ResponseEntity.ok(stockDtoService.page(request));
     }
 
+    @PostMapping("/allStocks")
+    public ResponseEntity<?> allStocks(@RequestBody ListStockRequest request) {
+        return ResponseEntity.ok(stockDtoService.fetchAll(request));
+    }
+
+    @GetMapping("/getStock/{id}")
+    public ResponseEntity<?> getStockByCode(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(stockDtoService.fetchById(id));
+    }
+
     @PostMapping("/plates")
     public ResponseEntity<?> listPlates(@RequestBody ListPlateRequest request) {
         return ResponseEntity.ok(plateDtoService.page(request));
@@ -63,7 +73,13 @@ public class BaseDataController {
         tradeMetaResponse.setTimeInForces(toSelectOptions(TimeInForce.values()));
         tradeMetaResponse.setTradeSecMarkets(toSelectOptions(TradeSecurityMarket.values()));
         tradeMetaResponse.setOrderTypes(toSelectOptions(OrderType.values()));
+        tradeMetaResponse.setMarketTypes(toSelectOptions(MarketType.values()));
         return ResponseEntity.ok(tradeMetaResponse);
+    }
+
+    private List<AntDesignSelectOptions> toSelectOptions(MarketType[] values) {
+        return Arrays.stream(values).map(t -> new AntDesignSelectOptions(t.getName(), t.getCode()))
+                .collect(Collectors.toList());
     }
 
     private List<AntDesignSelectOptions> toSelectOptions(OrderType[] values) {
