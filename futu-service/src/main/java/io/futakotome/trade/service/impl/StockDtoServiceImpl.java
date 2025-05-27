@@ -102,6 +102,9 @@ public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
         if (Objects.nonNull(listStockRequest.getMarket())) {
             queryWrapper.eq("market", listStockRequest.getMarket());
         }
+        if (Objects.nonNull(listStockRequest.getName())) {
+            queryWrapper.like("name", listStockRequest.getName());
+        }
         return list(queryWrapper).stream().map(this::dto2Vo)
                 .collect(Collectors.toList());
     }

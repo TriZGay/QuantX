@@ -1,7 +1,5 @@
 package io.futakotome.trade.dto.ws;
 
-import com.futu.openapi.pb.Common;
-
 public class PlaceOrderWsMessage implements Message {
     private String accId;
     private Integer tradeEnv;
@@ -14,7 +12,7 @@ public class PlaceOrderWsMessage implements Message {
     //以下2个为调整价格使用，都传才有效，对港、A 股有意义，因为港股有价位，A 股2位精度，美股可不传
     private Boolean adjustPrice; //是否调整价格，如果价格不合法，是否调整到合法价位，true 调整，false 不调整。如果价格不合法又不允许调整，则会返回错误
     private Double adjustSideAndLimit; //调整方向和调整幅度百分比限制，正数代表向上调整，负数代表向下调整，具体值代表调整幅度限制，如：0.015代表向上调整且幅度不超过1.5%；-0.01代表向下调整且幅度不超过1%
-    private Integer secMarket; //证券所属市场，参见 TrdSecMarket 的枚举定义
+    private Integer secMarket; //证券所属市场，参/见 TrdSecMarket 的枚举定义
     private String remark; //用户备注字符串，最多只能传64字节。可用于标识订单唯一信息等，下单填上，订单结构就会带上。
     private Integer timeInForce; //订单有效期限，参见 TrdCommon.TimeInForce 的枚举定义
     private Boolean fillOutsideRTH; //是否允许盘前盘后成交。仅适用于美股限价单。默认 false
