@@ -72,11 +72,13 @@ public class OrderDtoServiceImpl extends ServiceImpl<OrderDtoMapper, OrderDto>
     public int saveOrderBatch(OrderPushContent orderPush) {
         lock.lock();
         try {
-            if (!orderPush.getOrderList().isEmpty()) {
-                List<OrderDto> orderDtoList = orderPush.getOrderList()
-                        .stream().map(orderVo -> this.messageVo2Dto(orderPush, orderVo))
-                        .collect(Collectors.toList());
-                return getBaseMapper().insertBatch(orderDtoList);
+            if (Objects.nonNull(orderPush.getOrderList())) {
+                if (!orderPush.getOrderList().isEmpty()) {
+                    List<OrderDto> orderDtoList = orderPush.getOrderList()
+                            .stream().map(orderVo -> this.messageVo2Dto(orderPush, orderVo))
+                            .collect(Collectors.toList());
+                    return getBaseMapper().insertBatch(orderDtoList);
+                }
             }
             return 0;
         } catch (Exception e) {

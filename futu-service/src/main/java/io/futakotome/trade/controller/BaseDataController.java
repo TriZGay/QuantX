@@ -35,9 +35,9 @@ public class BaseDataController {
         return ResponseEntity.ok(stockDtoService.fetchAll(request));
     }
 
-    @GetMapping("/getStock/{id}")
-    public ResponseEntity<?> getStockByCode(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(stockDtoService.fetchById(id));
+    @GetMapping("/getStock/{code}")
+    public ResponseEntity<?> getStockByCode(@PathVariable("code") String code) {
+        return ResponseEntity.ok(stockDtoService.fetchByCode(code));
     }
 
     @PostMapping("/plates")

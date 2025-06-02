@@ -138,7 +138,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     public void syncTradeDate() {
-//        market.sendTradeDateRequest();
+        //        market.sendTradeDateRequest();
     }
 
     public void sendSubInfoRequest() {
@@ -164,24 +164,24 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         CommonSecurity commonSecurity = new CommonSecurity(market, code);
         CacheManager.put(String.valueOf(seqNo), commonSecurity);
         LOGGER.info("{}-{}请求资金流向.seqNo={}", MarketType.getNameByCode(market), code, seqNo);
-//        if (request.getPeriodType() == 1) {
-//            //实时
-//            ftRequest.setC2S(QotGetCapitalFlow.C2S.newBuilder()
-//                    .setPeriodType(request.getPeriodType())
-//                    .setSecurity(security)
-//                    .build());
-//        } else {
-//            ftRequest.setC2S(QotGetCapitalFlow.C2S.newBuilder()
-//                    .setPeriodType(request.getPeriodType())
-//                    .setSecurity(security)
-//                    .setBeginTime(request.getBeginDate())
-//                    .setEndTime(request.getEndDate())
-//                    .build());
-//        }
-//        int seqNo = qot.getCapitalFlow(ftRequest.build());
-//        String marketAndCode = request.getMarket() + "-" + request.getCode();
-//        CacheManager.put(String.valueOf(seqNo), marketAndCode);
-//        LOGGER.info("请求资金流向.seqNo=" + seqNo);
+        //        if (request.getPeriodType() == 1) {
+        //            //实时
+        //            ftRequest.setC2S(QotGetCapitalFlow.C2S.newBuilder()
+        //                    .setPeriodType(request.getPeriodType())
+        //                    .setSecurity(security)
+        //                    .build());
+        //        } else {
+        //            ftRequest.setC2S(QotGetCapitalFlow.C2S.newBuilder()
+        //                    .setPeriodType(request.getPeriodType())
+        //                    .setSecurity(security)
+        //                    .setBeginTime(request.getBeginDate())
+        //                    .setEndTime(request.getEndDate())
+        //                    .build());
+        //        }
+        //        int seqNo = qot.getCapitalFlow(ftRequest.build());
+        //        String marketAndCode = request.getMarket() + "-" + request.getCode();
+        //        CacheManager.put(String.valueOf(seqNo), marketAndCode);
+        //        LOGGER.info("请求资金流向.seqNo=" + seqNo);
     }
 
     public void syncCapitalDistribution(Integer market, String code) {
@@ -423,7 +423,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     klMessageContent.setRehabType(rehabType);
                     klMessageContent.setMarket(market);
                     klMessageContent.setCode(code);
-                    kafkaService.sendRTKLineMessage(klMessageContent);
+                    kafkaService.sendHistoryKLineMessage(klMessageContent);
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析历史K线额度使用明细结果失败.", e);
@@ -523,54 +523,54 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取交易日失败,code:" + rsp.getRetType()));
             sendNotifyMessage(notify);
         } else {
-//            try {
-//                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-//                Object marketType = CacheManager.get(String.valueOf(nSerialNo));
-//                Iterator<JsonElement> tradeDateList = ftGrpcReturnResult.getS2c().getAsJsonArray("tradeDateList").iterator();
-//                if (marketType instanceof Integer) {
-//                    Integer tradeDateMarket = (Integer) marketType;
-//                    List<TradeDateDto> newTradeDateDtos = new ArrayList<>();
-//                    if (tradeDateMarket.equals(TradeDateMarketType.HK.getCode())) {
-//                        while (tradeDateList.hasNext()) {
-//                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
-//                            TradeDateDto tradeDateDto = new TradeDateDto();
-//                            tradeDateDto.setMarketOrSecurity(String.valueOf(MarketType.HK.getCode()));
-//                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
-//                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
-//                            newTradeDateDtos.add(tradeDateDto);
-//                        }
-//                    } else if (tradeDateMarket.equals(TradeDateMarketType.CN.getCode())) {
-//                        while (tradeDateList.hasNext()) {
-//                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
-//                            TradeDateDto tradeDateDto = new TradeDateDto();
-//                            tradeDateDto.setMarketOrSecurity(MarketType.CN_SH.getCode() + "," + MarketType.CN_SZ.getCode());
-//                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
-//                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
-//                            newTradeDateDtos.add(tradeDateDto);
-//                        }
-//                    } else if (tradeDateMarket.equals(TradeDateMarketType.US.getCode())) {
-//                        while (tradeDateList.hasNext()) {
-//                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
-//                            TradeDateDto tradeDateDto = new TradeDateDto();
-//                            tradeDateDto.setMarketOrSecurity(String.valueOf(MarketType.US.getCode()));
-//                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
-//                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
-//                            newTradeDateDtos.add(tradeDateDto);
-//                        }
-//                    }
-//                    //todo 其他的以后再算
-//                    List<TradeDateDto> existTradeDates = tradeDateDtoMapper.selectList(null);
-//                    newTradeDateDtos.removeIf(existTradeDates::contains);
-//                    int insertRow = tradeDateDtoMapper.insertBatch(newTradeDateDtos);
-//                    if (insertRow > 0) {
-//                        String str = "交易日数据插入条数" + insertRow;
-//                        LOGGER.info(str);
-//                        sendNotifyMessage(str);
-//                    }
-//                }
-//            } catch (InvalidProtocolBufferException e) {
-//                LOGGER.error("解析交易日结果失败.", e);
-//            }
+            //            try {
+            //                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+            //                Object marketType = CacheManager.get(String.valueOf(nSerialNo));
+            //                Iterator<JsonElement> tradeDateList = ftGrpcReturnResult.getS2c().getAsJsonArray("tradeDateList").iterator();
+            //                if (marketType instanceof Integer) {
+            //                    Integer tradeDateMarket = (Integer) marketType;
+            //                    List<TradeDateDto> newTradeDateDtos = new ArrayList<>();
+            //                    if (tradeDateMarket.equals(TradeDateMarketType.HK.getCode())) {
+            //                        while (tradeDateList.hasNext()) {
+            //                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
+            //                            TradeDateDto tradeDateDto = new TradeDateDto();
+            //                            tradeDateDto.setMarketOrSecurity(String.valueOf(MarketType.HK.getCode()));
+            //                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
+            //                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
+            //                            newTradeDateDtos.add(tradeDateDto);
+            //                        }
+            //                    } else if (tradeDateMarket.equals(TradeDateMarketType.CN.getCode())) {
+            //                        while (tradeDateList.hasNext()) {
+            //                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
+            //                            TradeDateDto tradeDateDto = new TradeDateDto();
+            //                            tradeDateDto.setMarketOrSecurity(MarketType.CN_SH.getCode() + "," + MarketType.CN_SZ.getCode());
+            //                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
+            //                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
+            //                            newTradeDateDtos.add(tradeDateDto);
+            //                        }
+            //                    } else if (tradeDateMarket.equals(TradeDateMarketType.US.getCode())) {
+            //                        while (tradeDateList.hasNext()) {
+            //                            JsonObject tradeDateJsonObj = tradeDateList.next().getAsJsonObject();
+            //                            TradeDateDto tradeDateDto = new TradeDateDto();
+            //                            tradeDateDto.setMarketOrSecurity(String.valueOf(MarketType.US.getCode()));
+            //                            tradeDateDto.setTime(tradeDateJsonObj.get("time").getAsString());
+            //                            tradeDateDto.setTradeDateType(tradeDateJsonObj.get("tradeDateType").getAsInt());
+            //                            newTradeDateDtos.add(tradeDateDto);
+            //                        }
+            //                    }
+            //                    //todo 其他的以后再算
+            //                    List<TradeDateDto> existTradeDates = tradeDateDtoMapper.selectList(null);
+            //                    newTradeDateDtos.removeIf(existTradeDates::contains);
+            //                    int insertRow = tradeDateDtoMapper.insertBatch(newTradeDateDtos);
+            //                    if (insertRow > 0) {
+            //                        String str = "交易日数据插入条数" + insertRow;
+            //                        LOGGER.info(str);
+            //                        sendNotifyMessage(str);
+            //                    }
+            //                }
+            //            } catch (InvalidProtocolBufferException e) {
+            //                LOGGER.error("解析交易日结果失败.", e);
+            //            }
         }
     }
 
@@ -658,18 +658,18 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         brokerMessage.setOrderId(content.getOrderID());
         brokerMessage.setVolume(content.getVolume());
 
-//        rocketMQTemplate.asyncSend(MessageCommon.RT_BROKER_TOPIC, brokerMessage, new SendCallback() {
-//            @Override
-//            public void onSuccess(SendResult sendResult) {
-//                LOGGER.info("经纪队列数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-//                        sendResult.getSendStatus());
-//            }
-//
-//            @Override
-//            public void onException(Throwable throwable) {
-//                LOGGER.error("经纪队列数据投递失败", throwable);
-//            }
-//        });
+        //        rocketMQTemplate.asyncSend(MessageCommon.RT_BROKER_TOPIC, brokerMessage, new SendCallback() {
+        //            @Override
+        //            public void onSuccess(SendResult sendResult) {
+        //                LOGGER.info("经纪队列数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+        //                        sendResult.getSendStatus());
+        //            }
+        //
+        //            @Override
+        //            public void onException(Throwable throwable) {
+        //                LOGGER.error("经纪队列数据投递失败", throwable);
+        //            }
+        //        });
     }
 
     private void sendTimeShareMessage(TimeShareMessageContent content) {
@@ -686,18 +686,18 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             message.setTurnover(content.getTurnover());
             message.setUpdateTime(content.getTime());
 
-//            rocketMQTemplate.asyncSend(MessageCommon.RT_TIMESHARE_TOPIC, message, new SendCallback() {
-//                @Override
-//                public void onSuccess(SendResult sendResult) {
-//                    LOGGER.info("分时数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-//                            sendResult.getSendStatus());
-//                }
-//
-//                @Override
-//                public void onException(Throwable throwable) {
-//                    LOGGER.error("分时数据投递失败", throwable);
-//                }
-//            });
+            //            rocketMQTemplate.asyncSend(MessageCommon.RT_TIMESHARE_TOPIC, message, new SendCallback() {
+            //                @Override
+            //                public void onSuccess(SendResult sendResult) {
+            //                    LOGGER.info("分时数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+            //                            sendResult.getSendStatus());
+            //                }
+            //
+            //                @Override
+            //                public void onException(Throwable throwable) {
+            //                    LOGGER.error("分时数据投递失败", throwable);
+            //                }
+            //            });
         }
     }
 
@@ -713,18 +713,18 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         message.setTickerType(content.getType());
         message.setTypeSign(content.getTypeSign());
         message.setUpdateTime(content.getTime());
-//        rocketMQTemplate.asyncSend(MessageCommon.RT_TICKER_TOPIC, message, new SendCallback() {
-//            @Override
-//            public void onSuccess(SendResult sendResult) {
-//                LOGGER.info("逐笔数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-//                        sendResult.getSendStatus());
-//            }
-//
-//            @Override
-//            public void onException(Throwable throwable) {
-//                LOGGER.error("逐笔数据投递失败", throwable);
-//            }
-//        });
+        //        rocketMQTemplate.asyncSend(MessageCommon.RT_TICKER_TOPIC, message, new SendCallback() {
+        //            @Override
+        //            public void onSuccess(SendResult sendResult) {
+        //                LOGGER.info("逐笔数据投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+        //                        sendResult.getSendStatus());
+        //            }
+        //
+        //            @Override
+        //            public void onException(Throwable throwable) {
+        //                LOGGER.error("逐笔数据投递失败", throwable);
+        //            }
+        //        });
 
     }
 
@@ -739,9 +739,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             QueryWrapper<StockDto> queryWrapper = Wrappers.query();
             queryWrapper.eq("market", basicQuoteMessageContent.getSecurity().getMarket());
             queryWrapper.eq("code", basicQuoteMessageContent.getSecurity().getCode());
-//            stockDto = stockMapper.selectOne(queryWrapper);
+            //            stockDto = stockMapper.selectOne(queryWrapper);
             stockDto = new StockDto();
-//            CacheManager.put(cacheKey, stockDto);
+            //            CacheManager.put(cacheKey, stockDto);
         }
         RTBasicQuoteMessage rtBasicQuoteMessage = new RTBasicQuoteMessage();
         rtBasicQuoteMessage.setMarket(basicQuoteMessageContent.getSecurity().getMarket());
@@ -763,50 +763,50 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         String hashKey = rtBasicQuoteMessage.getMarket() + "-" + rtBasicQuoteMessage.getCode();
         if (stockDto.getStockType().equals(StockType.Eqty.getCode())) {
             //正股
-//            rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_BASIC_QUO_TOPIC_STOCK, rtBasicQuoteMessage, hashKey + "-stock", new SendCallback() {
-//                @Override
-//                public void onSuccess(SendResult sendResult) {
-//                    LOGGER.info("实时正股报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-//                            sendResult.getSendStatus());
-//                }
-//
-//                @Override
-//                public void onException(Throwable throwable) {
-//                    LOGGER.error("实时正股报价信息投递失败", throwable);
-//                }
-//            });
+            //            rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_BASIC_QUO_TOPIC_STOCK, rtBasicQuoteMessage, hashKey + "-stock", new SendCallback() {
+            //                @Override
+            //                public void onSuccess(SendResult sendResult) {
+            //                    LOGGER.info("实时正股报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+            //                            sendResult.getSendStatus());
+            //                }
+            //
+            //                @Override
+            //                public void onException(Throwable throwable) {
+            //                    LOGGER.error("实时正股报价信息投递失败", throwable);
+            //                }
+            //            });
         } else if (stockDto.getStockType().equals(StockType.Index.getCode())) {
             //指数
-//            rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_BASIC_QUO_TOPIC_INDEX, rtBasicQuoteMessage, hashKey + "-index", new SendCallback() {
-//                @Override
-//                public void onSuccess(SendResult sendResult) {
-//                    LOGGER.info("实时指数报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-//                            sendResult.getSendStatus());
-//                }
-//
-//                @Override
-//                public void onException(Throwable throwable) {
-//                    LOGGER.error("实时指数报价信息投递失败", throwable);
-//                }
-//            });
+            //            rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_BASIC_QUO_TOPIC_INDEX, rtBasicQuoteMessage, hashKey + "-index", new SendCallback() {
+            //                @Override
+            //                public void onSuccess(SendResult sendResult) {
+            //                    LOGGER.info("实时指数报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+            //                            sendResult.getSendStatus());
+            //                }
+            //
+            //                @Override
+            //                public void onException(Throwable throwable) {
+            //                    LOGGER.error("实时指数报价信息投递失败", throwable);
+            //                }
+            //            });
         } else if (stockDto.getStockType().equals(StockType.Future.getCode())) {
             //期货
 
 
         } else if (stockDto.getStockType().equals(StockType.Plate.getCode())) {
             //板块
-//            rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_BASIC_QUO_TOPIC_PLATE, rtBasicQuoteMessage, hashKey + "-plate", new SendCallback() {
-//                @Override
-//                public void onSuccess(SendResult sendResult) {
-//                    LOGGER.info("实时板块报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
-//                            sendResult.getSendStatus());
-//                }
-//
-//                @Override
-//                public void onException(Throwable throwable) {
-//                    LOGGER.error("实时板块报价信息投递失败", throwable);
-//                }
-//            });
+            //            rocketMQTemplate.asyncSendOrderly(MessageCommon.RT_BASIC_QUO_TOPIC_PLATE, rtBasicQuoteMessage, hashKey + "-plate", new SendCallback() {
+            //                @Override
+            //                public void onSuccess(SendResult sendResult) {
+            //                    LOGGER.info("实时板块报价信息投递成功.TransactionId:{}__[{}]", sendResult.getTransactionId(),
+            //                            sendResult.getSendStatus());
+            //                }
+            //
+            //                @Override
+            //                public void onException(Throwable throwable) {
+            //                    LOGGER.error("实时板块报价信息投递失败", throwable);
+            //                }
+            //            });
         }
     }
 
@@ -1107,12 +1107,12 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                         });
                     });
                     //todo 不进入这个方法 会卡死
-//                    int subRow = subService.subscribe(toAddList);
-//                    if (subRow > 0) {
-//                        String notify = "订阅成功";
-//                        LOGGER.info(notify);
-//                        sendNotifyMessage(notify);
-//                    }
+                    //                    int subRow = subService.subscribe(toAddList);
+                    //                    if (subRow > 0) {
+                    //                        String notify = "订阅成功";
+                    //                        LOGGER.info(notify);
+                    //                        sendNotifyMessage(notify);
+                    //                    }
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("订阅结果解析失败.", e);
@@ -1129,194 +1129,194 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询订阅信息失败,code:" + rsp.getRetType()));
             sendNotifyMessage(notify);
         } else {
-//            try {
-//                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-//                if (ftGrpcReturnResult.getS2c().has("connSubInfoList")) {
-//                    JsonArray connSubInfoList = ftGrpcReturnResult.getS2c().get("connSubInfoList").getAsJsonArray();
-//                    Iterator<JsonElement> connSubInfoListIterator = connSubInfoList.iterator();
-//                    List<SubDto> subDtoList = new ArrayList<>();
-//                    while (connSubInfoListIterator.hasNext()) {
-//                        JsonObject perConnSubInfo = connSubInfoListIterator.next().getAsJsonObject();
-//                        JsonArray subInfoList = perConnSubInfo.getAsJsonArray("subInfoList");
-//                        Iterator<JsonElement> subInfoIterator = subInfoList.iterator();
-//                        while (subInfoIterator.hasNext()) {
-//                            JsonObject perSubInfo = subInfoIterator.next().getAsJsonObject();
-//                            Integer subType = perSubInfo.get("subType").getAsInt();
-//                            JsonArray securityList = perSubInfo.getAsJsonArray("securityList");
-//                            Iterator<JsonElement> securityIterator = securityList.iterator();
-//                            while (securityIterator.hasNext()) {
-//                                JsonObject perSecurity = securityIterator.next().getAsJsonObject();
-//                                SubDto subDto = new SubDto();
-////                                subDto.setUsedQuota(perConnSubInfo.get("usedQuota").getAsInt());
-////                                subDto.setIsOwnConn(perConnSubInfo.get("isOwnConnData").getAsBoolean() ? 1 : 0);
-//                                subDto.setSecurityMarket(perSecurity.get("market").getAsInt());
-//                                subDto.setSecurityCode(perSecurity.get("code").getAsString());
-//                                subDto.setSubType(subType);
-//                                subDtoList.add(subDto);
-//                            }
-//                        }
-//                    }
-//                    List<SubDto> existSubscribeInfo = subDtoMapper.selectList(null);
-//                    //差集,新增数据
-//                    Collection<SubDto> subtractForInsert = CollectionUtils.subtract(subDtoList, existSubscribeInfo);
-//                    if (subtractForInsert.size() > 0) {
-//                        int insertRow = subDtoMapper.insertBatch(subtractForInsert);
-//                        String notify = "订阅信息表插入条数." + insertRow;
-//                        LOGGER.info(notify);
-//                        sendNotifyMessage(notify);
-//                    }
-//                    //差集,删除数据
-//                    Collection<SubDto> subtractForDel = CollectionUtils.subtract(existSubscribeInfo, subDtoList);
-//                    if (subtractForDel.size() > 0) {
-//                        int delRow = subDtoMapper.deleteBatchIds(subtractForDel
-//                                .stream().map(SubDto::getId).collect(Collectors.toList()));
-//                        String notify = "订阅信息表删除条数." + delRow;
-//                        LOGGER.info(notify);
-//                        sendNotifyMessage(notify);
-//                    }
-//                }
-//            } catch (InvalidProtocolBufferException e) {
-//                LOGGER.error("查询订阅信息解析结果失败.", e);
-//            }
+            //            try {
+            //                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+            //                if (ftGrpcReturnResult.getS2c().has("connSubInfoList")) {
+            //                    JsonArray connSubInfoList = ftGrpcReturnResult.getS2c().get("connSubInfoList").getAsJsonArray();
+            //                    Iterator<JsonElement> connSubInfoListIterator = connSubInfoList.iterator();
+            //                    List<SubDto> subDtoList = new ArrayList<>();
+            //                    while (connSubInfoListIterator.hasNext()) {
+            //                        JsonObject perConnSubInfo = connSubInfoListIterator.next().getAsJsonObject();
+            //                        JsonArray subInfoList = perConnSubInfo.getAsJsonArray("subInfoList");
+            //                        Iterator<JsonElement> subInfoIterator = subInfoList.iterator();
+            //                        while (subInfoIterator.hasNext()) {
+            //                            JsonObject perSubInfo = subInfoIterator.next().getAsJsonObject();
+            //                            Integer subType = perSubInfo.get("subType").getAsInt();
+            //                            JsonArray securityList = perSubInfo.getAsJsonArray("securityList");
+            //                            Iterator<JsonElement> securityIterator = securityList.iterator();
+            //                            while (securityIterator.hasNext()) {
+            //                                JsonObject perSecurity = securityIterator.next().getAsJsonObject();
+            //                                SubDto subDto = new SubDto();
+            ////                                subDto.setUsedQuota(perConnSubInfo.get("usedQuota").getAsInt());
+            ////                                subDto.setIsOwnConn(perConnSubInfo.get("isOwnConnData").getAsBoolean() ? 1 : 0);
+            //                                subDto.setSecurityMarket(perSecurity.get("market").getAsInt());
+            //                                subDto.setSecurityCode(perSecurity.get("code").getAsString());
+            //                                subDto.setSubType(subType);
+            //                                subDtoList.add(subDto);
+            //                            }
+            //                        }
+            //                    }
+            //                    List<SubDto> existSubscribeInfo = subDtoMapper.selectList(null);
+            //                    //差集,新增数据
+            //                    Collection<SubDto> subtractForInsert = CollectionUtils.subtract(subDtoList, existSubscribeInfo);
+            //                    if (subtractForInsert.size() > 0) {
+            //                        int insertRow = subDtoMapper.insertBatch(subtractForInsert);
+            //                        String notify = "订阅信息表插入条数." + insertRow;
+            //                        LOGGER.info(notify);
+            //                        sendNotifyMessage(notify);
+            //                    }
+            //                    //差集,删除数据
+            //                    Collection<SubDto> subtractForDel = CollectionUtils.subtract(existSubscribeInfo, subDtoList);
+            //                    if (subtractForDel.size() > 0) {
+            //                        int delRow = subDtoMapper.deleteBatchIds(subtractForDel
+            //                                .stream().map(SubDto::getId).collect(Collectors.toList()));
+            //                        String notify = "订阅信息表删除条数." + delRow;
+            //                        LOGGER.info(notify);
+            //                        sendNotifyMessage(notify);
+            //                    }
+            //                }
+            //            } catch (InvalidProtocolBufferException e) {
+            //                LOGGER.error("查询订阅信息解析结果失败.", e);
+            //            }
         }
     }
 
     @Override
     //todo GetIpoList
     public void onReply_GetIpoList(FTAPI_Conn client, int nSerialNo, QotGetIpoList.Response rsp) {
-//        if (rsp.getRetType() != 0) {
-//            String notify = "查询IPO信息失败:" + rsp.getRetMsg();
-//            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询IPO信息失败,code:" + rsp.getRetType()));
-//            sendNotifyMessage(notify);
-//        } else {
-//            try {
-//                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-//                Iterator<JsonElement> iterator = ftGrpcReturnResult.getS2c().getAsJsonArray("ipoList").iterator();
-//                List<IpoHkDto> ipoHkDtos = new ArrayList<>();
-//                List<IpoUsDto> ipoUsDtos = new ArrayList<>();
-//                List<IpoCnDto> ipoCnDtos = new ArrayList<>();
-//                while (iterator.hasNext()) {
-//                    JsonElement jsonElement = iterator.next();
-//                    JsonObject basic = jsonElement.getAsJsonObject().get("basic").getAsJsonObject();
-//                    String name = basic.get("name").getAsString();
-//                    Integer market = basic.get("security").getAsJsonObject().get("market").getAsInt();
-//                    String code = basic.get("security").getAsJsonObject().get("code").getAsString();
-//                    if (jsonElement.getAsJsonObject().has("usExData")) {
-//                        //美股IPO
-//                        JsonObject usExData = jsonElement.getAsJsonObject().get("usExData").getAsJsonObject();
-//                        IpoUsDto ipoUsDto = new IpoUsDto();
-//                        ipoUsDto.setName(name);
-//                        ipoUsDto.setCode(code);
-//                        ipoUsDto.setMarket(market);
-//                        if (basic.has("listTime")) {
-//                            ipoUsDto.setListTime(LocalDate.parse(basic.get("listTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-//                        }
-//                        ipoUsDto.setIpoPriceMin(usExData.get("ipoPriceMin").getAsDouble());
-//                        ipoUsDto.setIpoPriceMax(usExData.get("ipoPriceMax").getAsDouble());
-//                        ipoUsDto.setIssueSize(usExData.get("issueSize").getAsLong());
-//                        ipoUsDtos.add(ipoUsDto);
-//                    } else if (jsonElement.getAsJsonObject().has("cnExData")) {
-//                        //A股IPO
-//                        JsonObject cnExData = jsonElement.getAsJsonObject().get("cnExData").getAsJsonObject();
-//                        IpoCnDto ipoCnDto = new IpoCnDto();
-//                        ipoCnDto.setName(name);
-//                        ipoCnDto.setCode(code);
-//                        ipoCnDto.setMarket(market);
-//                        if (basic.has("listTime")) {
-//                            ipoCnDto.setListTime(LocalDate.parse(basic.get("listTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-//                        }
-//                        ipoCnDto.setApplyCode(cnExData.get("applyCode").getAsString());
-//                        ipoCnDto.setIssueSize(cnExData.get("issueSize").getAsLong());
-//                        ipoCnDto.setOnlineIssueSize(cnExData.get("onlineIssueSize").getAsLong());
-//                        ipoCnDto.setApplyUpperLimit(cnExData.get("applyUpperLimit").getAsLong());
-//                        ipoCnDto.setApplyLimitMarketValue(cnExData.get("applyLimitMarketValue").getAsLong());
-//                        ipoCnDto.setIsEstimateIpoPrice(cnExData.get("isEstimateIpoPrice").getAsBoolean() ? 1 : 0);
-//                        ipoCnDto.setIpoPrice(cnExData.get("ipoPrice").getAsDouble());
-//                        ipoCnDto.setIndustryPeRate(cnExData.get("industryPeRate").getAsDouble());
-//                        ipoCnDto.setIsEstimateWinningRatio(cnExData.get("isEstimateWinningRatio").getAsBoolean() ? 1 : 0);
-//                        ipoCnDto.setWinningRatio(cnExData.get("winningRatio").getAsDouble());
-//                        ipoCnDto.setIssuePeRate(cnExData.get("issuePeRate").getAsDouble());
-//                        if (cnExData.has("applyTime")) {
-//                            ipoCnDto.setApplyTime(LocalDate.parse(cnExData.get("applyTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-//                        }
-//                        if (cnExData.has("winningTime")) {
-//                            ipoCnDto.setWinningTime(LocalDate.parse(cnExData.get("winningTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-//                        }
-//                        ipoCnDto.setIsHasWon(cnExData.get("isHasWon").getAsBoolean() ? 1 : 0);
-//                        if (cnExData.has("winningNumData")) {
-//                            List<IpoCnExWinningDto> ipoCnExWinningDtos = new ArrayList<>();
-//                            Iterator<JsonElement> winningNumDatas = cnExData.get("winningNumData").getAsJsonArray().iterator();
-//                            while (winningNumDatas.hasNext()) {
-//                                JsonElement winningNumData = winningNumDatas.next();
-//                                IpoCnExWinningDto ipoCnExWinningDto = new IpoCnExWinningDto();
-//                                ipoCnExWinningDto.setWinningInfo(winningNumData.getAsJsonObject().get("winningInfo").getAsString());
-//                                ipoCnExWinningDto.setWinningName(winningNumData.getAsJsonObject().get("winningName").getAsString());
-//                                ipoCnExWinningDtos.add(ipoCnExWinningDto);
-//                            }
-//                            ipoCnDto.setCnExWinningDtos(ipoCnExWinningDtos);
-//                        }
-//                        ipoCnDtos.add(ipoCnDto);
-//                    } else if (jsonElement.getAsJsonObject().has("hkExData")) {
-//                        //港股IPO
-//                        JsonObject hkExData = jsonElement.getAsJsonObject().get("hkExData").getAsJsonObject();
-//                        IpoHkDto ipoHkDto = new IpoHkDto();
-//                        ipoHkDto.setCode(code);
-//                        ipoHkDto.setName(name);
-//                        ipoHkDto.setMarket(market);
-//                        if (basic.has("listTime")) {
-//                            ipoHkDto.setListTime(LocalDate.parse(basic.get("listTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-//                        }
-//                        ipoHkDto.setLotSize(hkExData.get("lotSize").getAsInt());
-//                        ipoHkDto.setIpoPriceMin(hkExData.get("ipoPriceMin").getAsDouble());
-//                        ipoHkDto.setIpoPriceMax(hkExData.get("ipoPriceMax").getAsDouble());
-//                        ipoHkDto.setListPrice(hkExData.get("listPrice").getAsDouble());
-//                        ipoHkDto.setEntrancePrice(hkExData.get("entrancePrice").getAsDouble());
-//                        ipoHkDto.setIsSubscribeStatus(hkExData.get("isSubscribeStatus").getAsBoolean() ? 1 : 0);
-//                        if (hkExData.has("applyEndTime")) {
-//                            ipoHkDto.setApplyEndtime(LocalDate.parse(hkExData.get("applyEndTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-//                        }
-//                        ipoHkDtos.add(ipoHkDto);
-//                    }
-//                }
-//                if (ipoHkDtos.size() > 0) {
-//                    List<IpoHkDto> oldIpoHks = ipoHkMapper.selectList(null);
-//                    ipoHkDtos.removeIf(oldIpoHks::contains);
-//                    if (ipoHkDtos.size() > 0) {
-//                        int insertRow = ipoHkMapper.insertBatch(ipoHkDtos);
-//                        LOGGER.info("港股IPO信息插入条数:" + insertRow);
-//                    }
-//                }
-//                if (ipoUsDtos.size() > 0) {
-//                    List<IpoUsDto> oldIpoUss = ipoUsMapper.selectList(null);
-//                    ipoUsDtos.removeIf(oldIpoUss::contains);
-//                    if (ipoUsDtos.size() > 0) {
-//                        int insertRow = ipoUsMapper.insertBatch(ipoUsDtos);
-//                        LOGGER.info("美股IPO信息插入条数:" + insertRow);
-//                    }
-//                }
-//                if (ipoCnDtos.size() > 0) {
-//                    List<IpoCnDto> oldIpoCns = ipoCnMapper.selectList(null);
-//                    ipoCnDtos.removeIf(oldIpoCns::contains);
-//                    if (ipoCnDtos.size() > 0) {
-//                        int insertRow = ipoCnMapper.insertBatch(ipoCnDtos);
-//                        LOGGER.info("A股IPO信息插入条数:" + insertRow);
-//                        List<IpoCnDto> hasWinningIpoCns = ipoCnDtos.stream()
-//                                .filter(ipoCnDto -> ipoCnDto.getCnExWinningDtos() != null)
-//                                .collect(Collectors.toList());
-//                        hasWinningIpoCns.forEach(hasWinningIpoDto -> {
-//                            hasWinningIpoDto.getCnExWinningDtos().forEach(ipoCnExWinningDto -> {
-//                                ipoCnExWinningDto.setIpoCnId(hasWinningIpoDto.getId());
-//                            });
-//                            int insertWinningRow = ipoCnExWinningMapper.insertBatch(hasWinningIpoDto.getCnExWinningDtos());
-//                            LOGGER.info("A股IPO中签信息插入条数:" + insertWinningRow);
-//                        });
-//                    }
-//                }
-//            } catch (InvalidProtocolBufferException e) {
-//                LOGGER.error("查询IPO信息解析结果失败!", e);
-//            }
-//
-//        }
+        //        if (rsp.getRetType() != 0) {
+        //            String notify = "查询IPO信息失败:" + rsp.getRetMsg();
+        //            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询IPO信息失败,code:" + rsp.getRetType()));
+        //            sendNotifyMessage(notify);
+        //        } else {
+        //            try {
+        //                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+        //                Iterator<JsonElement> iterator = ftGrpcReturnResult.getS2c().getAsJsonArray("ipoList").iterator();
+        //                List<IpoHkDto> ipoHkDtos = new ArrayList<>();
+        //                List<IpoUsDto> ipoUsDtos = new ArrayList<>();
+        //                List<IpoCnDto> ipoCnDtos = new ArrayList<>();
+        //                while (iterator.hasNext()) {
+        //                    JsonElement jsonElement = iterator.next();
+        //                    JsonObject basic = jsonElement.getAsJsonObject().get("basic").getAsJsonObject();
+        //                    String name = basic.get("name").getAsString();
+        //                    Integer market = basic.get("security").getAsJsonObject().get("market").getAsInt();
+        //                    String code = basic.get("security").getAsJsonObject().get("code").getAsString();
+        //                    if (jsonElement.getAsJsonObject().has("usExData")) {
+        //                        //美股IPO
+        //                        JsonObject usExData = jsonElement.getAsJsonObject().get("usExData").getAsJsonObject();
+        //                        IpoUsDto ipoUsDto = new IpoUsDto();
+        //                        ipoUsDto.setName(name);
+        //                        ipoUsDto.setCode(code);
+        //                        ipoUsDto.setMarket(market);
+        //                        if (basic.has("listTime")) {
+        //                            ipoUsDto.setListTime(LocalDate.parse(basic.get("listTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        //                        }
+        //                        ipoUsDto.setIpoPriceMin(usExData.get("ipoPriceMin").getAsDouble());
+        //                        ipoUsDto.setIpoPriceMax(usExData.get("ipoPriceMax").getAsDouble());
+        //                        ipoUsDto.setIssueSize(usExData.get("issueSize").getAsLong());
+        //                        ipoUsDtos.add(ipoUsDto);
+        //                    } else if (jsonElement.getAsJsonObject().has("cnExData")) {
+        //                        //A股IPO
+        //                        JsonObject cnExData = jsonElement.getAsJsonObject().get("cnExData").getAsJsonObject();
+        //                        IpoCnDto ipoCnDto = new IpoCnDto();
+        //                        ipoCnDto.setName(name);
+        //                        ipoCnDto.setCode(code);
+        //                        ipoCnDto.setMarket(market);
+        //                        if (basic.has("listTime")) {
+        //                            ipoCnDto.setListTime(LocalDate.parse(basic.get("listTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        //                        }
+        //                        ipoCnDto.setApplyCode(cnExData.get("applyCode").getAsString());
+        //                        ipoCnDto.setIssueSize(cnExData.get("issueSize").getAsLong());
+        //                        ipoCnDto.setOnlineIssueSize(cnExData.get("onlineIssueSize").getAsLong());
+        //                        ipoCnDto.setApplyUpperLimit(cnExData.get("applyUpperLimit").getAsLong());
+        //                        ipoCnDto.setApplyLimitMarketValue(cnExData.get("applyLimitMarketValue").getAsLong());
+        //                        ipoCnDto.setIsEstimateIpoPrice(cnExData.get("isEstimateIpoPrice").getAsBoolean() ? 1 : 0);
+        //                        ipoCnDto.setIpoPrice(cnExData.get("ipoPrice").getAsDouble());
+        //                        ipoCnDto.setIndustryPeRate(cnExData.get("industryPeRate").getAsDouble());
+        //                        ipoCnDto.setIsEstimateWinningRatio(cnExData.get("isEstimateWinningRatio").getAsBoolean() ? 1 : 0);
+        //                        ipoCnDto.setWinningRatio(cnExData.get("winningRatio").getAsDouble());
+        //                        ipoCnDto.setIssuePeRate(cnExData.get("issuePeRate").getAsDouble());
+        //                        if (cnExData.has("applyTime")) {
+        //                            ipoCnDto.setApplyTime(LocalDate.parse(cnExData.get("applyTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        //                        }
+        //                        if (cnExData.has("winningTime")) {
+        //                            ipoCnDto.setWinningTime(LocalDate.parse(cnExData.get("winningTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        //                        }
+        //                        ipoCnDto.setIsHasWon(cnExData.get("isHasWon").getAsBoolean() ? 1 : 0);
+        //                        if (cnExData.has("winningNumData")) {
+        //                            List<IpoCnExWinningDto> ipoCnExWinningDtos = new ArrayList<>();
+        //                            Iterator<JsonElement> winningNumDatas = cnExData.get("winningNumData").getAsJsonArray().iterator();
+        //                            while (winningNumDatas.hasNext()) {
+        //                                JsonElement winningNumData = winningNumDatas.next();
+        //                                IpoCnExWinningDto ipoCnExWinningDto = new IpoCnExWinningDto();
+        //                                ipoCnExWinningDto.setWinningInfo(winningNumData.getAsJsonObject().get("winningInfo").getAsString());
+        //                                ipoCnExWinningDto.setWinningName(winningNumData.getAsJsonObject().get("winningName").getAsString());
+        //                                ipoCnExWinningDtos.add(ipoCnExWinningDto);
+        //                            }
+        //                            ipoCnDto.setCnExWinningDtos(ipoCnExWinningDtos);
+        //                        }
+        //                        ipoCnDtos.add(ipoCnDto);
+        //                    } else if (jsonElement.getAsJsonObject().has("hkExData")) {
+        //                        //港股IPO
+        //                        JsonObject hkExData = jsonElement.getAsJsonObject().get("hkExData").getAsJsonObject();
+        //                        IpoHkDto ipoHkDto = new IpoHkDto();
+        //                        ipoHkDto.setCode(code);
+        //                        ipoHkDto.setName(name);
+        //                        ipoHkDto.setMarket(market);
+        //                        if (basic.has("listTime")) {
+        //                            ipoHkDto.setListTime(LocalDate.parse(basic.get("listTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        //                        }
+        //                        ipoHkDto.setLotSize(hkExData.get("lotSize").getAsInt());
+        //                        ipoHkDto.setIpoPriceMin(hkExData.get("ipoPriceMin").getAsDouble());
+        //                        ipoHkDto.setIpoPriceMax(hkExData.get("ipoPriceMax").getAsDouble());
+        //                        ipoHkDto.setListPrice(hkExData.get("listPrice").getAsDouble());
+        //                        ipoHkDto.setEntrancePrice(hkExData.get("entrancePrice").getAsDouble());
+        //                        ipoHkDto.setIsSubscribeStatus(hkExData.get("isSubscribeStatus").getAsBoolean() ? 1 : 0);
+        //                        if (hkExData.has("applyEndTime")) {
+        //                            ipoHkDto.setApplyEndtime(LocalDate.parse(hkExData.get("applyEndTime").getAsString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        //                        }
+        //                        ipoHkDtos.add(ipoHkDto);
+        //                    }
+        //                }
+        //                if (ipoHkDtos.size() > 0) {
+        //                    List<IpoHkDto> oldIpoHks = ipoHkMapper.selectList(null);
+        //                    ipoHkDtos.removeIf(oldIpoHks::contains);
+        //                    if (ipoHkDtos.size() > 0) {
+        //                        int insertRow = ipoHkMapper.insertBatch(ipoHkDtos);
+        //                        LOGGER.info("港股IPO信息插入条数:" + insertRow);
+        //                    }
+        //                }
+        //                if (ipoUsDtos.size() > 0) {
+        //                    List<IpoUsDto> oldIpoUss = ipoUsMapper.selectList(null);
+        //                    ipoUsDtos.removeIf(oldIpoUss::contains);
+        //                    if (ipoUsDtos.size() > 0) {
+        //                        int insertRow = ipoUsMapper.insertBatch(ipoUsDtos);
+        //                        LOGGER.info("美股IPO信息插入条数:" + insertRow);
+        //                    }
+        //                }
+        //                if (ipoCnDtos.size() > 0) {
+        //                    List<IpoCnDto> oldIpoCns = ipoCnMapper.selectList(null);
+        //                    ipoCnDtos.removeIf(oldIpoCns::contains);
+        //                    if (ipoCnDtos.size() > 0) {
+        //                        int insertRow = ipoCnMapper.insertBatch(ipoCnDtos);
+        //                        LOGGER.info("A股IPO信息插入条数:" + insertRow);
+        //                        List<IpoCnDto> hasWinningIpoCns = ipoCnDtos.stream()
+        //                                .filter(ipoCnDto -> ipoCnDto.getCnExWinningDtos() != null)
+        //                                .collect(Collectors.toList());
+        //                        hasWinningIpoCns.forEach(hasWinningIpoDto -> {
+        //                            hasWinningIpoDto.getCnExWinningDtos().forEach(ipoCnExWinningDto -> {
+        //                                ipoCnExWinningDto.setIpoCnId(hasWinningIpoDto.getId());
+        //                            });
+        //                            int insertWinningRow = ipoCnExWinningMapper.insertBatch(hasWinningIpoDto.getCnExWinningDtos());
+        //                            LOGGER.info("A股IPO中签信息插入条数:" + insertWinningRow);
+        //                        });
+        //                    }
+        //                }
+        //            } catch (InvalidProtocolBufferException e) {
+        //                LOGGER.error("查询IPO信息解析结果失败!", e);
+        //            }
+        //
+        //        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.futakotome.trade.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -73,8 +74,33 @@ public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
 
     @Override
     public IPage<ListStockResponse> page(ListStockRequest listStockRequest) {
-        QueryWrapper<StockDto> queryWrapper = Wrappers.query();
+        QueryWrapper<StockDto> queryWrapper = stockListQueryWrapper(listStockRequest);
         Page<StockDto> pagination = Page.of(1, 10);
+        if (listStockRequest.getCurrent() != null) {
+            pagination.setCurrent(listStockRequest.getCurrent());
+        }
+        if (listStockRequest.getSize() != null) {
+            pagination.setSize(listStockRequest.getSize());
+        }
+        return page(pagination, queryWrapper).convert(this::dto2Vo);
+    }
+
+    @Override
+    public ListStockResponse fetchByCode(String code) {
+        QueryWrapper<StockDto> queryWrapper = Wrappers.query();
+        queryWrapper.eq("code", code);
+        return this.dto2Vo(getOne(queryWrapper));
+    }
+
+    @Override
+    public List<ListStockResponse> fetchAll(ListStockRequest listStockRequest) {
+        QueryWrapper<StockDto> queryWrapper = stockListQueryWrapper(listStockRequest);
+        return list(queryWrapper).stream().map(this::dto2Vo)
+                .collect(Collectors.toList());
+    }
+
+    private QueryWrapper<StockDto> stockListQueryWrapper(ListStockRequest listStockRequest) {
+        QueryWrapper<StockDto> queryWrapper = Wrappers.query();
         if (listStockRequest.getName() != null) {
             queryWrapper.like("name", listStockRequest.getName());
         }
@@ -87,31 +113,7 @@ public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
         if (listStockRequest.getDelisting() != null) {
             queryWrapper.eq("delisting", listStockRequest.getDelisting());
         }
-        if (listStockRequest.getCurrent() != null) {
-            pagination.setCurrent(listStockRequest.getCurrent());
-        }
-        if (listStockRequest.getSize() != null) {
-            pagination.setSize(listStockRequest.getSize());
-        }
-        return page(pagination, queryWrapper).convert(this::dto2Vo);
-    }
-
-    @Override
-    public List<ListStockResponse> fetchAll(ListStockRequest listStockRequest) {
-        QueryWrapper<StockDto> queryWrapper = Wrappers.query();
-        if (Objects.nonNull(listStockRequest.getMarket())) {
-            queryWrapper.eq("market", listStockRequest.getMarket());
-        }
-        if (Objects.nonNull(listStockRequest.getName())) {
-            queryWrapper.like("name", listStockRequest.getName());
-        }
-        return list(queryWrapper).stream().map(this::dto2Vo)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public ListStockResponse fetchById(Long id) {
-        return this.dto2Vo(getById(id));
+        return queryWrapper;
     }
 
     private ListStockResponse dto2Vo(StockDto stockDto) {

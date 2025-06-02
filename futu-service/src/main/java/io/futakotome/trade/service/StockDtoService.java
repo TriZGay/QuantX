@@ -15,5 +15,5 @@ public interface StockDtoService extends IService<StockDto> {
 
     List<ListStockResponse> fetchAll(ListStockRequest listStockRequest);
 
-    ListStockResponse fetchById(Long id);
+    ListStockResponse fetchByCode(String code);
 }
