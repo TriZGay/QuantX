@@ -101,17 +101,20 @@ public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
 
     private QueryWrapper<StockDto> stockListQueryWrapper(ListStockRequest listStockRequest) {
         QueryWrapper<StockDto> queryWrapper = Wrappers.query();
-        if (listStockRequest.getName() != null) {
+        if (Objects.nonNull(listStockRequest.getName())) {
             queryWrapper.like("name", listStockRequest.getName());
         }
-        if (listStockRequest.getStockType() != null) {
+        if (Objects.nonNull(listStockRequest.getStockType())) {
             queryWrapper.eq("stock_type", listStockRequest.getStockType());
         }
-        if (listStockRequest.getMarket() != null) {
+        if (Objects.nonNull(listStockRequest.getMarket())) {
             queryWrapper.eq("market", listStockRequest.getMarket());
         }
-        if (listStockRequest.getDelisting() != null) {
+        if (Objects.nonNull(listStockRequest.getDelisting())) {
             queryWrapper.eq("delisting", listStockRequest.getDelisting());
+        }
+        if (Objects.nonNull(listStockRequest.getCode())) {
+            queryWrapper.eq("code", listStockRequest.getCode());
         }
         return queryWrapper;
     }

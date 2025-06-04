@@ -20,7 +20,7 @@ spring:
   liquibase:
     change-log: classpath:db/liquibase-changelog.xml
   kafka:
-    bootstrap-servers: 172.17.63.149:9092
+    bootstrap-servers: 172.19.183.66:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
