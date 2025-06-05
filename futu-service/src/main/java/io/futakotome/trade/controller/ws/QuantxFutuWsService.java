@@ -56,6 +56,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + ACC_FUNDS_URI, accFundsWsMessage);
     }
 
+    public void sendHistoryOrders(HistoryOrdersWsMessage historyOrdersWsMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + HISTORY_ORDER_URI, historyOrdersWsMessage);
+    }
+
     public void sendRtEma5(RTEmaMessage emaMessage) {
         this.template.convertAndSend(BROKER_PREFIX + EMA5_URI, emaMessage);
     }

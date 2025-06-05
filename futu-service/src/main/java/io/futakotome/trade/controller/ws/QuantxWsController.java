@@ -30,6 +30,7 @@ public class QuantxWsController {
     public static final String POSITION_URI = "/positions";
     public static final String STOCK_FILTER_URL = "/stock_filter";
     public static final String ACC_FUNDS_URI = "/acc_funds";
+    public static final String HISTORY_ORDER_URI = "/history_orders";
 
     public static final String EMA5_URI = "/ema5";
 
@@ -149,6 +150,10 @@ public class QuantxWsController {
                 //下单
                 PlaceOrderWsMessage placeOrderWsMessage = (PlaceOrderWsMessage) messageClz;
                 ftTradeService.requestPlaceOrder(placeOrderWsMessage);
+            } else if (messageClz.getType().equals(MessageType.HISTORY_ORDER)) {
+                //查询历史订单
+                HistoryOrdersWsMessage historyOrdersWsMessage = (HistoryOrdersWsMessage) messageClz;
+                ftTradeService.requestHistoryOrder(historyOrdersWsMessage);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

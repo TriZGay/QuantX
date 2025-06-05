@@ -22,6 +22,7 @@ public enum MessageType {
     STOCK_FILTER,
     ACC_FUNDS,
     PLACE_ORDER,
+    HISTORY_ORDER,
 
     RT_BASIC_QUOTE,
     RT_KL,

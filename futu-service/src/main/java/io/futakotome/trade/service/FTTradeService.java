@@ -4,18 +4,14 @@ import com.futu.openapi.*;
 import com.futu.openapi.pb.*;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
 import io.futakotome.trade.domain.code.*;
 import io.futakotome.trade.dto.AccSubDto;
-import io.futakotome.trade.dto.OrderDto;
 import io.futakotome.trade.dto.message.*;
 import io.futakotome.trade.dto.ws.*;
-import io.futakotome.trade.mapper.OrderDtoMapper;
 import io.futakotome.trade.utils.CacheManager;
 import org.bouncycastle.jcajce.provider.digest.MD5;
 import org.bouncycastle.util.encoders.Hex;
@@ -23,9 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Iterator;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -120,6 +116,19 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 .build();
         int seqNo = trd.getAccList(request);
         LOGGER.info("请求交易账户,seqNo={}", seqNo);
+    }
+
+    public void requestHistoryOrder(HistoryOrdersWsMessage request) {
+        TrdGetHistoryOrderList.C2S.Builder builder = TrdGetHistoryOrderList.C2S.newBuilder();
+        builder.setHeader(this.trdHeader(request.getAccId(), request.getTradeEnv(), request.getTradeMarket()));
+        builder.setFilterConditions(TrdCommon.TrdFilterConditions.newBuilder()
+                .setBeginTime("2025-01-01 00:00:00")
+                .setEndTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).build());
+        TrdGetHistoryOrderList.Request req = TrdGetHistoryOrderList.Request.newBuilder()
+                .setC2S(builder)
+                .build();
+        int seqNo = trd.getHistoryOrderList(req);
+        LOGGER.info("查询历史订单,seqNo={}", seqNo);
     }
 
     public void requestPlaceOrder(PlaceOrderWsMessage request) {
@@ -323,20 +332,26 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void onReply_GetHistoryOrderList(FTAPI_Conn client, int nSerialNo, TrdGetHistoryOrderList.Response rsp) {
         if (rsp.getRetType() != 0) {
-            LOGGER.error("查询历史订单失败:" + rsp.getRetMsg(),
-                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询历史订单失败,code:" + rsp.getRetType()));
+            String notify = "查询历史订单失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "查询历史订单失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
         } else {
-            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询历史订单...");
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                LOGGER.info(ftGrpcReturnResult.toString());
+                HistoryOrderContent historyOrderContent = GSON.fromJson(ftGrpcReturnResult.getS2c(), HistoryOrderContent.class);
+                HistoryOrdersWsMessage message = new HistoryOrdersWsMessage();
+                message.setHistoryOrderContent(historyOrderContent);
+                sendHistoryOrderContent(message);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析历史订单结果失败.", e);
             }
         }
+    }
+
+    private void sendHistoryOrderContent(HistoryOrdersWsMessage message) {
+        quantxFutuWsService.sendHistoryOrders(message);
     }
 
     @Override
