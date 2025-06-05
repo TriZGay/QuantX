@@ -60,6 +60,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + HISTORY_ORDER_URI, historyOrdersWsMessage);
     }
 
+    public void sendIncompleteOrders(IncompleteOrdersWsMessage incompleteOrdersWsMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + INCOMPLETE_ORDER_URI, incompleteOrdersWsMessage);
+    }
+
     public void sendRtEma5(RTEmaMessage emaMessage) {
         this.template.convertAndSend(BROKER_PREFIX + EMA5_URI, emaMessage);
     }

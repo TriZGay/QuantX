@@ -118,6 +118,16 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         LOGGER.info("请求交易账户,seqNo={}", seqNo);
     }
 
+    public void requestInCompleteOrder(IncompleteOrdersWsMessage request) {
+        TrdGetOrderList.C2S.Builder builder = TrdGetOrderList.C2S.newBuilder();
+        builder.setHeader(this.trdHeader(request.getAccId(), request.getTradeEnv(), request.getTradeMarket()));
+        TrdGetOrderList.Request req = TrdGetOrderList.Request.newBuilder()
+                .setC2S(builder.build())
+                .build();
+        int seqNo = trd.getOrderList(req);
+        LOGGER.info("查询未完成订单,seqNo={}", seqNo);
+    }
+
     public void requestHistoryOrder(HistoryOrdersWsMessage request) {
         TrdGetHistoryOrderList.C2S.Builder builder = TrdGetHistoryOrderList.C2S.newBuilder();
         builder.setHeader(this.trdHeader(request.getAccId(), request.getTradeEnv(), request.getTradeMarket()));
@@ -125,7 +135,7 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 .setBeginTime("2025-01-01 00:00:00")
                 .setEndTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).build());
         TrdGetHistoryOrderList.Request req = TrdGetHistoryOrderList.Request.newBuilder()
-                .setC2S(builder)
+                .setC2S(builder.build())
                 .build();
         int seqNo = trd.getHistoryOrderList(req);
         LOGGER.info("查询历史订单,seqNo={}", seqNo);
@@ -298,37 +308,21 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
 
     @Override
     public void onReply_GetOrderList(FTAPI_Conn client, int nSerialNo, TrdGetOrderList.Response rsp) {
-        //        if (rsp.getRetType() != 0) {
-        //            LOGGER.error("查询今日订单失败:" + rsp.getRetMsg(),
-        //                    new IllegalArgumentException("请求序列号:" + nSerialNo + "查询今日订单失败,code:" + rsp.getRetType()));
-        //        } else {
-        //            LOGGER.info("SeqNo:" + nSerialNo + ",connID=" + client.getConnectID() + "查询今日订单...");
-        //            try {
-        //                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-        //                LOGGER.info(ftGrpcReturnResult.toString());
-        //                List<OrderDto> existOrders = orderDtoMapper.selectList(null);
-        //                JsonObject header = ftGrpcReturnResult.getS2c().get("header").getAsJsonObject();
-        //                OrderDto order = new OrderDto();
-        //                order.setTradeEnv(header.get("trdEnv").getAsInt());
-        //                order.setAccId(header.get("accID").getAsString());
-        //                order.setTradeMarket(header.get("trdMarket").getAsInt());
-        //                if (ftGrpcReturnResult.getS2c().has("orderList")) {
-        //                    Iterator<JsonElement> orderListIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("orderList").iterator();
-        //                    while (orderListIterator.hasNext()) {
-        //                        JsonObject oneOrder = orderListIterator.next().getAsJsonObject();
-        //
-        //                        if (existOrders.contains(order)) {
-        //                            //在库里update
-        //                        } else {
-        //                            //不在库里新增
-        //                        }
-        //
-        //                    }
-        //                }
-        //            } catch (InvalidProtocolBufferException e) {
-        //                LOGGER.error("查询今日订单结果解析失败.", e);
-        //            }
-        //        }
+        if (rsp.getRetType() != 0) {
+            String notify = "查询未完成订单失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "查询未完成订单失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                IncompleteOrderContent incompleteOrderContent = GSON.fromJson(ftGrpcReturnResult.getS2c(), IncompleteOrderContent.class);
+                IncompleteOrdersWsMessage message = new IncompleteOrdersWsMessage();
+                message.setIncompleteOrderContent(incompleteOrderContent);
+                quantxFutuWsService.sendIncompleteOrders(message);
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("查询未完成订单结果解析失败.", e);
+            }
+        }
     }
 
     @Override
@@ -343,15 +337,11 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 HistoryOrderContent historyOrderContent = GSON.fromJson(ftGrpcReturnResult.getS2c(), HistoryOrderContent.class);
                 HistoryOrdersWsMessage message = new HistoryOrdersWsMessage();
                 message.setHistoryOrderContent(historyOrderContent);
-                sendHistoryOrderContent(message);
+                quantxFutuWsService.sendHistoryOrders(message);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析历史订单结果失败.", e);
             }
         }
-    }
-
-    private void sendHistoryOrderContent(HistoryOrdersWsMessage message) {
-        quantxFutuWsService.sendHistoryOrders(message);
     }
 
     @Override

@@ -23,6 +23,7 @@ public enum MessageType {
     ACC_FUNDS,
     PLACE_ORDER,
     HISTORY_ORDER,
+    INCOMPLETE_ORDER,
 
     RT_BASIC_QUOTE,
     RT_KL,
