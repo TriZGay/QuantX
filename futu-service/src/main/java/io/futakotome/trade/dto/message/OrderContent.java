@@ -1,9 +1,16 @@
 package io.futakotome.trade.dto.message;
 
+import com.google.gson.annotations.JsonAdapter;
+import io.futakotome.trade.utils.converter.OrderContentConverter;
+
+@JsonAdapter(OrderContentConverter.class)
 public class OrderContent {
     private Integer trdSide; //交易方向, 参见 TrdSide 的枚举定义
+    private String trdSideStr;
     private Integer orderType; //订单类型, 参见 OrderType 的枚举定义
+    private String orderTypeStr;
     private Integer orderStatus; //订单状态, 参见 OrderStatus 的枚举定义
+    private String orderStatusStr;
     private String orderID; //订单号
     private String orderIDEx; //扩展订单号(仅查问题时备用)
     private String code; //代码
@@ -16,15 +23,75 @@ public class OrderContent {
     private Double fillAvgPrice; //成交均价，无精度限制
     private String lastErrMsg; //最后的错误描述，如果有错误，会有此描述最后一次错误的原因，无错误为空
     private Integer secMarket; //证券所属市场，参见 TrdSecMarket 的枚举定义
+    private String secMarketStr;
     private Double createTimestamp; //创建时间戳
     private Double updateTimestamp; //最后更新时间戳
     private String remark; //用户备注字符串，最大长度64字节
     private Double auxPrice; //触发价格
     private Integer trailType; //跟踪类型, 参见Trd_Common.TrailType的枚举定义
+    private String trailTypeStr;
     private Double trailValue; //跟踪金额/百分比
     private Double trailSpread; //指定价差
     private Integer currency;        // 货币类型，取值参考 Currency
+    private String currencyStr;
     private Integer trdMarket;  //交易市场, 参见TrdMarket的枚举定义
+    private String trdMarketStr;
+
+    public String getTrdSideStr() {
+        return trdSideStr;
+    }
+
+    public void setTrdSideStr(String trdSideStr) {
+        this.trdSideStr = trdSideStr;
+    }
+
+    public String getOrderTypeStr() {
+        return orderTypeStr;
+    }
+
+    public void setOrderTypeStr(String orderTypeStr) {
+        this.orderTypeStr = orderTypeStr;
+    }
+
+    public String getOrderStatusStr() {
+        return orderStatusStr;
+    }
+
+    public void setOrderStatusStr(String orderStatusStr) {
+        this.orderStatusStr = orderStatusStr;
+    }
+
+    public String getSecMarketStr() {
+        return secMarketStr;
+    }
+
+    public void setSecMarketStr(String secMarketStr) {
+        this.secMarketStr = secMarketStr;
+    }
+
+    public String getTrailTypeStr() {
+        return trailTypeStr;
+    }
+
+    public void setTrailTypeStr(String trailTypeStr) {
+        this.trailTypeStr = trailTypeStr;
+    }
+
+    public String getCurrencyStr() {
+        return currencyStr;
+    }
+
+    public void setCurrencyStr(String currencyStr) {
+        this.currencyStr = currencyStr;
+    }
+
+    public String getTrdMarketStr() {
+        return trdMarketStr;
+    }
+
+    public void setTrdMarketStr(String trdMarketStr) {
+        this.trdMarketStr = trdMarketStr;
+    }
 
     public Integer getTrdSide() {
         return trdSide;

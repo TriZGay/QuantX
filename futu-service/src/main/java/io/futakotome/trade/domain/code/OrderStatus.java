@@ -1,5 +1,8 @@
 package io.futakotome.trade.domain.code;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum OrderStatus {
     UN_SUBMITTED(0, "未提交"),
     UNKNOWN(-1, "未知状态"),
@@ -21,10 +24,21 @@ public enum OrderStatus {
 
     private final Integer code;
     private final String name;
+    private static final Map<Integer, String> ORDER_STATUS_MAP = new HashMap<Integer, String>();
+
+    static {
+        for (OrderStatus orderStatus : OrderStatus.values()) {
+            ORDER_STATUS_MAP.put(orderStatus.getCode(), orderStatus.getName());
+        }
+    }
 
     OrderStatus(Integer code, String name) {
         this.code = code;
         this.name = name;
+    }
+
+    public static String getName(Integer code) {
+        return ORDER_STATUS_MAP.get(code);
     }
 
     public Integer getCode() {

@@ -1,5 +1,8 @@
 package io.futakotome.trade.domain.code;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum Currency {
     UNKNOWN(0, "未知"),
     HKD(1, "港元"),
@@ -10,10 +13,21 @@ public enum Currency {
 
     private final Integer code;
     private final String name;
+    private static final Map<Integer, String> CURRENCY_MAP = new HashMap<>();
+
+    static {
+        for (Currency currency : Currency.values()) {
+            CURRENCY_MAP.put(currency.code, currency.name);
+        }
+    }
 
     Currency(Integer code, String name) {
         this.code = code;
         this.name = name;
+    }
+
+    public static String getName(Integer code) {
+        return CURRENCY_MAP.get(code);
     }
 
     public static String getNameByCode(Integer code) {

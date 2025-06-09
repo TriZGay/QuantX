@@ -1,6 +1,5 @@
 package io.futakotome.trade.dto.ws;
 
-import io.futakotome.trade.dto.message.HistoryOrderContent;
 import io.futakotome.trade.dto.message.IncompleteOrderContent;
 
 public class IncompleteOrdersWsMessage implements Message {

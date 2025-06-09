@@ -1,5 +1,8 @@
 package io.futakotome.trade.domain.code;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum TradeMarket {
     UNKNOWN(0, "未知市场"),
     HK(1, "香港市场"),
@@ -21,10 +24,21 @@ public enum TradeMarket {
 
     private final Integer code;
     private final String name;
+    private static final Map<Integer, String> TRADE_MARKET_MAP = new HashMap<>();
+
+    static {
+        for (TradeMarket tradeMarket : TradeMarket.values()) {
+            TRADE_MARKET_MAP.put(tradeMarket.getCode(), tradeMarket.getName());
+        }
+    }
 
     TradeMarket(Integer code, String name) {
         this.code = code;
         this.name = name;
+    }
+
+    public static String getName(Integer code) {
+        return TRADE_MARKET_MAP.get(code);
     }
 
     public static String getNameByCode(Integer code) {
