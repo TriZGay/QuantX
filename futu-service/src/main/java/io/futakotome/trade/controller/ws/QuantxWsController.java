@@ -33,6 +33,7 @@ public class QuantxWsController {
     public static final String HISTORY_ORDER_URI = "/history_orders";
     public static final String INCOMPLETE_ORDER_URI = "/incomplete_orders";
     public static final String USER_GROUP_URI = "/user_group";
+    public static final String USER_SECURITY_URI = "/user_security";
 
     public static final String EMA5_URI = "/ema5";
 
@@ -163,6 +164,10 @@ public class QuantxWsController {
             } else if (messageClz.getType().equals(MessageType.USER_GROUP)) {
                 //查询自选股分组
                 ftQotService.sendUserGroupRequest();
+            } else if (messageClz.getType().equals(MessageType.USER_SECURITY)) {
+                //查询自选股列表
+                UserSecurityWsMessage request = (UserSecurityWsMessage) messageClz;
+                ftQotService.sendUserSecurityRequest(request);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

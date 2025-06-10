@@ -344,6 +344,17 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         LOGGER.info("请求自选股分组.seq={}", seqNo);
     }
 
+    public void sendUserSecurityRequest(UserSecurityWsMessage request) {
+        QotGetUserSecurity.C2S c2S = QotGetUserSecurity.C2S.newBuilder()
+                .setGroupName(request.getGroupName())
+                .build();
+        QotGetUserSecurity.Request req = QotGetUserSecurity.Request.newBuilder()
+                .setC2S(c2S)
+                .build();
+        int seqNo = qot.getUserSecurity(req);
+        LOGGER.info("请求自选股列表.seq={}", seqNo);
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         this.connect();
@@ -408,6 +419,26 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 sendNotifyMessage(notify);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("FutuD通知推送结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onReply_GetUserSecurity(FTAPI_Conn client, int nSerialNo, QotGetUserSecurity.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "获取自选股列表失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取自选股列表失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                List<StockContent> staticInfoList = GSON.fromJson(ftGrpcReturnResult.getS2c().get("staticInfoList").getAsJsonArray(), new TypeToken<List<StockContent>>() {
+                }.getType());
+                UserSecurityWsMessage message = new UserSecurityWsMessage();
+                message.setStocks(staticInfoList);
+                quantxFutuWsService.sendUserSecurity(message);
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析自选股分组结果失败.", e);
             }
         }
     }
@@ -1765,4 +1796,5 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         baseDto.setClosePrice5Minute(snapshotContent.getBasic().getClosePrice5Minute());
         return baseDto;
     }
+
 }
