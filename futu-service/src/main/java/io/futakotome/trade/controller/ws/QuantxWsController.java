@@ -32,6 +32,7 @@ public class QuantxWsController {
     public static final String ACC_FUNDS_URI = "/acc_funds";
     public static final String HISTORY_ORDER_URI = "/history_orders";
     public static final String INCOMPLETE_ORDER_URI = "/incomplete_orders";
+    public static final String USER_GROUP_URI = "/user_group";
 
     public static final String EMA5_URI = "/ema5";
 

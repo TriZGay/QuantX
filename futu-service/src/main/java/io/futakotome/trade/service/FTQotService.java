@@ -333,6 +333,17 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         LOGGER.info("{}-{}查询复权因子.seq={}", MarketType.getNameByCode(market), code, seqNo);
     }
 
+    public void sendUserGroupRequest() {
+        QotGetUserSecurityGroup.C2S c2s = QotGetUserSecurityGroup.C2S.newBuilder()
+                .setGroupType(QotGetUserSecurityGroup.GroupType.GroupType_All_VALUE)
+                .build();
+        QotGetUserSecurityGroup.Request request = QotGetUserSecurityGroup.Request.newBuilder()
+                .setC2S(c2s)
+                .build();
+        int seqNo = qot.getUserSecurityGroup(request);
+        LOGGER.info("请求自选股分组.seq={}", seqNo);
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         this.connect();
@@ -397,6 +408,26 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 sendNotifyMessage(notify);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("FutuD通知推送结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
+    public void onReply_GetUserSecurityGroup(FTAPI_Conn client, int nSerialNo, QotGetUserSecurityGroup.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "获取自选股分组失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "获取自选股分组失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                List<GroupData> groupDataList = GSON.fromJson(ftGrpcReturnResult.getS2c().get("groupList").getAsJsonArray(), new TypeToken<List<GroupData>>() {
+                }.getType());
+                UserGroupWsMessage message = new UserGroupWsMessage();
+                message.setGroupDataList(groupDataList);
+                quantxFutuWsService.sendUserGroup(message);
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("解析自选股分组结果失败.", e);
             }
         }
     }
