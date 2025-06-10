@@ -5,7 +5,7 @@ import io.futakotome.trade.dto.message.GroupData;
 import java.util.List;
 
 public class UserGroupWsMessage implements Message {
-    List<GroupData> groupDataList;
+    private List<GroupData> groupDataList;
 
     public List<GroupData> getGroupDataList() {
         return groupDataList;

@@ -432,11 +432,16 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                List<StockContent> staticInfoList = GSON.fromJson(ftGrpcReturnResult.getS2c().get("staticInfoList").getAsJsonArray(), new TypeToken<List<StockContent>>() {
-                }.getType());
-                UserSecurityWsMessage message = new UserSecurityWsMessage();
-                message.setStocks(staticInfoList);
-                quantxFutuWsService.sendUserSecurity(message);
+                if (Objects.nonNull(ftGrpcReturnResult.getS2c().get("staticInfoList"))) {
+                    List<StockContent> staticInfoList = GSON.fromJson(ftGrpcReturnResult.getS2c().get("staticInfoList").getAsJsonArray(), new TypeToken<List<StockContent>>() {
+                    }.getType());
+                    UserSecurityWsMessage message = new UserSecurityWsMessage();
+                    message.setStocks(staticInfoList);
+                    quantxFutuWsService.sendUserSecurity(message);
+                } else {
+                    UserSecurityWsMessage message = new UserSecurityWsMessage();
+                    quantxFutuWsService.sendUserSecurity(message);
+                }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析自选股分组结果失败.", e);
             }
