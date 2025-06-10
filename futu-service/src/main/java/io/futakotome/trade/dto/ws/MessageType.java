@@ -24,6 +24,7 @@ public enum MessageType {
     PLACE_ORDER,
     HISTORY_ORDER,
     INCOMPLETE_ORDER,
+    USER_GROUP,
 
     RT_BASIC_QUOTE,
     RT_KL,

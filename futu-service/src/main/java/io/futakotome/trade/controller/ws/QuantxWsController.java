@@ -160,6 +160,9 @@ public class QuantxWsController {
                 //查询未完成订单
                 IncompleteOrdersWsMessage incompleteOrdersWsMessage = (IncompleteOrdersWsMessage) messageClz;
                 ftTradeService.requestInCompleteOrder(incompleteOrdersWsMessage);
+            } else if (messageClz.getType().equals(MessageType.USER_GROUP)) {
+                //查询自选股分组
+                ftQotService.sendUserGroupRequest();
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
