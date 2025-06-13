@@ -344,6 +344,10 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         }
     }
 
+    private void logFTResult(String desc, FTGrpcReturnResult result) {
+        LOGGER.info("{}返回结果:{}", desc, result.toString());
+    }
+
     @Override
     public void onReply_GetPositionList(FTAPI_Conn client, int nSerialNo, TrdGetPositionList.Response rsp) {
         if (rsp.getRetType() != 0) {
@@ -353,6 +357,7 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("持仓", ftGrpcReturnResult);
                 List<PositionMessageContent> positionMessageContents = GSON.fromJson(ftGrpcReturnResult.getS2c().getAsJsonArray("positionList"), new TypeToken<List<PositionMessageContent>>() {
                 }.getType());
                 if (Objects.nonNull(positionMessageContents)) {
@@ -381,6 +386,7 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("账号订阅", ftGrpcReturnResult);
                 AccSubscribeWsMessage accSubscribeWsMessage = (AccSubscribeWsMessage) CacheManager.get(String.valueOf(nSerialNo));
                 List<AccSubDto> accSubDtos = accSubscribeWsMessage.getAccSubscribeItems()
                         .stream().map(accSubscribeItem -> {
@@ -411,6 +417,7 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("订单推送", ftGrpcReturnResult);
                 OrderPushContent orderPush = GSON.fromJson(ftGrpcReturnResult.getS2c(), OrderPushContent.class);
                 int insertRow = orderService.saveOrderBatch(orderPush);
                 LOGGER.info("账号:{}订单结果入库:{}条", orderPush.getHeader().getAccID(), insertRow);

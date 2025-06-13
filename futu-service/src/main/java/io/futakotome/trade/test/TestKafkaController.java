@@ -1,4 +1,4 @@
-package io.futakotome.trade.controller;
+package io.futakotome.trade.test;
 
 import io.futakotome.trade.domain.code.KLType;
 import io.futakotome.trade.dto.message.KLMessageContent;
