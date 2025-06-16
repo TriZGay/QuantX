@@ -103,7 +103,7 @@
         </trim>
     </insert>
     <insert id="insertBatch">
-        insert into t_order(id,acc_id,trade_env,
+        insert into t_order(acc_id,trade_env,
         acc_trade_market,trade_side,order_type,
         order_status,order_id,order_id_ex,
         code,name,qty,
@@ -114,7 +114,7 @@
         currency,trade_market)
         values
         <foreach collection="orderDtoCollection" item="item" separator=",">
-            (#{item.id,jdbcType=INTEGER},#{item.accId,jdbcType=VARCHAR},#{item.tradeEnv,jdbcType=INTEGER},
+            (#{item.accId,jdbcType=VARCHAR},#{item.tradeEnv,jdbcType=INTEGER},
             #{item.accTradeMarket,jdbcType=INTEGER},#{item.tradeSide,jdbcType=INTEGER},#{item.orderType,jdbcType=INTEGER},
             #{item.orderStatus,jdbcType=INTEGER},#{item.orderId,jdbcType=VARCHAR},#{item.orderIdEx,jdbcType=VARCHAR},
             #{item.code,jdbcType=VARCHAR},#{item.name,jdbcType=VARCHAR},#{item.qty,jdbcType=DOUBLE},

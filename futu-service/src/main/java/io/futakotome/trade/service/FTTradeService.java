@@ -216,8 +216,8 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info("改撤单结果:{}", ftGrpcReturnResult.getS2c().toString());
                 sendNotifyMessage(ftGrpcReturnResult.getS2c().toString());
-                PlaceOrderContent result = GSON.fromJson(ftGrpcReturnResult.getS2c(), PlaceOrderContent.class);
-                orderService.placeOrder(result);
+                //                PlaceOrderContent result = GSON.fromJson(ftGrpcReturnResult.getS2c(), PlaceOrderContent.class);
+                //                orderService.placeOrder(result);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("改撤单结果解析失败.", e);
             }
@@ -235,8 +235,8 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 LOGGER.info("下单结果:{}", ftGrpcReturnResult.getS2c().toString());
                 sendNotifyMessage(ftGrpcReturnResult.getS2c().toString());
-                PlaceOrderContent result = GSON.fromJson(ftGrpcReturnResult.getS2c(), PlaceOrderContent.class);
-                orderService.placeOrder(result);
+                //                PlaceOrderContent result = GSON.fromJson(ftGrpcReturnResult.getS2c(), PlaceOrderContent.class);
+                //                orderService.placeOrder(result);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("下单结果解析失败.", e);
             }

@@ -2,6 +2,7 @@ package io.futakotome.trade.dto.ws;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.futakotome.trade.dto.message.ModifyOrderWsMessage;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = StockFilterWsMessage.class, name = "STOCK_FILTER"),
         @JsonSubTypes.Type(value = AccFundsWsMessage.class, name = "ACC_FUNDS"),
         @JsonSubTypes.Type(value = PlaceOrderWsMessage.class, name = "PLACE_ORDER"),
+        @JsonSubTypes.Type(value = ModifyOrderWsMessage.class, name = "MODIFY_ORDER"),
         @JsonSubTypes.Type(value = HistoryOrdersWsMessage.class, name = "HISTORY_ORDER"),
         @JsonSubTypes.Type(value = IncompleteOrdersWsMessage.class, name = "INCOMPLETE_ORDER"),
         @JsonSubTypes.Type(value = UserGroupWsMessage.class, name = "USER_GROUP"),

@@ -4,7 +4,7 @@ import java.util.List;
 
 public class OrderPushContent {
     private CommonTrdHeader header;
-    private List<OrderContent> orderList;
+    private OrderContent order;
 
     public CommonTrdHeader getHeader() {
         return header;
@@ -14,11 +14,11 @@ public class OrderPushContent {
         this.header = header;
     }
 
-    public List<OrderContent> getOrderList() {
-        return orderList;
+    public OrderContent getOrder() {
+        return order;
     }
 
-    public void setOrderList(List<OrderContent> orderList) {
-        this.orderList = orderList;
+    public void setOrder(OrderContent order) {
+        this.order = order;
     }
 }
