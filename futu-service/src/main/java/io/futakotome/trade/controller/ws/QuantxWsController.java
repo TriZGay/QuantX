@@ -3,6 +3,7 @@ package io.futakotome.trade.controller.ws;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.trade.dto.message.CommonSecurity;
+import io.futakotome.trade.dto.message.ModifyOrderWsMessage;
 import io.futakotome.trade.dto.ws.*;
 import io.futakotome.trade.service.FTQotService;
 import io.futakotome.trade.service.FTTradeService;
@@ -153,6 +154,10 @@ public class QuantxWsController {
                 //下单
                 PlaceOrderWsMessage placeOrderWsMessage = (PlaceOrderWsMessage) messageClz;
                 ftTradeService.requestPlaceOrder(placeOrderWsMessage);
+            } else if (messageClz.getType().equals(MessageType.MODIFY_ORDER)) {
+                //改撤单
+                ModifyOrderWsMessage modifyOrderWsMessage = (ModifyOrderWsMessage) messageClz;
+                ftTradeService.requestModifyOrder(modifyOrderWsMessage);
             } else if (messageClz.getType().equals(MessageType.HISTORY_ORDER)) {
                 //查询历史订单
                 HistoryOrdersWsMessage historyOrdersWsMessage = (HistoryOrdersWsMessage) messageClz;

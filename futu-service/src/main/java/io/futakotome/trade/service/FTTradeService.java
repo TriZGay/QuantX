@@ -141,6 +141,21 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
         LOGGER.info("查询历史订单,seqNo={}", seqNo);
     }
 
+    public void requestModifyOrder(ModifyOrderWsMessage request) {
+        TrdModifyOrder.C2S.Builder builder = TrdModifyOrder.C2S.newBuilder();
+        builder.setPacketID(trd.nextPacketID());
+        builder.setHeader(this.trdHeader(request.getAccId(), request.getTradeEnv(), request.getTradeMarket()));
+        builder.setOrderID(Long.parseLong(request.getOrderId()));
+        builder.setModifyOrderOp(request.getModifyOp());
+        //todo 其他参数
+        TrdModifyOrder.Request req = TrdModifyOrder.Request.newBuilder()
+                .setC2S(builder.build())
+                .build();
+        int seqNo = trd.modifyOrder(req);
+        LOGGER.info("改撤单,seqNo={}", seqNo);
+
+    }
+
     public void requestPlaceOrder(PlaceOrderWsMessage request) {
         TrdPlaceOrder.C2S.Builder builder = TrdPlaceOrder.C2S.newBuilder();
         builder.setPacketID(trd.nextPacketID());
@@ -191,6 +206,25 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
     }
 
     @Override
+    public void onReply_ModifyOrder(FTAPI_Conn client, int nSerialNo, TrdModifyOrder.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "改撤单:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "改撤单,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                LOGGER.info("改撤单结果:{}", ftGrpcReturnResult.getS2c().toString());
+                sendNotifyMessage(ftGrpcReturnResult.getS2c().toString());
+                PlaceOrderContent result = GSON.fromJson(ftGrpcReturnResult.getS2c(), PlaceOrderContent.class);
+                orderService.placeOrder(result);
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("改撤单结果解析失败.", e);
+            }
+        }
+    }
+
+    @Override
     public void onReply_PlaceOrder(FTAPI_Conn client, int nSerialNo, TrdPlaceOrder.Response rsp) {
         if (rsp.getRetType() != 0) {
             String notify = "下单失败:" + rsp.getRetMsg();
@@ -205,6 +239,26 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 orderService.placeOrder(result);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("下单结果解析失败.", e);
+            }
+
+        }
+    }
+
+    @Override
+    public void onPush_UpdateOrder(FTAPI_Conn client, TrdUpdateOrder.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "订单推送失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "订单推送失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("订单推送", ftGrpcReturnResult);
+                OrderPushContent orderPush = GSON.fromJson(ftGrpcReturnResult.getS2c(), OrderPushContent.class);
+                int insertRow = orderService.saveOrderBatch(orderPush);
+                LOGGER.info("账号:{}订单结果入库:{}条", orderPush.getHeader().getAccID(), insertRow);
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("接收订单推送结果解析失败.", e);
             }
 
         }
@@ -403,26 +457,6 @@ public class FTTradeService implements FTSPI_Conn, FTSPI_Trd, InitializingBean {
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("订阅结果解析失败.", e);
-            }
-
-        }
-    }
-
-    @Override
-    public void onPush_UpdateOrder(FTAPI_Conn client, TrdUpdateOrder.Response rsp) {
-        if (rsp.getRetType() != 0) {
-            String notify = "订单推送失败:" + rsp.getRetMsg();
-            LOGGER.error(notify, new IllegalArgumentException("connID=" + client.getConnectID() + "订单推送失败,code:" + rsp.getRetType()));
-            sendNotifyMessage(notify);
-        } else {
-            try {
-                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                logFTResult("订单推送", ftGrpcReturnResult);
-                OrderPushContent orderPush = GSON.fromJson(ftGrpcReturnResult.getS2c(), OrderPushContent.class);
-                int insertRow = orderService.saveOrderBatch(orderPush);
-                LOGGER.info("账号:{}订单结果入库:{}条", orderPush.getHeader().getAccID(), insertRow);
-            } catch (InvalidProtocolBufferException e) {
-                LOGGER.error("接收订单推送结果解析失败.", e);
             }
 
         }

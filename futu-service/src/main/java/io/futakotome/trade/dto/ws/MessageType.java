@@ -22,6 +22,7 @@ public enum MessageType {
     STOCK_FILTER,
     ACC_FUNDS,
     PLACE_ORDER,
+    MODIFY_ORDER,
     HISTORY_ORDER,
     INCOMPLETE_ORDER,
     USER_GROUP,//自选股分组
