@@ -9,6 +9,15 @@ public class TradeMetaResponse {
     private List<AntDesignSelectOptions> tradeSecMarkets;
     private List<AntDesignSelectOptions> orderTypes;
     private List<AntDesignSelectOptions> marketTypes;
+    private List<AntDesignSelectOptions> modifyOrderOps;
+
+    public List<AntDesignSelectOptions> getModifyOrderOps() {
+        return modifyOrderOps;
+    }
+
+    public void setModifyOrderOps(List<AntDesignSelectOptions> modifyOrderOps) {
+        this.modifyOrderOps = modifyOrderOps;
+    }
 
     public List<AntDesignSelectOptions> getMarketTypes() {
         return marketTypes;

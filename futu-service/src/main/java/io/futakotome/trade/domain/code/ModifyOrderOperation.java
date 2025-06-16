@@ -26,6 +26,14 @@ public enum ModifyOrderOperation {
         }
     }
 
+    public Integer getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public static String getName(Integer code) {
         return MODIFY_ORDER_OPERATION_MAP.getOrDefault(code, "未知的操作码表值");
     }
