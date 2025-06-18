@@ -173,6 +173,10 @@ public class QuantxWsController {
                 //查询自选股列表
                 UserSecurityWsMessage request = (UserSecurityWsMessage) messageClz;
                 ftQotService.sendUserSecurityRequest(request);
+            } else if (messageClz.getType().equals(MessageType.SET_PRICE_REMINDER)) {
+                //设置到价提醒
+                SetPriceReminderWsMessage request = (SetPriceReminderWsMessage) messageClz;
+                ftQotService.sendSetReminderRequest(request);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

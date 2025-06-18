@@ -113,7 +113,8 @@ public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
         if (Objects.nonNull(listStockRequest.getDelisting())) {
             queryWrapper.eq("delisting", listStockRequest.getDelisting());
         }
-        if (Objects.nonNull(listStockRequest.getCode())) {
+        if (Objects.nonNull(listStockRequest.getCode())
+                && !listStockRequest.getCode().trim().isEmpty()) {
             queryWrapper.eq("code", listStockRequest.getCode());
         }
         return queryWrapper;

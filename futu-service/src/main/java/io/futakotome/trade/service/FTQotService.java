@@ -1545,11 +1545,32 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void sendSetReminderRequest(SetPriceReminderWsMessage request) {
+
+    }
+
+    @Override
+    public void onReply_SetPriceReminder(FTAPI_Conn client, int nSerialNo, QotSetPriceReminder.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "设置到价提醒失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "设置到价提醒失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                SetPriceReminderContent setPriceResult = GSON.fromJson(ftGrpcReturnResult.getS2c(), SetPriceReminderContent.class);
+                sendNotifyMessage("设置到价提醒结果:" + setPriceResult.getKey());
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("设置到价提醒解析结果失败!", e);
+            }
+        }
+    }
+
     @Override
     public void onReply_GetSecuritySnapshot(FTAPI_Conn client, int nSerialNo, QotGetSecuritySnapshot.Response rsp) {
         if (rsp.getRetType() != 0) {
             String notify = "查询快照数据失败:" + rsp.getRetMsg();
-            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询板块信息失败,code:" + rsp.getRetType()));
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询快照数据失败,code:" + rsp.getRetType()));
             sendNotifyMessage(notify);
         } else {
             try {

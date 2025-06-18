@@ -10,6 +10,15 @@ public class TradeMetaResponse {
     private List<AntDesignSelectOptions> orderTypes;
     private List<AntDesignSelectOptions> marketTypes;
     private List<AntDesignSelectOptions> modifyOrderOps;
+    private List<AntDesignSelectOptions> setPriceReminderOps;
+
+    public List<AntDesignSelectOptions> getSetPriceReminderOps() {
+        return setPriceReminderOps;
+    }
+
+    public void setSetPriceReminderOps(List<AntDesignSelectOptions> setPriceReminderOps) {
+        this.setPriceReminderOps = setPriceReminderOps;
+    }
 
     public List<AntDesignSelectOptions> getModifyOrderOps() {
         return modifyOrderOps;
