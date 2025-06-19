@@ -23,3 +23,5 @@ spring:
           json:
             trusted:
               packages: '*'
+itick:
+  apikey: ${apikey}
