@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -1546,7 +1547,48 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     public void sendSetReminderRequest(SetPriceReminderWsMessage request) {
+        //todo sendSetReminderRequest
+    }
 
+    public void sendGetReminderRequest(GetPriceReminderWsMessage request) {
+        QotGetPriceReminder.C2S.Builder c2s = QotGetPriceReminder.C2S.newBuilder();
+        if (Objects.nonNull(request.getSecMarket()) && Objects.nonNull(request.getCode())) {
+            QotCommon.Security sec = QotCommon.Security.newBuilder()
+                    .setMarket(request.getSecMarket())
+                    .setCode(request.getCode())
+                    .build();
+            c2s.setSecurity(sec);
+        }
+        if (Objects.nonNull(request.getMarket())) {
+            c2s.setMarket(request.getMarket());
+        }
+        QotGetPriceReminder.Request req = QotGetPriceReminder.Request.newBuilder()
+                .setC2S(c2s.build())
+                .build();
+        int seqNo = qot.getPriceReminder(req);
+        LOGGER.info("获取到价提醒列表.seq={}", seqNo);
+    }
+
+    private void logFTResult(String desc, FTGrpcReturnResult result) {
+        LOGGER.info("{}返回结果:{}", desc, result.toString());
+    }
+
+    @Override
+    public void onReply_GetPriceReminder(FTAPI_Conn client, int nSerialNo, QotGetPriceReminder.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询到价提醒列表失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询到价提醒列表失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询到价提醒列表", ftGrpcReturnResult);
+                PriceReminderContent result = GSON.fromJson(ftGrpcReturnResult.getS2c(), PriceReminderContent.class);
+
+            } catch (InvalidProtocolBufferException e) {
+                LOGGER.error("查询到价提醒列表解析结果失败!", e);
+            }
+        }
     }
 
     @Override
@@ -1558,6 +1600,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("设置到价提醒", ftGrpcReturnResult);
                 SetPriceReminderContent setPriceResult = GSON.fromJson(ftGrpcReturnResult.getS2c(), SetPriceReminderContent.class);
                 sendNotifyMessage("设置到价提醒结果:" + setPriceResult.getKey());
             } catch (InvalidProtocolBufferException e) {

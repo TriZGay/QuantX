@@ -28,6 +28,7 @@ public enum MessageType {
     USER_GROUP,//自选股分组
     USER_SECURITY,//自选股列表
     SET_PRICE_REMINDER,
+    GET_PRICE_REMINDER,
 
     RT_BASIC_QUOTE,
     RT_KL,

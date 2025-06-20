@@ -177,6 +177,10 @@ public class QuantxWsController {
                 //设置到价提醒
                 SetPriceReminderWsMessage request = (SetPriceReminderWsMessage) messageClz;
                 ftQotService.sendSetReminderRequest(request);
+            } else if (messageClz.getType().equals(MessageType.GET_PRICE_REMINDER)) {
+                //获取到价提醒列表
+                GetPriceReminderWsMessage request = (GetPriceReminderWsMessage) messageClz;
+                ftQotService.sendGetReminderRequest(request);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

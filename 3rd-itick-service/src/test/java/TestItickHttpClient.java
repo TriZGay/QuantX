@@ -2,7 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.itick.ItickFetcherApplication;
 import io.futakotome.itick.client.ItickHttpClient;
 import io.futakotome.itick.config.ItickConfig;
-import io.futakotome.itick.dto.StockDto;
+import io.futakotome.itick.dto.ProductDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class TestItickHttpClient {
             put("token", config.getApikey());
         }});
         ObjectMapper mapper = new ObjectMapper();
-        StockDto result = mapper.readValue(body, StockDto.class);
+        ProductDto result = mapper.readValue(body, ProductDto.class);
         System.out.println(result.toString());
     }
 }

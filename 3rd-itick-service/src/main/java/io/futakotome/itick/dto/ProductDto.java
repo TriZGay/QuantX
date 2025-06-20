@@ -2,10 +2,10 @@ package io.futakotome.itick.dto;
 
 import java.util.List;
 
-public class StockDto {
+public class ProductDto {
     private Integer code;
     private String msg;
-    private List<StockItem> data;
+    private List<ProductItem> data;
 
     public Integer getCode() {
         return code;
@@ -23,11 +23,11 @@ public class StockDto {
         this.msg = msg;
     }
 
-    public List<StockItem> getData() {
+    public List<ProductItem> getData() {
         return data;
     }
 
-    public void setData(List<StockItem> data) {
+    public void setData(List<ProductItem> data) {
         this.data = data;
     }
 

@@ -1,6 +1,6 @@
 package io.futakotome.itick.dto;
 
-public class StockItem {
+public class ProductItem {
     //产品代码
     private String c;
     //产品名称
