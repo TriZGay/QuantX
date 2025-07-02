@@ -1,14 +1,22 @@
 package io.futakotome.trade.dto.ws;
 
+import io.futakotome.trade.dto.message.PriceReminder;
+
+import java.util.List;
+
 public class GetPriceReminderWsMessage implements Message {
     private Integer secMarket;//股票所属市场
     private String code;
     private Integer market;//整个市场
 
-    public GetPriceReminderWsMessage(Integer secMarket, String code, Integer market) {
-        this.secMarket = secMarket;
-        this.code = code;
-        this.market = market;
+    private List<PriceReminder> priceReminderList;
+
+    public List<PriceReminder> getPriceReminderList() {
+        return priceReminderList;
+    }
+
+    public void setPriceReminderList(List<PriceReminder> priceReminderList) {
+        this.priceReminderList = priceReminderList;
     }
 
     public Integer getSecMarket() {

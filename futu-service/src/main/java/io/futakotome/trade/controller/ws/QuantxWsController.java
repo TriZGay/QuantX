@@ -35,6 +35,7 @@ public class QuantxWsController {
     public static final String INCOMPLETE_ORDER_URI = "/incomplete_orders";
     public static final String USER_GROUP_URI = "/user_group";
     public static final String USER_SECURITY_URI = "/user_security";
+    public static final String GET_PRICE_REMINDER_URI = "/get_price_reminders";
 
     public static final String EMA5_URI = "/ema5";
 

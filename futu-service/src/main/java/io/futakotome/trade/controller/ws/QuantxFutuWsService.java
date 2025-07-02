@@ -72,6 +72,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + USER_SECURITY_URI, message);
     }
 
+    public void sendGetPriceReminderListMessage(GetPriceReminderWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + GET_PRICE_REMINDER_URI, message);
+    }
+
     public void sendRtEma5(RTEmaMessage emaMessage) {
         this.template.convertAndSend(BROKER_PREFIX + EMA5_URI, emaMessage);
     }

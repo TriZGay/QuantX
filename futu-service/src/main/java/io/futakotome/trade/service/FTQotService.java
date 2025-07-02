@@ -1584,11 +1584,17 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 logFTResult("查询到价提醒列表", ftGrpcReturnResult);
                 PriceReminderContent result = GSON.fromJson(ftGrpcReturnResult.getS2c(), PriceReminderContent.class);
-
+                sendGetPriceReminderList(result);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询到价提醒列表解析结果失败!", e);
             }
         }
+    }
+
+    private void sendGetPriceReminderList(PriceReminderContent priceReminderContent) {
+        GetPriceReminderWsMessage message = new GetPriceReminderWsMessage();
+        message.setPriceReminderList(priceReminderContent.getPriceReminderList());
+        quantxFutuWsService.sendGetPriceReminderListMessage(message);
     }
 
     @Override
