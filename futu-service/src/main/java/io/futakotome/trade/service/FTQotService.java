@@ -1547,7 +1547,31 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     public void sendSetReminderRequest(SetPriceReminderWsMessage request) {
-        //todo sendSetReminderRequest
+        QotSetPriceReminder.C2S.Builder c2s = QotSetPriceReminder.C2S.newBuilder();
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(request.getCode())
+                .setMarket(request.getMarket())
+                .build();
+        c2s.setOp(request.getOp());
+        c2s.setSecurity(sec);
+        if (Objects.nonNull(request.getKey())) {
+            c2s.setKey(request.getKey());
+        }
+        if (Objects.nonNull(request.getRemindType())) {
+            c2s.setType(request.getRemindType());
+        }
+        if (Objects.nonNull(request.getRemindFreq())) {
+            c2s.setFreq(request.getRemindFreq());
+        }
+        if (Objects.nonNull(request.getValue())) {
+            c2s.setValue(request.getValue());
+        }
+        if (Objects.nonNull(request.getNote())) {
+            c2s.setNote(request.getNote());
+        }
+        QotSetPriceReminder.Request req = QotSetPriceReminder.Request.newBuilder().setC2S(c2s).build();
+        int seqNo = qot.setPriceReminder(req);
+        LOGGER.info("设置到价提醒.seq={}", seqNo);
     }
 
     public void sendGetReminderRequest(GetPriceReminderWsMessage request) {

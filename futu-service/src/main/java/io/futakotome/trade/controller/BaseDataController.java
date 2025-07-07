@@ -76,7 +76,19 @@ public class BaseDataController {
         tradeMetaResponse.setMarketTypes(toSelectOptions(MarketType.values()));
         tradeMetaResponse.setModifyOrderOps(toSelectOptions(ModifyOrderOperation.values()));
         tradeMetaResponse.setSetPriceReminderOps(toSelectOptions(SetPriceReminderOperation.values()));
+        tradeMetaResponse.setSetPriceReminderFreqs(toSelectOptions(SetPriceReminderFreq.values()));
+        tradeMetaResponse.setSetPriceReminderTypes(toSelectOptions(SetPriceReminderType.values()));
         return ResponseEntity.ok(tradeMetaResponse);
+    }
+
+    private List<AntDesignSelectOptions> toSelectOptions(SetPriceReminderFreq[] values) {
+        return Arrays.stream(values).map(t -> new AntDesignSelectOptions(t.getName(), t.getCode()))
+                .collect(Collectors.toList());
+    }
+
+    private List<AntDesignSelectOptions> toSelectOptions(SetPriceReminderType[] values) {
+        return Arrays.stream(values).map(t -> new AntDesignSelectOptions(t.getName(), t.getCode()))
+                .collect(Collectors.toList());
     }
 
     private List<AntDesignSelectOptions> toSelectOptions(SetPriceReminderOperation[] values) {
