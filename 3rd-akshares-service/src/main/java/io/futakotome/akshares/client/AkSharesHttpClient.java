@@ -1,7 +1,12 @@
 package io.futakotome.akshares.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.futakotome.akshares.config.AkToolsConfig;
+import io.futakotome.akshares.dto.SHStockSummary;
+import io.futakotome.akshares.dto.SZSummary;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -11,6 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -19,32 +29,55 @@ public class AkSharesHttpClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkSharesHttpClient.class);
     private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper;
+    private final AkToolsConfig akToolsConfig;
 
-    public AkSharesHttpClient(OkHttpClient httpClient, ObjectMapper objectMapper) {
+    public AkSharesHttpClient(OkHttpClient httpClient, ObjectMapper objectMapper, AkToolsConfig akToolsConfig) {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
+        this.akToolsConfig = akToolsConfig;
     }
 
-    private Map<String, String> obj2Map(Object object) {
+    public List<SZSummary> fetchSZSummaries() {
         try {
-            String jsonStr = objectMapper.writeValueAsString(object);
-            return objectMapper.readValue(jsonStr, Map.class);
-        } catch (JsonProcessingException e) {
-            LOGGER.error("obj2Map失败", e);
-            throw new RuntimeException(e);
+            String body = getFromAkTools("api/public/stock_szse_summary", new HashMap<>() {{
+                put("Accept", "application/json");
+            }}, new HashMap<>() {{
+                put("date", LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+            }});
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("查询深圳证券交易所股票市场总貌失败", e);
         }
     }
 
-    public String get(String url, Map<String, String> queryParameters) throws IOException {
-        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(url))
-                .newBuilder();
+    public List<SHStockSummary> fetchSHStockSummaries() {
+        try {
+            String body = getFromAkTools("api/public/stock_sse_summary", new HashMap<>() {{
+                put("Accept", "application/json");
+            }}, null);
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("查询上海证券交易所股票市场总貌失败", e);
+        }
+    }
+    //    public
+
+    public String getFromAkTools(String url, Map<String, String> headers, Map<String, String> queryParameters) throws IOException {
+        HttpUrl.Builder urlBuilder = new HttpUrl.Builder()
+                .scheme("http")
+                .addPathSegment(url)
+                .host(akToolsConfig.getHost())
+                .port(akToolsConfig.getPort());
         if (Objects.nonNull(queryParameters) && !queryParameters.isEmpty()) {
             queryParameters.forEach(urlBuilder::addQueryParameter);
         }
-        Request.Builder requestBuilder = new Request.Builder()
-                .url(urlBuilder.build())
-                .get()
-                .addHeader("Accept", "application/json");
+        Request.Builder requestBuilder = new Request.Builder();
+        if (Objects.nonNull(headers) && !headers.isEmpty()) {
+            headers.forEach(requestBuilder::addHeader);
+        }
+        requestBuilder.url(urlBuilder.build()).get();
         Request request = requestBuilder.build();
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful() && Objects.nonNull(response.body())) {

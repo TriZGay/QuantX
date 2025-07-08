@@ -1,6 +1,8 @@
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.akshares.AkSharesApplication;
 import io.futakotome.akshares.client.AkSharesHttpClient;
+import io.futakotome.akshares.dto.SHStockSummary;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SpringBootTest(classes = AkSharesApplication.class)
 @RunWith(SpringRunner.class)
@@ -18,11 +22,15 @@ public class TestAkSharesHttpClient {
 
     @Test
     public void testGet() throws IOException {
-        String body = httpClient.get("", new HashMap<>() {{
+        String body = httpClient.getFromAkTools("api/public/stock_szse_summary", new HashMap<>() {{
+            put("Accept", "application/json");
+        }}, new HashMap<>() {{
+//            put("date", "20250707");
         }});
-
-        ObjectMapper mapper = new ObjectMapper();
-        //        ProductDto result = mapper.readValue(body, ProductDto.class);
-        //        System.out.println(result.toString());
+        System.out.println(body);
+        //        ObjectMapper mapper = new ObjectMapper();
+        //        List<SHStockSummary> result = mapper.readValue(body, new TypeReference<>() {
+        //        });
+        //        System.out.println(result);
     }
 }

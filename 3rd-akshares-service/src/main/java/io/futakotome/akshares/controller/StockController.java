@@ -1,19 +1,29 @@
 package io.futakotome.akshares.controller;
 
+import io.futakotome.akshares.client.AkSharesHttpClient;
+import io.futakotome.akshares.controller.vo.SHSZTodaySummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/fetch-stocks")
+@RequestMapping("/stocks")
 public class StockController {
     private static final Logger LOGGER = LoggerFactory.getLogger(StockController.class);
+    private final AkSharesHttpClient akSharesHttpClient;
 
-    @PostMapping("/")
+    public StockController(AkSharesHttpClient akSharesHttpClient) {
+        this.akSharesHttpClient = akSharesHttpClient;
+    }
+
+    @GetMapping("/today-summary")
     public ResponseEntity<?> fetchStocks() {
-        return ResponseEntity.ok("hello");
+        SHSZTodaySummary summary = new SHSZTodaySummary();
+        summary.setShStockSummaries(akSharesHttpClient.fetchSHStockSummaries());
+        summary.setSzSummaries(akSharesHttpClient.fetchSZSummaries());
+        return ResponseEntity.ok(summary);
     }
 }
