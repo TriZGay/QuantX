@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.akshares.config.AkToolsConfig;
 import io.futakotome.akshares.dto.SHStockSummary;
 import io.futakotome.akshares.dto.SZSummary;
+import io.futakotome.akshares.dto.StockItem;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -35,6 +36,24 @@ public class AkSharesHttpClient {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.akToolsConfig = akToolsConfig;
+    }
+
+    //todo 雪球-查询公司简介
+
+
+    //东财-查询股票信息
+    public List<StockItem> fetchBigAStockIndividual(String symbol) {
+        try {
+            String body = getFromAkTools("api/public/stock_individual_info_em", new HashMap<>() {{
+                put("Accept", "application/json");
+            }}, new HashMap<>() {{
+                put("symbol", symbol);
+            }});
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("查询个股信息失败", e);
+        }
     }
 
     public List<SZSummary> fetchSZSummaries() {
