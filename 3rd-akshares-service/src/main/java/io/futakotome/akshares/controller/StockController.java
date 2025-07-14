@@ -3,6 +3,7 @@ package io.futakotome.akshares.controller;
 import io.futakotome.akshares.client.AkSharesHttpClient;
 import io.futakotome.akshares.controller.vo.BigAStockIndividual;
 import io.futakotome.akshares.controller.vo.SHSZTodaySummary;
+import io.futakotome.akshares.controller.vo.StockZhIndexResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,13 @@ public class StockController {
     public ResponseEntity<?> fetchIndividual(@PathVariable String code) {
         BigAStockIndividual resp = new BigAStockIndividual();
         resp.setStockItems(akSharesHttpClient.fetchBigAStockIndividual(code));
+        return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping("/bigA-stock-indies/{symbol}")
+    public ResponseEntity<?> fetchZhStockIndies(@PathVariable String symbol) {
+        StockZhIndexResponse resp = new StockZhIndexResponse();
+        resp.setStockZhIndexList(akSharesHttpClient.fetchStockZhIndies(symbol));
         return ResponseEntity.ok(resp);
     }
 }

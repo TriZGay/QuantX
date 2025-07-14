@@ -1,13 +1,12 @@
 package io.futakotome.akshares.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.akshares.config.AkToolsConfig;
 import io.futakotome.akshares.dto.SHStockSummary;
 import io.futakotome.akshares.dto.SZSummary;
 import io.futakotome.akshares.dto.StockItem;
+import io.futakotome.akshares.dto.StockZhIndex;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -36,6 +34,20 @@ public class AkSharesHttpClient {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.akToolsConfig = akToolsConfig;
+    }
+
+    public List<StockZhIndex> fetchStockZhIndies(String symbol) {
+        try {
+            String body = getFromAkTools("api/public/stock_zh_index_spot_em", new HashMap<>() {{
+                put("Accept", "application/json");
+            }}, new HashMap<>() {{
+                put("symbol", symbol);
+            }});
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("查询A股指数失败", e);
+        }
     }
 
     //todo 雪球-查询公司简介
