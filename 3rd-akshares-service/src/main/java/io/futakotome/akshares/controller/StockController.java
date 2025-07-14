@@ -4,8 +4,6 @@ import io.futakotome.akshares.client.AkSharesHttpClient;
 import io.futakotome.akshares.controller.vo.BigAStockIndividual;
 import io.futakotome.akshares.controller.vo.SHSZTodaySummary;
 import io.futakotome.akshares.controller.vo.StockZhIndexResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/stocks")
 public class StockController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StockController.class);
     private final AkSharesHttpClient akSharesHttpClient;
 
     public StockController(AkSharesHttpClient akSharesHttpClient) {
@@ -37,10 +34,4 @@ public class StockController {
         return ResponseEntity.ok(resp);
     }
 
-    @GetMapping("/bigA-stock-indies/{symbol}")
-    public ResponseEntity<?> fetchZhStockIndies(@PathVariable String symbol) {
-        StockZhIndexResponse resp = new StockZhIndexResponse();
-        resp.setStockZhIndexList(akSharesHttpClient.fetchStockZhIndies(symbol));
-        return ResponseEntity.ok(resp);
-    }
 }
