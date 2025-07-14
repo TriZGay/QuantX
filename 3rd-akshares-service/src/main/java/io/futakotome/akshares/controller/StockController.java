@@ -48,7 +48,8 @@ public class StockController {
     @GetMapping("/bigA-bidAsk/{symbol}")
     public ResponseEntity<?> fetchBidAsk(@PathVariable String symbol) {
         StockBidAskResponse response = new StockBidAskResponse();
-        return ResponseEntity.ok(akSharesHttpClient.fetchStockBidAsk(symbol));
+        response.setBidAskItems(akSharesHttpClient.fetchStockBidAsk(symbol));
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/bigA-rt/{type}")
