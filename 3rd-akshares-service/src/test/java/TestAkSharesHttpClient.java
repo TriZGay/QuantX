@@ -3,6 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.akshares.AkSharesApplication;
 import io.futakotome.akshares.client.AkSharesHttpClient;
 import io.futakotome.akshares.dto.StockItem;
+import io.futakotome.akshares.dto.StockRTPrice;
 import io.futakotome.akshares.dto.StockZhIndex;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,15 +23,14 @@ public class TestAkSharesHttpClient {
 
     @Test
     public void testGet() throws IOException {
-        String body = httpClient.getFromAkTools("api/public/stock_individual_basic_info_xq", new HashMap<>() {{
+        String body = httpClient.getFromAkTools("api/public/stock_zh_a_spot_em", new HashMap<>() {{
             put("Accept", "application/json");
         }}, new HashMap<>() {{
-            put("symbol", "SH601127");
         }});
-                System.out.println(body);
-//        ObjectMapper mapper = new ObjectMapper();
-//        List<StockZhIndex> result = mapper.readValue(body, new TypeReference<>() {
-//        });
-//        System.out.println(result.toString());
+//                System.out.println(body);
+        ObjectMapper mapper = new ObjectMapper();
+        List<StockRTPrice> result = mapper.readValue(body, new TypeReference<>() {
+        });
+        System.out.println(result.toString());
     }
 }

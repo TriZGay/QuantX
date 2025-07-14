@@ -3,10 +3,7 @@ package io.futakotome.akshares.client;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.akshares.config.AkToolsConfig;
-import io.futakotome.akshares.dto.SHStockSummary;
-import io.futakotome.akshares.dto.SZSummary;
-import io.futakotome.akshares.dto.StockItem;
-import io.futakotome.akshares.dto.StockZhIndex;
+import io.futakotome.akshares.dto.*;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -36,6 +33,60 @@ public class AkSharesHttpClient {
         this.akToolsConfig = akToolsConfig;
     }
 
+    //查询沪深京A-实时行情-东财
+    public List<StockRTPrice> fetchAllZhStockRtPrice() {
+        try {
+            String body = getFromAkTools("api/public/stock_zh_a_spot_em", new HashMap<>() {{
+                put("Accept", "application/json");
+            }}, null);
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("查询沪深京A-实时行情失败", e);
+        }
+    }
+
+    //查询沪A-实时行情-东财
+    public List<StockRTPrice> fetchShStockRtPrice() {
+        try {
+            String body = getFromAkTools("api/public/stock_sh_a_spot_em", new HashMap<>() {{
+                put("Accept", "application/json");
+            }}, null);
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("查询沪A-实时行情失败", e);
+        }
+    }
+
+    //查询深A-实时行情-东财
+    public List<StockRTPrice> fetchSzStockRtPrice() {
+        try {
+            String body = getFromAkTools("api/public/stock_sz_a_spot_em", new HashMap<>() {{
+                put("Accept", "application/json");
+            }}, null);
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("查询沪A-实时行情失败", e);
+        }
+    }
+
+    //查询京A-实时行情-东财
+    public List<StockRTPrice> fetchBjStockRtPrice() {
+        try {
+            String body = getFromAkTools("api/public/stock_bj_a_spot_em", new HashMap<>() {{
+                put("Accept", "application/json");
+            }}, null);
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("查询沪A-实时行情失败", e);
+        }
+    }
+    //查询新股-实时行情-东财
+
+    //查询A股-股票指数
     public List<StockZhIndex> fetchStockZhIndies(String symbol) {
         try {
             String body = getFromAkTools("api/public/stock_zh_index_spot_em", new HashMap<>() {{
@@ -80,6 +131,7 @@ public class AkSharesHttpClient {
         }
     }
 
+    //查询深交所市场概况
     public List<SZSummary> fetchSZSummaries() {
         try {
             String body = getFromAkTools("api/public/stock_szse_summary", new HashMap<>() {{
@@ -94,6 +146,7 @@ public class AkSharesHttpClient {
         }
     }
 
+    //查询上交所市场概况
     public List<SHStockSummary> fetchSHStockSummaries() {
         try {
             String body = getFromAkTools("api/public/stock_sse_summary", new HashMap<>() {{
@@ -105,7 +158,6 @@ public class AkSharesHttpClient {
             throw new RuntimeException("查询上海证券交易所股票市场总貌失败", e);
         }
     }
-    //    public
 
     public String getFromAkTools(String url, Map<String, String> headers, Map<String, String> queryParameters) throws IOException {
         HttpUrl.Builder urlBuilder = new HttpUrl.Builder()
