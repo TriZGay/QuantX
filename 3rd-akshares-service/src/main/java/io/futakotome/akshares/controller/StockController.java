@@ -3,6 +3,7 @@ package io.futakotome.akshares.controller;
 import io.futakotome.akshares.client.AkSharesHttpClient;
 import io.futakotome.akshares.controller.vo.BigAStockIndividual;
 import io.futakotome.akshares.controller.vo.SHSZTodaySummary;
+import io.futakotome.akshares.controller.vo.StockBidAskResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,6 +43,12 @@ public class StockController {
         BigAStockIndividual resp = new BigAStockIndividual();
         resp.setStockItems(akSharesHttpClient.fetchBigAStockIndividualInfo(code));
         return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping("/bigA-bidAsk/{symbol}")
+    public ResponseEntity<?> fetchBidAsk(@PathVariable String symbol) {
+        StockBidAskResponse response = new StockBidAskResponse();
+        return ResponseEntity.ok(akSharesHttpClient.fetchStockBidAsk(symbol));
     }
 
     @GetMapping("/bigA-rt/{type}")

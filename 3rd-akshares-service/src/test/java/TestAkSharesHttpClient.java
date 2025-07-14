@@ -2,6 +2,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.akshares.AkSharesApplication;
 import io.futakotome.akshares.client.AkSharesHttpClient;
+import io.futakotome.akshares.dto.StockBidAskItem;
 import io.futakotome.akshares.dto.StockItem;
 import io.futakotome.akshares.dto.StockRTPrice;
 import io.futakotome.akshares.dto.StockZhIndex;
@@ -23,13 +24,14 @@ public class TestAkSharesHttpClient {
 
     @Test
     public void testGet() throws IOException {
-        String body = httpClient.getFromAkTools("api/public/stock_zh_a_spot_em", new HashMap<>() {{
+        String body = httpClient.getFromAkTools("api/public/stock_bid_ask_em", new HashMap<>() {{
             put("Accept", "application/json");
         }}, new HashMap<>() {{
+            put("symbol", "000001");
         }});
-//                System.out.println(body);
+//                        System.out.println(body);
         ObjectMapper mapper = new ObjectMapper();
-        List<StockRTPrice> result = mapper.readValue(body, new TypeReference<>() {
+        List<StockBidAskItem> result = mapper.readValue(body, new TypeReference<>() {
         });
         System.out.println(result.toString());
     }

@@ -33,6 +33,21 @@ public class AkSharesHttpClient {
         this.akToolsConfig = akToolsConfig;
     }
 
+    //查询行情报价
+    public List<StockBidAskItem> fetchStockBidAsk(String symbol) {
+        try {
+            String body = getFromAkTools("api/public/stock_bid_ask_em", new HashMap<>() {{
+                put("Accept", "application/json");
+            }}, new HashMap<>() {{
+                put("symbol", symbol);
+            }});
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("查询行情报价失败", e);
+        }
+    }
+
     //查询沪深京A-实时行情-东财
     public List<StockRTPrice> fetchAllZhStockRtPrice() {
         try {
@@ -68,7 +83,7 @@ public class AkSharesHttpClient {
             return objectMapper.readValue(body, new TypeReference<>() {
             });
         } catch (IOException e) {
-            throw new RuntimeException("查询沪A-实时行情失败", e);
+            throw new RuntimeException("查询深A-实时行情失败", e);
         }
     }
 
@@ -81,7 +96,7 @@ public class AkSharesHttpClient {
             return objectMapper.readValue(body, new TypeReference<>() {
             });
         } catch (IOException e) {
-            throw new RuntimeException("查询沪A-实时行情失败", e);
+            throw new RuntimeException("查询京A-实时行情失败", e);
         }
     }
     //查询新股-实时行情-东财
