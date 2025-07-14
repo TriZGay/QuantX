@@ -22,15 +22,15 @@ public class TestAkSharesHttpClient {
 
     @Test
     public void testGet() throws IOException {
-        String body = httpClient.getFromAkTools("api/public/stock_zh_index_spot_em", new HashMap<>() {{
+        String body = httpClient.getFromAkTools("api/public/stock_individual_basic_info_xq", new HashMap<>() {{
             put("Accept", "application/json");
         }}, new HashMap<>() {{
-            put("symbol", "上证系列指数");
+            put("symbol", "SH601127");
         }});
-        //        System.out.println(body);
-        ObjectMapper mapper = new ObjectMapper();
-        List<StockZhIndex> result = mapper.readValue(body, new TypeReference<>() {
-        });
-        System.out.println(result.toString());
+                System.out.println(body);
+//        ObjectMapper mapper = new ObjectMapper();
+//        List<StockZhIndex> result = mapper.readValue(body, new TypeReference<>() {
+//        });
+//        System.out.println(result.toString());
     }
 }

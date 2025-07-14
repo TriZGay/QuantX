@@ -50,8 +50,20 @@ public class AkSharesHttpClient {
         }
     }
 
-    //todo 雪球-查询公司简介
-
+    //雪球-查询公司简介
+    public List<StockItem> fetchBigAStockIndividualInfo(String symbol) {
+        try {
+            String body = getFromAkTools("api/public/stock_individual_basic_info_xq", new HashMap<>() {{
+                put("Accept", "application/json");
+            }}, new HashMap<>() {{
+                put("symbol", symbol);
+            }});
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("查询个股信息失败", e);
+        }
+    }
 
     //东财-查询股票信息
     public List<StockItem> fetchBigAStockIndividual(String symbol) {

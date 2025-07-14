@@ -34,4 +34,10 @@ public class StockController {
         return ResponseEntity.ok(resp);
     }
 
+    @GetMapping("/bigA-individual-info/{code}")
+    public ResponseEntity<?> fetchIndividualInfo(@PathVariable String code) {
+        BigAStockIndividual resp = new BigAStockIndividual();
+        resp.setStockItems(akSharesHttpClient.fetchBigAStockIndividualInfo(code));
+        return ResponseEntity.ok(resp);
+    }
 }
