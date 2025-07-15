@@ -1,14 +1,9 @@
 package io.futakotome.akshares.controller;
 
 import io.futakotome.akshares.client.AkSharesHttpClient;
-import io.futakotome.akshares.controller.vo.BigAStockIndividual;
-import io.futakotome.akshares.controller.vo.SHSZTodaySummary;
-import io.futakotome.akshares.controller.vo.StockBidAskResponse;
+import io.futakotome.akshares.controller.vo.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/stocks")
@@ -49,6 +44,13 @@ public class StockController {
     public ResponseEntity<?> fetchBidAsk(@PathVariable String symbol) {
         StockBidAskResponse response = new StockBidAskResponse();
         response.setBidAskItems(akSharesHttpClient.fetchStockBidAsk(symbol));
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/bigA-history")
+    public ResponseEntity<?> fetchBigAHistoryPrice(@RequestBody StockZhHistoryRequest request) {
+        StockZhHistoryResponse response = new StockZhHistoryResponse();
+        response.setHistories(akSharesHttpClient.fetchStockZhHistory(request));
         return ResponseEntity.ok(response);
     }
 

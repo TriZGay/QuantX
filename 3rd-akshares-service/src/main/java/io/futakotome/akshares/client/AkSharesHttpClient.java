@@ -3,7 +3,9 @@ package io.futakotome.akshares.client;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.akshares.config.AkToolsConfig;
+import io.futakotome.akshares.controller.vo.StockZhHistoryRequest;
 import io.futakotome.akshares.dto.*;
+import io.futakotome.akshares.utils.Converter;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -31,6 +33,19 @@ public class AkSharesHttpClient {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.akToolsConfig = akToolsConfig;
+    }
+
+    //查询大A历史行情数据
+    public List<StockZhHistory> fetchStockZhHistory(StockZhHistoryRequest request) {
+        try {
+            String body = getFromAkTools("api/public/stock_bid_ask_em", new HashMap<>() {{
+                put("Accept", "application/json");
+            }}, Converter.convertObjToMap(request));
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("查询历史行情失败", e);
+        }
     }
 
     //查询行情报价
