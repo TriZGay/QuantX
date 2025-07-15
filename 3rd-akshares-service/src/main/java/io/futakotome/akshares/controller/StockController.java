@@ -56,16 +56,16 @@ public class StockController {
 
     @GetMapping("/bigA-rt/{type}")
     public ResponseEntity<?> fetchBigARTPrice(@PathVariable String type) {
+        StockZhRtResponse resp = new StockZhRtResponse();
         if (ALL_TYPE.equals(type)) {
-            return ResponseEntity.ok(akSharesHttpClient.fetchAllZhStockRtPrice());
+            resp.setRtPrices(akSharesHttpClient.fetchAllZhStockRtPrice());
         } else if (SH_TYPE.equals(type)) {
-            return ResponseEntity.ok(akSharesHttpClient.fetchShStockRtPrice());
+            resp.setRtPrices(akSharesHttpClient.fetchShStockRtPrice());
         } else if (SZ_TYPE.equals(type)) {
-            return ResponseEntity.ok(akSharesHttpClient.fetchSzStockRtPrice());
+            resp.setRtPrices(akSharesHttpClient.fetchSzStockRtPrice());
         } else if (BJ_TYPE.equals(type)) {
-            return ResponseEntity.ok(akSharesHttpClient.fetchBjStockRtPrice());
-        } else {
-            return ResponseEntity.ok("类型不能空");
+            resp.setRtPrices(akSharesHttpClient.fetchBjStockRtPrice());
         }
+        return ResponseEntity.ok(resp);
     }
 }
