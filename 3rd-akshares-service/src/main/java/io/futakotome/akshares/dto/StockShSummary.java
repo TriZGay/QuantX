@@ -2,8 +2,8 @@ package io.futakotome.akshares.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class SHStockSummary {
-    @JsonProperty("项目")
+public class StockShSummary {
+    @JsonProperty(value = "项目")
     private String name;
     @JsonProperty("股票")
     private Double stock;

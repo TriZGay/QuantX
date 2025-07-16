@@ -5,6 +5,8 @@ import io.futakotome.akshares.controller.vo.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/stocks")
 public class StockController {
@@ -20,9 +22,9 @@ public class StockController {
 
     @GetMapping("/today-summary")
     public ResponseEntity<?> fetchStocks() {
-        SHSZTodaySummary summary = new SHSZTodaySummary();
-        summary.setShStockSummaries(akSharesHttpClient.fetchSHStockSummaries());
-        summary.setSzSummaries(akSharesHttpClient.fetchSZSummaries());
+        StockZhTodaySummary summary = new StockZhTodaySummary();
+        summary.setShStockSummaries(StockZhTodaySummary.StockShSummaryVo.dtoListToVoList(akSharesHttpClient.fetchSHStockSummaries()));
+        summary.setSzSummaries(StockZhTodaySummary.StockSzSummaryVo.dtoListToVoList(akSharesHttpClient.fetchSZSummaries()));
         return ResponseEntity.ok(summary);
     }
 

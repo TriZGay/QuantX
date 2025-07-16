@@ -162,7 +162,7 @@ public class AkSharesHttpClient {
     }
 
     //查询深交所市场概况
-    public List<SZSummary> fetchSZSummaries() {
+    public List<StockSzSummary> fetchSZSummaries() {
         try {
             String body = getFromAkTools("api/public/stock_szse_summary", new HashMap<>() {{
                 put("Accept", "application/json");
@@ -177,7 +177,7 @@ public class AkSharesHttpClient {
     }
 
     //查询上交所市场概况
-    public List<SHStockSummary> fetchSHStockSummaries() {
+    public List<StockShSummary> fetchSHStockSummaries() {
         try {
             String body = getFromAkTools("api/public/stock_sse_summary", new HashMap<>() {{
                 put("Accept", "application/json");

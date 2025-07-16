@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.akshares.AkSharesApplication;
@@ -20,16 +21,30 @@ public class TestAkSharesHttpClient {
     private AkSharesHttpClient httpClient;
 
     @Test
+    public void testSummaries() throws IOException {
+        String body = httpClient.getFromAkTools("api/public/stock_sse_summary", new HashMap<>() {{
+            put("Accept", "application/json");
+        }}, new HashMap<>() {{
+        }});
+        //                                System.out.println(body);
+        ObjectMapper mapper = new ObjectMapper();
+        List<StockShSummary> result = mapper.readValue(body, new TypeReference<>() {
+        });
+        String r = mapper.writeValueAsString(result);
+        System.out.println(r);
+    }
+
+    @Test
     public void testGet() throws IOException {
         String body = httpClient.getFromAkTools("api/public/stock_zh_a_hist", new HashMap<>() {{
             put("Accept", "application/json");
         }}, new HashMap<>() {{
             put("symbol", "000001");
-            put("period","daily");
-            put("start_date","20250714");
-            put("end_date","20250715");
+            put("period", "daily");
+            put("start_date", "20250714");
+            put("end_date", "20250715");
         }});
-//                        System.out.println(body);
+        //                        System.out.println(body);
         ObjectMapper mapper = new ObjectMapper();
         List<StockZhHistory> result = mapper.readValue(body, new TypeReference<>() {
         });

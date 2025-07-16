@@ -2,8 +2,8 @@ package io.futakotome.akshares.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class SZSummary {
-    @JsonProperty("证券类别")
+public class StockSzSummary {
+    @JsonProperty(value = "证券类别")
     private String type;
     @JsonProperty("数量")
     private Long num;
