@@ -5,8 +5,6 @@ import io.futakotome.akshares.controller.vo.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping("/stocks")
 public class StockController {
@@ -60,13 +58,13 @@ public class StockController {
     public ResponseEntity<?> fetchBigARTPrice(@PathVariable String type) {
         StockZhRtResponse resp = new StockZhRtResponse();
         if (ALL_TYPE.equals(type)) {
-            resp.setRtPrices(akSharesHttpClient.fetchAllZhStockRtPrice());
+            resp.setRtPrices(StockZhRtResponse.StockRTPriceVo.dtoListToVoList(akSharesHttpClient.fetchAllZhStockRtPrice()));
         } else if (SH_TYPE.equals(type)) {
-            resp.setRtPrices(akSharesHttpClient.fetchShStockRtPrice());
+            resp.setRtPrices(StockZhRtResponse.StockRTPriceVo.dtoListToVoList(akSharesHttpClient.fetchShStockRtPrice()));
         } else if (SZ_TYPE.equals(type)) {
-            resp.setRtPrices(akSharesHttpClient.fetchSzStockRtPrice());
+            resp.setRtPrices(StockZhRtResponse.StockRTPriceVo.dtoListToVoList(akSharesHttpClient.fetchSzStockRtPrice()));
         } else if (BJ_TYPE.equals(type)) {
-            resp.setRtPrices(akSharesHttpClient.fetchBjStockRtPrice());
+            resp.setRtPrices(StockZhRtResponse.StockRTPriceVo.dtoListToVoList(akSharesHttpClient.fetchBjStockRtPrice()));
         }
         return ResponseEntity.ok(resp);
     }
