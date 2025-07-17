@@ -50,7 +50,7 @@ public class StockController {
     @PostMapping("/bigA-history")
     public ResponseEntity<?> fetchBigAHistoryPrice(@RequestBody StockZhHistoryRequest request) {
         StockZhHistoryResponse response = new StockZhHistoryResponse();
-        response.setHistories(akSharesHttpClient.fetchStockZhHistory(request));
+        response.setHistories(StockZhHistoryResponse.StockZhHistoryVo.dtoListToVoList(akSharesHttpClient.fetchStockZhHistory(request)));
         return ResponseEntity.ok(response);
     }
 

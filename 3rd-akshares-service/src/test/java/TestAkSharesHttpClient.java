@@ -1,9 +1,9 @@
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.akshares.AkSharesApplication;
 import io.futakotome.akshares.client.AkSharesHttpClient;
-import io.futakotome.akshares.dto.*;
+import io.futakotome.akshares.dto.StockShSummary;
+import io.futakotome.akshares.dto.StockZhHistory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

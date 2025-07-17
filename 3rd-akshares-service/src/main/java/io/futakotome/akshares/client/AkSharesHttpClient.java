@@ -5,13 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.akshares.config.AkToolsConfig;
 import io.futakotome.akshares.controller.vo.StockZhHistoryRequest;
 import io.futakotome.akshares.dto.*;
-import io.futakotome.akshares.utils.Converter;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -24,7 +21,6 @@ import java.util.Objects;
 
 @Service
 public class AkSharesHttpClient {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AkSharesHttpClient.class);
     private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper;
     private final AkToolsConfig akToolsConfig;
@@ -37,10 +33,26 @@ public class AkSharesHttpClient {
 
     //查询大A历史行情数据
     public List<StockZhHistory> fetchStockZhHistory(StockZhHistoryRequest request) {
+        Map<String, String> requestMap = new HashMap<>();
+        if (Objects.nonNull(request.getSymbol())) {
+            requestMap.put("symbol", request.getSymbol());
+        }
+        if (Objects.nonNull(request.getPeriod())) {
+            requestMap.put("period", request.getPeriod());
+        }
+        if (Objects.nonNull(request.getStartDate())) {
+            requestMap.put("start_date", request.getStartDate());
+        }
+        if (Objects.nonNull(request.getEndDate())) {
+            requestMap.put("end_date", request.getEndDate());
+        }
+        if (Objects.nonNull(request.getAdjust())) {
+            requestMap.put("adjust", request.getAdjust());
+        }
         try {
-            String body = getFromAkTools("api/public/stock_bid_ask_em", new HashMap<>() {{
+            String body = getFromAkTools("api/public/stock_zh_a_hist", new HashMap<>() {{
                 put("Accept", "application/json");
-            }}, Converter.convertObjToMap(request));
+            }}, requestMap);
             return objectMapper.readValue(body, new TypeReference<>() {
             });
         } catch (IOException e) {
