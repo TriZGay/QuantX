@@ -1,9 +1,11 @@
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.akshares.AkSharesApplication;
-import io.futakotome.akshares.client.AkSharesHttpClient;
 import io.futakotome.akshares.dto.StockShSummary;
+import io.futakotome.akshares.dto.StockUsRTPrice;
 import io.futakotome.akshares.dto.StockZhHistory;
+import io.futakotome.akshares.service.AkSharesService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,21 @@ import java.util.List;
 @RunWith(SpringRunner.class)
 public class TestAkSharesHttpClient {
     @Autowired
-    private AkSharesHttpClient httpClient;
+    private AkSharesService httpClient;
+
+    @Test
+    public void testUsRt() throws IOException {
+        String body = httpClient.getFromAkTools("api/public/stock_us_spot_em", new HashMap<>() {{
+            put("Accept", "application/json");
+        }}, new HashMap<>() {{
+        }});
+        //        System.out.println(body);
+        ObjectMapper mapper = new ObjectMapper();
+        List<StockUsRTPrice> result = mapper.readValue(body, new TypeReference<>() {
+        });
+        String r = mapper.writeValueAsString(result);
+        System.out.println(r);
+    }
 
     @Test
     public void testSummaries() throws IOException {

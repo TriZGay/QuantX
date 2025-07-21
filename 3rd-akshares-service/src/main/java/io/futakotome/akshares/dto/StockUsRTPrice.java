@@ -2,7 +2,7 @@ package io.futakotome.akshares.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class StockRTPrice {
+public class StockUsRTPrice {
     @JsonProperty("序号")
     private Long id;
     @JsonProperty("代码")
@@ -21,34 +21,20 @@ public class StockRTPrice {
     private Double volume;
     @JsonProperty("振幅")
     private Double amplitude;
-    @JsonProperty("最高")
+    @JsonProperty("最高价")
     private Double high;
-    @JsonProperty("最低")
+    @JsonProperty("最低价")
     private Double low;
-    @JsonProperty("今开")
+    @JsonProperty("开盘价")
     private Double open;
-    @JsonProperty("昨收")
+    @JsonProperty("昨收价")
     private Double close;
-    @JsonProperty("量比")
-    private Double equivalentRatio;
     @JsonProperty("换手率")
     private Double turnoverRatio;
-    @JsonProperty("市盈率-动态")
-    private Double peRatio;
-    @JsonProperty("市净率")
-    private Double pbRatio;
     @JsonProperty("总市值")
     private Double marketCap;
-    @JsonProperty("流通市值")
-    private Double circularRatio;
-    @JsonProperty("涨速")
-    private Double growthRatio;
-    @JsonProperty("5分钟涨跌")
-    private Double fiveMRatio;
-    @JsonProperty("60日涨跌幅")
-    private Double sixtyDRatio;
-    @JsonProperty("年初至今涨跌幅")
-    private Double ytdPercentRatio;
+    @JsonProperty("市盈率")
+    private Double peRatio;
 
     public Long getId() {
         return id;
@@ -154,36 +140,12 @@ public class StockRTPrice {
         this.close = close;
     }
 
-    public Double getEquivalentRatio() {
-        return equivalentRatio;
-    }
-
-    public void setEquivalentRatio(Double equivalentRatio) {
-        this.equivalentRatio = equivalentRatio;
-    }
-
     public Double getTurnoverRatio() {
         return turnoverRatio;
     }
 
     public void setTurnoverRatio(Double turnoverRatio) {
         this.turnoverRatio = turnoverRatio;
-    }
-
-    public Double getPeRatio() {
-        return peRatio;
-    }
-
-    public void setPeRatio(Double peRatio) {
-        this.peRatio = peRatio;
-    }
-
-    public Double getPbRatio() {
-        return pbRatio;
-    }
-
-    public void setPbRatio(Double pbRatio) {
-        this.pbRatio = pbRatio;
     }
 
     public Double getMarketCap() {
@@ -194,43 +156,11 @@ public class StockRTPrice {
         this.marketCap = marketCap;
     }
 
-    public Double getCircularRatio() {
-        return circularRatio;
+    public Double getPeRatio() {
+        return peRatio;
     }
 
-    public void setCircularRatio(Double circularRatio) {
-        this.circularRatio = circularRatio;
-    }
-
-    public Double getGrowthRatio() {
-        return growthRatio;
-    }
-
-    public void setGrowthRatio(Double growthRatio) {
-        this.growthRatio = growthRatio;
-    }
-
-    public Double getFiveMRatio() {
-        return fiveMRatio;
-    }
-
-    public void setFiveMRatio(Double fiveMRatio) {
-        this.fiveMRatio = fiveMRatio;
-    }
-
-    public Double getSixtyDRatio() {
-        return sixtyDRatio;
-    }
-
-    public void setSixtyDRatio(Double sixtyDRatio) {
-        this.sixtyDRatio = sixtyDRatio;
-    }
-
-    public Double getYtdPercentRatio() {
-        return ytdPercentRatio;
-    }
-
-    public void setYtdPercentRatio(Double ytdPercentRatio) {
-        this.ytdPercentRatio = ytdPercentRatio;
+    public void setPeRatio(Double peRatio) {
+        this.peRatio = peRatio;
     }
 }

@@ -1,4 +1,4 @@
-package io.futakotome.akshares.client;
+package io.futakotome.akshares.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,15 +20,28 @@ import java.util.Map;
 import java.util.Objects;
 
 @Service
-public class AkSharesHttpClient {
+public class AkSharesService {
     private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper;
     private final AkToolsConfig akToolsConfig;
 
-    public AkSharesHttpClient(OkHttpClient httpClient, ObjectMapper objectMapper, AkToolsConfig akToolsConfig) {
+    public AkSharesService(OkHttpClient httpClient, ObjectMapper objectMapper, AkToolsConfig akToolsConfig) {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.akToolsConfig = akToolsConfig;
+    }
+
+    //查询美股实时行情数据
+    public List<StockUsRTPrice> fetchStockUsRealTime() {
+        try {
+            String body = getFromAkTools("api/public/stock_us_spot_em", new HashMap<>() {{
+                put("Accept", "application/json");
+            }}, null);
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("查询美股实时行情失败", e);
+        }
     }
 
     //查询大A历史行情数据
@@ -76,7 +89,7 @@ public class AkSharesHttpClient {
     }
 
     //查询沪深京A-实时行情-东财
-    public List<StockRTPrice> fetchAllZhStockRtPrice() {
+    public List<StockZhRTPrice> fetchAllZhStockRtPrice() {
         try {
             String body = getFromAkTools("api/public/stock_zh_a_spot_em", new HashMap<>() {{
                 put("Accept", "application/json");
@@ -89,7 +102,7 @@ public class AkSharesHttpClient {
     }
 
     //查询沪A-实时行情-东财
-    public List<StockRTPrice> fetchShStockRtPrice() {
+    public List<StockZhRTPrice> fetchShStockRtPrice() {
         try {
             String body = getFromAkTools("api/public/stock_sh_a_spot_em", new HashMap<>() {{
                 put("Accept", "application/json");
@@ -102,7 +115,7 @@ public class AkSharesHttpClient {
     }
 
     //查询深A-实时行情-东财
-    public List<StockRTPrice> fetchSzStockRtPrice() {
+    public List<StockZhRTPrice> fetchSzStockRtPrice() {
         try {
             String body = getFromAkTools("api/public/stock_sz_a_spot_em", new HashMap<>() {{
                 put("Accept", "application/json");
@@ -115,7 +128,7 @@ public class AkSharesHttpClient {
     }
 
     //查询京A-实时行情-东财
-    public List<StockRTPrice> fetchBjStockRtPrice() {
+    public List<StockZhRTPrice> fetchBjStockRtPrice() {
         try {
             String body = getFromAkTools("api/public/stock_bj_a_spot_em", new HashMap<>() {{
                 put("Accept", "application/json");

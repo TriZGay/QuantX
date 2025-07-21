@@ -1,6 +1,6 @@
 package io.futakotome.akshares.controller.vo;
 
-import io.futakotome.akshares.dto.StockRTPrice;
+import io.futakotome.akshares.dto.StockZhRTPrice;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,12 +41,12 @@ public class StockZhRtResponse {
         private Double sixtyDRatio;
         private Double ytdPercentRatio;
 
-        public static List<StockRTPriceVo> dtoListToVoList(List<StockRTPrice> stockRTPrices) {
-            return stockRTPrices.stream().map(StockRTPriceVo::dtoToVo)
+        public static List<StockRTPriceVo> dtoListToVoList(List<StockZhRTPrice> stockZhRTPrices) {
+            return stockZhRTPrices.stream().map(StockRTPriceVo::dtoToVo)
                     .collect(Collectors.toList());
         }
 
-        private static StockRTPriceVo dtoToVo(StockRTPrice dto) {
+        private static StockRTPriceVo dtoToVo(StockZhRTPrice dto) {
             StockRTPriceVo stockRTPriceVo = new StockRTPriceVo();
             stockRTPriceVo.setId(dto.getId());
             stockRTPriceVo.setCode(dto.getCode());
