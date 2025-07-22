@@ -2,7 +2,7 @@ server:
   port: 9093
 spring:
   kafka:
-    bootstrap-servers: 172.31.127.144:9092
+    bootstrap-servers: 172.31.7.194:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

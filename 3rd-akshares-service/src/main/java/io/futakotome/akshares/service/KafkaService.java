@@ -1,7 +1,8 @@
 package io.futakotome.akshares.service;
 
 import io.futakotome.common.MessageCommon;
-import io.futakotome.common.message.akshres.KLineRtPriceMessage;
+import io.futakotome.common.message.akshres.BigARtPriceMessage;
+import io.futakotome.common.message.akshres.UsRtPriceMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -33,75 +34,13 @@ public class KafkaService {
         };
     }
 
-    public void sendKLineRtPrices(KLineRtPriceMessage message) {
-        ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.KL_RT_TOPIC, message);
+    public void sendBigRtPrices(BigARtPriceMessage message) {
+        ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.BIG_A_RT_TOPIC, message);
         sendFuture.addCallback(this.logging());
     }
-    //    public void sendHistoryKLineMessage(KLMessageContent klMessageContent) {
-    //        if (!klMessageContent.getBlank()) {
-    //            //内容不为空才发
-    //            RTKLMessage message = new RTKLMessage();
-    //            message.setMarket(klMessageContent.getMarket());
-    //            message.setCode(klMessageContent.getCode());
-    //            message.setRehabType(klMessageContent.getRehabType());
-    //            message.setHighPrice(klMessageContent.getHighPrice());
-    //            message.setOpenPrice(klMessageContent.getOpenPrice());
-    //            message.setLowPrice(klMessageContent.getLowPrice());
-    //            message.setClosePrice(klMessageContent.getClosePrice());
-    //            message.setLastClosePrice(klMessageContent.getLastClosePrice());
-    //            message.setVolume(klMessageContent.getVolume());
-    //            message.setTurnover(klMessageContent.getTurnover());
-    //            message.setTurnoverRate(klMessageContent.getTurnoverRate());
-    //            message.setPe(klMessageContent.getPe());
-    //            message.setChangeRate(klMessageContent.getChangeRate());
-    //            message.setUpdateTime(klMessageContent.getTime());
-    //
-    //            if (klMessageContent.getKlType().equals(KLType.DAY.getCode())) {
-    //                //日K
-    //                ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.HISTORY_KL_DAY_TOPIC, message);
-    //                sendFuture.addCallback(this.logging());
-    //            } else if (klMessageContent.getKlType().equals(KLType.WEEK.getCode())) {
-    //                //周K
-    //                ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.HISTORY_KL_WEEK_TOPIC, message);
-    //                sendFuture.addCallback(this.logging());
-    //            } else if (klMessageContent.getKlType().equals(KLType.MONTH.getCode())) {
-    //                //月K
-    //                ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.HISTORY_KL_MONTH_TOPIC, message);
-    //                sendFuture.addCallback(this.logging());
-    //            } else if (klMessageContent.getKlType().equals(KLType.QUARTER.getCode())) {
-    //                //季K
-    //                ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.HISTORY_KL_QUARTER_TOPIC, message);
-    //                sendFuture.addCallback(this.logging());
-    //            } else if (klMessageContent.getKlType().equals(KLType.YEAR.getCode())) {
-    //                //年K
-    //                ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.HISTORY_KL_YEAR_TOPIC, message);
-    //                sendFuture.addCallback(this.logging());
-    //            } else if (klMessageContent.getKlType().equals(KLType.MIN_1.getCode())) {
-    //                //1
-    //                ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.HISTORY_KL_MIN_1_TOPIC, message);
-    //                sendFuture.addCallback(this.logging());
-    //            } else if (klMessageContent.getKlType().equals(KLType.MIN_3.getCode())) {
-    //                //3
-    //                ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.HISTORY_KL_MIN_3_TOPIC, message);
-    //                sendFuture.addCallback(this.logging());
-    //            } else if (klMessageContent.getKlType().equals(KLType.MIN_5.getCode())) {
-    //                //5分K
-    //                ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.HISTORY_KL_MIN_5_TOPIC, message);
-    //                sendFuture.addCallback(this.logging());
-    //            } else if (klMessageContent.getKlType().equals(KLType.MIN_15.getCode())) {
-    //                //15
-    //                ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.HISTORY_KL_MIN_15_TOPIC, message);
-    //                sendFuture.addCallback(this.logging());
-    //            } else if (klMessageContent.getKlType().equals(KLType.MIN_30.getCode())) {
-    //                //30
-    //                ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.HISTORY_KL_MIN_30_TOPIC, message);
-    //                sendFuture.addCallback(this.logging());
-    //            } else if (klMessageContent.getKlType().equals(KLType.MIN_60.getCode())) {
-    //                //60
-    //                ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.HISTORY_KL_MIN_60_TOPIC, message);
-    //                sendFuture.addCallback(this.logging());
-    //            }
-    //        }
-    //    }
 
+    public void sendUsRtPrices(UsRtPriceMessage message) {
+        ListenableFuture<SendResult<String, Object>> sendFuture = kafkaTemplate.send(MessageCommon.US_RT_TOPIC, message);
+        sendFuture.addCallback(this.logging());
+    }
 }

@@ -501,3 +501,23 @@ create table if not exists quantx.t_arbr_min_1_arc
 ) ENGINE = MergeTree
       PRIMARY KEY (market, code, rehab_type, update_time);
 
+create table if not exists quantx.t_ak_us_rt
+(
+    id             Int64,
+    code           String,
+    price          Float64,
+    ratio          Float64,
+    ratio_val      Float64,
+    turnover       Float64,
+    volume         Float64,
+    amplitude      Float64,
+    high           Float64,
+    low            Float64,
+    open           Float64,
+    close          Float64,
+    turnover_ratio Float64,
+    market_cap     Float64,
+    peRatio        Float64,
+    add_time       DateTime64
+) ENGINE = MergeTree
+      PRIMARY KEY (code, add_time);

@@ -8,6 +8,7 @@ public interface MessageCommon {
     String RT_KL_QUARTER_CONSUMER_GROUP = "rt_klq_consumer_group";
     String RT_KL_YEAR_CONSUMER_GROUP = "rt_kly_consumer_group";
     String RT_KL_MIN_1_CONSUMER_GROUP = "rt_klm1_consumer_group";
+    //todo flink should be removed?
     String RT_KL_MIN_1_CONSUMER_GROUP_STREAM = "rt_klm1_consumer_group_stream";
     String RT_KL_MIN_3_CONSUMER_GROUP = "rt_klm3_consumer_group";
     String RT_KL_MIN_5_CONSUMER_GROUP = "rt_klm5_consumer_group";
@@ -42,4 +43,10 @@ public interface MessageCommon {
     String HISTORY_KL_MIN_15_TOPIC = "history_klm15_topic";
     String HISTORY_KL_MIN_30_TOPIC = "history_klm30_topic";
     String HISTORY_KL_MIN_60_TOPIC = "history_klm60_topic";
+    //akshares
+    String BIG_A_RT_TOPIC = "bigA_rt";
+    String BIG_A_RT_CONSUMER_GROUP = "bigA_rt_consumer_group";
+    String US_RT_TOPIC = "us_rt_topic";
+    String US_RT_CONSUMER_GROUP = "us_rt_consumer_group";
+
 }
