@@ -22,7 +22,7 @@ public class AkSharesMapper {
     public boolean insertUsRealTimeBatch(List<StockUsRTDto> dtos) {
         try {
             String sql = "insert into t_ak_us_rt" +
-                    "(id,code,price,ratio,ratio_val,turnover,volume,amplitude,high,low,open,close,turnover_ratio,market_cap,peRatio,add_time)" +
+                    "(id,code,price,ratio,ratio_val,turnover,volume,amplitude,high,low,open,close,turnover_ratio,market_cap,pe_ratio,add_time)" +
                     "values (:id,:code,:price,:ratio,:ratioVal,:turnover,:volume,:amplitude,:high,:low,:open,:close,:turnoverRatio,:marketCap,:peRatio,:addTime)";
             int[] updateRows = namedParameterJdbcTemplate.batchUpdate(sql, SqlParameterSourceUtils.createBatch(dtos));
             LOGGER.info("插入成功:条数{}", Arrays.stream(updateRows).sum());

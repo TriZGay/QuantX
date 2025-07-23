@@ -483,7 +483,13 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             Integer rehabType = Integer.valueOf(splitCachedValue[3]);
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询历史K线", ftGrpcReturnResult);
                 Iterator<JsonElement> klListIterator = ftGrpcReturnResult.getS2c().getAsJsonArray("klList").iterator();
+                if (ftGrpcReturnResult.getS2c().has("nextReqKey")) {
+                    sendNotifyMessage("market:" + market + ",code:" + code + ",klType:" + klType + ",rehabType" + rehabType + "需要分页,参数为:" + ftGrpcReturnResult.getS2c().get("nextReqKey").getAsString());
+                } else {
+                    sendNotifyMessage("market:" + market + ",code:" + code + ",klType:" + klType + ",rehabType" + rehabType + "无须分页.");
+                }
                 while (klListIterator.hasNext()) {
                     JsonObject kl = klListIterator.next().getAsJsonObject();
                     KLMessageContent klMessageContent = GSON.fromJson(kl, KLMessageContent.class);
@@ -494,7 +500,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     kafkaService.sendHistoryKLineMessage(klMessageContent);
                 }
             } catch (InvalidProtocolBufferException e) {
-                LOGGER.error("解析历史K线额度使用明细结果失败.", e);
+                LOGGER.error("解析历史K线失败.", e);
             }
         }
     }

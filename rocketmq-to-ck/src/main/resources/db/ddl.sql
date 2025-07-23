@@ -517,7 +517,7 @@ create table if not exists quantx.t_ak_us_rt
     close          Float64,
     turnover_ratio Float64,
     market_cap     Float64,
-    peRatio        Float64,
+    pe_ratio        Float64,
     add_time       DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (code, add_time);

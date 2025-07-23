@@ -30,7 +30,7 @@ public class KLineFetchTask {
         shRtPrices.forEach(stockZhRTPrice -> kafkaService.sendBigRtPrices(this.dtoToMessage(stockZhRTPrice)));
     }
 
-    @Scheduled(cron = "*/30 * * * * ?")
+    @Scheduled(cron = "0 0/15 * * * ?")
     public void fetchUsRealTime() {
         List<StockUsRTPrice> usRTPrices = akSharesService.fetchStockUsRealTime();
         usRTPrices.forEach(stockUsRTPrice -> kafkaService.sendUsRtPrices(this.dtoToMessage(stockUsRTPrice)));
