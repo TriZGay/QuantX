@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import static io.futakotome.rtck.mapper.KLMapper.*;
 
 @Component
-public class RTKLineListener extends AbstractKLineListener {
+public class RTKLineListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTKLineListener.class);
     private final KLMapper mapper;
     private final ObjectMapper objectMapper;
@@ -44,6 +44,26 @@ public class RTKLineListener extends AbstractKLineListener {
         if (mapper.insertBatch(toAddKLines, KL_MIN_1_RAW_TABLE_NAME)) {
             LOGGER.info("1分K线入库成功");
         }
+    }
+
+    private RTKLDto message2Dto(RTKLMessage rtklMessage) {
+        RTKLDto dto = new RTKLDto();
+        dto.setMarket(rtklMessage.getMarket());
+        dto.setCode(rtklMessage.getCode());
+        dto.setRehabType(rtklMessage.getRehabType());
+        dto.setHighPrice(rtklMessage.getHighPrice());
+        dto.setOpenPrice(rtklMessage.getOpenPrice());
+        dto.setLowPrice(rtklMessage.getLowPrice());
+        dto.setClosePrice(rtklMessage.getClosePrice());
+        dto.setLastClosePrice(rtklMessage.getLastClosePrice());
+        dto.setVolume(rtklMessage.getVolume());
+        dto.setTurnover(rtklMessage.getTurnover());
+        dto.setTurnoverRate(rtklMessage.getTurnoverRate());
+        dto.setPe(rtklMessage.getPe());
+        dto.setChangeRate(rtklMessage.getChangeRate() == null ? -1 : rtklMessage.getChangeRate());
+        dto.setUpdateTime(rtklMessage.getUpdateTime());
+        dto.setAddTime(rtklMessage.getAddTime());
+        return dto;
     }
 
     //todo K线其他类型
