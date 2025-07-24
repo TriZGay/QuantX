@@ -2,27 +2,15 @@ server:
   port: 9093
 spring:
   kafka:
-    bootstrap-servers: 172.31.0.156:9092
+    bootstrap-servers: 172.31.10.120:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       retries: 5
     consumer:
       max-poll-records: 500
-      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-      properties:
-        spring:
-          deserializer:
-            key:
-              delegate:
-                class: org.apache.kafka.common.serialization.StringDeserializer
-            value:
-              delegate:
-                class: org.apache.kafka.common.serialization.StringDeserializer
-          json:
-            trusted:
-              packages: '*'
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 aktools:
   host: localhost
   port: 8080

@@ -1,14 +1,19 @@
 package io.futakotome.rtck.listener;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.akshres.UsRtPriceMessage;
 import io.futakotome.rtck.mapper.AkSharesMapper;
 import io.futakotome.rtck.mapper.dto.StockUsRTDto;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -17,17 +22,24 @@ import java.util.stream.Collectors;
 public class AkSharesListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkSharesListener.class);
     private final AkSharesMapper mapper;
+    private final ObjectMapper objectMapper;
 
-    public AkSharesListener(AkSharesMapper mapper) {
+    public AkSharesListener(AkSharesMapper mapper, ObjectMapper objectMapper) {
         this.mapper = mapper;
+        this.objectMapper = objectMapper;
     }
-
 
     @KafkaListener(groupId = MessageCommon.US_RT_CONSUMER_GROUP, topics = {MessageCommon.US_RT_TOPIC},
             errorHandler = "rtKLineErrorHandler")
-    public void usRealTimeListener(List<UsRtPriceMessage> usRtPriceMessages) {
-        List<StockUsRTDto> toAdd = usRtPriceMessages.stream()
-                .map(this::messageToDto).collect(Collectors.toList());
+    public void usRealTimeListener(List<ConsumerRecord<?, ?>> records) throws JsonProcessingException {
+        List<UsRtPriceMessage> messages = new ArrayList<>();
+        for (ConsumerRecord<?, ?> record : records) {
+            LOGGER.info(record.value().toString());
+            UsRtPriceMessage message = objectMapper.readValue(record.value().toString(), new TypeReference<>() {
+            });
+            messages.add(message);
+        }
+        List<StockUsRTDto> toAdd = messages.stream().map(this::messageToDto).collect(Collectors.toList());
         if (mapper.insertUsRealTimeBatch(toAdd)) {
             LOGGER.info("美股实时行情入库成功");
         }

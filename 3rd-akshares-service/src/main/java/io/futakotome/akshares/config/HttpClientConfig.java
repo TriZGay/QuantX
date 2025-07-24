@@ -17,9 +17,9 @@ public class HttpClientConfig {
         ConnectionPool connectionPool = new ConnectionPool(5, 2, TimeUnit.MINUTES);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectionPool(connectionPool);
-        builder.connectTimeout(60, TimeUnit.SECONDS);
-        builder.readTimeout(60, TimeUnit.SECONDS);
-        builder.writeTimeout(60, TimeUnit.SECONDS);
+        builder.connectTimeout(180, TimeUnit.SECONDS);
+        builder.readTimeout(180, TimeUnit.SECONDS);
+        builder.writeTimeout(180, TimeUnit.SECONDS);
         builder.addInterceptor(loggingInterceptor);
         return builder.build();
     }

@@ -14,7 +14,7 @@ public class KafkaErrorConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaErrorConfiguration.class);
 
     private void loggingCommon(Message<?> message, ListenerExecutionFailedException exception, Consumer<?, ?> consumer) {
-        LOGGER.error("消费出现异常={},exception={},topics={}", message, exception.getMessage(), consumer.listTopics(), exception);
+        LOGGER.error("消费出现异常={}\nexception={}\ntopics={}", message.getPayload() + ":" + message.getHeaders(), exception.getMessage(), consumer.listTopics(), exception);
     }
 
     @Bean

@@ -517,7 +517,18 @@ create table if not exists quantx.t_ak_us_rt
     close          Float64,
     turnover_ratio Float64,
     market_cap     Float64,
-    pe_ratio        Float64,
+    pe_ratio       Float64,
     add_time       DateTime64
 ) ENGINE = MergeTree
       PRIMARY KEY (code, add_time);
+
+create table if not exists quantx.t_kafka_test
+(
+    a String,
+    b Float64
+) ENGINE = Kafka()
+      SETTINGS
+          kafka_broker_list = '172.31.10.120:9092',
+          kafka_topic_list = 'test_ck_kafka',
+          kafka_group_name = 'test_ck_kafka_group',
+          kafka_format = 'JSONEachRow';
