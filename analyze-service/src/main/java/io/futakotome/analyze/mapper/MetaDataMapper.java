@@ -77,10 +77,11 @@ public class MetaDataMapper {
             return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
                 put("tableName", tableName);
             }}, (rs, rowNum) -> {
-                List<?> tuple = rs.getObject(1, List.class);
+                Object tupleObj = rs.getObject(1);
+                Object[] tuple = (Object[]) tupleObj;
                 MetaDto metaDto = new MetaDto();
-                metaDto.setMarket(Byte.toUnsignedInt((Byte) tuple.get(0)));
-                metaDto.setCode((String) tuple.get(1));
+                metaDto.setMarket(Byte.toUnsignedInt((Byte) tuple[0]));
+                metaDto.setCode((String) tuple[1]);
                 return metaDto;
             });
         } catch (Exception e) {

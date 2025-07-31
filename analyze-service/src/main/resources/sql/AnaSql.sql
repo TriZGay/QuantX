@@ -1,8 +1,8 @@
 -- ema计算sql
 with recursive pre_data as (
-    select code, update_time, close_price, row_number() over (order by update_time) as rn
+    select code, update_time, close_price, row_number() over (partition by (code, rehab_type) order by update_time) as rn
     from t_kl_min_1_arc
-    where code='00700' and rehab_type=1 and update_time > '2025-01-01'
+    where update_time >= '2025-01-02'
     ), ema_cte as (
     select code, update_time, close_price, close_price as ema12, rn from pre_data
     where rn = 1
@@ -14,3 +14,4 @@ with recursive pre_data as (
 select *
 from ema_cte
 limit 10;
+

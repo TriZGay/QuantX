@@ -83,6 +83,7 @@ public class Ema {
                     insertDto.setMarket(kLineDto.getMarket());
                     insertDto.setRehabType(kLineDto.getRehabType());
                     insertDto.setCode(kLineDto.getCode());
+                    insertDto.setClosePrice(kLineDto.getClosePrice());
                     insertDto.setEma_5(ema5Val);
                     insertDto.setEma_10(ema10Val);
                     insertDto.setEma_12(ema12Val);
@@ -143,6 +144,7 @@ public class Ema {
                             insertDto.setMarket(kLineDto.getMarket());
                             insertDto.setRehabType(kLineDto.getRehabType());
                             insertDto.setCode(kLineDto.getCode());
+                            insertDto.setClosePrice(kLineDto.getClosePrice());
                             insertDto.setEma_5(ema5Val);
                             insertDto.setEma_10(ema10Val);
                             insertDto.setEma_12(ema12Val);

@@ -4,6 +4,7 @@ public class EmaDto {
     private Integer market;
     private String code;
     private Integer rehabType;
+    private Double closePrice;
     private Double ema_5;
     private Double ema_10;
     private Double ema_12;
@@ -32,6 +33,14 @@ public class EmaDto {
         this.rehabType = rehabType;
         this.start = start;
         this.end = end;
+    }
+
+    public Double getClosePrice() {
+        return closePrice;
+    }
+
+    public void setClosePrice(Double closePrice) {
+        this.closePrice = closePrice;
     }
 
     public String getTable() {
