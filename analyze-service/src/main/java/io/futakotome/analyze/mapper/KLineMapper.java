@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.stereotype.Repository;
 
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +70,7 @@ public class KLineMapper {
     //查询K线归档数据
     public List<KLineDto> queryKLineArchived(KLineDto kLineDto) {
         try {
-            String sql = "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time" +
+            String sql = "select market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,toString(update_time) as update_time" +
                     " from :tableName" +
                     " prewhere (1=1)";
             if (Objects.nonNull(kLineDto.getCode())) {

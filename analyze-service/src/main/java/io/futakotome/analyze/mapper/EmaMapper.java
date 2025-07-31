@@ -27,7 +27,7 @@ public class EmaMapper {
     public List<EmaDto> queryList(EmaDto emaDto) {
         try {
             String sql = "select market,code,rehab_type,round(ema_5,4) as ema_5,round(ema_10,4) as ema_10,round(ema_20,4) as ema_20," +
-                    "round(ema_60,4) as ema_60,round(ema_120,4) as ema_120,update_time from :table " +
+                    "round(ema_60,4) as ema_60,round(ema_120,4) as ema_120,toString(update_time) as update_time from :table " +
                     "prewhere (1=1) ";
             if (Objects.nonNull(emaDto.getCode())) {
                 sql += " and code=:code";
