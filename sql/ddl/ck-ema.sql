@@ -3,7 +3,6 @@ create table if not exists quantx.t_ema_min_1_arc
     market      Int8,
     code        String,
     rehab_type  Int8,
-    close_price Float64,
     ema_5       Float64,
     ema_10      Float64,
     ema_12      Float64,

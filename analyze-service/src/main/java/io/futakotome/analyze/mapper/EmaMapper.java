@@ -54,7 +54,7 @@ public class EmaMapper {
     public boolean insertBatch(String toTable, List<EmaDto> emas) {
         try {
             String sql = "insert into " + toTable
-                    + "(market,code,rehab_type,close_price,ema_5,ema_10,ema_12,ema_20,ema_26,ema_60,ema_120,update_time) values(:market,:code,:rehabType,:closePrice,:ema_5,:ema_10,:ema_12,:ema_20,:ema_26,:ema_60,:ema_120,:updateTime)";
+                    + "(market,code,rehab_type,ema_5,ema_10,ema_12,ema_20,ema_26,ema_60,ema_120,update_time) values(:market,:code,:rehabType,:ema_5,:ema_10,:ema_12,:ema_20,:ema_26,:ema_60,:ema_120,:updateTime)";
             int[] insertedRows = namedParameterJdbcTemplate.batchUpdate(sql, SqlParameterSourceUtils.createBatch(emas));
             LOGGER.info("插入成功.条数:{}", Arrays.stream(insertedRows).sum());
             return true;
