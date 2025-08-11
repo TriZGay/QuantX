@@ -18,20 +18,8 @@ with recursive raw_data as (
 select *
 from ema_cte;
 
-select market,
-       code,
-       rehab_type,
-       ema_5,
-       ema_10,
-       ema_12,
-       ema_20,
-       ema_26,
-       ema_60,
-       ema_120,
-       toString(update_time) as update_time
-from t_ema_min_1_arc e
-         inner join
-     (select code, rehab_type, max(update_time) as update_time
+select market,code,rehab_type,ema_5, ema_10,ema_12,ema_20, ema_26, ema_60, ema_120,toString(update_time) as update_time
+from t_ema_min_1_arc e inner join (select code, rehab_type, max(update_time) as update_time
       from t_ema_min_1_arc
       group by (code, rehab_type)) e2
      on e.code = e2.code and e.rehab_type = e2.rehab_type and e.update_time = e2.update_time;

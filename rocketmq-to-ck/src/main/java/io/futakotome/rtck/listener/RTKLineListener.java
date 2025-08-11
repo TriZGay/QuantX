@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.rtck.mapper.KLMapper;
+import io.futakotome.rtck.mapper.dto.EmaDto;
 import io.futakotome.rtck.mapper.dto.RTKLDto;
+import io.futakotome.rtck.service.EmaService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,17 +19,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.futakotome.rtck.mapper.EmaMapper.EMA_MIN_1_TABLE;
 import static io.futakotome.rtck.mapper.KLMapper.*;
 
 @Component
 public class RTKLineListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTKLineListener.class);
-    private final KLMapper mapper;
+    private final KLMapper klMapper;
     private final ObjectMapper objectMapper;
+    private final EmaService emaService;
 
-    public RTKLineListener(KLMapper mapper, ObjectMapper objectMapper) {
-        this.mapper = mapper;
+    public RTKLineListener(KLMapper klMapper, ObjectMapper objectMapper, EmaService emaService) {
+        this.klMapper = klMapper;
         this.objectMapper = objectMapper;
+        this.emaService = emaService;
     }
 
     @KafkaListener(groupId = MessageCommon.RT_KL_MIN_1_CONSUMER_GROUP, topics = {MessageCommon.RT_KL_MIN_1_TOPIC},
@@ -41,9 +46,13 @@ public class RTKLineListener {
         }
         List<RTKLDto> toAddKLines = rtklMessages.stream()
                 .map(this::message2Dto).collect(Collectors.toList());
-        if (mapper.insertBatch(toAddKLines, KL_MIN_1_RAW_TABLE_NAME)) {
+        if (klMapper.insertBatch(toAddKLines, KL_MIN_1_RAW_TABLE_NAME)) {
             LOGGER.info("1分K线入库成功");
         }
+        if (emaService.computeAndInsertBatch(toAddKLines, EMA_MIN_1_TABLE)) {
+            LOGGER.info("1分EMA线入库成功");
+        }
+
     }
 
     private RTKLDto message2Dto(RTKLMessage rtklMessage) {

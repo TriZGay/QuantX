@@ -53,7 +53,7 @@ public class KLMapper {
                     + "(market,code,rehab_type,high_price,open_price,low_price,close_price,last_close_price,volume,turnover,turnover_rate,pe,change_rate,update_time,add_time)" +
                     " values(:market,:code,:rehabType,:highPrice,:openPrice,:lowPrice,:closePrice,:lastClosePrice,:volume,:turnover,:turnoverRate,:pe,:changeRate,:updateTime,:addTime)";
             int[] updateRows = namedParameterJdbcTemplate.batchUpdate(sql, SqlParameterSourceUtils.createBatch(dtos));
-            LOGGER.info("插入成功:条数{}", Arrays.stream(updateRows).sum());
+            LOGGER.info("插入K线数据成功:条数{}", Arrays.stream(updateRows).sum());
             return true;
         } catch (Exception e) {
             LOGGER.error("插入K线数据失败.", e);
