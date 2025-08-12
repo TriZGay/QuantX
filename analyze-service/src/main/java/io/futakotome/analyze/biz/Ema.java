@@ -110,7 +110,7 @@ public class Ema {
                         List<KLineDto> kGroupByKey = groupingKLineByCodeAndRehabType.get(key);
                         List<EmaDto> forwardEmas = emaMapper.queryList(new EmaDto(toTable, key.getCode(), key.getRehabType(), sdt.getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER), endDateTime));
                         EmaDto initialEma = forwardEmas.stream().filter(forwardEma ->
-                                        LocalDateTime.parse(forwardEma.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
+                                        LocalDateTime.parse(forwardEma.getUpdateTime(), DateUtils.DATE_TIME_WITH_MILLISECOND_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
                                 .findFirst().orElseGet(() -> {
                                     //有些标的物不是从2025年1月2号开始收集K线数据
                                     EmaDto initEma = new EmaDto();

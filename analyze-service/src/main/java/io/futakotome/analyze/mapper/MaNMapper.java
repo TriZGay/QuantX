@@ -48,7 +48,7 @@ public class MaNMapper {
                     "round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 29 following),4) as ma_30," +
                     "round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 59 following),4) as ma_60," +
                     "round(avg(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 119 following),4) as ma_120," +
-                    "update_time" +
+                    "toString(update_time) as update_time" +
                     " from :tableName" +
                     " prewhere  (update_time >= :start) and (update_time <= :end) order by update_time asc ";
             return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
@@ -64,7 +64,7 @@ public class MaNMapper {
 
     public List<MaNDto> queryMaN(MaNDto maNDto) {
         try {
-            String sql = "select market,code,rehab_type,ma_5,ma_10,ma_20,ma_30,ma_60,ma_120,update_time" +
+            String sql = "select market,code,rehab_type,ma_5,ma_10,ma_20,ma_30,ma_60,ma_120,toString(update_time) as update_time" +
                     " from :tableName" +
                     " prewhere (1=1) ";
             if (Objects.nonNull(maNDto.getRehabType())) {

@@ -27,7 +27,7 @@ public class ArbrMapper {
 
     public List<ArbrDto> queryArbrList(ArbrDto arbrDto) {
         try {
-            String sql = "select market,code,rehab_type,round(ar,4) as ar,round(br,4)as br,update_time" +
+            String sql = "select market,code,rehab_type,round(ar,4) as ar,round(br,4)as br,toString(update_time) as update_time" +
                     " from :table" +
                     " prewhere (1=1)";
             if (Objects.nonNull(arbrDto.getCode())) {
@@ -77,7 +77,7 @@ public class ArbrMapper {
                     "select market, " +
                     "       code, " +
                     "       rehab_type, " +
-                    "       update_time, " +
+                    "      toString( update_time) as update_time, " +
                     "       (sum(high_price - open_price) over w / sum(open_price - low_price) over w) * 100 as ar, " +
                     "       (sum(greatest(0, high_price - pre_close_price)) over w / sum(greatest(0, pre_close_price - low_price)) over w) * 100 as br " +
                     "from pre_close_prices " +

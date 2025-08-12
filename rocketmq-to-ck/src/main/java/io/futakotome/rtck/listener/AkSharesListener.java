@@ -29,8 +29,8 @@ public class AkSharesListener {
         this.objectMapper = objectMapper;
     }
 
-    @KafkaListener(groupId = MessageCommon.US_RT_CONSUMER_GROUP, topics = {MessageCommon.US_RT_TOPIC},
-            errorHandler = "rtKLineErrorHandler")
+//    @KafkaListener(groupId = MessageCommon.US_RT_CONSUMER_GROUP, topics = {MessageCommon.US_RT_TOPIC},
+//            errorHandler = "rtKLineErrorHandler")
     public void usRealTimeListener(List<ConsumerRecord<?, ?>> records) throws JsonProcessingException {
         List<UsRtPriceMessage> messages = new ArrayList<>();
         for (ConsumerRecord<?, ?> record : records) {

@@ -89,7 +89,7 @@ public class Kdj {
                     groupingRsvByCodeAndRehabType.keySet().forEach(key -> {
                         List<KdjDto> kdjsByKey = groupingRsvByCodeAndRehabType.get(key);
                         KdjDto initKdj = kdjsByKey.stream().filter(forwardKdj ->
-                                        LocalDateTime.parse(forwardKdj.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
+                                        LocalDateTime.parse(forwardKdj.getUpdateTime(), DateUtils.DATE_TIME_WITH_MILLISECOND_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
                                 .findFirst().orElseGet(() -> {
                                     KdjDto initKdjDto = new KdjDto();
                                     initKdjDto.setK(50.0);

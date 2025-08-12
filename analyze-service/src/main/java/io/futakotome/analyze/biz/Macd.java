@@ -87,7 +87,7 @@ public class Macd {
                     groupingDifByCodeAndRehabType.keySet().forEach(key -> {
                         List<MacdDto> difByKey = groupingDifByCodeAndRehabType.get(key);
                         MacdDto initMacd = difByKey.stream().filter(forwardDif ->
-                                        LocalDateTime.parse(forwardDif.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
+                                        LocalDateTime.parse(forwardDif.getUpdateTime(), DateUtils.DATE_TIME_WITH_MILLISECOND_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
                                 .findFirst().orElseGet(() -> {
                                     //有些标的物不是从2025年1月2号开始收集K线数据
                                     MacdDto initMacdDto = new MacdDto();

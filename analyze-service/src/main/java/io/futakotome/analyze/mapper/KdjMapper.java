@@ -27,7 +27,7 @@ public class KdjMapper {
 
     public List<KdjDto> queryList(KdjDto kdjDto) {
         try {
-            String sql = "select market,code,rehab_type,round(k,4) as k,round(d,4)as d,round(j,4)as j,update_time" +
+            String sql = "select market,code,rehab_type,round(k,4) as k,round(d,4)as d,round(j,4)as j,toString(update_time) as update_time" +
                     " from :table" +
                     " prewhere (1=1)";
             if (Objects.nonNull(kdjDto.getCode())) {
@@ -72,7 +72,7 @@ public class KdjMapper {
                     "         (select market," +
                     "                 code," +
                     "                 rehab_type," +
-                    "                 update_time," +
+                    "                 toString(update_time) as update_time," +
                     "                 close_price," +
                     "                 max(high_price)" +
                     "                     over (partition by (code, rehab_type) order by update_time  rows BETWEEN 8 preceding and current row)  as highest_9," +

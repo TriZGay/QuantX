@@ -26,7 +26,7 @@ public class BollMapper {
 
     public List<BollDto> queryBolls(BollDto bollDto) {
         try {
-            String sql = "select market,code,rehab_type,ma20_mid,double_upper,double_lower,one_upper,one_lower,triple_upper,triple_lower,update_time" +
+            String sql = "select market,code,rehab_type,ma20_mid,double_upper,double_lower,one_upper,one_lower,triple_upper,triple_lower,toString(update_time) as update_time" +
                     " from :tableName" +
                     " prewhere code=:code and rehab_type=:rehabType and update_time >= :start and update_time <= :end" +
                     " order by update_time asc";
@@ -49,7 +49,7 @@ public class BollMapper {
                     "round(ma20_mid - stddevPopStable(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 19 following),4) as one_lower," +
                     "round(ma20_mid + 3*stddevPopStable(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 19 following),4) as triple_upper," +
                     "round(ma20_mid - 3*stddevPopStable(close_price) over (partition by (code,rehab_type) order by update_time desc rows between 0 preceding and 19 following),4) as triple_lower," +
-                    "update_time" +
+                    "toString(update_time) as update_time " +
                     " from :table" +
                     " where update_time>=:startDateTime and update_time<=:endDateTime";
             return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{

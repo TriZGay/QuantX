@@ -76,8 +76,8 @@ public class RTKLineListener {
     }
 
     //todo K线其他类型
-    @KafkaListener(groupId = "test_ck_kafka_group", topics = {"test_ck_kafka"},
-            errorHandler = "rtKLineErrorHandler")
+//    @KafkaListener(groupId = "test_ck_kafka_group", topics = {"test_ck_kafka"},
+//            errorHandler = "rtKLineErrorHandler")
     public void testCkKafka(String message) {
         System.out.println(message);
     }

@@ -48,8 +48,8 @@ public class MaN {
                 if (!tradeDates.isEmpty()) {
                     TradeDateDto sdt = tradeDates.get(0);
                     List<MaNDto> maNs = repository.queryMaUseKArc(fromTableName, sdt.getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER), endDateTime);
-                    List<MaNDto> toInsertMaN = maNs.stream().filter(maNDto ->
-                                    LocalDateTime.parse(maNDto.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER).isAfter(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
+                    List<MaNDto> toInsertMaN = maNs.stream().filter(maNDto -> LocalDateTime.parse(maNDto.getUpdateTime(), DateUtils.DATE_TIME_WITH_MILLISECOND_FORMATTER)
+                                    .isAfter(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
                             .collect(Collectors.toList());
                     if (repository.insetMaBatch(toTableName, toInsertMaN)) {
                         LOGGER.info("{}->{}时间段:{}-{}归档MA数据成功.", fromTableName, toTableName,

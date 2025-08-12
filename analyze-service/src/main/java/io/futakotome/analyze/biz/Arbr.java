@@ -65,7 +65,7 @@ public class Arbr {
                 List<ArbrDto> prefetchDto = arbrMapper.insertPrefetch(fromTableName, start, endDateTime);
                 List<ArbrDto> toAddList = prefetchDto.stream()
                         .filter(arbrDto -> {
-                            LocalDateTime dataDateTime = LocalDateTime.parse(arbrDto.getUpdateTime(), DateUtils.DATE_TIME_FORMATTER);
+                            LocalDateTime dataDateTime = LocalDateTime.parse(arbrDto.getUpdateTime(), DateUtils.DATE_TIME_WITH_MILLISECOND_FORMATTER);
                             LocalDateTime startBoundary = LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER);
                             return dataDateTime.isEqual(startBoundary) || dataDateTime.isAfter(startBoundary);
                         })

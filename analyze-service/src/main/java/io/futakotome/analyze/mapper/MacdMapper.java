@@ -54,7 +54,7 @@ public class MacdMapper {
 
     public List<MacdDto> queryDif(EmaDto emaDto) {
         try {
-            String sql = "select market,code,rehab_type,round(ema_12 - ema_26,4) as dif,update_time from :table" +
+            String sql = "select market,code,rehab_type,round(ema_12 - ema_26,4) as dif,toString(update_time) as update_time from :table" +
                     " prewhere (update_time>=:start) and (update_time<=:end) order by update_time asc";
             return namedParameterJdbcTemplate.query(sql,
                     new BeanPropertySqlParameterSource(emaDto),
