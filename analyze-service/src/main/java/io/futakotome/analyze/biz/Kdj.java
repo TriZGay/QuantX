@@ -2,20 +2,15 @@ package io.futakotome.analyze.biz;
 
 import io.futakotome.analyze.controller.vo.KdjRequest;
 import io.futakotome.analyze.controller.vo.KdjResponse;
-import io.futakotome.analyze.controller.vo.MacdRequest;
-import io.futakotome.analyze.controller.vo.MacdResponse;
 import io.futakotome.analyze.mapper.KdjMapper;
-import io.futakotome.analyze.mapper.MacdMapper;
 import io.futakotome.analyze.mapper.TradeDateMapper;
 import io.futakotome.analyze.mapper.dto.CodeAndRehabTypeKey;
 import io.futakotome.analyze.mapper.dto.KdjDto;
-import io.futakotome.analyze.mapper.dto.MacdDto;
 import io.futakotome.analyze.mapper.dto.TradeDateDto;
 import io.futakotome.analyze.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
