@@ -1,0 +1,37 @@
+server:
+  port: 9091
+ck:
+  driverClass: com.clickhouse.jdbc.ClickHouseDriver
+  url: jdbc:ch://localhost:8123/quantx
+  user: default
+  password: 123456
+pg:
+  driverClass: org.postgresql.Driver
+  url: jdbc:postgresql://localhost:5432/quantx_offline
+  user: postgres
+  password: 123456
+logging:
+  level:
+    org.springframework.jdbc.core.JdbcTemplate: DEBUG
+spring:
+  quartz:
+    jdbc:
+      initialize-schema: never
+    job-store-type: jdbc
+    wait-for-jobs-to-complete-on-shutdown: true
+    overwrite-existing-jobs: false
+    auto-startup: true
+    startup-delay: 0s
+    scheduler-name: quantxQuartzScheduler
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: QuantxScheduler
+            instanceId: AUTO
+          jobStore:
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            tablePrefix: QRTZ_
+            isClustered: false
+            useProperties: false
