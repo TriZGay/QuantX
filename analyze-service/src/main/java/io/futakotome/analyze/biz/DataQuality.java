@@ -8,6 +8,7 @@ import io.futakotome.analyze.mapper.dto.KLineRepeatDetailDto;
 import io.futakotome.analyze.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,17 +16,14 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Component
 public class DataQuality {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataQuality.class);
     private final DataQualityMapper repository;
-    private KLine kLine;
+    private final KLine kLine;
 
-    public DataQuality(DataQualityMapper repository) {
+    public DataQuality(DataQualityMapper repository, KLine kLine) {
         this.repository = repository;
-    }
-
-    public DataQuality(DataQualityMapper mapper, KLine kLine) {
-        this.repository = mapper;
         this.kLine = kLine;
     }
 

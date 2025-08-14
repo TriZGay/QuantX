@@ -8,11 +8,13 @@ import io.futakotome.analyze.mapper.KLineMapper;
 import io.futakotome.analyze.mapper.MetaDataMapper;
 import io.futakotome.analyze.mapper.dto.AnaDatabaseInfoDto;
 import io.futakotome.analyze.mapper.dto.AnaTableInfoDto;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Component
 public class Meta {
     private final MetaDataMapper repository;
 

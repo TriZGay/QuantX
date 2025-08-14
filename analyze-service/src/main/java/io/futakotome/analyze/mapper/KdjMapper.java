@@ -1,5 +1,6 @@
 package io.futakotome.analyze.mapper;
 
+import io.futakotome.analyze.biz.Kdj;
 import io.futakotome.analyze.mapper.dto.KdjDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,72 @@ public class KdjMapper {
 
     public KdjMapper(@Qualifier("analyzeNamedParameterJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
+
+    /**
+     * 递归cte计算kdj
+     * 三个时间的关系[....startDateTime...toAddDateTime...endDateTime...]
+     *
+     * @param kdjTable      kdj表
+     * @param kTable        k线表
+     * @param startDateTime 开始时间,因为需要计算9天的滑动窗口,一般建议开始时间取需要计算的那天的前一天交易日
+     * @param endDateTime   结束时间
+     * @param toAddDateTime 需要入库的时间段截取,
+     * @return
+     */
+    public List<KdjDto> computeKdj(String kdjTable, String kTable, String code, Integer rehabType, String startDateTime, String endDateTime, String toAddDateTime) {
+        try {
+            String sql = "with recursive rsv_pre as (" +
+                    "    select market, code, rehab_type, high_price, low_price, close_price, update_time, max (high_price) over (order by update_time rows between 8 preceding and current row ) as highest_9, min (low_price) over (order by update_time rows between 8 preceding and current row) as lowest_9" +
+                    "    from " + kTable +
+                    "    where update_time >= :startDateTime and update_time <= :endDateTime and code = :code and rehab_type = :rehabType" +
+                    "    ), rsv_data as (" +
+                    "    select *, case" +
+                    "    when highest_9 = lowest_9 then 50" +
+                    "    else (close_price - lowest_9) / (highest_9 - lowest_9) * 100" +
+                    "    end as rsv, row_number() over (order by update_time ) as rn" +
+                    "    from rsv_pre" +
+                    "    ), connect_data as (" +
+                    "    select r.*, kdj.k, kdj.d, kdj.j" +
+                    "    from rsv_data r left join " + kdjTable + " kdj on r.code=kdj.code and r.rehab_type=kdj.rehab_type" +
+                    "    ), kdj_cte as (" +
+                    "    select market, code, rehab_type, k, d, j, rsv, update_time, rn" +
+                    "    from connect_data" +
+                    "    where rn = 1" +
+                    "    union all" +
+                    "    select market, code, rehab_type, ((2/3)*e.k)+((1/3)*p.rsv) as k, ((2/3)*e.d+(1/3)*k) as d, ((3*k)-(2*d)) as j, rsv, update_time, p.rn" +
+                    "    from connect_data p, kdj_cte e" +
+                    "    where p.rn - 1 = e.rn" +
+                    "    )" +
+                    "select market, code, rehab_type, k, d, j, toString(update_time) as update_time " +
+                    "from kdj_cte " +
+                    "where update_time >= :toAddDateTime";
+            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
+                put("code", code);
+                put("rehabType", rehabType);
+                put("startDateTime", startDateTime);
+                put("endDateTime", endDateTime);
+                put("toAddDateTime", toAddDateTime);
+            }}, new BeanPropertyRowMapper<>(KdjDto.class));
+        } catch (Exception e) {
+            LOGGER.info("计算KDJ失败.", e);
+            return null;
+        }
+    }
+
+    public Integer insertInitKdjValues(String kdjTable, String kTable) {
+        try {
+            String sql = "insert into " + kdjTable +
+                    " select market, code, rehab_type, 50, 50, 50, update_time" +
+                    " from " + kTable +
+                    " where update_time =:date";
+            return namedParameterJdbcTemplate.update(sql, new HashMap<>() {{
+                put("date", "2025-01-02 09:30:00");
+            }});
+        } catch (Exception e) {
+            LOGGER.error("插入KDJ初始值失败.", e);
+            return null;
+        }
     }
 
     public List<KdjDto> queryList(KdjDto kdjDto) {
@@ -66,6 +133,7 @@ public class KdjMapper {
         }
     }
 
+    @Deprecated
     public List<KdjDto> queryRsv(String fromTable, String startDateTime, String endDateTime) {
         try {
             String sql = "with kdj_base as" +

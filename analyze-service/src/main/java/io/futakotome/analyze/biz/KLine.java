@@ -8,12 +8,14 @@ import io.futakotome.analyze.mapper.dto.KLineDto;
 import io.futakotome.analyze.mapper.dto.KLineRepeatDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Component
 public class KLine {
     private static final Logger LOGGER = LoggerFactory.getLogger(KLine.class);
     private final KLineMapper repository;

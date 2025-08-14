@@ -3,8 +3,6 @@ package io.futakotome.analyze.controller;
 import io.futakotome.analyze.biz.DataQuality;
 import io.futakotome.analyze.biz.Meta;
 import io.futakotome.analyze.controller.vo.*;
-import io.futakotome.analyze.mapper.DataQualityMapper;
-import io.futakotome.analyze.mapper.MetaDataMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -22,9 +20,9 @@ public class MetaController {
     private final Meta meta;
     private final DataQuality dataQuality;
 
-    public MetaController(MetaDataMapper mapper, DataQualityMapper dataQualityMapper) {
-        this.meta = new Meta(mapper);
-        this.dataQuality = new DataQuality(dataQualityMapper);
+    public MetaController(Meta meta, DataQuality dataQuality) {
+        this.meta = meta;
+        this.dataQuality = dataQuality;
     }
 
     @PostMapping("/dataQaDetails")

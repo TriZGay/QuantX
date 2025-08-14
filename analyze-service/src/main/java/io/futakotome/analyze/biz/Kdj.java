@@ -2,14 +2,17 @@ package io.futakotome.analyze.biz;
 
 import io.futakotome.analyze.controller.vo.KdjRequest;
 import io.futakotome.analyze.controller.vo.KdjResponse;
+import io.futakotome.analyze.mapper.KLineMapper;
 import io.futakotome.analyze.mapper.KdjMapper;
 import io.futakotome.analyze.mapper.TradeDateMapper;
 import io.futakotome.analyze.mapper.dto.CodeAndRehabTypeKey;
+import io.futakotome.analyze.mapper.dto.KLineDto;
 import io.futakotome.analyze.mapper.dto.KdjDto;
 import io.futakotome.analyze.mapper.dto.TradeDateDto;
 import io.futakotome.analyze.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,19 +22,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Component
 public class Kdj {
     private static final Logger LOGGER = LoggerFactory.getLogger(Rsi.class);
     private final KdjMapper kdjMapper;
-    private TradeDateMapper tradeDateMapper;
+    private final KLineMapper kLineMapper;
+    private final TradeDateMapper tradeDateMapper;
 
-    public Kdj(KdjMapper kdjMapper, TradeDateMapper tradeDateMapper) {
+    public Kdj(KdjMapper kdjMapper, KLineMapper kLineMapper, TradeDateMapper tradeDateMapper) {
         this.kdjMapper = kdjMapper;
+        this.kLineMapper = kLineMapper;
         this.tradeDateMapper = tradeDateMapper;
     }
 
-    public Kdj(KdjMapper kdjMapper) {
-        this.kdjMapper = kdjMapper;
-    }
 
     public List<KdjResponse> queryKdjList(KdjRequest kdjRequest) {
         switch (kdjRequest.getGranularity()) {
@@ -54,6 +57,31 @@ public class Kdj {
         kdjResponse.setJ(kdjDto.getJ());
         kdjResponse.setUpdateTime(kdjDto.getUpdateTime());
         return kdjResponse;
+    }
+
+    //初始化2025-01-02的数据作为第一天的初始化数据
+    public String initKdj933(Integer granularity) {
+        switch (granularity) {
+            case 1:
+                return initKdj933(KdjMapper.KDJ_MIN_1_TABLE_NAME, KLineMapper.KL_MIN_1_ARC_TABLE_NAME);
+            case 2:
+                return null;
+            default:
+                return null;
+        }
+    }
+
+    private String initKdj933(String kdjTable, String kTable) {
+        Integer insertRow = kdjMapper.insertInitKdjValues(kdjTable, kTable);
+        LOGGER.info("初始化KDJ:条数{}", insertRow);
+        List<KLineDto> groupingKLines = kLineMapper.queryKLineGroupByCodeRehabType(kTable);
+        groupingKLines.forEach(k -> {
+            List<KdjDto> toAddKdjData = kdjMapper.computeKdj(kdjTable, kTable, k.getCode(), k.getRehabType(), "2025-01-02 09:30:00", "2025-01-02 16:00:00", "2025-01-02 09:31:00");
+            if (kdjMapper.insertBatch(kdjTable, toAddKdjData)) {
+                LOGGER.info("{},{}计算初始化KDJ数据成功:条数{}", k.getCode(), k.getRehabType(), toAddKdjData.size());
+            }
+        });
+        return "初始化成功.";
     }
 
     public void calculate(String toTableName, String fromTableName, String startDateTime, String endDateTime) {

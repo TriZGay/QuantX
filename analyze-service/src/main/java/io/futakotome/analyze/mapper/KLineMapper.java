@@ -49,6 +49,16 @@ public class KLineMapper {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
+    //查询按代码和复权类型的分组数据
+    public List<KLineDto> queryKLineGroupByCodeRehabType(String table) {
+        try {
+            String sql = "select market,code,rehab_type from " + table + " group by (market,code,rehab_type)";
+            return namedParameterJdbcTemplate.query(sql, new BeanPropertyRowMapper<>(KLineDto.class));
+        } catch (Exception e) {
+            LOGGER.error("查询K线按代码和复权类型分组数据错误.", e);
+            return null;
+        }
+    }
 
     //查询K线归档表里的重复数据
     public List<KLineRepeatDto> queryKLineArchivedRepeated(String start, String end, String tableName) {

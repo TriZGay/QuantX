@@ -1,21 +1,14 @@
 package io.futakotome.analyze.controller;
 
-import io.futakotome.analyze.biz.Boll;
 import io.futakotome.analyze.biz.Kdj;
-import io.futakotome.analyze.controller.vo.BollRequest;
 import io.futakotome.analyze.controller.vo.Granularity;
 import io.futakotome.analyze.controller.vo.KdjRequest;
-import io.futakotome.analyze.mapper.BollMapper;
-import io.futakotome.analyze.mapper.KdjMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
 
@@ -26,8 +19,19 @@ public class KdjController {
     private static final String PRINT_REQUEST_TEMPLATE = "KDJ数据查询,请求参数:{},粒度:{},时间范围:start={},end={}";
     private final Kdj kdj;
 
-    public KdjController(KdjMapper kdjMapper) {
-        this.kdj = new Kdj(kdjMapper);
+    public KdjController(Kdj kdj) {
+        this.kdj = kdj;
+    }
+
+    @GetMapping("/initKdj933/{granularity}")
+    public Mono<ResponseEntity<?>> initKdj933(@PathVariable Integer granularity) {
+        return Mono.create(responseEntityMonoSink -> {
+            try {
+                responseEntityMonoSink.success(ResponseEntity.ok(kdj.initKdj933(granularity)));
+            } catch (Exception e) {
+                responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
+            }
+        });
     }
 
     @PostMapping("/kdj933")
