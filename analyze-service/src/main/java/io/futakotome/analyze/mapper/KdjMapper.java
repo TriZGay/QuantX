@@ -1,6 +1,5 @@
 package io.futakotome.analyze.mapper;
 
-import io.futakotome.analyze.biz.Kdj;
 import io.futakotome.analyze.mapper.dto.KdjDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
