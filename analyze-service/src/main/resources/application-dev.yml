@@ -2,12 +2,12 @@ server:
   port: 9091
 ck:
   driverClass: com.clickhouse.jdbc.ClickHouseDriver
-  url: jdbc:ch://172.27.153.152:8123/quantx
+  url: jdbc:ch://172.27.156.44:8123/quantx
   user: default
   password: 123456
 pg:
   driverClass: org.postgresql.Driver
-  url: jdbc:postgresql://172.27.153.152:5432/quantx_offline
+  url: jdbc:postgresql://172.27.156.44:5432/quantx_offline
   user: postgres
   password: 123456
 logging:

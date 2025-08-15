@@ -85,52 +85,61 @@ public class Kdj {
     }
 
     public void calculate(String toTableName, String fromTableName, String startDateTime, String endDateTime) {
-        LocalDate startDate = LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)
-                .toLocalDate();
+        LocalDate startDate = LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER).toLocalDate();
         if (startDate.isEqual(LocalDate.of(2025, 1, 2))) {
             //初始值从今年开始1月2日交易日开始算
-            List<KdjDto> rsv = kdjMapper.queryRsv(fromTableName, startDateTime, endDateTime);
-            Map<CodeAndRehabTypeKey, List<KdjDto>> groupingRsvByCodeAndRehabType = rsv.stream()
-                    .collect(Collectors.groupingBy(rsvValue -> new CodeAndRehabTypeKey(rsvValue.getRehabType(), rsvValue.getCode())));
-            groupingRsvByCodeAndRehabType.keySet().forEach(key -> {
-                List<KdjDto> kdjsByKey = groupingRsvByCodeAndRehabType.get(key);
-                List<KdjDto> toAddList = rsvToKdj(kdjsByKey, null, null);
-                if (kdjMapper.insertBatch(toTableName, toAddList)) {
-                    LOGGER.info("{}->{}时间段:{}-{}归档KDJ数据成功.", fromTableName, toTableName, startDateTime, endDateTime);
-                }
-            });
+            LOGGER.error("2025-01-02是数据初始日, 请使用初始化");
+            throw new IllegalStateException("执行失败");
+            //            List<KdjDto> rsv = kdjMapper.queryRsv(fromTableName, startDateTime, endDateTime);
+            //            Map<CodeAndRehabTypeKey, List<KdjDto>> groupingRsvByCodeAndRehabType = rsv.stream()
+            //                    .collect(Collectors.groupingBy(rsvValue -> new CodeAndRehabTypeKey(rsvValue.getRehabType(), rsvValue.getCode())));
+            //            groupingRsvByCodeAndRehabType.keySet().forEach(key -> {
+            //                List<KdjDto> kdjsByKey = groupingRsvByCodeAndRehabType.get(key);
+            //                List<KdjDto> toAddList = rsvToKdj(kdjsByKey, null, null);
+            //                if (kdjMapper.insertBatch(toTableName, toAddList)) {
+            //                    LOGGER.info("{}->{}时间段:{}-{}归档KDJ数据成功.", fromTableName, toTableName, startDateTime, endDateTime);
+            //                }
+            //            });
         } else {
             //不是1月2日的话从前一天的开始算
             List<TradeDateDto> tradeDates = tradeDateMapper.queryTradeDateByMarketPreceding(1, startDate, "1");
             if (Objects.nonNull(tradeDates)) {
                 if (!tradeDates.isEmpty()) {
-                    TradeDateDto sdt = tradeDates.get(0);
-                    String start = sdt.getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER);
-                    List<KdjDto> rsv = kdjMapper.queryRsv(fromTableName, start, endDateTime);
-                    Map<CodeAndRehabTypeKey, List<KdjDto>> groupingRsvByCodeAndRehabType = rsv.stream()
-                            .collect(Collectors.groupingBy(rsvValue -> new CodeAndRehabTypeKey(rsvValue.getRehabType(), rsvValue.getCode())));
-                    groupingRsvByCodeAndRehabType.keySet().forEach(key -> {
-                        List<KdjDto> kdjsByKey = groupingRsvByCodeAndRehabType.get(key);
-                        KdjDto initKdj = kdjsByKey.stream().filter(forwardKdj ->
-                                        LocalDateTime.parse(forwardKdj.getUpdateTime(), DateUtils.DATE_TIME_WITH_MILLISECOND_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
-                                .findFirst().orElseGet(() -> {
-                                    KdjDto initKdjDto = new KdjDto();
-                                    initKdjDto.setK(50.0);
-                                    initKdjDto.setD(50.0);
-                                    return initKdjDto;
-                                });
-                        List<KdjDto> toAddList = rsvToKdj(kdjsByKey, initKdj.getK(), initKdj.getD());
-                        if (kdjMapper.insertBatch(toTableName, toAddList)) {
-                            LOGGER.info("{}->{}时间段:{}-{}归档KDJ数据成功.", fromTableName, toTableName, startDateTime, endDateTime);
+                    String start = tradeDates.get(0).getTime().atStartOfDay().format(DateUtils.DATE_TIME_FORMATTER);
+                    List<KLineDto> groupingKLines = kLineMapper.queryKLineGroupByCodeRehabType(fromTableName);
+                    groupingKLines.forEach(k -> {
+                        List<KdjDto> toAddKdjData = kdjMapper.computeKdj(toTableName, fromTableName, k.getCode(), k.getRehabType(), start, endDateTime, startDateTime);
+                        if (kdjMapper.insertBatch(toTableName, toAddKdjData)) {
+                            LOGGER.info("{}->{}时间段:{}-{}归档KDJ数据成功.条数:{}", fromTableName, toTableName, startDateTime, endDateTime, toAddKdjData.size());
                         }
                     });
+                    //                    List<KdjDto> rsv = kdjMapper.queryRsv(fromTableName, start, endDateTime);
+                    //                    Map<CodeAndRehabTypeKey, List<KdjDto>> groupingRsvByCodeAndRehabType = rsv.stream()
+                    //                            .collect(Collectors.groupingBy(rsvValue -> new CodeAndRehabTypeKey(rsvValue.getRehabType(), rsvValue.getCode())));
+                    //                    groupingRsvByCodeAndRehabType.keySet().forEach(key -> {
+                    //                        List<KdjDto> kdjsByKey = groupingRsvByCodeAndRehabType.get(key);
+                    //                        KdjDto initKdj = kdjsByKey.stream().filter(forwardKdj ->
+                    //                                        LocalDateTime.parse(forwardKdj.getUpdateTime(), DateUtils.DATE_TIME_WITH_MILLISECOND_FORMATTER).isBefore(LocalDateTime.parse(startDateTime, DateUtils.DATE_TIME_FORMATTER)))
+                    //                                .findFirst().orElseGet(() -> {
+                    //                                    KdjDto initKdjDto = new KdjDto();
+                    //                                    initKdjDto.setK(50.0);
+                    //                                    initKdjDto.setD(50.0);
+                    //                                    return initKdjDto;
+                    //                                });
+                    //                        List<KdjDto> toAddList = rsvToKdj(kdjsByKey, initKdj.getK(), initKdj.getD());
+                    //                        if (kdjMapper.insertBatch(toTableName, toAddList)) {
+                    //                            LOGGER.info("{}->{}时间段:{}-{}归档KDJ数据成功.", fromTableName, toTableName, startDateTime, endDateTime);
+                    //                        }
+                    //                    });
                 } else {
                     LOGGER.error("{}->{}时间段:{}-{}归档KDJ数据失败.交易日期缺失数据", fromTableName, toTableName,
                             startDateTime, endDateTime);
+                    throw new IllegalStateException("执行失败");
                 }
             } else {
                 LOGGER.error("{}->{}时间段:{}-{}归档KDJ数据失败.交易日期为null", fromTableName, toTableName,
                         startDateTime, endDateTime);
+                throw new IllegalStateException("执行失败");
             }
         }
     }

@@ -2,7 +2,7 @@
 with recursive rsv_pre as (
     select market, code, rehab_type, high_price, low_price, close_price, update_time, max (high_price) over (order by update_time rows between 8 preceding and current row ) as highest_9, min (low_price) over (order by update_time rows between 8 preceding and current row) as lowest_9
     from t_kl_min_1_arc
-    where update_time >= '2025-01-02 09:30:00' and update_time <= '2025-01-02 16:00:00' and code = '00700' and rehab_type = 1
+    where update_time >= '2025-01-02 00:00:00' and update_time <= '2025-01-08 16:00:00' and code = '00700' and rehab_type = 1
     ), rsv_data as (
     select *, case
     when highest_9 = lowest_9 then 50
@@ -23,7 +23,7 @@ with recursive rsv_pre as (
     )
 select market, code, rehab_type, k, d, j, update_time
 from kdj_cte
-where update_time >= '2025-01-02 09:31:00';
+where update_time >= '2025-01-03 09:30:00';
 
 -- 初始化2025年kdj数据
 insert into t_kdj_min_1_arc
