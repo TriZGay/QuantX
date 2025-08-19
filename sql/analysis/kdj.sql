@@ -30,3 +30,24 @@ insert into t_kdj_min_1_arc
 select market, code, rehab_type, 50, 50, 50, update_time
 from t_kl_min_1_arc
 where update_time = '2025-01-02 09:30:00'
+
+-- kdj策略-只判断金叉、死叉
+with recursive pre_kdj as (
+    select *, row_number() over (order by update_time ) as rn
+    from t_kdj_min_1_arc
+    where code='00700' and rehab_type=1 and update_time >='2025-01-02 09:30:00' and update_time <='2025-01-02 16:00:00'
+    ), golden_dead_cross as (
+    select market, code, rehab_type, k, d, j, 'HOLD' as signal, update_time, rn
+    from pre_kdj where rn = 1
+    union all
+    select market, code, rehab_type, k, d, j, case when (p.k<p.d and e.k>e.d ) then 'BUY'
+    when (p.k>p.d and e.k<e.d) then 'SELL'
+    else 'HOLD'
+    end as signal, update_time, p.rn
+    from pre_kdj p, golden_dead_cross e
+    where p.rn - 1 = e.rn
+    )
+select *
+from golden_dead_cross;
+
+-- kdj策略-金叉死叉结合超买区(K>80/D>70/J>100)、超卖区(K<20/D<30/J<0)

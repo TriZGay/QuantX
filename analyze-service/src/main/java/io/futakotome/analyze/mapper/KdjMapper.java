@@ -50,7 +50,7 @@ public class KdjMapper {
                     "    from rsv_pre" +
                     "    ), connect_data as (" +
                     "    select r.*, kdj.k, kdj.d, kdj.j" +
-                    "    from rsv_data r left join " + kdjTable + " kdj on r.code=kdj.code and r.rehab_type=kdj.rehab_type" +
+                    "    from rsv_data r left join " + kdjTable + " kdj on r.code=kdj.code and r.rehab_type=kdj.rehab_type and r.update_time=kdj.update_time " +
                     "    ), kdj_cte as (" +
                     "    select market, code, rehab_type, k, d, j, rsv, update_time, rn" +
                     "    from connect_data" +
