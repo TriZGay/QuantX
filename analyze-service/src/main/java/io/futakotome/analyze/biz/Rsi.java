@@ -2,10 +2,8 @@ package io.futakotome.analyze.biz;
 
 import io.futakotome.analyze.controller.vo.RsiRequest;
 import io.futakotome.analyze.controller.vo.RsiResponse;
-import io.futakotome.analyze.mapper.MacdMapper;
 import io.futakotome.analyze.mapper.RsiMapper;
 import io.futakotome.analyze.mapper.TradeDateMapper;
-import io.futakotome.analyze.mapper.dto.MacdDto;
 import io.futakotome.analyze.mapper.dto.RsiDto;
 import io.futakotome.analyze.mapper.dto.TradeDateDto;
 import io.futakotome.analyze.utils.DateUtils;

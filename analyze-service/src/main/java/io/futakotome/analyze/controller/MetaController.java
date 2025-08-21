@@ -2,6 +2,7 @@ package io.futakotome.analyze.controller;
 
 import io.futakotome.analyze.biz.DataQuality;
 import io.futakotome.analyze.biz.Meta;
+import io.futakotome.analyze.biz.backtest.StrategyEnum;
 import io.futakotome.analyze.controller.vo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/meta")
@@ -114,5 +119,15 @@ public class MetaController {
                 }
             }).subscribe();
         });
+    }
+
+    @GetMapping("/strategyTypes")
+    public Mono<ResponseEntity<?>> getStrategyTypes() {
+        return Mono.create(responseEntityMonoSink -> responseEntityMonoSink.success(ResponseEntity.ok(strategyTypesOptions())));
+    }
+
+    private List<AntDesignSelectOptions> strategyTypesOptions() {
+        return Arrays.stream(StrategyEnum.values()).map(type -> new AntDesignSelectOptions(type.getName(), type.getCode()))
+                .collect(Collectors.toList());
     }
 }

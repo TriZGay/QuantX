@@ -1,5 +1,7 @@
 package io.futakotome.analyze.controller.vo;
 
+import io.futakotome.analyze.biz.backtest.StrategyEnum;
+
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -15,9 +17,21 @@ public class BackTestRequest extends RangeRequest {
     @EnumValid(target = Granularity.class, message = "粒度输入错误")
     private Integer granularity;
 
+    @NotNull(message = "策略必选")
+    @EnumValid(target = StrategyEnum.class, message = "策略输入错误")
+    private Integer strategyType;
+
     private Double initialCapital;
 
     private Double commission;
+
+    public Integer getStrategyType() {
+        return strategyType;
+    }
+
+    public void setStrategyType(Integer strategyType) {
+        this.strategyType = strategyType;
+    }
 
     public Double getInitialCapital() {
         return initialCapital;

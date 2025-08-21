@@ -1,7 +1,6 @@
 package io.futakotome.analyze.controller;
 
 import io.futakotome.analyze.controller.vo.BackTestRequest;
-import io.futakotome.analyze.controller.vo.Granularity;
 import io.futakotome.analyze.service.BackTestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +37,7 @@ public class BackTestController {
                 try {
                     responseEntityMonoSink.success(ResponseEntity.ok(backTestService.backTest(backTestRequest)));
                 } catch (Exception e) {
+                    LOGGER.error("回测错误.", e);
                     responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
                 }
             }).subscribe();

@@ -5,7 +5,6 @@ import io.futakotome.analyze.controller.vo.KdjResponse;
 import io.futakotome.analyze.mapper.KLineMapper;
 import io.futakotome.analyze.mapper.KdjMapper;
 import io.futakotome.analyze.mapper.TradeDateMapper;
-import io.futakotome.analyze.mapper.dto.CodeAndRehabTypeKey;
 import io.futakotome.analyze.mapper.dto.KLineDto;
 import io.futakotome.analyze.mapper.dto.KdjDto;
 import io.futakotome.analyze.mapper.dto.TradeDateDto;
@@ -18,7 +17,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 

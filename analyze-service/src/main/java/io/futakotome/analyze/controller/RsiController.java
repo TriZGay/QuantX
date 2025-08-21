@@ -1,11 +1,8 @@
 package io.futakotome.analyze.controller;
 
-import io.futakotome.analyze.biz.Macd;
 import io.futakotome.analyze.biz.Rsi;
 import io.futakotome.analyze.controller.vo.Granularity;
-import io.futakotome.analyze.controller.vo.MacdRequest;
 import io.futakotome.analyze.controller.vo.RsiRequest;
-import io.futakotome.analyze.mapper.MacdMapper;
 import io.futakotome.analyze.mapper.RsiMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

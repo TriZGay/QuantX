@@ -3,7 +3,6 @@ package io.futakotome.analyze.job;
 import io.futakotome.analyze.biz.Ema;
 import io.futakotome.analyze.mapper.EmaMapper;
 import io.futakotome.analyze.mapper.KLineMapper;
-import io.futakotome.analyze.mapper.MaNMapper;
 import io.futakotome.analyze.mapper.TradeDateMapper;
 import io.futakotome.analyze.utils.DateUtils;
 import org.quartz.Job;

@@ -1,9 +1,6 @@
 package io.futakotome.analyze.job;
 
 import io.futakotome.analyze.biz.Kdj;
-import io.futakotome.analyze.mapper.KLineMapper;
-import io.futakotome.analyze.mapper.KdjMapper;
-import io.futakotome.analyze.mapper.TradeDateMapper;
 import io.futakotome.analyze.utils.DateUtils;
 import org.quartz.Job;
 import org.quartz.JobDataMap;

@@ -3,17 +3,8 @@ package io.futakotome.analyze.controller.vo;
 import java.util.List;
 
 public class BackTestResponse {
-    List<KLineResponse> prices;
-    List<BackTestTradeSignalResponse> tradeSignals;
-    BackTestOvrResponse backTestOvr;
-
-    public List<KLineResponse> getPrices() {
-        return prices;
-    }
-
-    public void setPrices(List<KLineResponse> prices) {
-        this.prices = prices;
-    }
+    private List<BackTestTradeSignalResponse> tradeSignals;
+    private BackTestOvrResponse backTestOvr;
 
     public List<BackTestTradeSignalResponse> getTradeSignals() {
         return tradeSignals;

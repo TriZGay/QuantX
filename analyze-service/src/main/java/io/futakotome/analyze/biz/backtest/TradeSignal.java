@@ -8,14 +8,66 @@ public class TradeSignal {
     private Double price;
     private Integer quantity;
 
+    private Double open;
+    private Double close;
+    private Double high;
+    private Double low;
+    private Long volume;
+
     public TradeSignal() {
     }
 
-    public TradeSignal(String datetime, Action action, Double price, Integer quantity) {
+    public TradeSignal(String datetime, Action action, Double price, Integer quantity,
+                       Double open, Double close, Double high, Double low, Long volume) {
         this.datetime = datetime;
         this.action = action;
         this.price = price;
         this.quantity = quantity;
+        this.open = open;
+        this.close = close;
+        this.high = high;
+        this.low = low;
+        this.volume = volume;
+    }
+
+    public Double getOpen() {
+        return open;
+    }
+
+    public void setOpen(Double open) {
+        this.open = open;
+    }
+
+    public Double getClose() {
+        return close;
+    }
+
+    public void setClose(Double close) {
+        this.close = close;
+    }
+
+    public Double getHigh() {
+        return high;
+    }
+
+    public void setHigh(Double high) {
+        this.high = high;
+    }
+
+    public Double getLow() {
+        return low;
+    }
+
+    public void setLow(Double low) {
+        this.low = low;
+    }
+
+    public Long getVolume() {
+        return volume;
+    }
+
+    public void setVolume(Long volume) {
+        this.volume = volume;
     }
 
     public String getDatetime() {
@@ -51,7 +103,7 @@ public class TradeSignal {
     }
 
     public enum Action {
-        BUY, SELL, NONE
+        BUY, SELL, HOLD
     }
 
     public static BackTestTradeSignalResponse dto2Vo(TradeSignal dto) {
