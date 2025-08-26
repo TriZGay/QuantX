@@ -43,7 +43,20 @@ public class EmaService {
         return toAddKLines.stream()
                 .map(k -> {
                     CodeRehabTypeKey key = new CodeRehabTypeKey(k.getCode(), k.getRehabType());
-                    EmaDto cacheValue = EmaComputeCache.MIN_1_CACHE.get(key);
+                    //如果缓存里没有,就以close_price作为初值
+                    EmaDto cacheValue = EmaComputeCache.MIN_1_CACHE.getOrDefault(key, new EmaDto(
+                            k.getMarket(),
+                            k.getCode(),
+                            k.getRehabType(),
+                            k.getClosePrice(),
+                            k.getClosePrice(),
+                            k.getClosePrice(),
+                            k.getClosePrice(),
+                            k.getClosePrice(),
+                            k.getClosePrice(),
+                            k.getClosePrice(),
+                            k.getUpdateTime(),
+                            AddTimeUtil.generateAddTime()));
                     EmaDto toAddEmaDto = new EmaDto();
                     toAddEmaDto.setMarket(k.getMarket());
                     toAddEmaDto.setCode(key.getCode());

@@ -14,6 +14,24 @@ public class EmaDto {
     private String updateTime;
     private String addTime;
 
+    public EmaDto(Integer market, String code, Integer rehabType, Double ema_5, Double ema_10, Double ema_12, Double ema_20, Double ema_26, Double ema_60, Double ema_120, String updateTime, String addTime) {
+        this.market = market;
+        this.code = code;
+        this.rehabType = rehabType;
+        this.ema_5 = ema_5;
+        this.ema_10 = ema_10;
+        this.ema_12 = ema_12;
+        this.ema_20 = ema_20;
+        this.ema_26 = ema_26;
+        this.ema_60 = ema_60;
+        this.ema_120 = ema_120;
+        this.updateTime = updateTime;
+        this.addTime = addTime;
+    }
+
+    public EmaDto() {
+    }
+
     public String getAddTime() {
         return addTime;
     }

@@ -10,8 +10,9 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import static io.futakotome.rtck.mapper.EmaMapper.EMA_MIN_1_ARC_TABLE;
+import static io.futakotome.rtck.mapper.EmaMapper.EMA_MIN_1_RAW_TABLE;
 
 @Component
 public class EmaComputeCache implements InitializingBean {
@@ -23,7 +24,7 @@ public class EmaComputeCache implements InitializingBean {
      * value:初始值,和存放上次的值给本次迭代使用
      * }
      */
-    public static final Map<CodeRehabTypeKey, EmaDto> MIN_1_CACHE = new HashMap<>();
+    public static final Map<CodeRehabTypeKey, EmaDto> MIN_1_CACHE = new ConcurrentHashMap<>();
 
     public EmaComputeCache(EmaMapper emaMapper) {
         this.emaMapper = emaMapper;
@@ -31,14 +32,15 @@ public class EmaComputeCache implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        List<EmaDto> min1LatestEma = emaMapper.queryLatest(EMA_MIN_1_ARC_TABLE);
-        loadCache(EMA_MIN_1_ARC_TABLE, min1LatestEma);
+        List<EmaDto> min1LatestEma = emaMapper.queryLatest(EMA_MIN_1_RAW_TABLE);
+        loadCache(EMA_MIN_1_RAW_TABLE, min1LatestEma);
     }
 
     private void loadCache(String table, List<EmaDto> emas) {
-        if (EMA_MIN_1_ARC_TABLE.equals(table)) {
+        if (EMA_MIN_1_RAW_TABLE.equals(table)) {
             emas.forEach(ema -> MIN_1_CACHE.put(new CodeRehabTypeKey(ema.getCode(), ema.getRehabType()), ema));
             LOGGER.info("1分钟级ema计算缓存读取成功:{}", MIN_1_CACHE);
         }
     }
+
 }

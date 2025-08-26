@@ -40,7 +40,7 @@ public class EmaMapper {
     public List<EmaDto> queryLatest(String table) {
         try {
             String sql = "select market,code,rehab_type,ema_5, ema_10,ema_12,ema_20, ema_26, ema_60, ema_120,toString(update_time) as update_time\n" +
-                    "from t_ema_min_1_arc e inner join (select code, rehab_type, max(update_time) as update_time" +
+                    "from " + table + " e inner join (select code, rehab_type, max(update_time) as update_time" +
                     "      from " + table +
                     "      group by (code, rehab_type)) e2" +
                     "     on e.code = e2.code and e.rehab_type = e2.rehab_type and e.update_time = e2.update_time";
