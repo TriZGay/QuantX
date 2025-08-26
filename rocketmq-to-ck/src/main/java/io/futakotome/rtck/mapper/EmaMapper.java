@@ -13,7 +13,8 @@ import java.util.List;
 
 @Component
 public class EmaMapper {
-    public static final String EMA_MIN_1_TABLE = "t_ema_min_1_arc";
+    public static final String EMA_MIN_1_ARC_TABLE = "t_ema_min_1_arc";
+    public static final String EMA_MIN_1_RAW_TABLE = "t_ema_min_1_raw";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EmaMapper.class);
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;

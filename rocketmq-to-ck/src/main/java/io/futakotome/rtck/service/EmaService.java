@@ -8,15 +8,14 @@ import io.futakotome.rtck.mapper.dto.RTKLDto;
 import io.futakotome.rtck.utils.AddTimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.futakotome.rtck.mapper.EmaMapper.EMA_MIN_1_TABLE;
+import static io.futakotome.rtck.mapper.EmaMapper.EMA_MIN_1_RAW_TABLE;
 
 @Service
 public class EmaService {
@@ -27,15 +26,16 @@ public class EmaService {
         this.emaMapper = emaMapper;
     }
 
-    public boolean computeAndInsertBatch(List<RTKLDto> toAddKLines, String table) {
+    @Async
+    public void computeAndInsertBatch(List<RTKLDto> toAddKLines, String table) {
         List<EmaDto> toAddEmaDtos = null;
-        if (EMA_MIN_1_TABLE.equals(table)) {
+        if (EMA_MIN_1_RAW_TABLE.equals(table)) {
             toAddEmaDtos = computeMin1Ema(toAddKLines);
         }
         if (Objects.nonNull(toAddEmaDtos) && !toAddEmaDtos.isEmpty()) {
-            return emaMapper.insertBatch(toAddEmaDtos, table);
-        } else {
-            return false;
+            if (emaMapper.insertBatch(toAddEmaDtos, table)) {
+                LOGGER.info("{},EMA线入库成功.", table);
+            }
         }
     }
 
@@ -78,8 +78,7 @@ public class EmaService {
                     cacheValue.setUpdateTime(k.getUpdateTime());
                     EmaComputeCache.MIN_1_CACHE.put(key, cacheValue);
                     return toAddEmaDto;
-                })
-                .collect(Collectors.toList());
+                }).collect(Collectors.toList());
     }
 
     private Double calculate(Integer period, Double price, Double previousEma) {

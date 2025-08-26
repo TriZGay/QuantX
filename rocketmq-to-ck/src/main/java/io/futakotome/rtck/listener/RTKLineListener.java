@@ -5,10 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.RTKLMessage;
-import io.futakotome.rtck.mapper.KLMapper;
-import io.futakotome.rtck.mapper.dto.EmaDto;
 import io.futakotome.rtck.mapper.dto.RTKLDto;
 import io.futakotome.rtck.service.EmaService;
+import io.futakotome.rtck.service.KLineService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,18 +18,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.futakotome.rtck.mapper.EmaMapper.EMA_MIN_1_TABLE;
-import static io.futakotome.rtck.mapper.KLMapper.*;
+import static io.futakotome.rtck.mapper.EmaMapper.EMA_MIN_1_RAW_TABLE;
+import static io.futakotome.rtck.mapper.KLMapper.KL_MIN_1_RAW_TABLE_NAME;
 
 @Component
 public class RTKLineListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(RTKLineListener.class);
-    private final KLMapper klMapper;
+    private final KLineService kLineService;
     private final ObjectMapper objectMapper;
     private final EmaService emaService;
 
-    public RTKLineListener(KLMapper klMapper, ObjectMapper objectMapper, EmaService emaService) {
-        this.klMapper = klMapper;
+    public RTKLineListener(KLineService kLineService, ObjectMapper objectMapper, EmaService emaService) {
+        this.kLineService = kLineService;
         this.objectMapper = objectMapper;
         this.emaService = emaService;
     }
@@ -44,14 +43,9 @@ public class RTKLineListener {
             });
             rtklMessages.add(message);
         }
-        List<RTKLDto> toAddKLines = rtklMessages.stream()
-                .map(this::message2Dto).collect(Collectors.toList());
-        if (klMapper.insertBatch(toAddKLines, KL_MIN_1_RAW_TABLE_NAME)) {
-            LOGGER.info("1分K线入库成功");
-        }
-        if (emaService.computeAndInsertBatch(toAddKLines, EMA_MIN_1_TABLE)) {
-            LOGGER.info("1分EMA线入库成功");
-        }
+        List<RTKLDto> toAddKLines = rtklMessages.stream().map(this::message2Dto).collect(Collectors.toList());
+        kLineService.saveKLines(toAddKLines, KL_MIN_1_RAW_TABLE_NAME);
+        emaService.computeAndInsertBatch(toAddKLines, EMA_MIN_1_RAW_TABLE);
 
     }
 
@@ -76,8 +70,8 @@ public class RTKLineListener {
     }
 
     //todo K线其他类型
-//    @KafkaListener(groupId = "test_ck_kafka_group", topics = {"test_ck_kafka"},
-//            errorHandler = "rtKLineErrorHandler")
+    //    @KafkaListener(groupId = "test_ck_kafka_group", topics = {"test_ck_kafka"},
+    //            errorHandler = "rtKLineErrorHandler")
     public void testCkKafka(String message) {
         System.out.println(message);
     }

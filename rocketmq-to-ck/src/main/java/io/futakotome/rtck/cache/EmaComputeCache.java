@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.futakotome.rtck.mapper.EmaMapper.EMA_MIN_1_TABLE;
+import static io.futakotome.rtck.mapper.EmaMapper.EMA_MIN_1_ARC_TABLE;
 
 @Component
 public class EmaComputeCache implements InitializingBean {
@@ -31,14 +31,14 @@ public class EmaComputeCache implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        List<EmaDto> min1LatestEma = emaMapper.queryLatest(EMA_MIN_1_TABLE);
-        loadCache(EMA_MIN_1_TABLE, min1LatestEma);
+        List<EmaDto> min1LatestEma = emaMapper.queryLatest(EMA_MIN_1_ARC_TABLE);
+        loadCache(EMA_MIN_1_ARC_TABLE, min1LatestEma);
     }
 
     private void loadCache(String table, List<EmaDto> emas) {
-        if (EMA_MIN_1_TABLE.equals(table)) {
+        if (EMA_MIN_1_ARC_TABLE.equals(table)) {
             emas.forEach(ema -> MIN_1_CACHE.put(new CodeRehabTypeKey(ema.getCode(), ema.getRehabType()), ema));
-            LOGGER.info("1分钟及ema计算缓存读取成功:{}", MIN_1_CACHE);
+            LOGGER.info("1分钟级ema计算缓存读取成功:{}", MIN_1_CACHE);
         }
     }
 }

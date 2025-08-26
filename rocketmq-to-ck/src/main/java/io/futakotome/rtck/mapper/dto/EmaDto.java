@@ -109,4 +109,22 @@ public class EmaDto {
     public void setUpdateTime(String updateTime) {
         this.updateTime = updateTime;
     }
+
+    @Override
+    public String toString() {
+        return "EmaDto{" +
+                "market=" + market +
+                ", code='" + code + '\'' +
+                ", rehabType=" + rehabType +
+                ", ema_5=" + ema_5 +
+                ", ema_10=" + ema_10 +
+                ", ema_12=" + ema_12 +
+                ", ema_20=" + ema_20 +
+                ", ema_26=" + ema_26 +
+                ", ema_60=" + ema_60 +
+                ", ema_120=" + ema_120 +
+                ", updateTime='" + updateTime + '\'' +
+                ", addTime='" + addTime + '\'' +
+                '}';
+    }
 }
