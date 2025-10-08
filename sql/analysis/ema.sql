@@ -1,4 +1,4 @@
---计算递归sql计算ema
+--计算递归sql计算ema todo 待完善
 with recursive raw_data as (
     select ema.market as market, ema.code as code, ema.rehab_type as rehab_type, k.close_price, ema.ema_5 as ema_5, ema.ema_10 as ema_10, ema.ema_12 as ema_12, ema.ema_20 as ema_20, ema.ema_26 as ema_26, ema.ema_60 as ema_60, ema.ema_120 as ema_120, ema.update_time as update_time
     from t_kl_min_1_arc k inner join t_ema_min_1_arc ema on k.code=ema.code and k.rehab_type = ema.rehab_type and k.update_time = ema.update_time

@@ -1,6 +1,10 @@
 package io.futakotome.analyze.utils;
 
+import org.springframework.cglib.core.Local;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -18,5 +22,15 @@ public final class DateUtils {
             dates.add(start.plusDays(i).format(DATE_FORMATTER));
         }
         return dates;
+    }
+
+    public static String hkTradeDateStart(String someDay) {
+        LocalDate oneDay = LocalDate.parse(someDay, DATE_FORMATTER);
+        return LocalDateTime.of(oneDay, LocalTime.of(9, 30)).format(DATE_TIME_FORMATTER);
+    }
+
+    public static String hkTradeDateEnd(String someDay) {
+        LocalDate oneDay = LocalDate.parse(someDay, DATE_FORMATTER);
+        return LocalDateTime.of(oneDay, LocalTime.of(16, 0)).format(DATE_TIME_FORMATTER);
     }
 }
