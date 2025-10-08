@@ -1,6 +1,5 @@
 package io.futakotome.trade.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -13,7 +12,7 @@ import io.futakotome.trade.domain.code.ExchangeType;
 import io.futakotome.trade.domain.code.MarketType;
 import io.futakotome.trade.domain.code.StockType;
 import io.futakotome.trade.dto.StockDto;
-import io.futakotome.trade.mapper.StockDtoMapper;
+import io.futakotome.trade.mapper.pg.StockDtoMapper;
 import io.futakotome.trade.service.StockDtoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

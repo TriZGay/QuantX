@@ -10,11 +10,10 @@ import com.baomidou.mybatisplus.core.toolkit.ReflectionKit;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.futakotome.trade.dto.SnapshotBaseDto;
-import io.futakotome.trade.mapper.SnapshotBaseDtoMapper;
+import io.futakotome.trade.mapper.pg.SnapshotBaseDtoMapper;
 import io.futakotome.trade.service.SnapshotBaseDtoService;
 import org.apache.ibatis.binding.MapperMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Objects;

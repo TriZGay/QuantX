@@ -9,7 +9,7 @@ import io.futakotome.trade.domain.code.StockStatus;
 import io.futakotome.trade.domain.code.StockType;
 import io.futakotome.trade.dto.SnapshotBaseDto;
 import io.futakotome.trade.dto.SnapshotEquityExDto;
-import io.futakotome.trade.mapper.*;
+import io.futakotome.trade.mapper.pg.*;
 import io.futakotome.trade.service.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

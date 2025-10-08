@@ -14,26 +14,23 @@ spring:
           starttls.enable: true
           ssl.enable: true
   datasource:
-    url: jdbc:postgresql://172.21.90.92:5432/quantx_3rd_futu
+    url: jdbc:postgresql://172.25.233.108:5432/quantx_3rd_futu
     username: postgres
     password: 123456
   liquibase:
     change-log: classpath:db/liquibase-changelog.xml
-  kafka:
-    bootstrap-servers: 172.21.90.92:9092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      retries: 5
-    consumer:
-      max-poll-records: 500
-      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+#  kafka:
+#    bootstrap-servers: 172.21.90.92:9092
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      retries: 5
+#    consumer:
+#      max-poll-records: 500
+#      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+#      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 ft:
   url: 127.0.0.1
   port: 11111
   isEnableEncrypt: true
   pwd: 983528987fuck.
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

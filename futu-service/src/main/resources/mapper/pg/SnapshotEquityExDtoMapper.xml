@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.trade.mapper.pg.SnapshotEquityExDtoMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.SnapshotEquityExDto">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="market" column="market" jdbcType="INTEGER"/>
+            <result property="code" column="code" jdbcType="VARCHAR"/>
+            <result property="issuedShares" column="issued_shares" jdbcType="BIGINT"/>
+            <result property="issuedMarketVal" column="issued_market_val" jdbcType="DOUBLE"/>
+            <result property="netAsset" column="net_asset" jdbcType="DOUBLE"/>
+            <result property="netProfit" column="net_profit" jdbcType="DOUBLE"/>
+            <result property="earningsPerShare" column="earnings_per_share" jdbcType="DOUBLE"/>
+            <result property="outstandingShares" column="outstanding_shares" jdbcType="BIGINT"/>
+            <result property="outstandingMarketVal" column="outstanding_market_val" jdbcType="DOUBLE"/>
+            <result property="netAssetPerShare" column="net_asset_per_share" jdbcType="DOUBLE"/>
+            <result property="eyRate" column="ey_rate" jdbcType="DOUBLE"/>
+            <result property="peRate" column="pe_rate" jdbcType="DOUBLE"/>
+            <result property="pbRate" column="pb_rate" jdbcType="DOUBLE"/>
+            <result property="peTtmRate" column="pe_ttm_rate" jdbcType="DOUBLE"/>
+            <result property="dividendTtm" column="dividend_ttm" jdbcType="DOUBLE"/>
+            <result property="dividendRatioTtm" column="dividend_ratio_ttm" jdbcType="DOUBLE"/>
+            <result property="dividendLfy" column="dividend_lfy" jdbcType="DOUBLE"/>
+            <result property="dividendLfyRatio" column="dividend_lfy_ratio" jdbcType="DOUBLE"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,market,code,
+        issued_shares,issued_market_val,net_asset,
+        net_profit,earnings_per_share,outstanding_shares,
+        outstanding_market_val,net_asset_per_share,ey_rate,
+        pe_rate,pb_rate,pe_ttm_rate,
+        dividend_ttm,dividend_ratio_ttm,dividend_lfy,
+        dividend_lfy_ratio
+    </sql>
+    <insert id="insertBatch">
+        insert into t_snapshot_equity_ex(market,code,
+        issued_shares,issued_market_val,net_asset,
+        net_profit,earnings_per_share,outstanding_shares,
+        outstanding_market_val,net_asset_per_share,ey_rate,
+        pe_rate,pb_rate,pe_ttm_rate,
+        dividend_ttm,dividend_ratio_ttm,dividend_lfy,
+        dividend_lfy_ratio)
+        values
+        <foreach collection="snapshotEquityExDtoCollection" item="item" separator=",">
+            (#{item.market,jdbcType=NUMERIC},#{item.code,jdbcType=VARCHAR},
+            #{item.issuedShares,jdbcType=NUMERIC},#{item.issuedMarketVal,jdbcType=DECIMAL},#{item.netAsset,jdbcType=DECIMAL},
+            #{item.netProfit,jdbcType=DECIMAL},#{item.earningsPerShare,jdbcType=DECIMAL},#{item.outstandingShares,jdbcType=NUMERIC},
+            #{item.outstandingMarketVal,jdbcType=DECIMAL},#{item.netAssetPerShare,jdbcType=DECIMAL},#{item.eyRate,jdbcType=DECIMAL},
+            #{item.peRate,jdbcType=DECIMAL},#{item.pbRate,jdbcType=DECIMAL},#{item.peTtmRate,jdbcType=DECIMAL},
+            #{item.dividendTtm,jdbcType=DECIMAL},#{item.dividendRatioTtm,jdbcType=DECIMAL},#{item.dividendLfy,jdbcType=DECIMAL},
+            #{item.dividendLfyRatio,jdbcType=DECIMAL})
+        </foreach>
+    </insert>
+</mapper>

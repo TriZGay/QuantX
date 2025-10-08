@@ -2,7 +2,7 @@ package io.futakotome.trade.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.futakotome.trade.dto.TradeDateDto;
-import io.futakotome.trade.mapper.TradeDateDtoMapper;
+import io.futakotome.trade.mapper.pg.TradeDateDtoMapper;
 import io.futakotome.trade.service.TradeDateDtoService;
 import org.springframework.stereotype.Service;
 
