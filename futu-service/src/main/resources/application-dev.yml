@@ -29,6 +29,11 @@ spring:
 #      max-poll-records: 500
 #      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 #      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+ck:
+  driverClass: com.clickhouse.jdbc.ClickHouseDriver
+  url: jdbc:ch://172.25.233.108:8123/quantx
+  user: default
+  password: 123456
 ft:
   url: 127.0.0.1
   port: 11111
