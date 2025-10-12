@@ -11,7 +11,6 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import javax.sql.DataSource;
@@ -44,6 +43,7 @@ public class CkDataSourceConfiguration {
         configuration.setLogImpl(StdOutImpl.class);
         //
         bean.setConfiguration(configuration);
+        bean.setTypeHandlersPackage("io.futakotome.trade.utils.handler");
         bean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:mapper/ck/*.xml"));
         return bean.getObject();
     }

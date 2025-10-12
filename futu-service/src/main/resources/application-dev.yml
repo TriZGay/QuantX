@@ -14,7 +14,7 @@ spring:
           starttls.enable: true
           ssl.enable: true
   datasource:
-    url: jdbc:postgresql://172.25.233.108:5432/quantx_3rd_futu
+    url: jdbc:postgresql://172.21.23.71:5432/quantx_3rd_futu
     username: postgres
     password: 123456
   liquibase:
@@ -31,7 +31,7 @@ spring:
 #      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 ck:
   driverClass: com.clickhouse.jdbc.ClickHouseDriver
-  url: jdbc:ch://172.25.233.108:8123/quantx
+  url: jdbc:ch://172.21.23.71:8123/quantx
   user: default
   password: 123456
 ft:

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.futakotome.trade.mapper.ck.KLineMin1ArcMapper">
+
+    <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.KLineMin1Arc">
+            <result property="market" column="market" jdbcType="INTEGER"/>
+            <result property="code" column="code" jdbcType="OTHER"/>
+            <result property="rehabType" column="rehab_type" jdbcType="INTEGER"/>
+            <result property="highPrice" column="high_price" jdbcType="FLOAT"/>
+            <result property="openPrice" column="open_price" jdbcType="FLOAT"/>
+            <result property="lowPrice" column="low_price" jdbcType="FLOAT"/>
+            <result property="closePrice" column="close_price" jdbcType="FLOAT"/>
+            <result property="lastClosePrice" column="last_close_price" jdbcType="FLOAT"/>
+            <result property="volume" column="volume" jdbcType="INTEGER"/>
+            <result property="turnover" column="turnover" jdbcType="FLOAT"/>
+            <result property="turnoverRate" column="turnover_rate" jdbcType="FLOAT"/>
+            <result property="pe" column="pe" jdbcType="FLOAT"/>
+            <result property="changeRate" column="change_rate" jdbcType="FLOAT"/>
+            <result property="updateTime" column="update_time" typeHandler="io.futakotome.trade.utils.handler.UpdateTimeTypeHandler"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        market,code,rehab_type,
+        high_price,open_price,low_price,
+        close_price,last_close_price,volume,
+        turnover,turnover_rate,pe,
+        change_rate,update_time
+    </sql>
+</mapper>
