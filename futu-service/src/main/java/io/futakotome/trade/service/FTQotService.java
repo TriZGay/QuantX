@@ -53,15 +53,14 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private final TradeDateDtoService tradeDateService;
     private final FutuConfig futuConfig;
     private final QuantxFutuWsService quantxFutuWsService;
-    private final KafkaService kafkaService;
-
+    private final KLineService kLineService;
     private static final String clientID = "javaclient";
 
     private static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
     public FTQotService(PlateDtoService plateService, StockDtoService stockService, SnapshotService snapshotService,
                         SubDtoService subService, TradeDateDtoService tradeDateService, FutuConfig futuConfig,
-                        QuantxFutuWsService quantxFutuWsService, KafkaService kafkaService) {
+                        QuantxFutuWsService quantxFutuWsService, KLineService kLineService) {
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
@@ -70,10 +69,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         this.snapshotService = snapshotService;
         this.subService = subService;
         this.tradeDateService = tradeDateService;
+        this.kLineService = kLineService;
 
         this.futuConfig = futuConfig;
         this.quantxFutuWsService = quantxFutuWsService;
-        this.kafkaService = kafkaService;
     }
 
     public void syncStockInPlate(List<CommonSecurity> plates) {
@@ -489,6 +488,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 } else {
                     sendNotifyMessage("market:" + market + ",code:" + code + ",klType:" + klType + ",rehabType" + rehabType + "无须分页.");
                 }
+                List<KLMessageContent> klMessageContents = new ArrayList<>();
                 while (klListIterator.hasNext()) {
                     JsonObject kl = klListIterator.next().getAsJsonObject();
                     KLMessageContent klMessageContent = GSON.fromJson(kl, KLMessageContent.class);
@@ -496,8 +496,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     klMessageContent.setRehabType(rehabType);
                     klMessageContent.setMarket(market);
                     klMessageContent.setCode(code);
-                    kafkaService.sendHistoryKLineMessage(klMessageContent);
+                    klMessageContents.add(klMessageContent);
                 }
+                int insertNum = kLineService.insertHistoryKLines(klMessageContents);
+                sendNotifyMessage("历史K线插入数据.条数:" + insertNum);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析历史K线失败.", e);
             }
@@ -924,7 +926,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     klMessageContent.setRehabType(rehabType);
                     klMessageContent.setMarket(market);
                     klMessageContent.setCode(code);
-                    kafkaService.sendRTKLineMessage(klMessageContent);
+                    //todo real time kline
+//                    kafkaService.sendRTKLineMessage(klMessageContent);
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("K线推送结果解析失败.", e);

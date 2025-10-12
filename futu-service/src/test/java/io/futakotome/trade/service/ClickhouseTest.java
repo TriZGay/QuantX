@@ -1,7 +1,7 @@
 package io.futakotome.trade.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import io.futakotome.trade.dto.KLineMin1Arc;
+import io.futakotome.trade.dto.KLineMin1ArcDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class ClickhouseTest {
 
     @Test
     public void getKLineMin1Arc() {
-        List<KLineMin1Arc> result = kLineMin1ArcService.list(Wrappers.query(new KLineMin1Arc())
+        List<KLineMin1ArcDto> result = kLineMin1ArcService.list(Wrappers.query(new KLineMin1ArcDto())
                 .eq("code", "00700").eq("rehab_type", 1)
                 .ge("update_time", "2025-09-01").last("limit 10"));
         System.out.println(result);
@@ -28,7 +28,7 @@ public class ClickhouseTest {
 
     @Test
     public void insertBatchKLineMin1Arc() {
-        KLineMin1Arc one = new KLineMin1Arc();
+        KLineMin1ArcDto one = new KLineMin1ArcDto();
         one.setMarket(1);
         one.setCode("test");
         one.setRehabType(1);
@@ -43,7 +43,7 @@ public class ClickhouseTest {
         one.setPe(1D);
         one.setChangeRate(1D);
         one.setUpdateTime("2025-10-11 09:30:12");
-        KLineMin1Arc two = new KLineMin1Arc();
+        KLineMin1ArcDto two = new KLineMin1ArcDto();
         two.setMarket(1);
         two.setCode("test");
         two.setRehabType(1);
@@ -58,7 +58,7 @@ public class ClickhouseTest {
         two.setPe(1D);
         two.setChangeRate(1D);
         two.setUpdateTime("2025-10-11 09:31:12");
-        List<KLineMin1Arc> toAdd = Arrays.asList(one, two);
+        List<KLineMin1ArcDto> toAdd = Arrays.asList(one, two);
         boolean result = kLineMin1ArcService.saveBatch(toAdd);
         System.out.println(result);
     }

@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @TableName t_kl_min_1_arc
  */
 @TableName(value = "t_kl_min_1_arc")
-public class KLineMin1Arc implements Serializable {
+public class KLineMin1ArcDto implements Serializable {
     private Integer market;
     private String code;
     private Integer rehabType;
@@ -138,23 +138,4 @@ public class KLineMin1Arc implements Serializable {
         this.updateTime = updateTime;
     }
 
-    @Override
-    public String toString() {
-        return "KLineMin1Arc{" +
-                "market=" + market +
-                ", code='" + code + '\'' +
-                ", rehabType=" + rehabType +
-                ", highPrice=" + highPrice +
-                ", openPrice=" + openPrice +
-                ", lowPrice=" + lowPrice +
-                ", closePrice=" + closePrice +
-                ", lastClosePrice=" + lastClosePrice +
-                ", volume=" + volume +
-                ", turnover=" + turnover +
-                ", turnoverRate=" + turnoverRate +
-                ", pe=" + pe +
-                ", changeRate=" + changeRate +
-                ", updateTime='" + updateTime + '\'' +
-                '}';
-    }
 }
