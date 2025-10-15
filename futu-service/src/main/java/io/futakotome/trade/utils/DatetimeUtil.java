@@ -1,5 +1,7 @@
 package io.futakotome.trade.utils;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -9,5 +11,10 @@ public final class DatetimeUtil {
         ZonedDateTime zonedDateTime = ZonedDateTime.parse(datetimeWithTimeZone, formatter);
         DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
         return zonedDateTime.format(outputFormatter);
+    }
+
+    public static String createNowWithTimeZone(String timeZoneId) {
+        return LocalDateTime.now(ZoneId.of(timeZoneId))
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
     }
 }

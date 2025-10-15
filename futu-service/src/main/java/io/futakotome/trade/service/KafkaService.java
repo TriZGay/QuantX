@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-@Service
+//@Service
+@Deprecated
 public class KafkaService {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaService.class);
     private final KafkaTemplate<String, Object> kafkaTemplate;

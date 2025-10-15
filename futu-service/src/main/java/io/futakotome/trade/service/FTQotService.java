@@ -22,12 +22,14 @@ import io.futakotome.trade.domain.code.*;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.dto.message.*;
 import io.futakotome.trade.dto.ws.*;
+import io.futakotome.trade.event.KLineUpdateEvent;
 import io.futakotome.trade.utils.CacheManager;
 import io.futakotome.trade.utils.RequestCount;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -44,6 +46,7 @@ import static java.util.stream.Collectors.toMap;
 public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(FTQotService.class);
     private static final Gson GSON = new Gson();
+    private final ApplicationEventPublisher eventPublisher;
 
     private final PlateDtoService plateService;
     private final StockDtoService stockService;
@@ -58,9 +61,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     private static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
-    public FTQotService(PlateDtoService plateService, StockDtoService stockService, SnapshotService snapshotService,
+    public FTQotService(ApplicationEventPublisher eventPublisher, PlateDtoService plateService, StockDtoService stockService, SnapshotService snapshotService,
                         SubDtoService subService, TradeDateDtoService tradeDateService, FutuConfig futuConfig,
                         QuantxFutuWsService quantxFutuWsService, KLineService kLineService) {
+        this.eventPublisher = eventPublisher;
         qot.setClientInfo(clientID, 1);
         qot.setConnSpi(this);
         qot.setQotSpi(this);
@@ -926,8 +930,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                     klMessageContent.setRehabType(rehabType);
                     klMessageContent.setMarket(market);
                     klMessageContent.setCode(code);
-                    //todo real time kline
-//                    kafkaService.sendRTKLineMessage(klMessageContent);
+                    eventPublisher.publishEvent(new KLineUpdateEvent(klMessageContent));
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("K线推送结果解析失败.", e);

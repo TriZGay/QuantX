@@ -2,7 +2,12 @@ package io.futakotome.trade.service;
 
 import io.futakotome.trade.domain.code.KLType;
 import io.futakotome.trade.dto.KLineMin1ArcDto;
+import io.futakotome.trade.dto.KLineMin1RawDto;
 import io.futakotome.trade.dto.message.KLMessageContent;
+import io.futakotome.trade.event.KLineUpdateEvent;
+import io.futakotome.trade.utils.DatetimeUtil;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,9 +16,11 @@ import java.util.List;
 @Service
 public class KLineService {
     private final KLineMin1ArcService kLineMin1ArcService;
+    private final KLineMin1RawService kLineMin1RawService;
 
-    public KLineService(KLineMin1ArcService kLineMin1ArcService) {
+    public KLineService(KLineMin1ArcService kLineMin1ArcService, KLineMin1RawService kLineMin1RawService) {
         this.kLineMin1ArcService = kLineMin1ArcService;
+        this.kLineMin1RawService = kLineMin1RawService;
     }
 
     public int insertHistoryKLines(List<KLMessageContent> klMessageContents) {
@@ -27,6 +34,37 @@ public class KLineService {
             return kLineMin1ArcService.saveHistoryKLinesMin1(kLineMin1ArcDtos);
         }
         return 0;
+    }
+
+    @Async
+    @EventListener
+    public void onKLineUpdate(KLineUpdateEvent kLineUpdateEvent) {
+        if (!kLineUpdateEvent.getContent().getBlank()) {
+            if (kLineUpdateEvent.getContent().getKlType().equals(KLType.MIN_1.getCode())) {
+                KLineMin1RawDto kLineMin1RawDto = toKLineMin1RawDto(kLineUpdateEvent.getContent());
+                kLineMin1RawService.saveOne(kLineMin1RawDto);
+            }
+        }
+    }
+
+    private KLineMin1RawDto toKLineMin1RawDto(KLMessageContent content) {
+        KLineMin1RawDto kLineMin1RawDto = new KLineMin1RawDto();
+        kLineMin1RawDto.setMarket(content.getMarket());
+        kLineMin1RawDto.setCode(content.getCode());
+        kLineMin1RawDto.setRehabType(content.getRehabType());
+        kLineMin1RawDto.setHighPrice(content.getHighPrice());
+        kLineMin1RawDto.setOpenPrice(content.getOpenPrice());
+        kLineMin1RawDto.setLowPrice(content.getLowPrice());
+        kLineMin1RawDto.setClosePrice(content.getClosePrice());
+        kLineMin1RawDto.setLastClosePrice(content.getLastClosePrice());
+        kLineMin1RawDto.setVolume(content.getVolume());
+        kLineMin1RawDto.setTurnover(content.getTurnover());
+        kLineMin1RawDto.setTurnoverRate(content.getTurnoverRate());
+        kLineMin1RawDto.setPe(content.getPe());
+        kLineMin1RawDto.setChangeRate(content.getChangeRate());
+        kLineMin1RawDto.setUpdateTime(content.getTime());
+        kLineMin1RawDto.setAddTime(DatetimeUtil.createNowWithTimeZone("Asia/Shanghai"));
+        return kLineMin1RawDto;
     }
 
     private KLineMin1ArcDto toKLineMin1ArcDto(KLMessageContent klMessageContent) {
