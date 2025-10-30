@@ -1,6 +1,7 @@
 package io.futakotome.trade.service;
 
 import io.futakotome.trade.domain.code.KLType;
+import io.futakotome.trade.dto.KLineDayArcDto;
 import io.futakotome.trade.dto.KLineMin1ArcDto;
 import io.futakotome.trade.dto.KLineMin1RawDto;
 import io.futakotome.trade.dto.message.KLMessageContent;
@@ -17,21 +18,30 @@ import java.util.List;
 public class KLineService {
     private final KLineMin1ArcService kLineMin1ArcService;
     private final KLineMin1RawService kLineMin1RawService;
+    private final KLineDayArcService kLineDayArcService;
 
-    public KLineService(KLineMin1ArcService kLineMin1ArcService, KLineMin1RawService kLineMin1RawService) {
+    public KLineService(KLineMin1ArcService kLineMin1ArcService, KLineMin1RawService kLineMin1RawService, KLineDayArcService kLineDayArcService) {
         this.kLineMin1ArcService = kLineMin1ArcService;
         this.kLineMin1RawService = kLineMin1RawService;
+        this.kLineDayArcService = kLineDayArcService;
     }
 
     public int insertHistoryKLines(List<KLMessageContent> klMessageContents) {
         List<KLineMin1ArcDto> kLineMin1ArcDtos = new ArrayList<>();
+        List<KLineDayArcDto> kLineDayArcDtos = new ArrayList<>();
         klMessageContents.forEach(klMessageContent -> {
             if (klMessageContent.getKlType().equals(KLType.MIN_1.getCode())) {
                 kLineMin1ArcDtos.add(toKLineMin1ArcDto(klMessageContent));
             }
+            if (klMessageContent.getKlType().equals(KLType.DAY.getCode())) {
+                kLineDayArcDtos.add(toKLineDayArcDto(klMessageContent));
+            }
         });
-        if (!klMessageContents.isEmpty()) {
+        if (!kLineMin1ArcDtos.isEmpty()) {
             return kLineMin1ArcService.saveHistoryKLinesMin1(kLineMin1ArcDtos);
+        }
+        if (!kLineDayArcDtos.isEmpty()) {
+            return kLineDayArcService.saveHistoryKLinesDay(kLineDayArcDtos);
         }
         return 0;
     }
@@ -65,6 +75,25 @@ public class KLineService {
         kLineMin1RawDto.setUpdateTime(content.getTime());
         kLineMin1RawDto.setAddTime(DatetimeUtil.createNowWithTimeZone("Asia/Shanghai"));
         return kLineMin1RawDto;
+    }
+
+    private KLineDayArcDto toKLineDayArcDto(KLMessageContent klMessageContent) {
+        KLineDayArcDto kLineDayArcDto = new KLineDayArcDto();
+        kLineDayArcDto.setMarket(klMessageContent.getMarket());
+        kLineDayArcDto.setCode(klMessageContent.getCode());
+        kLineDayArcDto.setRehabType(klMessageContent.getRehabType());
+        kLineDayArcDto.setHighPrice(klMessageContent.getHighPrice());
+        kLineDayArcDto.setOpenPrice(klMessageContent.getOpenPrice());
+        kLineDayArcDto.setLowPrice(klMessageContent.getLowPrice());
+        kLineDayArcDto.setClosePrice(klMessageContent.getClosePrice());
+        kLineDayArcDto.setLastClosePrice(klMessageContent.getLastClosePrice());
+        kLineDayArcDto.setVolume(klMessageContent.getVolume());
+        kLineDayArcDto.setTurnover(klMessageContent.getTurnover());
+        kLineDayArcDto.setTurnoverRate(klMessageContent.getTurnoverRate());
+        kLineDayArcDto.setPe(klMessageContent.getPe());
+        kLineDayArcDto.setChangeRate(klMessageContent.getChangeRate());
+        kLineDayArcDto.setUpdateTime(klMessageContent.getTime());
+        return kLineDayArcDto;
     }
 
     private KLineMin1ArcDto toKLineMin1ArcDto(KLMessageContent klMessageContent) {

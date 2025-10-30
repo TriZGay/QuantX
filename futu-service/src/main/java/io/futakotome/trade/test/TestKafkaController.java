@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static io.futakotome.trade.service.MailService.ME;
 
-@RestController
-@RequestMapping("/testKafka")
+//@RestController
+//@RequestMapping("/testKafka")
+@Deprecated
 public class TestKafkaController {
     private final KafkaService kafkaService;
     private final MailService mailService;
