@@ -2,8 +2,8 @@ package io.futakotome.trade.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.futakotome.trade.dto.KLineMin1RawDto;
-import io.futakotome.trade.service.KLineMin1RawService;
 import io.futakotome.trade.mapper.ck.KLineMin1RawDtoMapper;
+import io.futakotome.trade.service.KLineMin1RawService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

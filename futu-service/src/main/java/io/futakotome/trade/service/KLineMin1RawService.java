@@ -1,7 +1,7 @@
 package io.futakotome.trade.service;
 
-import io.futakotome.trade.dto.KLineMin1RawDto;
 import com.baomidou.mybatisplus.extension.service.IService;
+import io.futakotome.trade.dto.KLineMin1RawDto;
 
 /**
 * @author 86131

@@ -1,11 +1,10 @@
 package io.futakotome.trade.mapper.ck;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import io.futakotome.trade.dto.KLineQuarterArcDto;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Collection;
-
-import io.futakotome.trade.dto.KLineQuarterArcDto;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
  * @author 86131

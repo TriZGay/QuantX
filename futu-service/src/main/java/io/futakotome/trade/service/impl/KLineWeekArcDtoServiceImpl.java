@@ -1,10 +1,9 @@
 package io.futakotome.trade.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.futakotome.trade.dto.KLineQuarterArcDto;
 import io.futakotome.trade.dto.KLineWeekArcDto;
-import io.futakotome.trade.service.KLineWeekArcDtoService;
 import io.futakotome.trade.mapper.ck.KLineWeekArcDtoMapper;
+import io.futakotome.trade.service.KLineWeekArcDtoService;
 import io.futakotome.trade.utils.ListSplitUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

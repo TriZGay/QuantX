@@ -5,10 +5,10 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 
 /**
- * @TableName t_kl_month_arc
+ * @TableName t_kl_year_arc
  */
-@TableName(value ="t_kl_month_arc")
-public class KLineMonthArcDto implements Serializable {
+@TableName(value ="t_kl_year_arc")
+public class KLineYearArcDto implements Serializable {
     private Integer market;
 
     private String code;

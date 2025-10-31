@@ -1,7 +1,5 @@
 package io.futakotome.trade.dto.message;
 
-import java.util.List;
-
 public class OrderPushContent {
     private CommonTrdHeader header;
     private OrderContent order;

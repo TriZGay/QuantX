@@ -1,7 +1,6 @@
 package io.futakotome.trade.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.futakotome.trade.dto.KLineDayArcDto;
 import io.futakotome.trade.dto.KLineMonthArcDto;
 import io.futakotome.trade.mapper.ck.KLineMonthArcDtoMapper;
 import io.futakotome.trade.service.KLineMonthArcService;

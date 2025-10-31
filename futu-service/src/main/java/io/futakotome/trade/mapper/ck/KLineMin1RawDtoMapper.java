@@ -1,7 +1,7 @@
 package io.futakotome.trade.mapper.ck;
 
-import io.futakotome.trade.dto.KLineMin1RawDto;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import io.futakotome.trade.dto.KLineMin1RawDto;
 
 /**
 * @author 86131
