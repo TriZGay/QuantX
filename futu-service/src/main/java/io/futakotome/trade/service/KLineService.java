@@ -19,13 +19,15 @@ public class KLineService {
     private final KLineDayArcService kLineDayArcService;
     private final KLineMonthArcService kLineMonthArcService;
     private final KLineQuarterArcService kLineQuarterArcService;
+    private final KLineWeekArcDtoService kLineWeekArcDtoService;
 
-    public KLineService(KLineMin1ArcService kLineMin1ArcService, KLineMin1RawService kLineMin1RawService, KLineDayArcService kLineDayArcService, KLineMonthArcService kLineMonthArcService, KLineQuarterArcService kLineQuarterArcService) {
+    public KLineService(KLineMin1ArcService kLineMin1ArcService, KLineMin1RawService kLineMin1RawService, KLineDayArcService kLineDayArcService, KLineMonthArcService kLineMonthArcService, KLineQuarterArcService kLineQuarterArcService, KLineWeekArcDtoService kLineWeekArcDtoService) {
         this.kLineMin1ArcService = kLineMin1ArcService;
         this.kLineMin1RawService = kLineMin1RawService;
         this.kLineDayArcService = kLineDayArcService;
         this.kLineMonthArcService = kLineMonthArcService;
         this.kLineQuarterArcService = kLineQuarterArcService;
+        this.kLineWeekArcDtoService = kLineWeekArcDtoService;
     }
 
     public int insertHistoryKLines(List<KLMessageContent> klMessageContents) {
@@ -33,12 +35,16 @@ public class KLineService {
         List<KLineDayArcDto> kLineDayArcDtos = new ArrayList<>();
         List<KLineMonthArcDto> kLineMonthArcDtos = new ArrayList<>();
         List<KLineQuarterArcDto> kLineQuarterArcDtos = new ArrayList<>();
+        List<KLineWeekArcDto> kLineWeekArcDtos = new ArrayList<>();
         klMessageContents.forEach(klMessageContent -> {
             if (klMessageContent.getKlType().equals(KLType.MIN_1.getCode())) {
                 kLineMin1ArcDtos.add(toKLineMin1ArcDto(klMessageContent));
             }
             if (klMessageContent.getKlType().equals(KLType.DAY.getCode())) {
                 kLineDayArcDtos.add(toKLineDayArcDto(klMessageContent));
+            }
+            if (klMessageContent.getKlType().equals(KLType.WEEK.getCode())) {
+                kLineWeekArcDtos.add(toKLineWeekArcDto(klMessageContent));
             }
             if (klMessageContent.getKlType().equals(KLType.MONTH.getCode())) {
                 kLineMonthArcDtos.add(toKLineMonthArcDto(klMessageContent));
@@ -52,6 +58,9 @@ public class KLineService {
         }
         if (!kLineDayArcDtos.isEmpty()) {
             return kLineDayArcService.saveHistoryKLinesDay(kLineDayArcDtos);
+        }
+        if (!kLineWeekArcDtos.isEmpty()) {
+            return kLineWeekArcDtoService.saveHistoryKLinesWeek(kLineWeekArcDtos);
         }
         if (!kLineMonthArcDtos.isEmpty()) {
             return kLineMonthArcService.saveHistoryKLinesMonth(kLineMonthArcDtos);
@@ -71,6 +80,25 @@ public class KLineService {
                 kLineMin1RawService.saveOne(kLineMin1RawDto);
             }
         }
+    }
+
+    private KLineWeekArcDto toKLineWeekArcDto(KLMessageContent content) {
+        KLineWeekArcDto dto = new KLineWeekArcDto();
+        dto.setMarket(content.getMarket());
+        dto.setCode(content.getCode());
+        dto.setRehabType(content.getRehabType());
+        dto.setHighPrice(content.getHighPrice());
+        dto.setOpenPrice(content.getOpenPrice());
+        dto.setLowPrice(content.getLowPrice());
+        dto.setClosePrice(content.getClosePrice());
+        dto.setLastClosePrice(content.getLastClosePrice());
+        dto.setVolume(content.getVolume());
+        dto.setTurnover(content.getTurnover());
+        dto.setTurnoverRate(content.getTurnoverRate());
+        dto.setPe(content.getPe());
+        dto.setChangeRate(content.getChangeRate());
+        dto.setUpdateTime(content.getTime());
+        return dto;
     }
 
     private KLineQuarterArcDto toKLineQuarterArcDto(KLMessageContent content) {
