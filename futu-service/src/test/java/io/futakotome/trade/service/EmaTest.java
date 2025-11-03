@@ -3,7 +3,6 @@ package io.futakotome.trade.service;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.futakotome.common.indies.ema.*;
 import io.futakotome.trade.dto.KLineDayArcDto;
-import io.futakotome.trade.dto.KLineMin1ArcDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ public class EmaTest {
     private KLineDayArcService kLineDayArcService;
 
     @Test
-    public void testEma5() {
+    public void testEma() {
         List<KLineDayArcDto> result = kLineDayArcService.list(Wrappers.query(new KLineDayArcDto())
                 .eq("code", "000001").eq("rehab_type", 1)
                 .ge("update_time", "2025-01-01")
