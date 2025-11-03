@@ -80,7 +80,7 @@ public class KLineService {
         return 0;
     }
 
-    @Async
+    @Async("klineUpdateTaskExecutor")
     @EventListener
     public void onKLineUpdate(KLineUpdateEvent kLineUpdateEvent) {
         if (!kLineUpdateEvent.getContent().getBlank()) {
