@@ -1,24 +1,35 @@
 package io.futakotome.trade.test;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.futakotome.trade.domain.code.KLType;
+import io.futakotome.trade.dto.KLineMin1ArcDto;
+import io.futakotome.trade.dto.KLineMin1RawDto;
 import io.futakotome.trade.dto.message.KLMessageContent;
+import io.futakotome.trade.service.KLineMin1ArcService;
+import io.futakotome.trade.service.KLineMin1RawService;
 import io.futakotome.trade.service.KafkaService;
 import io.futakotome.trade.service.MailService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 import static io.futakotome.trade.service.MailService.ME;
 
-//@RestController
-//@RequestMapping("/testKafka")
-@Deprecated
+@RestController
+@RequestMapping("/testKafka")
 public class TestKafkaController {
     private final KafkaService kafkaService;
     private final MailService mailService;
+    private final KLineMin1RawService kLineMin1RawService;
 
-    public TestKafkaController(KafkaService kafkaService, MailService mailService) {
+    public TestKafkaController(KafkaService kafkaService, MailService mailService, KLineMin1RawService kLineMin1RawService) {
         this.kafkaService = kafkaService;
         this.mailService = mailService;
+        this.kLineMin1RawService = kLineMin1RawService;
     }
 
     @GetMapping("/sendMail")
@@ -29,69 +40,41 @@ public class TestKafkaController {
 
     @GetMapping("/sendKL")
     public ResponseEntity<String> sendKL() {
-        for (int i = 0; i < 10; i++) {
-            KLMessageContent klMessageContent = new KLMessageContent();
-            klMessageContent.setRehabType(0);
-            klMessageContent.setMarket(1);
-            klMessageContent.setCode("ddddd");
-            klMessageContent.setTime("2025-03-04 12:00:00");
-            klMessageContent.setHighPrice(0D);
-            klMessageContent.setOpenPrice(0D);
-            klMessageContent.setLowPrice(0D);
-            klMessageContent.setClosePrice(0D);
-            klMessageContent.setLastClosePrice(0D);
-            klMessageContent.setVolume(0L);
-            klMessageContent.setTurnover(0D);
-            klMessageContent.setTurnoverRate(0D);
-            klMessageContent.setPe(0D);
-            klMessageContent.setChangeRate(0D);
-            klMessageContent.setTimestamp(0D);
-            klMessageContent.setBlank(false);
-            klMessageContent.setKlType(KLType.MIN_1.getCode());
-            kafkaService.sendRTKLineMessage(klMessageContent);
-        }
-        for (int i = 0; i < 10; i++) {
-            KLMessageContent klMessageContent = new KLMessageContent();
-            klMessageContent.setRehabType(2);
-            klMessageContent.setMarket(1);
-            klMessageContent.setCode("ddddd");
-            klMessageContent.setTime("2025-03-04 12:00:00");
-            klMessageContent.setHighPrice(0D);
-            klMessageContent.setOpenPrice(0D);
-            klMessageContent.setLowPrice(0D);
-            klMessageContent.setClosePrice(0D);
-            klMessageContent.setLastClosePrice(0D);
-            klMessageContent.setVolume(0L);
-            klMessageContent.setTurnover(0D);
-            klMessageContent.setTurnoverRate(0D);
-            klMessageContent.setPe(0D);
-            klMessageContent.setChangeRate(0D);
-            klMessageContent.setTimestamp(0D);
-            klMessageContent.setBlank(false);
-            klMessageContent.setKlType(KLType.MIN_1.getCode());
-            kafkaService.sendRTKLineMessage(klMessageContent);
-        }
-        for (int i = 0; i < 10; i++) {
-            KLMessageContent klMessageContent = new KLMessageContent();
-            klMessageContent.setRehabType(1);
-            klMessageContent.setMarket(1);
-            klMessageContent.setCode("ddddd");
-            klMessageContent.setTime("2025-03-04 12:00:00");
-            klMessageContent.setHighPrice(0D);
-            klMessageContent.setOpenPrice(0D);
-            klMessageContent.setLowPrice(0D);
-            klMessageContent.setClosePrice(0D);
-            klMessageContent.setLastClosePrice(0D);
-            klMessageContent.setVolume(0L);
-            klMessageContent.setTurnover(0D);
-            klMessageContent.setTurnoverRate(0D);
-            klMessageContent.setPe(0D);
-            klMessageContent.setChangeRate(0D);
-            klMessageContent.setTimestamp(0D);
-            klMessageContent.setBlank(false);
-            klMessageContent.setKlType(KLType.MIN_1.getCode());
-            kafkaService.sendRTKLineMessage(klMessageContent);
-        }
+        List<KLineMin1RawDto> testData = kLineMin1RawService.getBaseMapper().selectList(Wrappers.query(new KLineMin1RawDto())
+                .eq("code", "00700")
+                .eq("rehab_type", 1)
+                .ge("update_time", "2025-11-17 09:30:00")
+                .le("update_time", "2025-11-17 16:00:00"));
+        this.publishTestData(testData);
         return ResponseEntity.ok("yes!");
+    }
+
+    @Async("kafkaPublishTaskExecutor")
+    public void publishTestData(List<KLineMin1RawDto> testData) {
+        for (KLineMin1RawDto testDatum : testData) {
+            try {
+                KLMessageContent klMessageContent = new KLMessageContent();
+                klMessageContent.setMarket(testDatum.getMarket());
+                klMessageContent.setCode(testDatum.getCode());
+                klMessageContent.setKlType(1); //实时1分钟
+                klMessageContent.setRehabType(testDatum.getRehabType());
+                klMessageContent.setTime(testDatum.getUpdateTime());
+                klMessageContent.setBlank(false);
+                klMessageContent.setHighPrice(testDatum.getHighPrice());
+                klMessageContent.setOpenPrice(testDatum.getOpenPrice());
+                klMessageContent.setLowPrice(testDatum.getLowPrice());
+                klMessageContent.setClosePrice(testDatum.getClosePrice());
+                klMessageContent.setLastClosePrice(testDatum.getLastClosePrice());
+                klMessageContent.setVolume(testDatum.getVolume());
+                klMessageContent.setTurnover(testDatum.getTurnover());
+                klMessageContent.setTurnoverRate(testDatum.getTurnoverRate());
+                klMessageContent.setPe(testDatum.getPe());
+                klMessageContent.setChangeRate(testDatum.getChangeRate());
+                kafkaService.sendRTKLineMessage(klMessageContent);
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

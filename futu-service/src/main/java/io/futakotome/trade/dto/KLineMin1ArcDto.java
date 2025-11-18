@@ -34,7 +34,7 @@ public class KLineMin1ArcDto implements Serializable {
         this.market = market;
     }
 
-    public Object getCode() {
+    public String getCode() {
         return code;
     }
 

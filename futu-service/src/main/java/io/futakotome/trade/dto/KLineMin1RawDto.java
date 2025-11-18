@@ -49,7 +49,7 @@ public class KLineMin1RawDto implements Serializable {
         this.market = market;
     }
 
-    public Object getCode() {
+    public String getCode() {
         return code;
     }
 
