@@ -7,10 +7,14 @@ import io.futakotome.quantx.process.MaProcessFunction;
 import io.futakotome.quantx.source.RTKLine;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.RestartStrategyOptions;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+
+import java.time.Duration;
 
 import static io.futakotome.common.MessageCommon.RT_KL_MIN_1_CONSUMER_GROUP_STREAM;
 import static io.futakotome.common.MessageCommon.RT_KL_MIN_1_TOPIC;
@@ -19,13 +23,17 @@ public class QuantXMainJob {
 
 
     public static void main(String[] args) throws Exception {
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        Configuration conf = new Configuration();
+        conf.set(RestartStrategyOptions.RESTART_STRATEGY, "fixed-delay");
+        conf.set(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS, 3); // 尝试重启的次数
+        conf.set(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY, Duration.ofSeconds(10)); // 延时
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
         ParameterTool configs = ParameterTool.fromPropertiesFile(QuantXMainJob.class.getResourceAsStream("/base_config.properties"));
 
         KafkaSource<RTKLMessage> source = RTKLine.fromKafka(configs, RT_KL_MIN_1_CONSUMER_GROUP_STREAM, RT_KL_MIN_1_TOPIC);
 
-        DataStream<RTKLMessage> rtklMin1Source = env.fromSource(source, WatermarkStrategy.forMonotonousTimestamps(), "rtk_min1_source")
-                .setParallelism(2);
+        DataStream<RTKLMessage> rtklMin1Source = env.fromSource(source, WatermarkStrategy.forMonotonousTimestamps(), "rtk_min1_source");
+
         KeyedStream<RTKLMessage, RTKLineKey> keyedStream = rtklMin1Source.keyBy(new RTKLineKeySelector());
         keyedStream.countWindow(5, -4)
                 .process(new MaProcessFunction(5))
