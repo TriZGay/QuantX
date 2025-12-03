@@ -2,15 +2,16 @@ package io.futakotome.analyze.controller.vo;
 
 public enum Granularity {
     MIN1(1, "1分K"),
-    MIN3(2, "3分K"),
-    MIN5(3, "5分K"),
-    MIN30(4, "30分K"),
-    MIN60(5, "60分K"),
-    DAY(6, "日K"),
-    WEEK(7, "周K"),
-    MONTH(8, "月K"),
-    QUARTER(9, "季K"),
-    YEAR(10, "年K");
+    DAY(2, "日K"),
+    WEEK(3, "周K"),
+    MONTH(4, "月K"),
+    YEAR(5, "年K"),
+    MIN5(6, "5分K"),
+    MIN15(7, "15分K"),
+    MIN30(8, "30分K"),
+    MIN60(9, "60分K"),
+    MIN3(10, "3分K"),
+    QUARTER(11, "季K");
 
     private final Integer code;
     private final String name;

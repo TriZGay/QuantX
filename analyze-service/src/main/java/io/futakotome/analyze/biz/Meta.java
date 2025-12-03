@@ -60,16 +60,54 @@ public class Meta {
         }
     }
 
+    /**
+     * MIN1(1, "1分K"),
+     * DAY(2, "日K"),
+     * WEEK(3, "周K"),
+     * MONTH(4, "月K"),
+     * YEAR(5, "年K"),
+     * MIN5(6, "5分K"),
+     * MIN15(7, "15分K"),
+     * MIN30(8, "30分K"),
+     * MIN60(9, "60分K"),
+     * MIN3(10, "3分K"),
+     * QUARTER(11, "季K");
+     *
+     * @param request
+     * @return
+     */
     public List<MetaResponse> hasDataCodes(MetaRequest request) {
         switch (request.getGranularity()) {
             case 1:
-                return repository.kLineDistinctCodesCommon(KLineMapper.KL_MIN_1_ARC_TABLE_NAME)
-                        .stream().map(metaDto -> new MetaResponse(metaDto.getMarket(), metaDto.getCode()))
-                        .collect(Collectors.toList());
+                return queryCodesBy(KLineMapper.KL_MIN_1_ARC_TABLE_NAME);
             case 2:
-                return null;
+                return queryCodesBy(KLineMapper.KL_DAY_ARC_TABLE_NAME);
+            case 3:
+                return queryCodesBy(KLineMapper.KL_WEEK_ARC_TABLE_NAME);
+            case 4:
+                return queryCodesBy(KLineMapper.KL_MONTH_ARC_TABLE_NAME);
+            case 5:
+                return queryCodesBy(KLineMapper.KL_YEAR_ARC_TABLE_NAME);
+            case 6:
+                return queryCodesBy(KLineMapper.KL_MIN_5_ARC_TABLE_NAME);
+            case 7:
+                return queryCodesBy(KLineMapper.KL_MIN_15_ARC_TABLE_NAME);
+            case 8:
+                return queryCodesBy(KLineMapper.KL_MIN_30_ARC_TABLE_NAME);
+            case 9:
+                return queryCodesBy(KLineMapper.KL_MIN_60_TABLE_NAME);
+            case 10:
+                return queryCodesBy(KLineMapper.KL_MIN_3_ARC_TABLE_NAME);
+            case 11:
+                return queryCodesBy(KLineMapper.KL_QUARTER_TABLE_NAME);
         }
-        return null;
+        throw new IllegalArgumentException("无此粒度");
+    }
+
+    private List<MetaResponse> queryCodesBy(String tableName) {
+        return repository.kLineDistinctCodesCommon(tableName)
+                .stream().map(metaDto -> new MetaResponse(metaDto.getMarket(), metaDto.getCode()))
+                .collect(Collectors.toList());
     }
 
     private TableInfoResponse tableInfoDtoMapResponse(AnaTableInfoDto dto) {
