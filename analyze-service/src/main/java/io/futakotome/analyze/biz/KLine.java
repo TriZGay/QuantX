@@ -36,17 +36,39 @@ public class KLine {
                 .stream().map(this::dtoMapRepeatResponse).collect(Collectors.toList());
     }
 
+    private List<KLineResponse> queryKLinesArc(String table, KLineRequest kLineRequest) {
+        return repository.queryKLineArchived(new KLineDto(table, kLineRequest.getCode(), kLineRequest.getRehabType(),
+                        kLineRequest.getStart(), kLineRequest.getEnd()))
+                .stream().distinct().map(KLine::dto2Resp)
+                .collect(Collectors.toList());
+    }
+
     public List<KLineResponse> kLinesUseArc(KLineRequest kLineRequest) {
         switch (kLineRequest.getGranularity()) {
             case 1:
-                return repository.queryKLineArchived(new KLineDto(KLineMapper.KL_MIN_1_ARC_TABLE_NAME, kLineRequest.getCode(), kLineRequest.getRehabType(),
-                                kLineRequest.getStart(), kLineRequest.getEnd()))
-                        .stream().distinct().map(KLine::dto2Resp)
-                        .collect(Collectors.toList());
+                return queryKLinesArc(KLineMapper.KL_MIN_1_ARC_TABLE_NAME, kLineRequest);
             case 2:
-                return null;
+                return queryKLinesArc(KLineMapper.KL_DAY_ARC_TABLE_NAME, kLineRequest);
+            case 3:
+                return queryKLinesArc(KLineMapper.KL_WEEK_ARC_TABLE_NAME, kLineRequest);
+            case 4:
+                return queryKLinesArc(KLineMapper.KL_MONTH_ARC_TABLE_NAME, kLineRequest);
+            case 5:
+                return queryKLinesArc(KLineMapper.KL_YEAR_ARC_TABLE_NAME, kLineRequest);
+            case 6:
+                return queryKLinesArc(KLineMapper.KL_MIN_5_ARC_TABLE_NAME, kLineRequest);
+            case 7:
+                return queryKLinesArc(KLineMapper.KL_MIN_15_ARC_TABLE_NAME, kLineRequest);
+            case 8:
+                return queryKLinesArc(KLineMapper.KL_MIN_30_ARC_TABLE_NAME, kLineRequest);
+            case 9:
+                return queryKLinesArc(KLineMapper.KL_MIN_60_TABLE_NAME, kLineRequest);
+            case 10:
+                return queryKLinesArc(KLineMapper.KL_MIN_3_ARC_TABLE_NAME, kLineRequest);
+            case 11:
+                return queryKLinesArc(KLineMapper.KL_QUARTER_TABLE_NAME, kLineRequest);
         }
-        return null;
+        throw new IllegalArgumentException("无此粒度");
     }
 
     private KLineRepeatResponse dtoMapRepeatResponse(KLineRepeatDto kLineRepeatDto) {
