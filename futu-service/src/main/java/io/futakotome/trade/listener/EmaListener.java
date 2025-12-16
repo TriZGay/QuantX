@@ -6,9 +6,13 @@ import io.futakotome.common.message.RTEmaMessage;
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-@Component
+import static io.futakotome.common.MessageCommon.RT_EMA5_CONSUMER_GROUP_STREAM;
+import static io.futakotome.common.MessageCommon.RT_EMA5_TOPIC;
+
+//@Component
 public class EmaListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmaListener.class);
     private final QuantxFutuWsService wsService;

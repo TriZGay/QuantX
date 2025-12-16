@@ -3,7 +3,9 @@ package io.futakotome.quantx;
 import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.quantx.key.RTKLineKey;
 import io.futakotome.quantx.key.RTKLineKeySelector;
+import io.futakotome.quantx.map.MaMapFunction;
 import io.futakotome.quantx.process.MaProcessFunction;
+import io.futakotome.quantx.sink.RTMaSink;
 import io.futakotome.quantx.source.RTKLine;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -16,8 +18,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.time.Duration;
 
-import static io.futakotome.common.MessageCommon.RT_KL_MIN_1_CONSUMER_GROUP_STREAM;
-import static io.futakotome.common.MessageCommon.RT_KL_MIN_1_TOPIC;
+import static io.futakotome.common.MessageCommon.*;
 
 public class QuantXMainJob {
 
@@ -37,7 +38,8 @@ public class QuantXMainJob {
         KeyedStream<RTKLMessage, RTKLineKey> keyedStream = rtklMin1Source.keyBy(new RTKLineKeySelector());
         keyedStream.countWindow(5, -4)
                 .process(new MaProcessFunction(5))
-                .print("ma5-stream");
+                .map(new MaMapFunction())
+                .sinkTo(RTMaSink.toKafka(configs, RT_MA5_TOPIC));
         keyedStream.countWindow(10, -9)
                 .process(new MaProcessFunction(10))
                 .print("ma10-stream");

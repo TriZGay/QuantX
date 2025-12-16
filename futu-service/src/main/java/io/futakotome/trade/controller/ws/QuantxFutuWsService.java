@@ -1,6 +1,7 @@
 package io.futakotome.trade.controller.ws;
 
 import io.futakotome.common.message.RTEmaMessage;
+import io.futakotome.common.message.RTMaMessage;
 import io.futakotome.trade.dto.ws.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -76,6 +77,12 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + GET_PRICE_REMINDER_URI, message);
     }
 
+    //ma
+    public void sendRtMa5(RTMaMessage maMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);
+    }
+
+    //ema
     public void sendRtEma5(RTEmaMessage emaMessage) {
         this.template.convertAndSend(BROKER_PREFIX + EMA5_URI, emaMessage);
     }

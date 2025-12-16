@@ -14,11 +14,14 @@ public interface MessageCommon {
     String RT_KL_MIN_15_CONSUMER_GROUP = "rt_klm15_consumer_group";
     String RT_KL_MIN_30_CONSUMER_GROUP = "rt_klm30_consumer_group";
     String RT_KL_MIN_60_CONSUMER_GROUP = "rt_klm60_consumer_group";
-
+    //ma
+    String RT_MA5_TOPIC = "rt_ma5_topic";
+    String RT_MA5_CONSUMER_GROUP_STREAM = "rt_ma5_consumer_group_stream";
     //todo 应该可以删除历史数据的
     String HISTORY_KL_MIN_1_CONSUMER_GROUP = "history_klm1_consumer_group";
-    String RT_EMA5_TOPIC = "rk_ema5_topic";
-    String RT_EMA5_CONSUMER_GROUP_STREAM = "rk_ema5_consumer_group_stream";
+    //ema
+    String RT_EMA5_TOPIC = "rt_ema5_topic";
+    String RT_EMA5_CONSUMER_GROUP_STREAM = "rt_ema5_consumer_group_stream";
     //实时K
     String RT_KL_DAY_TOPIC = "rt_kld_topic";
     String RT_KL_WEEK_TOPIC = "rt_klw_topic";

@@ -37,6 +37,9 @@ public class QuantxWsController {
     public static final String USER_SECURITY_URI = "/user_security";
     public static final String GET_PRICE_REMINDER_URI = "/get_price_reminders";
 
+    //ma
+    public static final String MA5_URI = "/ma5";
+    //ema
     public static final String EMA5_URI = "/ema5";
 
     private final FTQotService ftQotService;

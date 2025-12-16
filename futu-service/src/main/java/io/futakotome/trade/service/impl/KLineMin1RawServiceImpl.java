@@ -21,8 +21,8 @@ public class KLineMin1RawServiceImpl extends ServiceImpl<KLineMin1RawDtoMapper, 
     @Override
     public void saveOne(KLineMin1RawDto kLineMin1RawDto) {
         if (save(kLineMin1RawDto)) {
-            LOGGER.info("1分钟实时K线入库成功.code={},rehab_type={},close_price={}",
-                    kLineMin1RawDto.getCode(), kLineMin1RawDto.getRehabType(), kLineMin1RawDto.getClosePrice());
+            LOGGER.info("1分钟实时K线入库成功.code={},rehab_type={},update_time={},close_price={}",
+                    kLineMin1RawDto.getCode(), kLineMin1RawDto.getRehabType(), kLineMin1RawDto.getUpdateTime(), kLineMin1RawDto.getClosePrice());
         }
     }
 }
