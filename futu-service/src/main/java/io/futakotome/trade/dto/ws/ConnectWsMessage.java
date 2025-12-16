@@ -1,7 +1,7 @@
 package io.futakotome.trade.dto.ws;
 
 public class ConnectWsMessage implements Message {
-    private boolean isConnect;
+    private boolean connected;
 
     public ConnectWsMessage() {
     }
@@ -11,11 +11,11 @@ public class ConnectWsMessage implements Message {
         return MessageType.CONNECT;
     }
 
-    public boolean isConnect() {
-        return isConnect;
+    public boolean isConnected() {
+        return connected;
     }
 
-    public void setConnect(boolean connect) {
-        isConnect = connect;
+    public void setConnected(boolean connected) {
+        this.connected = connected;
     }
 }

@@ -65,7 +65,7 @@ public class QuantxWsController {
             } else if (messageClz.getType().equals(MessageType.CONNECT)) {
                 //连接或断开连接
                 ConnectWsMessage connectWsMessage = (ConnectWsMessage) messageClz;
-                if (connectWsMessage.isConnect()) {
+                if (connectWsMessage.isConnected()) {
                     ftQotService.connect();
                     ftTradeService.connect();
                 } else {
