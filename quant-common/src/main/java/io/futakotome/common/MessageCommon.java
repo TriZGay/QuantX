@@ -17,6 +17,16 @@ public interface MessageCommon {
     //ma
     String RT_MA5_TOPIC = "rt_ma5_topic";
     String RT_MA5_CONSUMER_GROUP_STREAM = "rt_ma5_consumer_group_stream";
+    String RT_MA10_TOPIC = "rt_ma10_topic";
+    String RT_MA10_CONSUMER_GROUP_STREAM = "rt_ma10_consumer_group_stream";
+    String RT_MA20_TOPIC = "rt_ma20_topic";
+    String RT_MA20_CONSUMER_GROUP_STREAM = "rt_ma20_consumer_group_stream";
+    String RT_MA30_TOPIC = "rt_ma30_topic";
+    String RT_MA30_CONSUMER_GROUP_STREAM = "rt_ma30_consumer_group_stream";
+    String RT_MA60_TOPIC = "rt_ma60_topic";
+    String RT_MA60_CONSUMER_GROUP_STREAM = "rt_ma60_consumer_group_stream";
+    String RT_MA120_TOPIC = "rt_ma120_topic";
+    String RT_MA120_CONSUMER_GROUP_STREAM = "rt_ma120_consumer_group_stream";
     //todo 应该可以删除历史数据的
     String HISTORY_KL_MIN_1_CONSUMER_GROUP = "history_klm1_consumer_group";
     //ema

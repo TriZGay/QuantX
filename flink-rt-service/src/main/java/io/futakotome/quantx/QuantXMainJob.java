@@ -42,19 +42,24 @@ public class QuantXMainJob {
                 .sinkTo(RTMaSink.toKafka(configs, RT_MA5_TOPIC));
         keyedStream.countWindow(10, -9)
                 .process(new MaProcessFunction(10))
-                .print("ma10-stream");
+                .map(new MaMapFunction())
+                .sinkTo(RTMaSink.toKafka(configs, RT_MA10_TOPIC));
         keyedStream.countWindow(20, -19)
                 .process(new MaProcessFunction(20))
-                .print("ma20-stream");
+                .map(new MaMapFunction())
+                .sinkTo(RTMaSink.toKafka(configs, RT_MA20_TOPIC));
         keyedStream.countWindow(30, -29)
                 .process(new MaProcessFunction(30))
-                .print("ma30-stream");
+                .map(new MaMapFunction())
+                .sinkTo(RTMaSink.toKafka(configs, RT_MA30_TOPIC));
         keyedStream.countWindow(60, -59)
                 .process(new MaProcessFunction(60))
-                .print("ma60-stream");
+                .map(new MaMapFunction())
+                .sinkTo(RTMaSink.toKafka(configs, RT_MA60_TOPIC));
         keyedStream.countWindow(120, -119)
                 .process(new MaProcessFunction(120))
-                .print("ma120-stream");
+                .map(new MaMapFunction())
+                .sinkTo(RTMaSink.toKafka(configs, RT_MA120_TOPIC));
         //        SingleOutputStreamOperator<Macd> macdStream = keyedStream.process(new MacdProcessFunction(12, 26, 9));
         //        macdStream.getSideOutput(MacdProcessFunction.TRADE_SIGNAL_OUTPUT_TAG)
         //                .print("signal-stream");

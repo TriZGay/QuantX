@@ -82,6 +82,26 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);
     }
 
+    public void sendRtMa10(RTMaMessage maMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + MA10_URI, maMessage);
+    }
+
+    public void sendRtMa20(RTMaMessage maMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + MA20_URI, maMessage);
+    }
+
+    public void sendRtMa30(RTMaMessage maMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + MA30_URI, maMessage);
+    }
+
+    public void sendRtMa60(RTMaMessage maMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + MA60_URI, maMessage);
+    }
+
+    public void sendRtMa120(RTMaMessage maMessage) {
+        this.template.convertAndSend(BROKER_PREFIX + MA120_URI, maMessage);
+    }
+
     //ema
     public void sendRtEma5(RTEmaMessage emaMessage) {
         this.template.convertAndSend(BROKER_PREFIX + EMA5_URI, emaMessage);

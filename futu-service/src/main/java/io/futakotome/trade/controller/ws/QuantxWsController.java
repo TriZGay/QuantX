@@ -39,6 +39,11 @@ public class QuantxWsController {
 
     //ma
     public static final String MA5_URI = "/ma5";
+    public static final String MA10_URI = "/ma10";
+    public static final String MA20_URI = "/ma20";
+    public static final String MA30_URI = "/ma30";
+    public static final String MA60_URI = "/ma60";
+    public static final String MA120_URI = "/ma120";
     //ema
     public static final String EMA5_URI = "/ema5";
 
