@@ -9,14 +9,6 @@ import org.apache.flink.formats.json.JsonSerializationSchema;
 
 public class RTEmaSink {
     public static KafkaSink<RTEmaMessage> toKafka(ParameterTool configs, String topic) {
-        return KafkaSink.<RTEmaMessage>builder()
-                .setBootstrapServers(configs.getRequired("kafka.bootstrapServers"))
-                .setRecordSerializer(KafkaRecordSerializationSchema.builder()
-                        .setTopic(topic)
-                        .setValueSerializationSchema(new JsonSerializationSchema<RTEmaMessage>())
-                        .build())
-                .setProperty("transaction.timeout.ms", String.valueOf(15 * 60 * 1000))
-                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                .build();
+        return KfkSink.produce(configs, topic);
     }
 }
