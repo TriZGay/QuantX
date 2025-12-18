@@ -6,6 +6,7 @@ import io.futakotome.analyze.controller.vo.MaRequest;
 import io.futakotome.analyze.mapper.MaNMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/ma")
@@ -32,7 +36,8 @@ public class MaNController {
     public Mono<ResponseEntity<?>> maN(@RequestBody @Validated Mono<MaRequest> maRequestMono) {
         return Mono.create(responseEntityMonoSink -> {
             maRequestMono.doOnError(WebExchangeBindException.class, throwable -> {
-                responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + throwable.getFieldErrors(), HttpStatus.BAD_REQUEST));
+                List<String> errors = throwable.getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList());
+                responseEntityMonoSink.success(new ResponseEntity<>("参数校验失败:" + String.join(",", errors), HttpStatus.BAD_REQUEST));
             }).doOnError(Exception.class, throwable -> {
                 responseEntityMonoSink.success(ResponseEntity.internalServerError().body("服务器内部异常"));
             }).doOnNext(maRequest -> {
