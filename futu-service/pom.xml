@@ -108,6 +108,12 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <!--        集成 logstash-->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>5.3</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

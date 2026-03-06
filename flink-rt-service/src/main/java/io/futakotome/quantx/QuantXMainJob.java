@@ -60,11 +60,11 @@ public class QuantXMainJob {
                 .process(new MaProcessFunction(120))
                 .map(new MaMapFunction())
                 .sinkTo(RTMaSink.toKafka(configs, RT_MA120_TOPIC));
-        //        SingleOutputStreamOperator<Macd> macdStream = keyedStream.process(new MacdProcessFunction(12, 26, 9));
-        //        macdStream.getSideOutput(MacdProcessFunction.TRADE_SIGNAL_OUTPUT_TAG)
-        //                .print("signal-stream");
-        //                .sinkTo()
-        //                .setParallelism(2);
+//                SingleOutputStreamOperator<Macd> macdStream = keyedStream.process(new MacdProcessFunction(12, 26, 9));
+//                macdStream.getSideOutput(MacdProcessFunction.TRADE_SIGNAL_OUTPUT_TAG)
+//                        .print("signal-stream");
+//                        .sinkTo()
+//                        .setParallelism(2);
         //        macdStream.print("macd-stream");
         //        keyedStream.process(new EmaProcessFunction(5))
         //                .map(new EmaMapFunction())
