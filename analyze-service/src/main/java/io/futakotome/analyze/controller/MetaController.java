@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -58,7 +59,7 @@ public class MetaController {
     public Mono<ResponseEntity<?>> truncateTable(@RequestBody TableInfoRequest request) {
         return Mono.create(responseEntityMonoSink -> {
             try {
-                responseEntityMonoSink.success(ResponseEntity.ok(meta.truncate(request.getTableName())));
+//                responseEntityMonoSink.success(ResponseEntity.ok(meta.truncate(request.getTableName())));
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
                 responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
@@ -79,7 +80,7 @@ public class MetaController {
     }
 
     @GetMapping("/dbInfo")
-    public Mono<ResponseEntity<?>> dnInfo() {
+    public Mono<ResponseEntity<?>> dbInfo() {
         return Mono.create(responseEntityMonoSink -> {
             try {
                 responseEntityMonoSink.success(ResponseEntity.ok(meta.dbInfo()));
@@ -124,6 +125,20 @@ public class MetaController {
     @GetMapping("/strategyTypes")
     public Mono<ResponseEntity<?>> getStrategyTypes() {
         return Mono.create(responseEntityMonoSink -> responseEntityMonoSink.success(ResponseEntity.ok(strategyTypesOptions())));
+    }
+
+    @GetMapping("/tbInfo/granularity/{granularity}/code/{code}/rehabType/{rehabType}")
+    public Mono<ResponseEntity<?>> tbInfoPerCode(@PathVariable("granularity") Integer granularity,
+                                                 @PathVariable("code") String code,
+                                                 @PathVariable("rehabType") Integer rehabType) {
+        return Mono.create(responseEntityMonoSink -> {
+            try {
+                responseEntityMonoSink.success(ResponseEntity.ok(meta.dataInfoPerCode(granularity, code, rehabType)));
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+                responseEntityMonoSink.success(ResponseEntity.internalServerError().body(e.getMessage()));
+            }
+        });
     }
 
     private List<AntDesignSelectOptions> strategyTypesOptions() {

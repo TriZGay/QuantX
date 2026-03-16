@@ -1,9 +1,6 @@
 package io.futakotome.analyze.biz;
 
-import io.futakotome.analyze.controller.vo.DbInfoResponse;
-import io.futakotome.analyze.controller.vo.MetaRequest;
-import io.futakotome.analyze.controller.vo.MetaResponse;
-import io.futakotome.analyze.controller.vo.TableInfoResponse;
+import io.futakotome.analyze.controller.vo.*;
 import io.futakotome.analyze.mapper.KLineMapper;
 import io.futakotome.analyze.mapper.MetaDataMapper;
 import io.futakotome.analyze.mapper.dto.AnaDatabaseInfoDto;
@@ -102,6 +99,51 @@ public class Meta {
                 return queryCodesBy(KLineMapper.KL_QUARTER_TABLE_NAME);
         }
         throw new IllegalArgumentException("无此粒度");
+    }
+
+    public DataInfoPerCodeResponse dataInfoPerCode(Integer granularity, String code, Integer rehabType) {
+        DataInfoPerCodeResponse response = new DataInfoPerCodeResponse();
+        response.setkInfo(kInfoPerCode(granularity, code, rehabType));
+        return response;
+    }
+
+
+    private DataInfoPerCodeResponse.KLineInfoPerCode kInfoPerCode(Integer granularity, String code, Integer rehabType) {
+        switch (granularity) {
+            case 1:
+                return kInfo(KLineMapper.KL_MIN_1_ARC_TABLE_NAME, code, rehabType);
+            case 2:
+                return kInfo(KLineMapper.KL_DAY_ARC_TABLE_NAME, code, rehabType);
+            case 3:
+                return kInfo(KLineMapper.KL_WEEK_ARC_TABLE_NAME, code, rehabType);
+            case 4:
+                return kInfo(KLineMapper.KL_MONTH_ARC_TABLE_NAME, code, rehabType);
+            case 5:
+                return kInfo(KLineMapper.KL_YEAR_ARC_TABLE_NAME, code, rehabType);
+            case 6:
+                return kInfo(KLineMapper.KL_MIN_5_ARC_TABLE_NAME, code, rehabType);
+            case 7:
+                return kInfo(KLineMapper.KL_MIN_15_ARC_TABLE_NAME, code, rehabType);
+            case 8:
+                return kInfo(KLineMapper.KL_MIN_30_ARC_TABLE_NAME, code, rehabType);
+            case 9:
+                return kInfo(KLineMapper.KL_MIN_60_TABLE_NAME, code, rehabType);
+            case 10:
+                return kInfo(KLineMapper.KL_MIN_3_ARC_TABLE_NAME, code, rehabType);
+            case 11:
+                return kInfo(KLineMapper.KL_QUARTER_TABLE_NAME, code, rehabType);
+        }
+        throw new IllegalArgumentException("无此粒度");
+    }
+
+    private DataInfoPerCodeResponse.KLineInfoPerCode kInfo(String tableName, String code, Integer rehabType) {
+        DataInfoPerCodeResponse.KLineInfoPerCode kInfoResult = new DataInfoPerCodeResponse.KLineInfoPerCode();
+        AnaTableInfoDto dto = repository.kInfo(tableName, code, rehabType);
+        kInfoResult.setMaxTime(dto.getMaxTime());
+        kInfoResult.setMinTime(dto.getMinTime());
+        kInfoResult.setCode(dto.getCode());
+        kInfoResult.setRehabType(dto.getRehabType());
+        return kInfoResult;
     }
 
     private List<MetaResponse> queryCodesBy(String tableName) {

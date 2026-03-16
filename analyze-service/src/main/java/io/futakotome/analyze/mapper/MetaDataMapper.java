@@ -32,6 +32,22 @@ public class MetaDataMapper {
         }
     }
 
+    public AnaTableInfoDto kInfo(String tableName, String code, Integer rehabType) {
+        try {
+            String sql = "select toString(max(update_time)) as max_time, toString(min(update_time)) as min_time ,code,rehab_type " +
+                    " from :tableName where code = :code and rehab_type = :rehabType" +
+                    " group by code,rehab_type";
+            return namedParameterJdbcTemplate.queryForObject(sql, new HashMap<>() {{
+                put("tableName", tableName);
+                put("code", code);
+                put("rehabType", rehabType);
+            }}, new BeanPropertyRowMapper<>(AnaTableInfoDto.class));
+        } catch (Exception e) {
+            LOGGER.error("查询表信息失败.", e);
+            return null;
+        }
+    }
+
     public List<AnaTableInfoDto> tableInfo(String tableName) {
         try {
             String sql = "select max (update_time) as max_time, min (update_time) as min_time ,code,rehab_type " +
