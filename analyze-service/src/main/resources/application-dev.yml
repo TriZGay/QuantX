@@ -10,6 +10,11 @@ pg:
   url: jdbc:postgresql://172.21.195.165:5432/quantx_offline
   user: postgres
   password: 123456
+pg1:
+  driverClass: org.postgresql.Driver
+  url: jdbc:postgresql://172.21.195.165:5432/quantx_3rd_futu
+  user: postgres
+  password: 123456
 logging:
   level:
     org.springframework.jdbc.core.JdbcTemplate: DEBUG

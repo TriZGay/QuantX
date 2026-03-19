@@ -3,8 +3,10 @@ package io.futakotome.analyze.biz;
 import io.futakotome.analyze.controller.vo.*;
 import io.futakotome.analyze.mapper.KLineMapper;
 import io.futakotome.analyze.mapper.MetaDataMapper;
+import io.futakotome.analyze.mapper.StockMapper;
 import io.futakotome.analyze.mapper.dto.AnaDatabaseInfoDto;
 import io.futakotome.analyze.mapper.dto.AnaTableInfoDto;
+import io.futakotome.analyze.mapper.dto.StockDto;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,9 +16,11 @@ import java.util.stream.Collectors;
 @Component
 public class Meta {
     private final MetaDataMapper repository;
+    private final StockMapper stockMapper;
 
-    public Meta(MetaDataMapper mapper) {
+    public Meta(MetaDataMapper mapper, StockMapper stockMapper) {
         this.repository = mapper;
+        this.stockMapper = stockMapper;
     }
 
     public String truncate(String tableName) {
@@ -104,9 +108,17 @@ public class Meta {
     public DataInfoPerCodeResponse dataInfoPerCode(Integer granularity, String code, Integer rehabType) {
         DataInfoPerCodeResponse response = new DataInfoPerCodeResponse();
         response.setkInfo(kInfoPerCode(granularity, code, rehabType));
+        response.setName(getNameByCode(code));
         return response;
     }
 
+    private String getNameByCode(String code) {
+        StockDto stockDto = stockMapper.queryByCode(code);
+        if (Objects.nonNull(stockDto)) {
+            return stockDto.getName();
+        }
+        return "";
+    }
 
     private DataInfoPerCodeResponse.KLineInfoPerCode kInfoPerCode(Integer granularity, String code, Integer rehabType) {
         switch (granularity) {

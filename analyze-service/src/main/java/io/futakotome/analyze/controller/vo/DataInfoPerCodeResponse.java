@@ -1,7 +1,16 @@
 package io.futakotome.analyze.controller.vo;
 
 public class DataInfoPerCodeResponse {
+    private String name;
     private KLineInfoPerCode kInfo;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public KLineInfoPerCode getkInfo() {
         return kInfo;
