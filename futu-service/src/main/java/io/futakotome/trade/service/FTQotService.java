@@ -154,37 +154,31 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         LOGGER.info("查询订阅信息.seqNo={}", seqNo);
     }
 
-    public void syncCapitalFlow(Integer market, String code) {
+    /**
+     * @param periodType 0-实时 1-日 2-周 3-月
+     * @param beginTime  yyyy-MM-dd
+     * @param endTime    yyyy-MM-dd
+     */
+    public void syncCapitalFlow(Integer market, String code, Integer periodType, String beginTime, String endTime) {
         QotCommon.Security security = QotCommon.Security.newBuilder()
                 .setMarket(market)
                 .setCode(code)
                 .build();
+        QotGetCapitalFlow.C2S.Builder builder = QotGetCapitalFlow.C2S.newBuilder();
+        builder.setSecurity(security);
+        builder.setPeriodType(periodType);
+        if (!periodType.equals(0)) {
+            //非实时需要开始、结束时间
+            builder.setBeginTime(beginTime);
+            builder.setEndTime(endTime);
+        }
         QotGetCapitalFlow.Request request = QotGetCapitalFlow.Request.newBuilder()
-                .setC2S(QotGetCapitalFlow.C2S.newBuilder()
-                        .setSecurity(security).build())
+                .setC2S(builder.build())
                 .build();
         int seqNo = qot.getCapitalFlow(request);
         CommonSecurity commonSecurity = new CommonSecurity(market, code);
         CacheManager.put(String.valueOf(seqNo), commonSecurity);
         LOGGER.info("{}-{}请求资金流向.seqNo={}", MarketType.getNameByCode(market), code, seqNo);
-        //        if (request.getPeriodType() == 1) {
-        //            //实时
-        //            ftRequest.setC2S(QotGetCapitalFlow.C2S.newBuilder()
-        //                    .setPeriodType(request.getPeriodType())
-        //                    .setSecurity(security)
-        //                    .build());
-        //        } else {
-        //            ftRequest.setC2S(QotGetCapitalFlow.C2S.newBuilder()
-        //                    .setPeriodType(request.getPeriodType())
-        //                    .setSecurity(security)
-        //                    .setBeginTime(request.getBeginDate())
-        //                    .setEndTime(request.getEndDate())
-        //                    .build());
-        //        }
-        //        int seqNo = qot.getCapitalFlow(ftRequest.build());
-        //        String marketAndCode = request.getMarket() + "-" + request.getCode();
-        //        CacheManager.put(String.valueOf(seqNo), marketAndCode);
-        //        LOGGER.info("请求资金流向.seqNo=" + seqNo);
     }
 
     public void syncCapitalDistribution(Integer market, String code) {

@@ -131,7 +131,8 @@ public class QuantxWsController {
             } else if (messageClz.getType().equals(MessageType.CAPITAL_FLOW)) {
                 //查询资金流向
                 CapitalFlowWsMessage capitalFlowWsMessage = (CapitalFlowWsMessage) messageClz;
-                ftQotService.syncCapitalFlow(capitalFlowWsMessage.getSecurity().getMarket(), capitalFlowWsMessage.getSecurity().getCode());
+                CommonSecurity security = capitalFlowWsMessage.getSecurity();
+                ftQotService.syncCapitalFlow(security.getMarket(), security.getCode(), capitalFlowWsMessage.getPeriodType(), capitalFlowWsMessage.getBeginTime(), capitalFlowWsMessage.getEndTime());
             } else if (messageClz.getType().equals(MessageType.REHABS)) {
                 //查询复权因子
                 RehabsWsMessage rehabsWsMessage = (RehabsWsMessage) messageClz;
