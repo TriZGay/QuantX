@@ -1,10 +1,11 @@
 package io.futakotome.trade.domain.code;
 
 public enum PeriodType {
-    INTRADAY(0, "实时"),
-    DAY(1, "日"),
-    WEEK(2, "周"),
-    MONTH(3, "月");
+    UNKNOWN(0, "未知"),
+    INTRADAY(1, "实时"),
+    DAY(2, "日"),
+    WEEK(3, "周"),
+    MONTH(4, "月");
 
     private final int code;
     private final String name;

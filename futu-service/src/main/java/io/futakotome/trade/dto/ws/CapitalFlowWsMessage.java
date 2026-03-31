@@ -11,16 +11,7 @@ public class CapitalFlowWsMessage implements Message {
     private String beginTime;
     private String endTime;
 
-    private String lastValidTime;
     private List<CapitalFlowMessageContent> contentList;
-
-    public String getLastValidTime() {
-        return lastValidTime;
-    }
-
-    public void setLastValidTime(String lastValidTime) {
-        this.lastValidTime = lastValidTime;
-    }
 
     public List<CapitalFlowMessageContent> getContentList() {
         return contentList;
@@ -61,6 +52,7 @@ public class CapitalFlowWsMessage implements Message {
     public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
+
 
     @Override
     public MessageType getType() {

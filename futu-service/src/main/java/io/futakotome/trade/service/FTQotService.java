@@ -555,14 +555,14 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 CommonSecurity security = (CommonSecurity) CacheManager.get(String.valueOf(nSerialNo));
                 List<CapitalFlowMessageContent> capitalFlowMessageContents = GSON.fromJson(ftGrpcReturnResult.getS2c().get("flowItemList").getAsJsonArray(), new TypeToken<List<CapitalFlowMessageContent>>() {
                 }.getType());
-                String lastValidTime = ftGrpcReturnResult.getS2c().get("lastValidTime").getAsString();
                 CapitalFlowWsMessage capitalFlowWsMessage = new CapitalFlowWsMessage();
                 capitalFlowWsMessage.setContentList(capitalFlowMessageContents);
                 capitalFlowWsMessage.setSecurity(security);
-                capitalFlowWsMessage.setLastValidTime(lastValidTime);
                 quantxFutuWsService.sendCapitalFlow(capitalFlowWsMessage);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("解析资金流向结果失败.", e);
+            } catch (NullPointerException e) {
+                LOGGER.error("资金流向回调异常.", e);
             }
         }
     }
