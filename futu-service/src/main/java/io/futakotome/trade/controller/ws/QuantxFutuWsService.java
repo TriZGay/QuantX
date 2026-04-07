@@ -77,6 +77,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + GET_PRICE_REMINDER_URI, message);
     }
 
+    public void sendIpoMessage(GetIpoWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + GET_IPO_URI, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);

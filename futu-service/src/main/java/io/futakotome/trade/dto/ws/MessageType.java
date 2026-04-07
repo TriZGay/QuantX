@@ -29,6 +29,7 @@ public enum MessageType {
     USER_SECURITY,//自选股列表
     SET_PRICE_REMINDER,
     GET_PRICE_REMINDER,
+    IPO,
 
     RT_BASIC_QUOTE,
     RT_KL,

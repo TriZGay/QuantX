@@ -36,6 +36,7 @@ public class QuantxWsController {
     public static final String USER_GROUP_URI = "/user_group";
     public static final String USER_SECURITY_URI = "/user_security";
     public static final String GET_PRICE_REMINDER_URI = "/get_price_reminders";
+    public static final String GET_IPO_URI = "/ipo";
 
     //ma
     public static final String MA5_URI = "/ma5";
@@ -191,6 +192,10 @@ public class QuantxWsController {
                 //获取到价提醒列表
                 GetPriceReminderWsMessage request = (GetPriceReminderWsMessage) messageClz;
                 ftQotService.sendGetReminderRequest(request);
+            } else if (messageClz.getType().equals(MessageType.IPO)) {
+                //ipo
+                GetIpoWsMessage request = (GetIpoWsMessage) messageClz;
+                ftQotService.sendGetIpoRequest(request);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

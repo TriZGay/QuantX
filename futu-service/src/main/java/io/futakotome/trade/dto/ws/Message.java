@@ -32,6 +32,7 @@ import io.futakotome.trade.dto.message.ModifyOrderWsMessage;
         @JsonSubTypes.Type(value = UserSecurityWsMessage.class, name = "USER_SECURITY"),
         @JsonSubTypes.Type(value = SetPriceReminderWsMessage.class, name = "SET_PRICE_REMINDER"),
         @JsonSubTypes.Type(value = GetPriceReminderWsMessage.class, name = "GET_PRICE_REMINDER"),
+        @JsonSubTypes.Type(value = GetIpoWsMessage.class, name = "IPO"),
 
         @JsonSubTypes.Type(value = RealTimeBaseQuoteMessage.class, name = "RT_BASIC_QUOTE"),
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),
