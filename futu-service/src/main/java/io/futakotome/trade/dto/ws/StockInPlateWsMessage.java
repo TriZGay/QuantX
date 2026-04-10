@@ -1,32 +1,33 @@
 package io.futakotome.trade.dto.ws;
 
 import io.futakotome.trade.dto.message.CommonSecurity;
+import io.futakotome.trade.dto.message.StockContent;
 
 import java.util.List;
 
 public class StockInPlateWsMessage implements Message {
-    private boolean all;
-    private List<CommonSecurity> plates;
+    private CommonSecurity plate;
+    private List<StockContent> stocks;
 
-    public List<CommonSecurity> getPlates() {
-        return plates;
+    public List<StockContent> getStocks() {
+        return stocks;
     }
 
-    public void setPlates(List<CommonSecurity> plates) {
-        this.plates = plates;
+    public void setStocks(List<StockContent> stocks) {
+        this.stocks = stocks;
     }
 
-    public boolean isAll() {
-        return all;
+    public CommonSecurity getPlate() {
+        return plate;
     }
 
-    public void setAll(boolean all) {
-        this.all = all;
+    public void setPlate(CommonSecurity plate) {
+        this.plate = plate;
     }
 
     @Override
     public MessageType getType() {
         return MessageType.STOCK_IN_PLATE;
     }
-    
+
 }

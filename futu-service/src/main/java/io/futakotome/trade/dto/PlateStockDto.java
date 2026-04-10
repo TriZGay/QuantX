@@ -15,6 +15,14 @@ public class PlateStockDto implements Serializable {
 
     private Long stockId;
 
+    public PlateStockDto(Long plateId, Long stockId) {
+        this.plateId = plateId;
+        this.stockId = stockId;
+    }
+
+    public PlateStockDto() {
+    }
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 

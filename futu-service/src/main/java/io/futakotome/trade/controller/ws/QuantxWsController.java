@@ -13,9 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static io.futakotome.trade.config.WebSocketMessageBrokerConfig.ENDPOINT_NOTIFY;
 
 @Controller
@@ -37,6 +34,7 @@ public class QuantxWsController {
     public static final String USER_SECURITY_URI = "/user_security";
     public static final String GET_PRICE_REMINDER_URI = "/get_price_reminders";
     public static final String GET_IPO_URI = "/ipo";
+    public static final String STOCKS_IN_PLATE_URI = "/stocks_in_plate";
 
     //ma
     public static final String MA5_URI = "/ma5";
@@ -104,19 +102,9 @@ public class QuantxWsController {
                 PlatesWsMessage platesWsMessage = (PlatesWsMessage) messageClz;
                 ftQotService.syncPlateInfo(platesWsMessage.getMarkets());
             } else if (messageClz.getType().equals(MessageType.STOCK_IN_PLATE)) {
-                //todo 同步板块下股票数据 (优化代码
+                //同步板块下股票数据
                 StockInPlateWsMessage stockInPlateWsMessage = (StockInPlateWsMessage) messageClz;
-                if (stockInPlateWsMessage.isAll()) {
-                    List<CommonSecurity> allPlates = plateService.list().stream().map(plateDto -> {
-                        CommonSecurity plateItem = new CommonSecurity();
-                        plateItem.setMarket(plateDto.getMarket());
-                        plateItem.setCode(plateDto.getCode());
-                        return plateItem;
-                    }).collect(Collectors.toList());
-                    ftQotService.syncStockInPlate(allPlates);
-                } else {
-                    ftQotService.syncStockInPlate(stockInPlateWsMessage.getPlates());
-                }
+                ftQotService.syncStockInPlate(stockInPlateWsMessage.getPlate());
             } else if (messageClz.getType().equals(MessageType.STOCKS)) {
                 //同步 静态标的物
                 StocksWsMessage stocksWsMessage = (StocksWsMessage) messageClz;

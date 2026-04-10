@@ -23,6 +23,7 @@ import io.futakotome.trade.dto.*;
 import io.futakotome.trade.dto.message.*;
 import io.futakotome.trade.dto.ws.*;
 import io.futakotome.trade.event.KLineUpdateEvent;
+import io.futakotome.trade.event.StockInPlateUpdateEvent;
 import io.futakotome.trade.utils.CacheManager;
 import io.futakotome.trade.utils.RequestCount;
 import org.apache.commons.collections4.CollectionUtils;
@@ -79,26 +80,20 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         this.quantxFutuWsService = quantxFutuWsService;
     }
 
-    public void syncStockInPlate(List<CommonSecurity> plates) {
-        RequestCount requestLock = new RequestCount(40000L, 10);
-        for (CommonSecurity plateItem : plates) {
-            QotCommon.Security sec = QotCommon.Security.newBuilder()
-                    .setMarket(plateItem.getMarket())
-                    .setCode(plateItem.getCode())
-                    .build();
-            QotGetPlateSecurity.C2S c2s = QotGetPlateSecurity.C2S.newBuilder()
-                    .setPlate(sec)
-                    .build();
-            QotGetPlateSecurity.Request req = QotGetPlateSecurity.Request.newBuilder()
-                    .setC2S(c2s)
-                    .build();
-            int seqNo = qot.getPlateSecurity(req);
-            CacheManager.put(String.valueOf(seqNo), plateItem);
-            LOGGER.info("{}-{}:请求股票数据,seq={}", MarketType.getNameByCode(plateItem.getMarket()),
-                    plateItem.getCode(), seqNo);
-            requestLock.count();
-        }
-
+    public void syncStockInPlate(CommonSecurity plate) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setMarket(plate.getMarket())
+                .setCode(plate.getCode())
+                .build();
+        QotGetPlateSecurity.C2S c2s = QotGetPlateSecurity.C2S.newBuilder()
+                .setPlate(sec)
+                .build();
+        QotGetPlateSecurity.Request req = QotGetPlateSecurity.Request.newBuilder()
+                .setC2S(c2s)
+                .build();
+        int seqNo = qot.getPlateSecurity(req);
+        CacheManager.put(String.valueOf(seqNo), plate);
+        LOGGER.info("{}-{}:请求板块下股票数据,seq={}", MarketType.getNameByCode(plate.getMarket()), plate.getCode(), seqNo);
     }
 
     public void syncPlateInfo(List<Integer> markets) {
@@ -1351,20 +1346,27 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询板块下股票信息结果", ftGrpcReturnResult);
                 List<StockContent> stockContents = GSON.fromJson(ftGrpcReturnResult.getS2c().getAsJsonArray("staticInfoList"), new TypeToken<List<StockContent>>() {
                 }.getType());
+                sendStocksInPlateMessage(stockContents);
                 CommonSecurity plateItem = (CommonSecurity) CacheManager.get(String.valueOf(nSerialNo));
                 List<StockDto> toInsertStocks = stockContent2StockDto(stockContents);
                 PlateDto plateDto = new PlateDto(plateItem.getMarket(), plateItem.getCode());
                 //todo 用板块同步股票数据会无法建立关联关系
-                int insertRow = stockService.insertBatch(toInsertStocks);
-                String notify = "查询板块下股票信息,插入条数:" + insertRow;
-                LOGGER.info(notify);
-                sendNotifyMessage(notify);
+                eventPublisher.publishEvent(new StockInPlateUpdateEvent(plateDto, toInsertStocks));
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询板块下股票解析结果失败!", e);
+            } catch (NullPointerException e) {
+                LOGGER.error("查询板块下股票解析回调空指针.", e);
             }
         }
+    }
+
+    private void sendStocksInPlateMessage(List<StockContent> stockContents) {
+        StockInPlateWsMessage message = new StockInPlateWsMessage();
+        message.setStocks(stockContents);
+        this.quantxFutuWsService.sendStocksInPlateMessage(message);
     }
 
     private List<StockDto> stockContent2StockDto(List<StockContent> stockContents) {

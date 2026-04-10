@@ -41,6 +41,7 @@ public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
     public int insertBatch(List<StockDto> toInsertStocks) {
         lock.lock();
         try {
+            //todo 这个查全量，在数据量大的时候可能会有问题
             List<StockDto> allStocks = list();
             toInsertStocks.removeIf(allStocks::contains);
             if (!toInsertStocks.isEmpty()) {
