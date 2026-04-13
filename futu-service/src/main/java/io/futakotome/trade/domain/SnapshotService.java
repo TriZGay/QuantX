@@ -51,41 +51,46 @@ public class SnapshotService {
                 totalInsert += snapshot.getEquityExDtoList().size();
             }
         }
-        //todo override other saveOrUpdateBatch
+        if (Objects.nonNull(snapshot.getPlateExDtoList()) &&
+                !snapshot.getPlateExDtoList().isEmpty()) {
+            if (plateExDtoService.saveOrUpdateBatch(snapshot.getPlateExDtoList(), 1000)) {
+                totalInsert += snapshot.getPlateExDtoList().size();
+            }
+        }
         if (Objects.nonNull(snapshot.getFutureExDtoList())
                 && !snapshot.getFutureExDtoList().isEmpty()) {
-            SnapshotFutureExDtoMapper futureExDtoMapper = (SnapshotFutureExDtoMapper) futureExDtoService.getBaseMapper();
-            totalInsert += futureExDtoMapper.insertBatch(snapshot.getFutureExDtoList());
+            if (futureExDtoService.saveOrUpdateBatch(snapshot.getFutureExDtoList(), 1000)) {
+                totalInsert += snapshot.getFutureExDtoList().size();
+            }
         }
+        //todo override other saveOrUpdateBatch
         if (Objects.nonNull(snapshot.getIndexExDtoList())
                 && !snapshot.getIndexExDtoList().isEmpty()) {
-            SnapshotIndexExDtoMapper indexExDtoMapper = (SnapshotIndexExDtoMapper) indexExDtoService.getBaseMapper();
-            totalInsert += indexExDtoMapper.insertBatch(snapshot.getIndexExDtoList());
+            if (indexExDtoService.saveOrUpdateBatch(snapshot.getIndexExDtoList(), 1000)) {
+                totalInsert += snapshot.getIndexExDtoList().size();
+            }
         }
         if (Objects.nonNull(snapshot.getOptionExDtoList())
                 && !snapshot.getOptionExDtoList().isEmpty()) {
-            SnapshotOptionExDtoMapper optionExDtoMapper = (SnapshotOptionExDtoMapper) optionExDtoService.getBaseMapper();
-            totalInsert += optionExDtoMapper.insertBatch(snapshot.getOptionExDtoList());
-        }
-        if (Objects.nonNull(snapshot.getPlateExDtoList()) &&
-                !snapshot.getPlateExDtoList().isEmpty()) {
-            SnapshotPlateExDtoMapper plateExDtoMapper = (SnapshotPlateExDtoMapper) plateExDtoService.getBaseMapper();
-            totalInsert += plateExDtoMapper.insertBatch(snapshot.getPlateExDtoList());
+            if (optionExDtoService.saveOrUpdateBatch(snapshot.getOptionExDtoList(), 1000)) {
+                totalInsert += snapshot.getOptionExDtoList().size();
+            }
         }
         if (Objects.nonNull(snapshot.getTrustExDtoList()) &&
                 !snapshot.getTrustExDtoList().isEmpty()) {
-            SnapshotTrustExDtoMapper trustExDtoMapper = (SnapshotTrustExDtoMapper) trustExDtoService.getBaseMapper();
-            totalInsert += trustExDtoMapper.insertBatch(snapshot.getTrustExDtoList());
+            if (trustExDtoService.saveOrUpdateBatch(snapshot.getTrustExDtoList(), 1000)) {
+                totalInsert += snapshot.getTrustExDtoList().size();
+            }
         }
         if (Objects.nonNull(snapshot.getWarrantExDtoList())
                 && !snapshot.getWarrantExDtoList().isEmpty()) {
-            SnapshotWarrantExDtoMapper warrantExDtoMapper = (SnapshotWarrantExDtoMapper) warrantExDtoService.getBaseMapper();
-            totalInsert += warrantExDtoMapper.insertBatch(snapshot.getWarrantExDtoList());
+            if (warrantExDtoService.saveOrUpdateBatch(snapshot.getWarrantExDtoList(), 1000)) {
+                totalInsert += snapshot.getWarrantExDtoList().size();
+            }
         }
         return totalInsert;
     }
 
-    @Transactional
     public SnapshotBaseResponse querySnapshot(CommonSecurityRequest securityRequest) {
         SnapshotBaseDto baseDto = baseDtoService.query()
                 .eq("market", securityRequest.getMarket())

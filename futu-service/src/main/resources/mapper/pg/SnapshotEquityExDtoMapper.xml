@@ -5,25 +5,26 @@
 <mapper namespace="io.futakotome.trade.mapper.pg.SnapshotEquityExDtoMapper">
 
     <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.SnapshotEquityExDto">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="market" column="market" jdbcType="INTEGER"/>
-            <result property="code" column="code" jdbcType="VARCHAR"/>
-            <result property="issuedShares" column="issued_shares" jdbcType="BIGINT"/>
-            <result property="issuedMarketVal" column="issued_market_val" jdbcType="DOUBLE"/>
-            <result property="netAsset" column="net_asset" jdbcType="DOUBLE"/>
-            <result property="netProfit" column="net_profit" jdbcType="DOUBLE"/>
-            <result property="earningsPerShare" column="earnings_per_share" jdbcType="DOUBLE"/>
-            <result property="outstandingShares" column="outstanding_shares" jdbcType="BIGINT"/>
-            <result property="outstandingMarketVal" column="outstanding_market_val" jdbcType="DOUBLE"/>
-            <result property="netAssetPerShare" column="net_asset_per_share" jdbcType="DOUBLE"/>
-            <result property="eyRate" column="ey_rate" jdbcType="DOUBLE"/>
-            <result property="peRate" column="pe_rate" jdbcType="DOUBLE"/>
-            <result property="pbRate" column="pb_rate" jdbcType="DOUBLE"/>
-            <result property="peTtmRate" column="pe_ttm_rate" jdbcType="DOUBLE"/>
-            <result property="dividendTtm" column="dividend_ttm" jdbcType="DOUBLE"/>
-            <result property="dividendRatioTtm" column="dividend_ratio_ttm" jdbcType="DOUBLE"/>
-            <result property="dividendLfy" column="dividend_lfy" jdbcType="DOUBLE"/>
-            <result property="dividendLfyRatio" column="dividend_lfy_ratio" jdbcType="DOUBLE"/>
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="market" column="market" jdbcType="INTEGER"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="issuedShares" column="issued_shares" jdbcType="BIGINT"/>
+        <result property="issuedMarketVal" column="issued_market_val" jdbcType="DOUBLE"/>
+        <result property="netAsset" column="net_asset" jdbcType="DOUBLE"/>
+        <result property="netProfit" column="net_profit" jdbcType="DOUBLE"/>
+        <result property="earningsPerShare" column="earnings_per_share" jdbcType="DOUBLE"/>
+        <result property="outstandingShares" column="outstanding_shares" jdbcType="BIGINT"/>
+        <result property="outstandingMarketVal" column="outstanding_market_val" jdbcType="DOUBLE"/>
+        <result property="netAssetPerShare" column="net_asset_per_share" jdbcType="DOUBLE"/>
+        <result property="eyRate" column="ey_rate" jdbcType="DOUBLE"/>
+        <result property="peRate" column="pe_rate" jdbcType="DOUBLE"/>
+        <result property="pbRate" column="pb_rate" jdbcType="DOUBLE"/>
+        <result property="peTtmRate" column="pe_ttm_rate" jdbcType="DOUBLE"/>
+        <result property="dividendTtm" column="dividend_ttm" jdbcType="DOUBLE"/>
+        <result property="dividendRatioTtm" column="dividend_ratio_ttm" jdbcType="DOUBLE"/>
+        <result property="dividendLfy" column="dividend_lfy" jdbcType="DOUBLE"/>
+        <result property="dividendLfyRatio" column="dividend_lfy_ratio" jdbcType="DOUBLE"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -33,7 +34,7 @@
         outstanding_market_val,net_asset_per_share,ey_rate,
         pe_rate,pb_rate,pe_ttm_rate,
         dividend_ttm,dividend_ratio_ttm,dividend_lfy,
-        dividend_lfy_ratio
+        dividend_lfy_ratio,update_time
     </sql>
     <insert id="insertBatch">
         insert into t_snapshot_equity_ex(market,code,
@@ -42,7 +43,7 @@
         outstanding_market_val,net_asset_per_share,ey_rate,
         pe_rate,pb_rate,pe_ttm_rate,
         dividend_ttm,dividend_ratio_ttm,dividend_lfy,
-        dividend_lfy_ratio)
+        dividend_lfy_ratio,update_time)
         values
         <foreach collection="snapshotEquityExDtoCollection" item="item" separator=",">
             (#{item.market,jdbcType=NUMERIC},#{item.code,jdbcType=VARCHAR},
@@ -51,7 +52,7 @@
             #{item.outstandingMarketVal,jdbcType=DECIMAL},#{item.netAssetPerShare,jdbcType=DECIMAL},#{item.eyRate,jdbcType=DECIMAL},
             #{item.peRate,jdbcType=DECIMAL},#{item.pbRate,jdbcType=DECIMAL},#{item.peTtmRate,jdbcType=DECIMAL},
             #{item.dividendTtm,jdbcType=DECIMAL},#{item.dividendRatioTtm,jdbcType=DECIMAL},#{item.dividendLfy,jdbcType=DECIMAL},
-            #{item.dividendLfyRatio,jdbcType=DECIMAL})
+            #{item.dividendLfyRatio,jdbcType=DECIMAL}, #{item.updateTime})
         </foreach>
     </insert>
 </mapper>

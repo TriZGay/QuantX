@@ -3,11 +3,12 @@ package io.futakotome.trade.dto;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * @TableName t_snapshot_index_ex
  */
-@TableName(value ="t_snapshot_index_ex")
+@TableName(value = "t_snapshot_index_ex")
 public class SnapshotIndexExDto implements Serializable {
     private Long id;
 
@@ -21,7 +22,17 @@ public class SnapshotIndexExDto implements Serializable {
 
     private Integer equalCount;
 
+    private LocalDateTime updateTime;
+
     private static final long serialVersionUID = 1L;
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
 
     public Long getId() {
         return id;

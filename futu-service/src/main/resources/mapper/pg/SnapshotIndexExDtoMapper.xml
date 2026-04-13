@@ -5,25 +5,27 @@
 <mapper namespace="io.futakotome.trade.mapper.pg.SnapshotIndexExDtoMapper">
 
     <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.SnapshotIndexExDto">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="market" column="market" jdbcType="INTEGER"/>
-            <result property="code" column="code" jdbcType="VARCHAR"/>
-            <result property="raiseCount" column="raise_count" jdbcType="INTEGER"/>
-            <result property="fallCount" column="fall_count" jdbcType="INTEGER"/>
-            <result property="equalCount" column="equal_count" jdbcType="INTEGER"/>
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="market" column="market" jdbcType="INTEGER"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="raiseCount" column="raise_count" jdbcType="INTEGER"/>
+        <result property="fallCount" column="fall_count" jdbcType="INTEGER"/>
+        <result property="equalCount" column="equal_count" jdbcType="INTEGER"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,market,code,
-        raise_count,fall_count,equal_count
+        raise_count,fall_count,equal_count,update_time
     </sql>
     <insert id="insertBatch">
         insert into t_snapshot_index_ex(market,code,
-        raise_count,fall_count,equal_count)
+        raise_count,fall_count,equal_count,update_time)
         values
         <foreach collection="snapshotIndexExDtoCollection" item="item" separator=",">
             (#{item.market,jdbcType=NUMERIC},#{item.code,jdbcType=VARCHAR},
-            #{item.raiseCount,jdbcType=NUMERIC},#{item.fallCount,jdbcType=NUMERIC},#{item.equalCount,jdbcType=NUMERIC})
+            #{item.raiseCount,jdbcType=NUMERIC},#{item.fallCount,jdbcType=NUMERIC},#{item.equalCount,jdbcType=NUMERIC},
+            #{item.updateTime})
         </foreach>
     </insert>
 </mapper>

@@ -1564,11 +1564,13 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 }.getType());
                 Snapshot snapshot = getSnapshot(snapshotContents);
                 int insertRow = snapshotService.insertBatch(snapshot);
-                String str = "同步快照数据,插入条数:" + insertRow;
+                String str = "同步快照数据,条数:" + insertRow;
                 LOGGER.info(str);
                 sendNotifyMessage(str);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询快照数据解析结果失败!", e);
+            } catch (NullPointerException e) {
+                LOGGER.error("查询快照数据回调空指针异常!", e);
             }
         }
     }
@@ -1654,6 +1656,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         warrantExDto.setLowerStrikePrice(snapshotContent.getWarrantExData().getLowerStrikePrice());
         warrantExDto.setInlinePriceStatus(snapshotContent.getWarrantExData().getInLinePriceStatus());
         warrantExDto.setIssuerCode(snapshotContent.getWarrantExData().getIssuerCode());
+        warrantExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return warrantExDto;
     }
 
@@ -1667,6 +1670,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         trustExDto.setNetAssetValue(snapshotContent.getTrustExData().getNetAssetValue());
         trustExDto.setPremium(snapshotContent.getTrustExData().getPremium());
         trustExDto.setAssetClass(snapshotContent.getTrustExData().getAssetClass());
+        trustExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return trustExDto;
     }
 
@@ -1677,6 +1681,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         plateExDto.setRaiseCount(snapshotContent.getPlateExData().getRaiseCount());
         plateExDto.setFallCount(snapshotContent.getPlateExData().getFallCount());
         plateExDto.setEqualCount(snapshotContent.getPlateExData().getEqualCount());
+        plateExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return plateExDto;
     }
 
@@ -1704,6 +1709,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         optionExDto.setOwnerLotMultiplier(snapshotContent.getOptionExData().getOwnerLotMultiplier());
         optionExDto.setOptionAreaType(snapshotContent.getOptionExData().getOptionAreaType());
         optionExDto.setContractMultiplier(snapshotContent.getOptionExData().getContractMultiplier());
+        optionExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return optionExDto;
     }
 
@@ -1714,6 +1720,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         indexExDto.setRaiseCount(snapshotContent.getIndexExData().getRaiseCount());
         indexExDto.setFallCount(snapshotContent.getIndexExData().getFallCount());
         indexExDto.setEqualCount(snapshotContent.getIndexExData().getEqualCount());
+        indexExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return indexExDto;
     }
 
@@ -1726,6 +1733,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         futureExDto.setPositionChange(snapshotContent.getFutureExData().getPositionChange());
         futureExDto.setLastTradeTime(LocalDate.parse(snapshotContent.getFutureExData().getLastTradeTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         futureExDto.setIsMainContract(snapshotContent.getFutureExData().getMainContract());
+        futureExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return futureExDto;
     }
 
@@ -1749,6 +1757,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         equityExDto.setDividendRatioTtm(snapshotContent.getEquityExData().getDividendRatioTTM());
         equityExDto.setDividendLfy(snapshotContent.getEquityExData().getDividendLFY());
         equityExDto.setDividendLfyRatio(snapshotContent.getEquityExData().getDividendLFYRatio());
+        equityExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return equityExDto;
     }
 

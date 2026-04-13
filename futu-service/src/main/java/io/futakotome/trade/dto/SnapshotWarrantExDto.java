@@ -64,7 +64,17 @@ public class SnapshotWarrantExDto implements Serializable {
 
     private String issuerCode;
 
+    private LocalDateTime updateTime;
+
     private static final long serialVersionUID = 1L;
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
 
     public Long getId() {
         return id;

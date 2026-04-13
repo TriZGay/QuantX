@@ -5,29 +5,30 @@
 <mapper namespace="io.futakotome.trade.mapper.pg.SnapshotOptionExDtoMapper">
 
     <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.SnapshotOptionExDto">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="ownerMarket" column="owner_market" jdbcType="INTEGER"/>
-            <result property="ownerCode" column="owner_code" jdbcType="VARCHAR"/>
-            <result property="optionType" column="option_type" jdbcType="INTEGER"/>
-            <result property="strikeTime" column="strike_time" jdbcType="VARCHAR"/>
-            <result property="strikePrice" column="strike_price" jdbcType="DOUBLE"/>
-            <result property="contractSize" column="contract_size" jdbcType="INTEGER"/>
-            <result property="contractSizeFloat" column="contract_size_float" jdbcType="DOUBLE"/>
-            <result property="openInterest" column="open_interest" jdbcType="INTEGER"/>
-            <result property="impliedVolatility" column="implied_volatility" jdbcType="DOUBLE"/>
-            <result property="premium" column="premium" jdbcType="DOUBLE"/>
-            <result property="delta" column="delta" jdbcType="DOUBLE"/>
-            <result property="gamma" column="gamma" jdbcType="DOUBLE"/>
-            <result property="vega" column="vega" jdbcType="DOUBLE"/>
-            <result property="theta" column="theta" jdbcType="DOUBLE"/>
-            <result property="rho" column="rho" jdbcType="DOUBLE"/>
-            <result property="indexOptionType" column="index_option_type" jdbcType="INTEGER"/>
-            <result property="netOpenInterest" column="net_open_interest" jdbcType="INTEGER"/>
-            <result property="expiryDateDistance" column="expiry_date_distance" jdbcType="INTEGER"/>
-            <result property="contractNominalValue" column="contract_nominal_value" jdbcType="DOUBLE"/>
-            <result property="ownerLotMultiplier" column="owner_lot_multiplier" jdbcType="DOUBLE"/>
-            <result property="optionAreaType" column="option_area_type" jdbcType="INTEGER"/>
-            <result property="contractMultiplier" column="contract_multiplier" jdbcType="DOUBLE"/>
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="ownerMarket" column="owner_market" jdbcType="INTEGER"/>
+        <result property="ownerCode" column="owner_code" jdbcType="VARCHAR"/>
+        <result property="optionType" column="option_type" jdbcType="INTEGER"/>
+        <result property="strikeTime" column="strike_time" jdbcType="VARCHAR"/>
+        <result property="strikePrice" column="strike_price" jdbcType="DOUBLE"/>
+        <result property="contractSize" column="contract_size" jdbcType="INTEGER"/>
+        <result property="contractSizeFloat" column="contract_size_float" jdbcType="DOUBLE"/>
+        <result property="openInterest" column="open_interest" jdbcType="INTEGER"/>
+        <result property="impliedVolatility" column="implied_volatility" jdbcType="DOUBLE"/>
+        <result property="premium" column="premium" jdbcType="DOUBLE"/>
+        <result property="delta" column="delta" jdbcType="DOUBLE"/>
+        <result property="gamma" column="gamma" jdbcType="DOUBLE"/>
+        <result property="vega" column="vega" jdbcType="DOUBLE"/>
+        <result property="theta" column="theta" jdbcType="DOUBLE"/>
+        <result property="rho" column="rho" jdbcType="DOUBLE"/>
+        <result property="indexOptionType" column="index_option_type" jdbcType="INTEGER"/>
+        <result property="netOpenInterest" column="net_open_interest" jdbcType="INTEGER"/>
+        <result property="expiryDateDistance" column="expiry_date_distance" jdbcType="INTEGER"/>
+        <result property="contractNominalValue" column="contract_nominal_value" jdbcType="DOUBLE"/>
+        <result property="ownerLotMultiplier" column="owner_lot_multiplier" jdbcType="DOUBLE"/>
+        <result property="optionAreaType" column="option_area_type" jdbcType="INTEGER"/>
+        <result property="contractMultiplier" column="contract_multiplier" jdbcType="DOUBLE"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -38,7 +39,7 @@
         gamma,vega,theta,
         rho,index_option_type,net_open_interest,
         expiry_date_distance,contract_nominal_value,owner_lot_multiplier,
-        option_area_type,contract_multiplier
+        option_area_type,contract_multiplier,update_time
     </sql>
     <insert id="insertBatch">
         insert into t_snapshot_option_ex(owner_market,owner_code,
@@ -48,7 +49,7 @@
         gamma,vega,theta,
         rho,index_option_type,net_open_interest,
         expiry_date_distance,contract_nominal_value,owner_lot_multiplier,
-        option_area_type,contract_multiplier)
+        option_area_type,contract_multiplier,update_time)
         values
         <foreach collection="snapshotOptionExDtoCollection" item="item" separator=",">
             (#{item.ownerMarket,jdbcType=NUMERIC},#{item.ownerCode,jdbcType=VARCHAR},
@@ -58,7 +59,7 @@
             #{item.gamma,jdbcType=DECIMAL},#{item.vega,jdbcType=DECIMAL},#{item.theta,jdbcType=DECIMAL},
             #{item.rho,jdbcType=DECIMAL},#{item.indexOptionType,jdbcType=NUMERIC},#{item.netOpenInterest,jdbcType=NUMERIC},
             #{item.expiryDateDistance,jdbcType=NUMERIC},#{item.contractNominalValue,jdbcType=DECIMAL},#{item.ownerLotMultiplier,jdbcType=DECIMAL},
-            #{item.optionAreaType,jdbcType=NUMERIC},#{item.contractMultiplier,jdbcType=DECIMAL})
+            #{item.optionAreaType,jdbcType=NUMERIC},#{item.contractMultiplier,jdbcType=DECIMAL}, #{item.updateTime})
         </foreach>
     </insert>
 </mapper>

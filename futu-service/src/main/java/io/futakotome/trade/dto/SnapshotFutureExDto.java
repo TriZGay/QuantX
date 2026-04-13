@@ -4,11 +4,12 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * @TableName t_snapshot_future_ex
  */
-@TableName(value ="t_snapshot_future_ex")
+@TableName(value = "t_snapshot_future_ex")
 public class SnapshotFutureExDto implements Serializable {
     private Long id;
 
@@ -26,7 +27,25 @@ public class SnapshotFutureExDto implements Serializable {
 
     private Boolean isMainContract;
 
+    private LocalDateTime updateTime;
+
     private static final long serialVersionUID = 1L;
+
+    public Boolean getMainContract() {
+        return isMainContract;
+    }
+
+    public void setMainContract(Boolean mainContract) {
+        isMainContract = mainContract;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
 
     public Long getId() {
         return id;

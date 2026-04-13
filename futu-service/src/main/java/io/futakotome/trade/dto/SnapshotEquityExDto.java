@@ -3,11 +3,12 @@ package io.futakotome.trade.dto;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * @TableName t_snapshot_equity_ex
  */
-@TableName(value ="t_snapshot_equity_ex")
+@TableName(value = "t_snapshot_equity_ex")
 public class SnapshotEquityExDto implements Serializable {
     private Long id;
 
@@ -47,7 +48,17 @@ public class SnapshotEquityExDto implements Serializable {
 
     private Double dividendLfyRatio;
 
+    private LocalDateTime updateTime;
+
     private static final long serialVersionUID = 1L;
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
 
     public Long getId() {
         return id;

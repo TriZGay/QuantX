@@ -5,31 +5,33 @@
 <mapper namespace="io.futakotome.trade.mapper.pg.SnapshotTrustExDtoMapper">
 
     <resultMap id="BaseResultMap" type="io.futakotome.trade.dto.SnapshotTrustExDto">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="market" column="market" jdbcType="INTEGER"/>
-            <result property="code" column="code" jdbcType="VARCHAR"/>
-            <result property="dividendYield" column="dividend_yield" jdbcType="DOUBLE"/>
-            <result property="aum" column="aum" jdbcType="DOUBLE"/>
-            <result property="outstandingUnits" column="outstanding_units" jdbcType="BIGINT"/>
-            <result property="netAssetValue" column="net_asset_value" jdbcType="DOUBLE"/>
-            <result property="premium" column="premium" jdbcType="DOUBLE"/>
-            <result property="assetClass" column="asset_class" jdbcType="INTEGER"/>
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="market" column="market" jdbcType="INTEGER"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="dividendYield" column="dividend_yield" jdbcType="DOUBLE"/>
+        <result property="aum" column="aum" jdbcType="DOUBLE"/>
+        <result property="outstandingUnits" column="outstanding_units" jdbcType="BIGINT"/>
+        <result property="netAssetValue" column="net_asset_value" jdbcType="DOUBLE"/>
+        <result property="premium" column="premium" jdbcType="DOUBLE"/>
+        <result property="assetClass" column="asset_class" jdbcType="INTEGER"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,market,code,
         dividend_yield,aum,outstanding_units,
-        net_asset_value,premium,asset_class
+        net_asset_value,premium,asset_class,update_time
     </sql>
     <insert id="insertBatch">
         insert into t_snapshot_trust_ex(market,code,
         dividend_yield,aum,outstanding_units,
-        net_asset_value,premium,asset_class)
+        net_asset_value,premium,asset_class,update_time)
         values
         <foreach collection="snapshotTrustExDtoCollection" item="item" separator=",">
             (#{item.market,jdbcType=NUMERIC},#{item.code,jdbcType=VARCHAR},
             #{item.dividendYield,jdbcType=DECIMAL},#{item.aum,jdbcType=DECIMAL},#{item.outstandingUnits,jdbcType=NUMERIC},
-            #{item.netAssetValue,jdbcType=DECIMAL},#{item.premium,jdbcType=DECIMAL},#{item.assetClass,jdbcType=NUMERIC})
+            #{item.netAssetValue,jdbcType=DECIMAL},#{item.premium,jdbcType=DECIMAL},#{item.assetClass,jdbcType=NUMERIC},
+            #{item.updateTime})
         </foreach>
     </insert>
 </mapper>
