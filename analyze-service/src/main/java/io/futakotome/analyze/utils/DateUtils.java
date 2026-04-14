@@ -1,7 +1,5 @@
 package io.futakotome.analyze.utils;
 
-import org.springframework.cglib.core.Local;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
