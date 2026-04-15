@@ -50,3 +50,5 @@ ft:
   port: 11111
   isEnableEncrypt: true
   pwd: 983528987fuck.
+  exclusionCodesWhenSnapshot:
+    - LIST1983

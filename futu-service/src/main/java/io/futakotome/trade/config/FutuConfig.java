@@ -3,6 +3,8 @@ package io.futakotome.trade.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @ConfigurationProperties(prefix = "ft")
 public class FutuConfig {
@@ -10,6 +12,15 @@ public class FutuConfig {
     private Integer port;
     private boolean isEnableEncrypt;
     private String pwd;
+    private List<String> exclusionCodesWhenSnapshot;
+
+    public List<String> getExclusionCodesWhenSnapshot() {
+        return exclusionCodesWhenSnapshot;
+    }
+
+    public void setExclusionCodesWhenSnapshot(List<String> exclusionCodesWhenSnapshot) {
+        this.exclusionCodesWhenSnapshot = exclusionCodesWhenSnapshot;
+    }
 
     public String getPwd() {
         return pwd;

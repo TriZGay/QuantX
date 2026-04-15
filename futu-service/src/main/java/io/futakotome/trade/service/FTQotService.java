@@ -1432,7 +1432,16 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private void syncSnapshotDataInternal(List<CommonSecurity> securities) {
         QotGetSecuritySnapshot.C2S.Builder c2sBuilder = QotGetSecuritySnapshot.C2S.newBuilder();
         List<QotCommon.Security> securityListToReq = new ArrayList<>();
-        for (CommonSecurity security : securities) {
+        List<CommonSecurity> filteredSecurities = securities.stream().filter(sec -> {
+            String code = sec.getCode();
+            if (futuConfig.getExclusionCodesWhenSnapshot().contains(code)) {
+                LOGGER.info("{}不参与查询快照数据", code);
+                return false;
+            } else {
+                return true;
+            }
+        }).collect(Collectors.toList());
+        for (CommonSecurity security : filteredSecurities) {
             QotCommon.Security sec = QotCommon.Security.newBuilder()
                     .setMarket(security.getMarket())
                     .setCode(security.getCode())
