@@ -16,13 +16,14 @@ import io.futakotome.common.message.RTTickerMessage;
 import io.futakotome.common.message.RTTimeShareMessage;
 import io.futakotome.trade.config.FutuConfig;
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
-import io.futakotome.trade.domain.Snapshot;
-import io.futakotome.trade.domain.SnapshotService;
 import io.futakotome.trade.domain.code.*;
-import io.futakotome.trade.dto.*;
+import io.futakotome.trade.dto.PlateDto;
+import io.futakotome.trade.dto.StockDto;
+import io.futakotome.trade.dto.SubDto;
 import io.futakotome.trade.dto.message.*;
 import io.futakotome.trade.dto.ws.*;
 import io.futakotome.trade.event.KLineUpdateEvent;
+import io.futakotome.trade.event.SnapshotUpdateEvent;
 import io.futakotome.trade.event.StockInPlateUpdateEvent;
 import io.futakotome.trade.utils.CacheManager;
 import io.futakotome.trade.utils.RequestCount;
@@ -51,7 +52,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     private final PlateDtoService plateService;
     private final StockDtoService stockService;
-    private final SnapshotService snapshotService;
 
     private final SubDtoService subService;
     private final TradeDateDtoService tradeDateService;
@@ -62,7 +62,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     private static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
-    public FTQotService(ApplicationEventPublisher eventPublisher, PlateDtoService plateService, StockDtoService stockService, SnapshotService snapshotService,
+    public FTQotService(ApplicationEventPublisher eventPublisher, PlateDtoService plateService, StockDtoService stockService,
                         SubDtoService subService, TradeDateDtoService tradeDateService, FutuConfig futuConfig,
                         QuantxFutuWsService quantxFutuWsService, KLineService kLineService) {
         this.eventPublisher = eventPublisher;
@@ -71,7 +71,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         qot.setQotSpi(this);
         this.plateService = plateService;
         this.stockService = stockService;
-        this.snapshotService = snapshotService;
         this.subService = subService;
         this.tradeDateService = tradeDateService;
         this.kLineService = kLineService;
@@ -1430,18 +1429,55 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     }
 
-    public void syncSnapshotData(List<CommonSecurity> securities) {
+    private void syncSnapshotDataInternal(List<CommonSecurity> securities) {
+        QotGetSecuritySnapshot.C2S.Builder c2sBuilder = QotGetSecuritySnapshot.C2S.newBuilder();
+        List<QotCommon.Security> securityListToReq = new ArrayList<>();
         for (CommonSecurity security : securities) {
-            QotGetSecuritySnapshot.C2S c2S = QotGetSecuritySnapshot.C2S.newBuilder()
-                    .addSecurityList(QotCommon.Security.newBuilder()
-                            .setMarket(security.getMarket())
-                            .setCode(security.getCode())
-                            .build())
+            QotCommon.Security sec = QotCommon.Security.newBuilder()
+                    .setMarket(security.getMarket())
+                    .setCode(security.getCode())
                     .build();
-            QotGetSecuritySnapshot.Request request = QotGetSecuritySnapshot.Request
-                    .newBuilder().setC2S(c2S).build();
-            int seqNo = qot.getSecuritySnapshot(request);
-            LOGGER.info("{}-{}请求快照数据.seqNo={}", MarketType.getNameByCode(security.getMarket()), security.getCode(), seqNo);
+            securityListToReq.add(sec);
+        }
+        c2sBuilder.addAllSecurityList(securityListToReq);
+        QotGetSecuritySnapshot.Request request = QotGetSecuritySnapshot.Request
+                .newBuilder().setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getSecuritySnapshot(request);
+        LOGGER.info("请求快照数据.seqNo={}", seqNo);
+    }
+
+    private void syncSnapshotDataBatch(List<CommonSecurity> securities, int batchLimit) {
+        if (!securities.isEmpty()) {
+            RequestCount requestCount = new RequestCount(30L * 1000, 59);
+            int sendLength = securities.size();
+            int i = 0;
+            while (sendLength > batchLimit) {
+                List<CommonSecurity> batchSendSecurities = securities.subList(i, i + batchLimit);
+                syncSnapshotDataInternal(batchSendSecurities);
+                i += batchLimit;
+                sendLength -= batchLimit;
+                requestCount.count();
+            }
+            if (sendLength > 0) {
+                List<CommonSecurity> batchSendSecurities = securities.subList(i, i + sendLength);
+                syncSnapshotDataInternal(batchSendSecurities);
+                requestCount.count();
+            }
+        }
+    }
+
+    public void syncSnapshotData(SnapshotWsMessage snapshotWsMessage) {
+        Integer reqMarket = snapshotWsMessage.getMarket();
+        if (Objects.isNull(reqMarket)) {
+            syncSnapshotDataBatch(snapshotWsMessage.getSecurities(), 400);
+        } else {
+            if (snapshotWsMessage.getIsPlate().equals(1)) {
+                //按市场-按板块
+                List<PlateDto> plateDtos = plateService.list(Wrappers.query(new PlateDto()).eq("market", reqMarket));
+                List<CommonSecurity> platesToRequest = plateDtos.stream().map(p -> new CommonSecurity(p.getMarket(), p.getCode()))
+                        .collect(Collectors.toList());
+                syncSnapshotDataBatch(platesToRequest, 400);
+            }
         }
     }
 
@@ -1471,6 +1507,16 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         QotSetPriceReminder.Request req = QotSetPriceReminder.Request.newBuilder().setC2S(c2s).build();
         int seqNo = qot.setPriceReminder(req);
         LOGGER.info("设置到价提醒.seq={}", seqNo);
+    }
+
+    public void syncStockInPlateByMarket(Integer market) {
+        List<PlateDto> plateByMarket = plateService.list(Wrappers.query(new PlateDto()).eq("market", market));
+        RequestCount requestCount = new RequestCount(30L * 1000, 8);
+        for (int i = 0; i < plateByMarket.size(); i++) {
+            PlateDto plate = plateByMarket.get(i);
+            syncStockInPlate(new CommonSecurity(plate.getMarket(), plate.getCode()));
+            requestCount.count();
+        }
     }
 
     public void sendGetIpoRequest(GetIpoWsMessage req) {
@@ -1562,259 +1608,13 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 List<SnapshotContent> snapshotContents = GSON.fromJson(ftGrpcReturnResult.getS2c().getAsJsonArray("snapshotList"), new TypeToken<List<SnapshotContent>>() {
                 }.getType());
-                Snapshot snapshot = getSnapshot(snapshotContents);
-                int insertRow = snapshotService.insertBatch(snapshot);
-                String str = "同步快照数据,条数:" + insertRow;
-                LOGGER.info(str);
-                sendNotifyMessage(str);
+                eventPublisher.publishEvent(new SnapshotUpdateEvent(snapshotContents));
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询快照数据解析结果失败!", e);
             } catch (NullPointerException e) {
                 LOGGER.error("查询快照数据回调空指针异常!", e);
             }
         }
-    }
-
-    private Snapshot getSnapshot(List<SnapshotContent> snapshotContents) {
-        Snapshot snapshot = new Snapshot();
-        List<SnapshotBaseDto> baseDtoList = new ArrayList<>();
-        List<SnapshotEquityExDto> equityExDtoList = new ArrayList<>();
-        List<SnapshotOptionExDto> optionExDtoList = new ArrayList<>();
-        List<SnapshotFutureExDto> futureExDtoList = new ArrayList<>();
-        List<SnapshotIndexExDto> indexExDtoList = new ArrayList<>();
-        List<SnapshotPlateExDto> plateExDtoList = new ArrayList<>();
-        List<SnapshotTrustExDto> trustExDtoList = new ArrayList<>();
-        List<SnapshotWarrantExDto> warrantExDtoList = new ArrayList<>();
-        for (SnapshotContent snapshotContent : snapshotContents) {
-            SnapshotBaseDto baseDto = getSnapshotBase(snapshotContent);
-            baseDtoList.add(baseDto);
-            if (Objects.nonNull(snapshotContent.getEquityExData())) {
-                SnapshotEquityExDto equityExDto = getSnapshotEquityEx(snapshotContent);
-                equityExDtoList.add(equityExDto);
-            }
-            if (Objects.nonNull(snapshotContent.getFutureExData())) {
-                SnapshotFutureExDto futureExDto = getSnapshotFutureEx(snapshotContent);
-                futureExDtoList.add(futureExDto);
-            }
-            if (Objects.nonNull(snapshotContent.getIndexExData())) {
-                SnapshotIndexExDto indexExDto = getSnapshotIndexEx(snapshotContent);
-                indexExDtoList.add(indexExDto);
-            }
-            if (Objects.nonNull(snapshotContent.getOptionExData())) {
-                SnapshotOptionExDto optionExDto = getSnapshotOptionEx(snapshotContent);
-                optionExDtoList.add(optionExDto);
-            }
-            if (Objects.nonNull(snapshotContent.getPlateExData())) {
-                SnapshotPlateExDto plateExDto = getSnapshotPlateEx(snapshotContent);
-                plateExDtoList.add(plateExDto);
-            }
-            if (Objects.nonNull(snapshotContent.getTrustExData())) {
-                SnapshotTrustExDto trustExDto = getSnapshotTrustEx(snapshotContent);
-                trustExDtoList.add(trustExDto);
-            }
-            if (Objects.nonNull(snapshotContent.getWarrantExData())) {
-                SnapshotWarrantExDto warrantExDto = getSnapshotWarrantEx(snapshotContent);
-                warrantExDtoList.add(warrantExDto);
-            }
-        }
-        snapshot.setBaseDtoList(baseDtoList);
-        snapshot.setEquityExDtoList(equityExDtoList);
-        snapshot.setOptionExDtoList(optionExDtoList);
-        snapshot.setFutureExDtoList(futureExDtoList);
-        snapshot.setIndexExDtoList(indexExDtoList);
-        snapshot.setPlateExDtoList(plateExDtoList);
-        snapshot.setTrustExDtoList(trustExDtoList);
-        snapshot.setWarrantExDtoList(warrantExDtoList);
-        return snapshot;
-    }
-
-    private SnapshotWarrantExDto getSnapshotWarrantEx(SnapshotContent snapshotContent) {
-        SnapshotWarrantExDto warrantExDto = new SnapshotWarrantExDto();
-        warrantExDto.setOwnerMarket(snapshotContent.getWarrantExData().getOwner().getMarket());
-        warrantExDto.setOwnerCode(snapshotContent.getWarrantExData().getOwner().getCode());
-        warrantExDto.setConversionRate(snapshotContent.getWarrantExData().getConversionRate());
-        warrantExDto.setWarrantType(snapshotContent.getWarrantExData().getWarrantType());
-        warrantExDto.setStrikePrice(snapshotContent.getWarrantExData().getStrikePrice());
-        warrantExDto.setMaturityTime(snapshotContent.getWarrantExData().getMaturityTime());
-        warrantExDto.setEndTradeTime(snapshotContent.getWarrantExData().getEndTradeTime());
-        warrantExDto.setRecoveryPrice(snapshotContent.getWarrantExData().getRecoveryPrice());
-        warrantExDto.setStreetVolumn(snapshotContent.getWarrantExData().getStreetVolumn());
-        warrantExDto.setIssueVolumn(snapshotContent.getWarrantExData().getIssueVolumn());
-        warrantExDto.setStreetRate(snapshotContent.getWarrantExData().getStreetRate());
-        warrantExDto.setDelta(snapshotContent.getWarrantExData().getDelta());
-        warrantExDto.setImpliedVolatility(snapshotContent.getWarrantExData().getImpliedVolatility());
-        warrantExDto.setPremium(snapshotContent.getWarrantExData().getPremium());
-        warrantExDto.setMaturityTimestamp(LocalDateTime.parse(snapshotContent.getWarrantExData().getMaturityTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        warrantExDto.setEndTradeTimestamp(LocalDateTime.parse(snapshotContent.getWarrantExData().getEndTradeTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        warrantExDto.setLeverage(snapshotContent.getWarrantExData().getLeverage());
-        warrantExDto.setIpop(snapshotContent.getWarrantExData().getIpop());
-        warrantExDto.setBreakEventPoint(snapshotContent.getWarrantExData().getBreakEvenPoint());
-        warrantExDto.setConversionPrice(snapshotContent.getWarrantExData().getConversionPrice());
-        warrantExDto.setPriceRecoveryRatio(snapshotContent.getWarrantExData().getPriceRecoveryRatio());
-        warrantExDto.setScore(snapshotContent.getWarrantExData().getScore());
-        warrantExDto.setUpperStrikePrice(snapshotContent.getWarrantExData().getUpperStrikePrice());
-        warrantExDto.setLowerStrikePrice(snapshotContent.getWarrantExData().getLowerStrikePrice());
-        warrantExDto.setInlinePriceStatus(snapshotContent.getWarrantExData().getInLinePriceStatus());
-        warrantExDto.setIssuerCode(snapshotContent.getWarrantExData().getIssuerCode());
-        warrantExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        return warrantExDto;
-    }
-
-    private SnapshotTrustExDto getSnapshotTrustEx(SnapshotContent snapshotContent) {
-        SnapshotTrustExDto trustExDto = new SnapshotTrustExDto();
-        trustExDto.setMarket(snapshotContent.getBasic().getSecurity().getMarket());
-        trustExDto.setCode(snapshotContent.getBasic().getSecurity().getCode());
-        trustExDto.setDividendYield(snapshotContent.getTrustExData().getDividendYield());
-        trustExDto.setAum(snapshotContent.getTrustExData().getAum());
-        trustExDto.setOutstandingUnits(snapshotContent.getTrustExData().getOutstandingUnits());
-        trustExDto.setNetAssetValue(snapshotContent.getTrustExData().getNetAssetValue());
-        trustExDto.setPremium(snapshotContent.getTrustExData().getPremium());
-        trustExDto.setAssetClass(snapshotContent.getTrustExData().getAssetClass());
-        trustExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        return trustExDto;
-    }
-
-    private SnapshotPlateExDto getSnapshotPlateEx(SnapshotContent snapshotContent) {
-        SnapshotPlateExDto plateExDto = new SnapshotPlateExDto();
-        plateExDto.setMarket(snapshotContent.getBasic().getSecurity().getMarket());
-        plateExDto.setCode(snapshotContent.getBasic().getSecurity().getCode());
-        plateExDto.setRaiseCount(snapshotContent.getPlateExData().getRaiseCount());
-        plateExDto.setFallCount(snapshotContent.getPlateExData().getFallCount());
-        plateExDto.setEqualCount(snapshotContent.getPlateExData().getEqualCount());
-        plateExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        return plateExDto;
-    }
-
-    private SnapshotOptionExDto getSnapshotOptionEx(SnapshotContent snapshotContent) {
-        SnapshotOptionExDto optionExDto = new SnapshotOptionExDto();
-        optionExDto.setOwnerMarket(snapshotContent.getOptionExData().getOwner().getMarket());
-        optionExDto.setOwnerCode(snapshotContent.getOptionExData().getOwner().getCode());
-        optionExDto.setOptionType(snapshotContent.getOptionExData().getType());
-        optionExDto.setStrikeTime(snapshotContent.getOptionExData().getStrikeTime());
-        optionExDto.setStrikePrice(snapshotContent.getOptionExData().getStrikePrice());
-        optionExDto.setContractSize(snapshotContent.getOptionExData().getContractSize());
-        optionExDto.setContractSizeFloat(snapshotContent.getOptionExData().getContractSizeFloat());
-        optionExDto.setOpenInterest(snapshotContent.getOptionExData().getOpenInterest());
-        optionExDto.setImpliedVolatility(snapshotContent.getOptionExData().getImpliedVolatility());
-        optionExDto.setPremium(snapshotContent.getOptionExData().getPremium());
-        optionExDto.setDelta(snapshotContent.getOptionExData().getDelta());
-        optionExDto.setGamma(snapshotContent.getOptionExData().getGamma());
-        optionExDto.setVega(snapshotContent.getOptionExData().getVega());
-        optionExDto.setTheta(snapshotContent.getOptionExData().getTheta());
-        optionExDto.setRho(snapshotContent.getOptionExData().getRho());
-        optionExDto.setIndexOptionType(snapshotContent.getOptionExData().getIndexOptionType());
-        optionExDto.setNetOpenInterest(snapshotContent.getOptionExData().getNetOpenInterest());
-        optionExDto.setExpiryDateDistance(snapshotContent.getOptionExData().getExpiryDateDistance());
-        optionExDto.setContractNominalValue(snapshotContent.getOptionExData().getContractNominalValue());
-        optionExDto.setOwnerLotMultiplier(snapshotContent.getOptionExData().getOwnerLotMultiplier());
-        optionExDto.setOptionAreaType(snapshotContent.getOptionExData().getOptionAreaType());
-        optionExDto.setContractMultiplier(snapshotContent.getOptionExData().getContractMultiplier());
-        optionExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        return optionExDto;
-    }
-
-    private SnapshotIndexExDto getSnapshotIndexEx(SnapshotContent snapshotContent) {
-        SnapshotIndexExDto indexExDto = new SnapshotIndexExDto();
-        indexExDto.setMarket(snapshotContent.getBasic().getSecurity().getMarket());
-        indexExDto.setCode(snapshotContent.getBasic().getSecurity().getCode());
-        indexExDto.setRaiseCount(snapshotContent.getIndexExData().getRaiseCount());
-        indexExDto.setFallCount(snapshotContent.getIndexExData().getFallCount());
-        indexExDto.setEqualCount(snapshotContent.getIndexExData().getEqualCount());
-        indexExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        return indexExDto;
-    }
-
-    private SnapshotFutureExDto getSnapshotFutureEx(SnapshotContent snapshotContent) {
-        SnapshotFutureExDto futureExDto = new SnapshotFutureExDto();
-        futureExDto.setMarket(snapshotContent.getBasic().getSecurity().getMarket());
-        futureExDto.setCode(snapshotContent.getBasic().getSecurity().getCode());
-        futureExDto.setLastSettlePrice(snapshotContent.getFutureExData().getLastSettlePrice());
-        futureExDto.setPosition(snapshotContent.getFutureExData().getPosition());
-        futureExDto.setPositionChange(snapshotContent.getFutureExData().getPositionChange());
-        futureExDto.setLastTradeTime(LocalDate.parse(snapshotContent.getFutureExData().getLastTradeTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        futureExDto.setIsMainContract(snapshotContent.getFutureExData().getMainContract());
-        futureExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        return futureExDto;
-    }
-
-    private SnapshotEquityExDto getSnapshotEquityEx(SnapshotContent snapshotContent) {
-        SnapshotEquityExDto equityExDto = new SnapshotEquityExDto();
-        equityExDto.setMarket(snapshotContent.getBasic().getSecurity().getMarket());
-        equityExDto.setCode(snapshotContent.getBasic().getSecurity().getCode());
-        equityExDto.setIssuedShares(snapshotContent.getEquityExData().getIssuedShares());
-        equityExDto.setIssuedMarketVal(snapshotContent.getEquityExData().getIssuedMarketVal());
-        equityExDto.setNetAsset(snapshotContent.getEquityExData().getNetAsset());
-        equityExDto.setNetProfit(snapshotContent.getEquityExData().getNetProfit());
-        equityExDto.setEarningsPerShare(snapshotContent.getEquityExData().getEarningsPershare());
-        equityExDto.setOutstandingShares(snapshotContent.getEquityExData().getOutstandingShares());
-        equityExDto.setOutstandingMarketVal(snapshotContent.getEquityExData().getOutstandingMarketVal());
-        equityExDto.setNetAssetPerShare(snapshotContent.getEquityExData().getNetAssetPershare());
-        equityExDto.setEyRate(snapshotContent.getEquityExData().getEyRate());
-        equityExDto.setPeRate(snapshotContent.getEquityExData().getPeRate());
-        equityExDto.setPbRate(snapshotContent.getEquityExData().getPbRate());
-        equityExDto.setPeTtmRate(snapshotContent.getEquityExData().getPeTTMRate());
-        equityExDto.setDividendTtm(snapshotContent.getEquityExData().getDividendTTM());
-        equityExDto.setDividendRatioTtm(snapshotContent.getEquityExData().getDividendRatioTTM());
-        equityExDto.setDividendLfy(snapshotContent.getEquityExData().getDividendLFY());
-        equityExDto.setDividendLfyRatio(snapshotContent.getEquityExData().getDividendLFYRatio());
-        equityExDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        return equityExDto;
-    }
-
-    private SnapshotBaseDto getSnapshotBase(SnapshotContent snapshotContent) {
-        SnapshotBaseDto baseDto = new SnapshotBaseDto();
-        baseDto.setMarket(snapshotContent.getBasic().getSecurity().getMarket());
-        baseDto.setCode(snapshotContent.getBasic().getSecurity().getCode());
-        baseDto.setName(snapshotContent.getBasic().getName());
-        baseDto.setType(snapshotContent.getBasic().getType());
-        baseDto.setIsSuspend(snapshotContent.getBasic().getSuspend());
-        baseDto.setListTime(LocalDate.parse(snapshotContent.getBasic().getListTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        baseDto.setLotSize(snapshotContent.getBasic().getLotSize());
-        baseDto.setPriceSpread(snapshotContent.getBasic().getPriceSpread());
-        baseDto.setUpdateTime(LocalDateTime.parse(snapshotContent.getBasic().getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        baseDto.setHighPrice(snapshotContent.getBasic().getHighPrice());
-        baseDto.setOpenPrice(snapshotContent.getBasic().getOpenPrice());
-        baseDto.setLowPrice(snapshotContent.getBasic().getLowPrice());
-        baseDto.setLastClosePrice(snapshotContent.getBasic().getLastClosePrice());
-        baseDto.setCurPrice(snapshotContent.getBasic().getCurPrice());
-        baseDto.setVolume(snapshotContent.getBasic().getVolume());
-        baseDto.setTurnover(snapshotContent.getBasic().getTurnover());
-        baseDto.setTurnoverRate(snapshotContent.getBasic().getTurnoverRate());
-        baseDto.setAskPrice(snapshotContent.getBasic().getAskPrice());
-        baseDto.setBidPrice(snapshotContent.getBasic().getBidPrice());
-        baseDto.setAskVol(snapshotContent.getBasic().getAskVol());
-        baseDto.setBidVol(snapshotContent.getBasic().getBidVol());
-        baseDto.setAmplitude(snapshotContent.getBasic().getAmplitude());
-        baseDto.setAvgPrice(snapshotContent.getBasic().getAvgPrice());
-        baseDto.setBidAskRatio(snapshotContent.getBasic().getBidAskRatio());
-        baseDto.setVolumeRatio(snapshotContent.getBasic().getVolumeRatio());
-        baseDto.setHighest52WeeksPrice(snapshotContent.getBasic().getHighest52WeeksPrice());
-        baseDto.setLowest52WeeksPrice(snapshotContent.getBasic().getLowest52WeeksPrice());
-        baseDto.setHighestHistoryPrice(snapshotContent.getBasic().getHighestHistoryPrice());
-        baseDto.setLowestHistoryPrice(snapshotContent.getBasic().getLowestHistoryPrice());
-        if (Objects.nonNull(snapshotContent.getBasic().getPreMarket())) {
-            baseDto.setPrePrice(snapshotContent.getBasic().getPreMarket().getPrice());
-            baseDto.setPreHighPrice(snapshotContent.getBasic().getPreMarket().getHighPrice());
-            baseDto.setPreLowPrice(snapshotContent.getBasic().getPreMarket().getLowPrice());
-            baseDto.setPreVolume(snapshotContent.getBasic().getPreMarket().getVolume());
-            baseDto.setPreTurnover(snapshotContent.getBasic().getPreMarket().getTurnover());
-            baseDto.setPreChangeVal(snapshotContent.getBasic().getPreMarket().getChangeVal());
-            baseDto.setPreChangeRate(snapshotContent.getBasic().getPreMarket().getChangeRate());
-            baseDto.setPreAmplitude(snapshotContent.getBasic().getPreMarket().getAmplitude());
-        }
-        if (Objects.nonNull(snapshotContent.getBasic().getAfterMarket())) {
-            baseDto.setAfterPrice(snapshotContent.getBasic().getAfterMarket().getPrice());
-            baseDto.setAfterHighPrice(snapshotContent.getBasic().getAfterMarket().getHighPrice());
-            baseDto.setAfterLowPrice(snapshotContent.getBasic().getAfterMarket().getLowPrice());
-            baseDto.setAfterVolume(snapshotContent.getBasic().getAfterMarket().getVolume());
-            baseDto.setAfterTurnover(snapshotContent.getBasic().getAfterMarket().getTurnover());
-            baseDto.setAfterChangeVal(snapshotContent.getBasic().getAfterMarket().getChangeVal());
-            baseDto.setAfterChangeRate(snapshotContent.getBasic().getAfterMarket().getChangeRate());
-            baseDto.setAfterAmplitude(snapshotContent.getBasic().getAfterMarket().getAmplitude());
-        }
-        baseDto.setSecStatus(snapshotContent.getBasic().getSecStatus());
-        baseDto.setClosePrice5Minute(snapshotContent.getBasic().getClosePrice5Minute());
-        return baseDto;
     }
 
 }

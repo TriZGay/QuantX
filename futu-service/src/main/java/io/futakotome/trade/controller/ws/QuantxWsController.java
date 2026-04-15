@@ -48,13 +48,11 @@ public class QuantxWsController {
 
     private final FTQotService ftQotService;
     private final FTTradeService ftTradeService;
-    private final PlateDtoService plateService;
     private final ObjectMapper objectMapper;
 
-    public QuantxWsController(FTQotService ftQotService, FTTradeService ftTradeService, PlateDtoService plateService, ObjectMapper objectMapper) {
+    public QuantxWsController(FTQotService ftQotService, FTTradeService ftTradeService, ObjectMapper objectMapper) {
         this.ftQotService = ftQotService;
         this.ftTradeService = ftTradeService;
-        this.plateService = plateService;
         this.objectMapper = objectMapper;
     }
 
@@ -128,8 +126,8 @@ public class QuantxWsController {
                 ftQotService.sendRehabRequest(rehabsWsMessage.getSecurity().getMarket(), rehabsWsMessage.getSecurity().getCode());
             } else if (messageClz.getType().equals(MessageType.SNAPSHOT)) {
                 //查询快照数据
-                SnapshotWsMessage snapshotWsMessage = (SnapshotWsMessage) messageClz;
-                ftQotService.syncSnapshotData(snapshotWsMessage.getSecurities());
+                SnapshotWsMessage request = (SnapshotWsMessage) messageClz;
+                ftQotService.syncSnapshotData(request);
             } else if (messageClz.getType().equals(MessageType.ACCOUNTS)) {
                 //查询交易账号
                 ftTradeService.requestAccounts();
@@ -184,6 +182,10 @@ public class QuantxWsController {
                 //ipo
                 GetIpoWsMessage request = (GetIpoWsMessage) messageClz;
                 ftQotService.sendGetIpoRequest(request);
+            } else if (messageClz.getType().equals(MessageType.STOCK_IN_PLATE_BY_MARKET)) {
+                //按市场建立板块和股票的关系
+                StockInPlateByMarketWsMessage request = (StockInPlateByMarketWsMessage) messageClz;
+                ftQotService.syncStockInPlateByMarket(request.getMarket());
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
