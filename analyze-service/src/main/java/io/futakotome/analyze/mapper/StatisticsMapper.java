@@ -20,14 +20,27 @@ public class StatisticsMapper {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    public List<SnapshotPriceChangeDto> queryPriceChangeInPlatesByMarket(Integer market) {
+    public List<SnapshotPriceChangeDto> queryRiseTop10InPlatesByMarket(Integer market) {
         try {
-            String sql = "select market,code,name,update_time,round(((cur_price-last_close_price) /last_close_price)::numeric *100,2)  as price_change from t_snapshot_base where market = :market and type = 7";
+            String sql = "select market,code,name,update_time,round(((cur_price-last_close_price) /last_close_price)::numeric *100,2)  as price_change from t_snapshot_base where market = :market and type = 7  order by price_change desc limit 10";
             return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
                 put("market", market);
             }}, new BeanPropertyRowMapper<>(SnapshotPriceChangeDto.class));
         } catch (Exception e) {
-            LOGGER.error("查询板块涨跌幅失败.", e);
+            LOGGER.error("查询板块涨幅失败.", e);
+            return null;
+        }
+    }
+
+
+    public List<SnapshotPriceChangeDto> queryReduceTop10InPlatesByMarket(Integer market) {
+        try {
+            String sql = "select market,code,name,update_time,round(((cur_price-last_close_price) /last_close_price)::numeric *100,2)  as price_change from t_snapshot_base where market = :market and type = 7  order by price_change asc limit 10";
+            return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
+                put("market", market);
+            }}, new BeanPropertyRowMapper<>(SnapshotPriceChangeDto.class));
+        } catch (Exception e) {
+            LOGGER.error("查询板块跌幅失败.", e);
             return null;
         }
     }

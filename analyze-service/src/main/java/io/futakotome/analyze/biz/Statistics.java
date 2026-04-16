@@ -20,17 +20,20 @@ public class Statistics {
         this.statisticsMapper = statisticsMapper;
     }
 
-    public List<SnapshotPriceChangeResponse> heatmapByPlates(Integer market) {
+    public SnapshotPriceChangeResponse heatmapByPlates(Integer market) {
         if (Objects.isNull(market)) {
             throw new IllegalArgumentException("市场参数为空");
         }
-        return statisticsMapper.queryPriceChangeInPlatesByMarket(market)
-                .stream().map(this::priceChangeDto2Vo)
-                .collect(Collectors.toList());
+        SnapshotPriceChangeResponse response = new SnapshotPriceChangeResponse();
+        response.setRaises(statisticsMapper.queryRiseTop10InPlatesByMarket(market)
+                .stream().map(this::priceChangeDto2Vo).collect(Collectors.toList()));
+        response.setReduces(statisticsMapper.queryReduceTop10InPlatesByMarket(market)
+                .stream().map(this::priceChangeDto2Vo).collect(Collectors.toList()));
+        return response;
     }
 
-    private SnapshotPriceChangeResponse priceChangeDto2Vo(SnapshotPriceChangeDto dto) {
-        SnapshotPriceChangeResponse response = new SnapshotPriceChangeResponse();
+    private SnapshotPriceChangeResponse.PriceChangeResponse priceChangeDto2Vo(SnapshotPriceChangeDto dto) {
+        SnapshotPriceChangeResponse.PriceChangeResponse response = new SnapshotPriceChangeResponse.PriceChangeResponse();
         response.setMarket(dto.getMarket());
         response.setCode(dto.getCode());
         response.setName(dto.getName());

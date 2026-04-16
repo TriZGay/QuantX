@@ -1,49 +1,72 @@
 package io.futakotome.analyze.controller.vo;
 
+import java.util.List;
+
 public class SnapshotPriceChangeResponse {
-    private Integer market;
-    private String code;
-    private String name;
-    private String updateTime;
-    private Double priceChange;
+    private List<PriceChangeResponse> raises;
+    private List<PriceChangeResponse> reduces;
 
-    public Integer getMarket() {
-        return market;
+    public List<PriceChangeResponse> getRaises() {
+        return raises;
     }
 
-    public void setMarket(Integer market) {
-        this.market = market;
+    public void setRaises(List<PriceChangeResponse> raises) {
+        this.raises = raises;
     }
 
-    public String getCode() {
-        return code;
+    public List<PriceChangeResponse> getReduces() {
+        return reduces;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setReduces(List<PriceChangeResponse> reduces) {
+        this.reduces = reduces;
     }
 
-    public String getName() {
-        return name;
-    }
+    public static class PriceChangeResponse{
+        private Integer market;
+        private String code;
+        private String name;
+        private String updateTime;
+        private Double priceChange;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+        public Integer getMarket() {
+            return market;
+        }
 
-    public String getUpdateTime() {
-        return updateTime;
-    }
+        public void setMarket(Integer market) {
+            this.market = market;
+        }
 
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
-    }
+        public String getCode() {
+            return code;
+        }
 
-    public Double getPriceChange() {
-        return priceChange;
-    }
+        public void setCode(String code) {
+            this.code = code;
+        }
 
-    public void setPriceChange(Double priceChange) {
-        this.priceChange = priceChange;
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getUpdateTime() {
+            return updateTime;
+        }
+
+        public void setUpdateTime(String updateTime) {
+            this.updateTime = updateTime;
+        }
+
+        public Double getPriceChange() {
+            return priceChange;
+        }
+
+        public void setPriceChange(Double priceChange) {
+            this.priceChange = priceChange;
+        }
     }
 }
