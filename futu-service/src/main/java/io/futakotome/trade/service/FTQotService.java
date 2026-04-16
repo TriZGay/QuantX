@@ -23,6 +23,7 @@ import io.futakotome.trade.dto.SubDto;
 import io.futakotome.trade.dto.message.*;
 import io.futakotome.trade.dto.ws.*;
 import io.futakotome.trade.event.KLineUpdateEvent;
+import io.futakotome.trade.event.PlateSetUpdateEvent;
 import io.futakotome.trade.event.SnapshotUpdateEvent;
 import io.futakotome.trade.event.StockInPlateUpdateEvent;
 import io.futakotome.trade.utils.CacheManager;
@@ -1281,12 +1282,13 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     @Override
     public void onReply_GetOwnerPlate(FTAPI_Conn client, int nSerialNo, QotGetOwnerPlate.Response rsp) {
         if (rsp.getRetType() != 0) {
-            String notify = "查询股票板块信息失败:" + rsp.getRetMsg();
-            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询股票板块信息失败,code:" + rsp.getRetType()));
+            String notify = "查询股票所属板块信息失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询股票所属板块信息失败,code:" + rsp.getRetType()));
             sendNotifyMessage(notify);
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询股票所属板块信息",ftGrpcReturnResult);
                 List<StockOwnerPlateContent> stockOwnerPlateContents = GSON.fromJson(ftGrpcReturnResult.getS2c().getAsJsonArray("ownerPlateList"), new TypeToken<List<StockOwnerPlateContent>>() {
                 }.getType());
                 int totalInsert = 0;
@@ -1409,19 +1411,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询板块信息", ftGrpcReturnResult);
                 List<PlateInfoContent> plateInfos = GSON.fromJson(ftGrpcReturnResult.getS2c().getAsJsonArray("plateInfoList"), new TypeToken<List<PlateInfoContent>>() {
                 }.getType());
-                List<PlateDto> toInsertPlates = plateInfos.stream().map(plateVo -> {
-                    PlateDto plateDto = new PlateDto();
-                    plateDto.setName(plateVo.getName());
-                    plateDto.setCode(plateVo.getPlate().getCode());
-                    plateDto.setMarket(plateVo.getPlate().getMarket());
-                    return plateDto;
-                }).collect(Collectors.toList());
-                int insertRow = plateService.insertBatch(toInsertPlates);
-                String str = "同步板块数据,插入条数:" + insertRow;
-                LOGGER.info(str);
-                sendNotifyMessage(str);
+                eventPublisher.publishEvent(new PlateSetUpdateEvent(plateInfos));
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询板块信息解析结果失败!", e);
             }

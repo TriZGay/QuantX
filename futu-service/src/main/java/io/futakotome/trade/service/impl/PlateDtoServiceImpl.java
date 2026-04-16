@@ -7,16 +7,22 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.futakotome.trade.controller.vo.ListPlateRequest;
 import io.futakotome.trade.controller.vo.ListPlateResponse;
+import io.futakotome.trade.controller.ws.QuantxFutuWsService;
+import io.futakotome.trade.controller.ws.QuantxWsController;
 import io.futakotome.trade.domain.code.MarketType;
 import io.futakotome.trade.domain.code.PlateSetType;
 import io.futakotome.trade.dto.PlateDto;
 import io.futakotome.trade.dto.PlateStockDto;
 import io.futakotome.trade.dto.StockDto;
+import io.futakotome.trade.event.PlateSetUpdateEvent;
 import io.futakotome.trade.mapper.pg.PlateDtoMapper;
 import io.futakotome.trade.mapper.pg.PlateStockDtoMapper;
 import io.futakotome.trade.service.PlateDtoService;
 import io.futakotome.trade.service.PlateStockDtoService;
 import io.futakotome.trade.service.StockDtoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,13 +40,31 @@ import java.util.stream.Collectors;
 @Service
 public class PlateDtoServiceImpl extends ServiceImpl<PlateDtoMapper, PlateDto>
         implements PlateDtoService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlateDtoServiceImpl.class);
     private static final ReentrantLock lock = new ReentrantLock();
     private final StockDtoService stockService;
     private final PlateStockDtoService plateStockService;
+    private final QuantxFutuWsService wsService;
 
-    public PlateDtoServiceImpl(StockDtoService stockService, PlateStockDtoService plateStockService) {
+    public PlateDtoServiceImpl(StockDtoService stockService, PlateStockDtoService plateStockService, QuantxFutuWsService wsService) {
         this.stockService = stockService;
         this.plateStockService = plateStockService;
+        this.wsService = wsService;
+    }
+
+    @EventListener
+    public void onPlateSetUpdate(PlateSetUpdateEvent event) {
+        List<PlateDto> toInsertPlates = event.getPlateInfos().stream().map(plateVo -> {
+            PlateDto plateDto = new PlateDto();
+            plateDto.setName(plateVo.getName());
+            plateDto.setCode(plateVo.getPlate().getCode());
+            plateDto.setMarket(plateVo.getPlate().getMarket());
+            return plateDto;
+        }).collect(Collectors.toList());
+        int insertRow = insertBatch(toInsertPlates);
+        String str = "同步板块数据,插入条数:" + insertRow;
+        LOGGER.info(str);
+        wsService.sendNotify(str);
     }
 
     @Override
