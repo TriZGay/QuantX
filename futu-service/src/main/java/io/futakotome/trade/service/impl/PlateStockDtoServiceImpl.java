@@ -39,16 +39,17 @@ public class PlateStockDtoServiceImpl extends ServiceImpl<PlateStockDtoMapper, P
                     i = i + batchLimit;
                     insertLength -= batchLimit;
                     totalInsertRow += insertRow;
-                    LOGGER.info("板块与标的物关系入库{}条数据.", insertRow);
                 }
                 if (insertLength > 0) {
                     List<PlateStockDto> remainingInsertRelations = relations.subList(i, i + insertLength);
                     int insertRow = getBaseMapper().insertBatch(remainingInsertRelations);
                     totalInsertRow += insertRow;
-                    LOGGER.info("板块与标的物关系入库{}条数据.", insertRow);
+
                 }
+                LOGGER.info("板块与标的物关系入库{}条数据.", totalInsertRow);
                 return totalInsertRow;
             } else {
+                LOGGER.info("没有新增关系,不需要插入.");
                 return 0;
             }
         } finally {

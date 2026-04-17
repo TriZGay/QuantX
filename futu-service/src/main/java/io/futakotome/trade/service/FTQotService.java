@@ -1509,7 +1509,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         int seqNo = qot.getIpoList(request);
         CommonSecurity commonSecurity = new CommonSecurity(req.getMarket(), null);
         CacheManager.put(String.valueOf(seqNo), commonSecurity);
-        LOGGER.info("{}市场获取IPO列表.seq={}", req.getMarket(), seqNo);
+        LOGGER.info("{}市场获取IPO列表.seq={}", MarketType.getName(req.getMarket()), seqNo);
     }
 
     public void sendGetReminderRequest(GetPriceReminderWsMessage request) {

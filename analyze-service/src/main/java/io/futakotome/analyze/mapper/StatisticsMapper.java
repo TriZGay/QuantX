@@ -22,7 +22,7 @@ public class StatisticsMapper {
 
     public List<SnapshotPriceChangeDto> queryRiseTop10InPlatesByMarket(Integer market) {
         try {
-            String sql = "select market,code,name,update_time,round(((cur_price-last_close_price) /last_close_price)::numeric *100,2)  as price_change from t_snapshot_base where market = :market and type = 7  order by price_change desc limit 10";
+            String sql = "select market,code,name,update_time,coalesce(round(((cur_price-last_close_price) /nullif(last_close_price,0))::numeric *100,2),0)  as price_change from t_snapshot_base where market = :market and type = 7  order by price_change desc limit 10";
             return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
                 put("market", market);
             }}, new BeanPropertyRowMapper<>(SnapshotPriceChangeDto.class));
@@ -35,7 +35,7 @@ public class StatisticsMapper {
 
     public List<SnapshotPriceChangeDto> queryReduceTop10InPlatesByMarket(Integer market) {
         try {
-            String sql = "select market,code,name,update_time,round(((cur_price-last_close_price) /last_close_price)::numeric *100,2)  as price_change from t_snapshot_base where market = :market and type = 7  order by price_change asc limit 10";
+            String sql = "select market,code,name,update_time,coalesce(round(((cur_price-last_close_price) /nullif(last_close_price,0))::numeric *100,2),0)  as price_change from t_snapshot_base where market = :market and type = 7  order by price_change asc limit 10";
             return namedParameterJdbcTemplate.query(sql, new HashMap<>() {{
                 put("market", market);
             }}, new BeanPropertyRowMapper<>(SnapshotPriceChangeDto.class));

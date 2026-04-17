@@ -52,3 +52,30 @@ ft:
   pwd: 983528987fuck.
   exclusionCodesWhenSnapshot:
     - LIST1983
+    - Fund
+    - GEM
+    - HSCEI Stock
+    - HSI Constituent Stocks
+    - Hong Kong Index
+    - LIST10001
+    - LIST1352
+    - LIST1600
+    - LIST1607
+    - LIST1902
+    - LIST1910
+    - LIST1911
+    - LIST1912
+    - LIST1921
+    - LIST1981
+    - LIST1989
+    - LIST1990
+    - LIST20860
+    - LIST20861
+    - LIST20862
+    - LIST23405
+    - LIST23406
+    - LIST91331
+    - LIST91332
+    - LIST91333
+    - LIST9700
+    - Motherboard
