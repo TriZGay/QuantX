@@ -7,7 +7,6 @@ import io.futakotome.trade.dto.message.ModifyOrderWsMessage;
 import io.futakotome.trade.dto.ws.*;
 import io.futakotome.trade.service.FTQotService;
 import io.futakotome.trade.service.FTTradeService;
-import io.futakotome.trade.service.PlateDtoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;

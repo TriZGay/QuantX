@@ -28,4 +28,7 @@
     <changeSet id="7" author="futakotome">
         <sqlFile path="db/sql/InitAccSubscribeInfoTable.sql"/>
     </changeSet>
+    <changeSet id="8" author="futakotome">
+        <sqlFile path="db/sql/AlterStockTable.sql"/>
+    </changeSet>
 </databaseChangeLog>
