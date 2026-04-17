@@ -22,10 +22,7 @@ import io.futakotome.trade.dto.StockDto;
 import io.futakotome.trade.dto.SubDto;
 import io.futakotome.trade.dto.message.*;
 import io.futakotome.trade.dto.ws.*;
-import io.futakotome.trade.event.KLineUpdateEvent;
-import io.futakotome.trade.event.PlateSetUpdateEvent;
-import io.futakotome.trade.event.SnapshotUpdateEvent;
-import io.futakotome.trade.event.StockInPlateUpdateEvent;
+import io.futakotome.trade.event.*;
 import io.futakotome.trade.utils.CacheManager;
 import io.futakotome.trade.utils.RequestCount;
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,7 +49,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     private final ApplicationEventPublisher eventPublisher;
 
     private final PlateDtoService plateService;
-    private final StockDtoService stockService;
 
     private final SubDtoService subService;
     private final TradeDateDtoService tradeDateService;
@@ -63,7 +59,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
 
     private static final FTAPI_Conn_Qot qot = new FTAPI_Conn_Qot();
 
-    public FTQotService(ApplicationEventPublisher eventPublisher, PlateDtoService plateService, StockDtoService stockService,
+    public FTQotService(ApplicationEventPublisher eventPublisher, PlateDtoService plateService,
                         SubDtoService subService, TradeDateDtoService tradeDateService, FutuConfig futuConfig,
                         QuantxFutuWsService quantxFutuWsService, KLineService kLineService) {
         this.eventPublisher = eventPublisher;
@@ -71,7 +67,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         qot.setConnSpi(this);
         qot.setQotSpi(this);
         this.plateService = plateService;
-        this.stockService = stockService;
         this.subService = subService;
         this.tradeDateService = tradeDateService;
         this.kLineService = kLineService;
@@ -105,7 +100,9 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             QotGetPlateSet.Request req = QotGetPlateSet.Request.newBuilder()
                     .setC2S(c2S).build();
             int seqNo = qot.getPlateSet(req);
-            LOGGER.info("{}:请求板块数据,seq={}", MarketType.getNameByCode(market), seqNo);
+            CommonSecurity commonSecurity = new CommonSecurity(market, null);
+            CacheManager.put(String.valueOf(seqNo), commonSecurity);
+            LOGGER.info("{}:请求板块数据,seq={}", MarketType.getName(market), seqNo);
         }
     }
 
@@ -117,22 +114,25 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         QotGetStaticInfo.Request request = QotGetStaticInfo.Request.newBuilder()
                 .setC2S(c2S).build();
         int seqNo = qot.getStaticInfo(request);
-        LOGGER.info("{}-{}:请求静态数据,seq={}", MarketType.getNameByCode(market), StockType.getNameByCode(stockType), seqNo);
+        CacheManager.put(String.valueOf(seqNo), new CommonStaticInfo(market, stockType));
+        LOGGER.info("{}-{}:请求静态数据,seq={}", MarketType.getName(market), StockType.getNameByCode(stockType), seqNo);
     }
 
     public void syncStockOwnerPlateInfo(List<CommonSecurity> securities) {
+        QotGetOwnerPlate.C2S.Builder c2SBuilder = QotGetOwnerPlate.C2S.newBuilder();
+        List<QotCommon.Security> securitiesToReq = new ArrayList<>();
         for (CommonSecurity security : securities) {
-            QotGetOwnerPlate.C2S c2S = QotGetOwnerPlate.C2S.newBuilder()
-                    .addSecurityList(QotCommon.Security.newBuilder()
-                            .setMarket(security.getMarket())
-                            .setCode(security.getCode())
-                            .build()).build();
-            QotGetOwnerPlate.Request request = QotGetOwnerPlate.Request.newBuilder()
-                    .setC2S(c2S)
+            QotCommon.Security sec = QotCommon.Security.newBuilder()
+                    .setMarket(security.getMarket())
+                    .setCode(security.getCode())
                     .build();
-            int seqNo = qot.getOwnerPlate(request);
-            LOGGER.info("{}-{}:请求板块数据,seq={}", MarketType.getNameByCode(security.getMarket()), security.getCode(), seqNo);
+            securitiesToReq.add(sec);
         }
+        QotGetOwnerPlate.Request request = QotGetOwnerPlate.Request.newBuilder()
+                .setC2S(c2SBuilder.addAllSecurityList(securitiesToReq).build())
+                .build();
+        int seqNo = qot.getOwnerPlate(request);
+        LOGGER.info("请求股票所属板块数据,seq={}", seqNo);
     }
 
     public void syncTradeDate() {
@@ -1288,28 +1288,28 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                logFTResult("查询股票所属板块信息",ftGrpcReturnResult);
+                logFTResult("查询股票所属板块信息", ftGrpcReturnResult);
                 List<StockOwnerPlateContent> stockOwnerPlateContents = GSON.fromJson(ftGrpcReturnResult.getS2c().getAsJsonArray("ownerPlateList"), new TypeToken<List<StockOwnerPlateContent>>() {
                 }.getType());
-                int totalInsert = 0;
-                for (StockOwnerPlateContent stockOwnerPlateContent : stockOwnerPlateContents) {
-                    StockDto stockDto = new StockDto();
-                    stockDto.setMarket(stockOwnerPlateContent.getSecurity().getMarket());
-                    stockDto.setCode(stockOwnerPlateContent.getSecurity().getCode());
-                    List<PlateDto> toInsertPlates = stockOwnerPlateContent.getPlateInfoList()
-                            .stream().map(plateInfoContent -> {
-                                PlateDto plateDto = new PlateDto();
-                                plateDto.setName(plateInfoContent.getName());
-                                plateDto.setCode(plateInfoContent.getPlate().getCode());
-                                plateDto.setMarket(plateInfoContent.getPlate().getMarket());
-                                plateDto.setPlateType(plateInfoContent.getPlateType());
-                                return plateDto;
-                            }).collect(Collectors.toList());
-                    totalInsert += plateService.insertBatch(stockDto, toInsertPlates);
-                }
-                String notify = "查询股票对应板块数据,插入条数:" + totalInsert;
-                LOGGER.info(notify);
-                sendNotifyMessage(notify);
+//                int totalInsert = 0;
+//                for (StockOwnerPlateContent stockOwnerPlateContent : stockOwnerPlateContents) {
+//                    StockDto stockDto = new StockDto();
+//                    stockDto.setMarket(stockOwnerPlateContent.getSecurity().getMarket());
+//                    stockDto.setCode(stockOwnerPlateContent.getSecurity().getCode());
+//                    List<PlateDto> toInsertPlates = stockOwnerPlateContent.getPlateInfoList()
+//                            .stream().map(plateInfoContent -> {
+//                                PlateDto plateDto = new PlateDto();
+//                                plateDto.setName(plateInfoContent.getName());
+//                                plateDto.setCode(plateInfoContent.getPlate().getCode());
+//                                plateDto.setMarket(plateInfoContent.getPlate().getMarket());
+//                                plateDto.setPlateType(plateInfoContent.getPlateType());
+//                                return plateDto;
+//                            }).collect(Collectors.toList());
+//                    totalInsert += plateService.insertBatch(stockDto, toInsertPlates);
+//                }
+//                String notify = "查询股票对应板块数据,插入条数:" + totalInsert;
+//                LOGGER.info(notify);
+//                sendNotifyMessage(notify);
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询股票板塊信息解析结果失败!", e);
             }
@@ -1325,15 +1325,19 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询静态信息", ftGrpcReturnResult);
+                CommonStaticInfo commonStaticInfo = (CommonStaticInfo) CacheManager.get(String.valueOf(nSerialNo));
                 List<StockContent> stockContents = GSON.fromJson(ftGrpcReturnResult.getS2c().getAsJsonArray("staticInfoList"), new TypeToken<List<StockContent>>() {
                 }.getType());
-                List<StockDto> toInsertStocks = stockContent2StockDto(stockContents);
-                int insertRow = stockService.insertBatch(toInsertStocks);
-                String notify = "查询静态标的数据,插入条数:" + insertRow;
-                LOGGER.info(notify);
-                sendNotifyMessage(notify);
+                eventPublisher.publishEvent(new StaticInfoUpdateEvent(commonStaticInfo, stockContents));
             } catch (InvalidProtocolBufferException e) {
-                LOGGER.error("查询静态信息解析结果失败!", e);
+                String errMsg = "查询静态信息解析结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询静态信息空指针.";
+                LOGGER.error(errMsg, e);
+                LOGGER.error(errMsg, e);
             }
         }
     }
@@ -1352,10 +1356,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 }.getType());
                 sendStocksInPlateMessage(stockContents);
                 CommonSecurity plateItem = (CommonSecurity) CacheManager.get(String.valueOf(nSerialNo));
-                List<StockDto> toInsertStocks = stockContent2StockDto(stockContents);
                 PlateDto plateDto = new PlateDto(plateItem.getMarket(), plateItem.getCode());
-                //todo 用板块同步股票数据会无法建立关联关系
-                eventPublisher.publishEvent(new StockInPlateUpdateEvent(plateDto, toInsertStocks));
+                eventPublisher.publishEvent(new StockInPlateUpdateEvent(plateDto, stockContents));
             } catch (InvalidProtocolBufferException e) {
                 LOGGER.error("查询板块下股票解析结果失败!", e);
             } catch (NullPointerException e) {
@@ -1370,37 +1372,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         this.quantxFutuWsService.sendStocksInPlateMessage(message);
     }
 
-    private List<StockDto> stockContent2StockDto(List<StockContent> stockContents) {
-        return stockContents.stream().map(vo -> {
-            StockDto dto = new StockDto();
-            dto.setName(vo.getBasic().getName());
-            dto.setCode(vo.getBasic().getSecurity().getCode());
-            dto.setLotSize(vo.getBasic().getLotSize());
-            dto.setStockType(vo.getBasic().getSecType());
-            dto.setMarket(vo.getBasic().getSecurity().getMarket());
-            dto.setListingDate(LocalDate.parse(vo.getBasic().getListTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-            dto.setDelisting(vo.getBasic().getDelisting() ? 1 : 0);
-            dto.setExchangeType(vo.getBasic().getExchType());
-            dto.setStockId(vo.getBasic().getId());
-            if (Objects.nonNull(vo.getWarrantExData())) {
-                dto.setStockChildType(vo.getWarrantExData().getType());
-                dto.setStockOwner(vo.getWarrantExData().getOwner().getCode());
-            }
-            if (Objects.nonNull(vo.getOptionExData())) {
-                dto.setOptionType(vo.getOptionExData().getType());
-                dto.setStrikeTime(vo.getOptionExData().getStrikeTime());
-                dto.setStrikePrice(vo.getOptionExData().getStrikePrice());
-                dto.setOptionMarket(vo.getOptionExData().getMarket());
-                dto.setSuspension(vo.getOptionExData().getSuspend());
-                dto.setIndexOptionType(vo.getOptionExData().getIndexOptionType());
-            }
-            if (Objects.nonNull(vo.getFutureExData())) {
-                dto.setMainContract(vo.getFutureExData().getMainContract() ? 1 : 0);
-                dto.setLastTradeTime(LocalDate.parse(vo.getFutureExData().getLastTradeTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-            }
-            return dto;
-        }).collect(Collectors.toList());
-    }
 
     @Override
     public void onReply_GetPlateSet(FTAPI_Conn client, int nSerialNo, QotGetPlateSet.Response rsp) {
@@ -1414,9 +1385,16 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 logFTResult("查询板块信息", ftGrpcReturnResult);
                 List<PlateInfoContent> plateInfos = GSON.fromJson(ftGrpcReturnResult.getS2c().getAsJsonArray("plateInfoList"), new TypeToken<List<PlateInfoContent>>() {
                 }.getType());
-                eventPublisher.publishEvent(new PlateSetUpdateEvent(plateInfos));
+                CommonSecurity commonSecurity = (CommonSecurity) CacheManager.get(String.valueOf(nSerialNo));
+                eventPublisher.publishEvent(new PlateSetUpdateEvent(commonSecurity.getMarket(), plateInfos));
             } catch (InvalidProtocolBufferException e) {
-                LOGGER.error("查询板块信息解析结果失败!", e);
+                String errMsg = "查询板块信息解析结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询板块信息解析结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
             }
         }
 

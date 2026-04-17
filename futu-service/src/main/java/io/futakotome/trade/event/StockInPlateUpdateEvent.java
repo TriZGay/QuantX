@@ -2,16 +2,17 @@ package io.futakotome.trade.event;
 
 import io.futakotome.trade.dto.PlateDto;
 import io.futakotome.trade.dto.StockDto;
+import io.futakotome.trade.dto.message.StockContent;
 
 import java.util.List;
 
 public class StockInPlateUpdateEvent {
     private PlateDto plateDto;
-    private List<StockDto> stockDtos;
+    private   List<StockContent> stockContents;
 
-    public StockInPlateUpdateEvent(PlateDto plateDto, List<StockDto> stockDtos) {
+    public StockInPlateUpdateEvent(PlateDto plateDto, List<StockContent> stockContents) {
         this.plateDto = plateDto;
-        this.stockDtos = stockDtos;
+        this.stockContents = stockContents;
     }
 
     public PlateDto getPlateDto() {
@@ -22,11 +23,11 @@ public class StockInPlateUpdateEvent {
         this.plateDto = plateDto;
     }
 
-    public List<StockDto> getStockDtos() {
-        return stockDtos;
+    public List<StockContent> getStockContents() {
+        return stockContents;
     }
 
-    public void setStockDtos(List<StockDto> stockDtos) {
-        this.stockDtos = stockDtos;
+    public void setStockContents(List<StockContent> stockContents) {
+        this.stockContents = stockContents;
     }
 }

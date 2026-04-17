@@ -31,4 +31,7 @@
     <changeSet id="8" author="futakotome">
         <sqlFile path="db/sql/AlterStockTable.sql"/>
     </changeSet>
+    <changeSet id="9" author="futakotome">
+        <sqlFile path="db/sql/AlterPlateTable.sql"/>
+    </changeSet>
 </databaseChangeLog>

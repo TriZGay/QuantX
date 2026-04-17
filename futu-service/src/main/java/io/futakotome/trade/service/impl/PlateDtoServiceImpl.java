@@ -61,7 +61,7 @@ public class PlateDtoServiceImpl extends ServiceImpl<PlateDtoMapper, PlateDto>
             plateDto.setMarket(plateVo.getPlate().getMarket());
             return plateDto;
         }).collect(Collectors.toList());
-        int insertRow = insertBatch(toInsertPlates);
+        int insertRow = insertBatch(event.getMarket(), toInsertPlates);
         String str = "同步板块数据,插入条数:" + insertRow;
         LOGGER.info(str);
         wsService.sendNotify(str);
@@ -69,11 +69,11 @@ public class PlateDtoServiceImpl extends ServiceImpl<PlateDtoMapper, PlateDto>
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int insertBatch(List<PlateDto> newPlates) {
+    public int insertBatch(Integer market, List<PlateDto> newPlates) {
         lock.lock();
         try {
-            List<PlateDto> allPlates = list();
-            newPlates.removeIf(allPlates::contains);
+            List<PlateDto> allPlatesByMarket = list(Wrappers.lambdaQuery(new PlateDto()).eq(PlateDto::getMarket, market));
+            newPlates.removeIf(allPlatesByMarket::contains);
             if (!newPlates.isEmpty()) {
                 return getBaseMapper().insertBatch(newPlates);
             } else {

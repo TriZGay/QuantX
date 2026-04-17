@@ -38,11 +38,10 @@ public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int insertBatch(List<StockDto> toInsertStocks) {
+    public int insertBatch(Integer market, Integer stockType, List<StockDto> toInsertStocks) {
         lock.lock();
         try {
-            //todo 这个查全量，在数据量大的时候可能会有问题
-            List<StockDto> allStocks = list();
+            List<StockDto> allStocks = list(Wrappers.lambdaQuery(new StockDto()).eq(StockDto::getMarket, market).eq(StockDto::getStockType, stockType));
             toInsertStocks.removeIf(allStocks::contains);
             if (!toInsertStocks.isEmpty()) {
                 int totalInsertRow = 0;
@@ -55,16 +54,17 @@ public class StockDtoServiceImpl extends ServiceImpl<StockDtoMapper, StockDto>
                     i = i + batchLimit;
                     insertLength = insertLength - batchLimit;
                     totalInsertRow += insertRow;
-                    LOGGER.info("批量插入静态标的物条数={}", insertRow);
                 }
                 if (insertLength > 0) {
                     List<StockDto> remainingInsertStocks = toInsertStocks.subList(i, i + insertLength);
                     int insertRow = getBaseMapper().insertBatch(remainingInsertStocks);
                     totalInsertRow += insertRow;
-                    LOGGER.info("批量插入静态标的物条数={}", insertRow);
+
                 }
+                LOGGER.info("批量插入静态标的物条数={}", totalInsertRow);
                 return totalInsertRow;
             } else {
+                LOGGER.info("没有新增标的物,不需要插入.");
                 return 0;
             }
         } finally {

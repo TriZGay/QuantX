@@ -9,7 +9,7 @@ import io.futakotome.trade.dto.StockDto;
 import java.util.List;
 
 public interface StockDtoService extends IService<StockDto> {
-    int insertBatch(List<StockDto> list);
+    int insertBatch(Integer market, Integer stockType, List<StockDto> list);
 
     IPage<ListStockResponse> page(ListStockRequest listStockRequest);
 
