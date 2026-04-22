@@ -26,13 +26,11 @@ import java.util.Objects;
 @Configuration
 @MapperScan(basePackages = "io.futakotome.trade.mapper.pg", sqlSessionFactoryRef = "sqlSessionFactory")
 public class PgDataSourceConfiguration {
-
     @Bean
-    @Primary
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
-        MybatisPlusInterceptor mybatisPlusInterceptor = new MybatisPlusInterceptor();
-        mybatisPlusInterceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.POSTGRE_SQL));
-        return mybatisPlusInterceptor;
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.POSTGRE_SQL));
+        return interceptor;
     }
 
     @Bean(name = "datasource")
@@ -57,6 +55,7 @@ public class PgDataSourceConfiguration {
         //
         MybatisConfiguration configuration = new MybatisConfiguration();
         configuration.setLogImpl(StdOutImpl.class);
+        configuration.addInterceptor(mybatisPlusInterceptor());
         //
         bean.setConfiguration(configuration);
         bean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:mapper/pg/*.xml"));

@@ -176,7 +176,7 @@ public class PlateDtoServiceImpl extends ServiceImpl<PlateDtoMapper, PlateDto>
             response.setId(plateDto.getId());
             response.setName(plateDto.getName());
             response.setCode(plateDto.getCode());
-            response.setMarket(MarketType.getNameByCode(plateDto.getMarket()));
+            response.setMarket(MarketType.getName(plateDto.getMarket()));
             response.setMarketCode(plateDto.getMarket());
             response.setPlateType(PlateSetType.getNameByCode(plateDto.getPlateType()));
             response.setPlateTypeCode(plateDto.getPlateType());
