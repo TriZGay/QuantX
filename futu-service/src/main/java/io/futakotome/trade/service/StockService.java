@@ -53,10 +53,14 @@ public class StockService {
                 return plateDto;
             }).collect(Collectors.toList());
             int insertPlateRow = plateDtoService.insertBatch(staticInfo.getMarket(), plateDtos);
-            wsService.sendNotify("插入板块:" + insertPlateRow + "行");
+            String insertLog = "插入板块表,条数:" + insertPlateRow;
+            LOGGER.info(insertLog);
+            wsService.sendNotify(insertLog);
         }
         int insertRow = stockDtoService.insertBatch(staticInfo.getMarket(), staticInfo.getStockType(), stockDtos);
-        wsService.sendNotify("插入静态标的物:" + insertRow + "行");
+        String insertLog = "插入静态标的物表,条数:" + insertRow;
+        LOGGER.info(insertLog);
+        wsService.sendNotify(insertLog);
     }
 
     @EventListener

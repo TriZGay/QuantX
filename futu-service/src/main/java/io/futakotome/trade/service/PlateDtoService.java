@@ -12,8 +12,5 @@ import java.util.List;
 public interface PlateDtoService extends IService<PlateDto> {
     int insertBatch(Integer market, List<PlateDto> list);
 
-    @Deprecated
-    int insertBatch(StockDto stockDto, List<PlateDto> toInsertPlates);
-
     IPage<ListPlateResponse> page(ListPlateRequest request);
 }

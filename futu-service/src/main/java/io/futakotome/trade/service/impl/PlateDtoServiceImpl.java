@@ -42,13 +42,11 @@ public class PlateDtoServiceImpl extends ServiceImpl<PlateDtoMapper, PlateDto>
         implements PlateDtoService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlateDtoServiceImpl.class);
     private static final ReentrantLock lock = new ReentrantLock();
-    private final StockDtoService stockService;
-    private final PlateStockDtoService plateStockService;
+    private final StockDtoService stockDtoService;
     private final QuantxFutuWsService wsService;
 
-    public PlateDtoServiceImpl(StockDtoService stockService, PlateStockDtoService plateStockService, QuantxFutuWsService wsService) {
-        this.stockService = stockService;
-        this.plateStockService = plateStockService;
+    public PlateDtoServiceImpl(StockDtoService stockDtoService, QuantxFutuWsService wsService) {
+        this.stockDtoService = stockDtoService;
         this.wsService = wsService;
     }
 
@@ -65,6 +63,19 @@ public class PlateDtoServiceImpl extends ServiceImpl<PlateDtoMapper, PlateDto>
         String str = "同步板块数据,插入条数:" + insertRow;
         LOGGER.info(str);
         wsService.sendNotify(str);
+        //静态表也插一下,保持和‘同步静态数据’的接口数据一致
+        List<StockDto> stockDtos = event.getPlateInfos().stream().map(p -> {
+            StockDto stockDto = new StockDto();
+            stockDto.setName(p.getName());
+            stockDto.setMarket(p.getPlate().getMarket());
+            stockDto.setCode(p.getPlate().getCode());
+            stockDto.setStockType(7);
+            return stockDto;
+        }).collect(Collectors.toList());
+        int insertStaticRow = stockDtoService.insertBatch(event.getMarket(), 7, stockDtos);
+        String insertStaticLog = "插入静态标的物表,条数:" + insertStaticRow;
+        LOGGER.info(insertStaticLog);
+        wsService.sendNotify(insertStaticLog);
     }
 
     @Override
@@ -79,72 +90,6 @@ public class PlateDtoServiceImpl extends ServiceImpl<PlateDtoMapper, PlateDto>
             } else {
                 return 0;
             }
-        } catch (Exception e) {
-            throw new RuntimeException("批量插入出错", e);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public int insertBatch(StockDto stockDto, List<PlateDto> toInsertPlates) {
-        lock.lock();
-        try {
-            StockDto oneStock = stockService.getOne(Wrappers.query(stockDto)
-                    .eq("market", stockDto.getMarket())
-                    .eq("code", stockDto.getCode()));
-            if (Objects.isNull(oneStock)) {
-                return 0;
-            }
-            List<PlateDto> existPlates = new ArrayList<>();
-            List<PlateDto> newPlates = new ArrayList<>();
-            for (PlateDto plateDto : toInsertPlates) {
-                PlateDto isExistPlate = getOne(Wrappers.query(plateDto)
-                        .eq("market", plateDto.getMarket())
-                        .eq("code", plateDto.getCode()));
-                if (Objects.nonNull(isExistPlate)) {
-                    existPlates.add(isExistPlate);
-                } else {
-                    newPlates.add(plateDto);
-                }
-            }
-            int totalInsertRow = 0;
-            if (!newPlates.isEmpty()) {
-                int insertRow = getBaseMapper().insertBatch(newPlates);
-                List<PlateStockDto> relations = newPlates.stream()
-                        .map(plateDto -> {
-                            PlateStockDto plateStockDto = new PlateStockDto();
-                            plateStockDto.setPlateId(plateDto.getId());
-                            plateStockDto.setStockId(oneStock.getId());
-                            return plateStockDto;
-                        }).collect(Collectors.toList());
-                PlateStockDtoMapper plateStockDtoMapper = (PlateStockDtoMapper) plateStockService.getBaseMapper();
-                if (plateStockDtoMapper.insertBatch(relations) > 0) {
-                    totalInsertRow += insertRow;
-                }
-            }
-            if (!existPlates.isEmpty()) {
-                PlateStockDtoMapper plateStockDtoMapper = (PlateStockDtoMapper) plateStockService.getBaseMapper();
-                List<PlateStockDto> relations = new ArrayList<>();
-                for (PlateDto existPlateDto : existPlates) {
-                    boolean relationExist = plateStockDtoMapper.exists(Wrappers.query(new PlateStockDto())
-                            .eq("plate_id", existPlateDto.getId())
-                            .eq("stock_id", oneStock.getId()));
-                    if (!relationExist) {
-                        PlateStockDto relation = new PlateStockDto();
-                        relation.setPlateId(existPlateDto.getId());
-                        relation.setStockId(oneStock.getId());
-                        relations.add(relation);
-                    }
-                }
-                if (!relations.isEmpty()) {
-                    if (plateStockDtoMapper.insertBatch(relations) > 0) {
-                        totalInsertRow += relations.size();
-                    }
-                }
-            }
-            return totalInsertRow;
         } catch (Exception e) {
             throw new RuntimeException("批量插入出错", e);
         } finally {

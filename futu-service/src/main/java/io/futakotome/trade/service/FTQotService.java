@@ -1395,6 +1395,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 String errMsg = "查询板块信息解析结果空指针.";
                 LOGGER.error(errMsg, e);
                 sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询板块信息有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
             }
         }
 
