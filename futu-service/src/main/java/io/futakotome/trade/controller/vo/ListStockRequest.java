@@ -7,6 +7,16 @@ public class ListStockRequest extends PaginationRequest {
     private String name;
     private String code;
 
+    private Long plateId;
+
+    public Long getPlateId() {
+        return plateId;
+    }
+
+    public void setPlateId(Long plateId) {
+        this.plateId = plateId;
+    }
+
     public String getCode() {
         return code;
     }
