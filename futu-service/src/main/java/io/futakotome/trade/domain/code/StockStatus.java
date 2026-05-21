@@ -1,5 +1,8 @@
 package io.futakotome.trade.domain.code;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum StockStatus {
     UNKNOWN(0, "未知"),
     NORMAL(1, "正常状态"),
@@ -26,12 +29,24 @@ public enum StockStatus {
 
     private final Integer code;
     private final String name;
+    private static final Map<Integer, String> STOCK_STATUS_MAP = new HashMap<>();
+
+    static {
+        for (StockStatus stockStatus : StockStatus.values()) {
+            STOCK_STATUS_MAP.put(stockStatus.code, stockStatus.name);
+        }
+    }
 
     StockStatus(Integer code, String name) {
         this.code = code;
         this.name = name;
     }
 
+    public static String getName(Integer code) {
+        return STOCK_STATUS_MAP.getOrDefault(code, "无此状态");
+    }
+
+    @Deprecated
     public static String getNameByCode(Integer code) {
         for (StockStatus s : StockStatus.values()) {
             if (s.getCode().equals(code)) {

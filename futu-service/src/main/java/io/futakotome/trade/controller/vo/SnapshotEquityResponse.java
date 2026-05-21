@@ -1,6 +1,9 @@
 package io.futakotome.trade.controller.vo;
 
-public class SnapshotEquityResponse extends SnapshotBaseResponse {
+public class SnapshotEquityResponse {
+    private Integer market;
+    private String marketStr;
+    private String code;
     private Long issuedShares;
     private Double issuedMarketVal;
     private Double netAsset;
@@ -17,6 +20,42 @@ public class SnapshotEquityResponse extends SnapshotBaseResponse {
     private Double dividendRatioTtm;
     private Double dividendLfy;
     private Double dividendLfyRatio;
+    //
+    private String updateTime;
+    //
+
+
+    public String getMarketStr() {
+        return marketStr;
+    }
+
+    public void setMarketStr(String marketStr) {
+        this.marketStr = marketStr;
+    }
+
+    public String getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public Integer getMarket() {
+        return market;
+    }
+
+    public void setMarket(Integer market) {
+        this.market = market;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
 
     public Long getIssuedShares() {
         return issuedShares;

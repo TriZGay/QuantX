@@ -1,15 +1,19 @@
 package io.futakotome.trade.controller.vo;
 
 public class SnapshotBaseResponse {
-    private String market;
+    private Integer market;
+    private String marketStr;
     private String code;
     private String name;
-    private String type;
+    private Integer type;
+    private String typeStr;
     private String isSuspend;
     private String listTime;
     private Integer lotSize;
     private Double priceSpread;
+    //
     private String updateTime;
+    //
     private Double highPrice;
     private Double openPrice;
     private Double lowPrice;
@@ -46,14 +50,32 @@ public class SnapshotBaseResponse {
     private Double afterChangeVal;
     private Double afterChangeRate;
     private Double afterAmplitude;
-    private String secStatus;
+    private Integer secStatus;
+    private String secStatusStr;
     private Double closePrice5Minute;
 
-    public String getMarket() {
+
+    public String getSecStatusStr() {
+        return secStatusStr;
+    }
+
+    public void setSecStatusStr(String secStatusStr) {
+        this.secStatusStr = secStatusStr;
+    }
+
+    public String getMarketStr() {
+        return marketStr;
+    }
+
+    public void setMarketStr(String marketStr) {
+        this.marketStr = marketStr;
+    }
+
+    public Integer getMarket() {
         return market;
     }
 
-    public void setMarket(String market) {
+    public void setMarket(Integer market) {
         this.market = market;
     }
 
@@ -73,11 +95,19 @@ public class SnapshotBaseResponse {
         this.name = name;
     }
 
-    public String getType() {
+    public String getTypeStr() {
+        return typeStr;
+    }
+
+    public void setTypeStr(String typeStr) {
+        this.typeStr = typeStr;
+    }
+
+    public Integer getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(Integer type) {
         this.type = type;
     }
 
@@ -409,11 +439,11 @@ public class SnapshotBaseResponse {
         this.afterAmplitude = afterAmplitude;
     }
 
-    public String getSecStatus() {
+    public Integer getSecStatus() {
         return secStatus;
     }
 
-    public void setSecStatus(String secStatus) {
+    public void setSecStatus(Integer secStatus) {
         this.secStatus = secStatus;
     }
 

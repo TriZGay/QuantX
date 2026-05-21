@@ -1,9 +1,6 @@
 package io.futakotome.trade.domain;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import io.futakotome.trade.controller.vo.CommonSecurityRequest;
-import io.futakotome.trade.controller.vo.SnapshotBaseResponse;
-import io.futakotome.trade.controller.vo.SnapshotEquityResponse;
+import io.futakotome.trade.controller.vo.*;
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
 import io.futakotome.trade.domain.code.MarketType;
 import io.futakotome.trade.domain.code.StockStatus;
@@ -352,22 +349,25 @@ public class SnapshotService {
         return totalInsert;
     }
 
-    public SnapshotBaseResponse querySnapshot(CommonSecurityRequest securityRequest) {
-        SnapshotBaseDto baseDto = baseDtoService.query()
-                .eq("market", securityRequest.getMarket())
-                .eq("code", securityRequest.getCode())
-                .orderByDesc("update_time").list().stream().findFirst().orElseGet(SnapshotBaseDto::new);
+    public SnapshotResponse querySnapshot(CommonSecurityRequest securityRequest) {
+        SnapshotBaseDto baseDto = baseDtoService.lambdaQuery(new SnapshotBaseDto())
+                .eq(SnapshotBaseDto::getMarket, securityRequest.getMarket())
+                .eq(SnapshotBaseDto::getCode, securityRequest.getCode())
+                .one();
         if (securityRequest.getSecurityType().equals(StockType.Eqty.getCode())) {
             //正股
-            SnapshotEquityExDto equityExDto = equityExDtoService.getOne(Wrappers.query(new SnapshotEquityExDto())
-                    .eq("market", securityRequest.getMarket())
-                    .eq("code", securityRequest.getCode()));
-            SnapshotEquityResponse snapshotEquityResponse = new SnapshotEquityResponse();
-            setBaseResponse(snapshotEquityResponse, baseDto);
-            if (Objects.nonNull(equityExDto)) {
-                setEquityResponse(snapshotEquityResponse, equityExDto);
+            SnapshotEquityExDto equityExDto = equityExDtoService.lambdaQuery(new SnapshotEquityExDto())
+                    .eq(SnapshotEquityExDto::getMarket, securityRequest.getMarket())
+                    .eq(SnapshotEquityExDto::getCode, securityRequest.getCode())
+                    .one();
+            SnapshotResponse snapshotResponse = new SnapshotResponse();
+            if (Objects.nonNull(baseDto)) {
+                snapshotResponse.setBaseResponse(baseDto2BaseResponse(baseDto));
             }
-            return snapshotEquityResponse;
+            if (Objects.nonNull(equityExDto)) {
+                snapshotResponse.setEquityResponse(equityDto2EquityResponse(equityExDto));
+            }
+            return snapshotResponse;
         } else if (securityRequest.getSecurityType().equals(StockType.Future.getCode())) {
             //期货
         } else if (securityRequest.getSecurityType().equals(StockType.Index.getCode())) {
@@ -376,6 +376,18 @@ public class SnapshotService {
             //期权
         } else if (securityRequest.getSecurityType().equals(StockType.Plate.getCode())) {
             //板块
+            SnapshotPlateExDto plateExDto = plateExDtoService.lambdaQuery(new SnapshotPlateExDto())
+                    .eq(SnapshotPlateExDto::getMarket, securityRequest.getMarket())
+                    .eq(SnapshotPlateExDto::getCode, securityRequest.getCode())
+                    .one();
+            SnapshotResponse snapshotResponse = new SnapshotResponse();
+            if (Objects.nonNull(baseDto)) {
+                snapshotResponse.setBaseResponse(baseDto2BaseResponse(baseDto));
+            }
+            if (Objects.nonNull(plateExDto)) {
+                snapshotResponse.setPlateResponse(plateDto2PlateResponse(plateExDto));
+            }
+            return snapshotResponse;
         } else if (securityRequest.getSecurityType().equals(StockType.Trust.getCode())) {
             //信托
         } else if (securityRequest.getSecurityType().equals(StockType.Warrant.getCode())) {
@@ -384,7 +396,23 @@ public class SnapshotService {
         return null;
     }
 
-    private void setEquityResponse(SnapshotEquityResponse equityResponse, SnapshotEquityExDto equityExDto) {
+    private SnapshotPlateResponse plateDto2PlateResponse(SnapshotPlateExDto plateExDto) {
+        SnapshotPlateResponse response = new SnapshotPlateResponse();
+        response.setMarket(plateExDto.getMarket());
+        response.setMarketStr(MarketType.getName(plateExDto.getMarket()));
+        response.setCode(plateExDto.getCode());
+        response.setRaiseCount(plateExDto.getRaiseCount());
+        response.setFallCount(plateExDto.getFallCount());
+        response.setEqualCount(plateExDto.getEqualCount());
+        response.setUpdateTime(plateExDto.getUpdateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        return response;
+    }
+
+    private SnapshotEquityResponse equityDto2EquityResponse(SnapshotEquityExDto equityExDto) {
+        SnapshotEquityResponse equityResponse = new SnapshotEquityResponse();
+        equityResponse.setMarket(equityExDto.getMarket());
+        equityResponse.setMarketStr(MarketType.getName(equityExDto.getMarket()));
+        equityResponse.setCode(equityExDto.getCode());
         equityResponse.setIssuedShares(equityExDto.getIssuedShares());
         equityResponse.setIssuedMarketVal(equityExDto.getIssuedMarketVal());
         equityResponse.setNetAsset(equityExDto.getNetAsset());
@@ -401,13 +429,18 @@ public class SnapshotService {
         equityResponse.setDividendRatioTtm(equityExDto.getDividendRatioTtm());
         equityResponse.setDividendLfy(equityExDto.getDividendLfy());
         equityResponse.setDividendLfyRatio(equityExDto.getDividendLfyRatio());
+        equityResponse.setUpdateTime(equityExDto.getUpdateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        return equityResponse;
     }
 
-    private void setBaseResponse(SnapshotBaseResponse baseResponse, SnapshotBaseDto baseDto) {
-        baseResponse.setMarket(MarketType.getNameByCode(baseDto.getMarket()));
+    private SnapshotBaseResponse baseDto2BaseResponse(SnapshotBaseDto baseDto) {
+        SnapshotBaseResponse baseResponse = new SnapshotBaseResponse();
+        baseResponse.setMarket(baseDto.getMarket());
+        baseResponse.setMarketStr(MarketType.getName(baseDto.getMarket()));
         baseResponse.setCode(baseDto.getCode());
         baseResponse.setName(baseDto.getName());
-        baseResponse.setType(StockType.getNameByCode(baseDto.getType()));
+        baseResponse.setType(baseDto.getType());
+        baseResponse.setTypeStr(StockType.getName(baseDto.getType()));
         baseResponse.setIsSuspend(baseDto.getIsSuspend() ? "已退市" : "在市");
         baseResponse.setListTime(baseDto.getListTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         baseResponse.setLotSize(baseDto.getLotSize());
@@ -433,24 +466,57 @@ public class SnapshotService {
         baseResponse.setLowest52WeeksPrice(baseDto.getLowest52WeeksPrice());
         baseResponse.setHighestHistoryPrice(baseDto.getHighestHistoryPrice());
         baseResponse.setLowestHistoryPrice(baseDto.getLowestHistoryPrice());
-        baseResponse.setPrePrice(baseDto.getPrePrice());
-        baseResponse.setPreHighPrice(baseDto.getPreHighPrice());
-        baseResponse.setPreLowPrice(baseDto.getPreLowPrice());
-        baseResponse.setPreVolume(baseDto.getPreVolume());
-        baseResponse.setPreTurnover(baseDto.getPreTurnover());
-        baseResponse.setPreChangeVal(baseDto.getPreChangeVal());
-        baseResponse.setPreChangeRate(baseDto.getPreChangeRate());
-        baseResponse.setPreAmplitude(baseDto.getPreAmplitude());
-        baseResponse.setAfterPrice(baseDto.getAfterPrice());
-        baseResponse.setAfterHighPrice(baseResponse.getAfterHighPrice());
-        baseResponse.setAfterLowPrice(baseResponse.getAfterLowPrice());
-        baseResponse.setAfterVolume(baseResponse.getAfterVolume());
-        baseResponse.setAfterTurnover(baseResponse.getAfterTurnover());
-        baseResponse.setAfterChangeVal(baseResponse.getAfterChangeVal());
-        baseResponse.setAfterChangeRate(baseResponse.getAfterChangeRate());
-        baseResponse.setAfterAmplitude(baseResponse.getAfterAmplitude());
-        baseResponse.setSecStatus(StockStatus.getNameByCode(baseDto.getSecStatus()));
+        if (Objects.nonNull(baseDto.getPrePrice())) {
+            baseResponse.setPrePrice(baseDto.getPrePrice());
+        }
+        if (Objects.nonNull(baseDto.getPreHighPrice())) {
+            baseResponse.setPreHighPrice(baseDto.getPreHighPrice());
+        }
+        if (Objects.nonNull(baseDto.getPreLowPrice())) {
+            baseResponse.setPreLowPrice(baseDto.getPreLowPrice());
+        }
+        if (Objects.nonNull(baseDto.getPreVolume())) {
+            baseResponse.setPreVolume(baseDto.getPreVolume());
+        }
+        if (Objects.nonNull(baseDto.getPreTurnover())) {
+            baseResponse.setPreTurnover(baseDto.getPreTurnover());
+        }
+        if (Objects.nonNull(baseDto.getPreChangeVal())) {
+            baseResponse.setPreChangeVal(baseDto.getPreChangeVal());
+        }
+        if (Objects.nonNull(baseDto.getPreChangeRate())) {
+            baseResponse.setPreChangeRate(baseDto.getPreChangeRate());
+        }
+        if (Objects.nonNull(baseDto.getPreAmplitude())) {
+            baseResponse.setPreAmplitude(baseDto.getPreAmplitude());
+        }
+        if (Objects.nonNull(baseDto.getAfterPrice())) {
+            baseResponse.setAfterPrice(baseDto.getAfterPrice());
+        }
+        if (Objects.nonNull(baseResponse.getAfterHighPrice())) {
+            baseResponse.setAfterHighPrice(baseResponse.getAfterHighPrice());
+        }
+        if (Objects.nonNull(baseResponse.getAfterLowPrice())) {
+            baseResponse.setAfterLowPrice(baseResponse.getAfterLowPrice());
+        }
+        if (Objects.nonNull(baseResponse.getAfterVolume())) {
+            baseResponse.setAfterVolume(baseResponse.getAfterVolume());
+        }
+        if (Objects.nonNull(baseResponse.getAfterTurnover())) {
+            baseResponse.setAfterTurnover(baseResponse.getAfterTurnover());
+        }
+        if (Objects.nonNull(baseResponse.getAfterChangeVal())) {
+            baseResponse.setAfterChangeVal(baseResponse.getAfterChangeVal());
+        }
+        if (Objects.nonNull(baseResponse.getAfterChangeRate())) {
+            baseResponse.setAfterChangeRate(baseResponse.getAfterChangeRate());
+        }
+        if (Objects.nonNull(baseResponse.getAfterAmplitude())) {
+            baseResponse.setAfterAmplitude(baseResponse.getAfterAmplitude());
+        }
+        baseResponse.setSecStatus(baseDto.getSecStatus());
+        baseResponse.setSecStatusStr(StockStatus.getName(baseDto.getSecStatus()));
         baseResponse.setClosePrice5Minute(baseResponse.getClosePrice5Minute());
-
+        return baseResponse;
     }
 }

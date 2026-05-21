@@ -1,5 +1,8 @@
 package io.futakotome.trade.domain.code;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum StockType {
     Unknown(0, "未知"),
     Bond(1, "债券"),
@@ -15,12 +18,24 @@ public enum StockType {
 
     private final Integer code;
     private final String name;
+    private static final Map<Integer, String> STOCK_TYPE_MAP = new HashMap<>();
+
+    static {
+        for (StockType stockType : StockType.values()) {
+            STOCK_TYPE_MAP.put(stockType.code, stockType.name);
+        }
+    }
 
     StockType(Integer code, String name) {
         this.code = code;
         this.name = name;
     }
 
+    public static String getName(Integer code) {
+        return STOCK_TYPE_MAP.getOrDefault(code, "未知市场码表");
+    }
+
+    @Deprecated
     public static String getNameByCode(Integer code) {
         for (StockType type : StockType.values()) {
             if (type.getCode().equals(code)) {
