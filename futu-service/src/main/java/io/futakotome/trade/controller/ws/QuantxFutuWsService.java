@@ -2,6 +2,7 @@ package io.futakotome.trade.controller.ws;
 
 import io.futakotome.common.message.RTEmaMessage;
 import io.futakotome.common.message.RTMaMessage;
+import io.futakotome.trade.dto.message.FinancialRevenueBreakDownContent;
 import io.futakotome.trade.dto.ws.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -85,6 +86,11 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + STOCKS_IN_PLATE_URI, message);
     }
 
+
+    public void sendFinancialRevenueBreakDown(FinancialReWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + FINANCIAL_REVENUE_BREAKDOWN, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);
@@ -114,5 +120,4 @@ public class QuantxFutuWsService {
     public void sendRtEma5(RTEmaMessage emaMessage) {
         this.template.convertAndSend(BROKER_PREFIX + EMA5_URI, emaMessage);
     }
-
 }

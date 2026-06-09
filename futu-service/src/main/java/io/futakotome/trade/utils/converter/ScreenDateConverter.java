@@ -1,0 +1,19 @@
+package io.futakotome.trade.utils.converter;
+
+import com.google.gson.*;
+import io.futakotome.trade.domain.code.FinancialType;
+import io.futakotome.trade.dto.message.ScreenDateContent;
+
+import java.lang.reflect.Type;
+
+public class ScreenDateConverter implements JsonDeserializer<ScreenDateContent> {
+    @Override
+    public ScreenDateContent deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        Integer date = jsonObject.get("date").getAsInt();
+        String periodText = jsonObject.get("periodText").getAsString();
+        Integer financialType = jsonObject.get("financialType").getAsInt();
+        String finTypeStr = FinancialType.getName(financialType);
+        return new ScreenDateContent(date, periodText, financialType, finTypeStr);
+    }
+}

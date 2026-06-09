@@ -34,7 +34,7 @@ public class QuantxWsController {
     public static final String GET_PRICE_REMINDER_URI = "/get_price_reminders";
     public static final String GET_IPO_URI = "/ipo";
     public static final String STOCKS_IN_PLATE_URI = "/stocks_in_plate";
-
+    public static final String FINANCIAL_REVENUE_BREAKDOWN = "/fin_reve_bd";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -185,6 +185,10 @@ public class QuantxWsController {
                 //按市场建立板块和股票的关系
                 StockInPlateByMarketWsMessage request = (StockInPlateByMarketWsMessage) messageClz;
                 ftQotService.syncStockInPlateByMarket(request.getMarket());
+            } else if (messageClz.getType().equals(MessageType.FINANCIAL_REVENUE_BREAKDOWN)) {
+                //主营构成
+                FinancialReWsMessage req = (FinancialReWsMessage) messageClz;
+                ftQotService.syncFinancialRevenueBreakDown(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

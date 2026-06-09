@@ -31,6 +31,7 @@ public enum MessageType {
     GET_PRICE_REMINDER,
     IPO,
     STOCK_IN_PLATE_BY_MARKET,
+    FINANCIAL_REVENUE_BREAKDOWN,
 
     RT_BASIC_QUOTE,
     RT_KL,

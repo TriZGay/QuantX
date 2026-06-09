@@ -33,7 +33,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -1500,6 +1499,57 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             PlateDto plate = plateByMarket.get(i);
             syncStockInPlate(new CommonSecurity(plate.getMarket(), plate.getCode()));
             requestCount.count();
+        }
+    }
+
+    public void syncFinancialRevenueBreakDown(FinancialReWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setMarket(req.getMarket())
+                .setCode(req.getCode())
+                .build();
+        QotGetFinancialsRevenueBreakdown.C2S.Builder c2SBuilder = QotGetFinancialsRevenueBreakdown.C2S.newBuilder();
+        c2SBuilder.setSecurity(sec);
+        if (Objects.nonNull(req.getDate())) {
+            c2SBuilder.setDate(req.getDate());
+        }
+        if (Objects.nonNull(req.getFinancialType())) {
+            c2SBuilder.setFinancialType(QotCommon.F10Type.forNumber(req.getFinancialType()));
+        }
+        if (Objects.nonNull(req.getCurrencyCode())) {
+            c2SBuilder.setCurrencyCode(req.getCurrencyCode());
+        }
+        QotGetFinancialsRevenueBreakdown.Request request = QotGetFinancialsRevenueBreakdown.Request.newBuilder()
+                .setC2S(c2SBuilder.build()).build();
+        int seqNo = qot.getFinancialsRevenueBreakdown(request);
+        LOGGER.info("市场{},code={}查询主营构成.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+
+    }
+
+    @Override
+    public void onReply_GetFinancialsRevenueBreakdown(FTAPI_Conn client, int nSerialNo, QotGetFinancialsRevenueBreakdown.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询主营构成失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询板块信息失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询主营构成", ftGrpcReturnResult);
+                FinancialRevenueBreakDownContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), FinancialRevenueBreakDownContent.class);
+                eventPublisher.publishEvent(new FinancialRevenueBreakDownUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询主营构成解析结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询主营构成解析结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询主营构成有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
         }
     }
 
