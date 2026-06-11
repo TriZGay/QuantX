@@ -11,15 +11,6 @@ public class RevenueBreakdownGroupContent {
     private String typeStr;
     private List<MainIncomeItemContent> itemList;
 
-    public RevenueBreakdownGroupContent() {
-    }
-
-    public RevenueBreakdownGroupContent(Integer type, String typeStr, List<MainIncomeItemContent> itemList) {
-        this.type = type;
-        this.typeStr = typeStr;
-        this.itemList = itemList;
-    }
-
     public Integer getType() {
         return type;
     }

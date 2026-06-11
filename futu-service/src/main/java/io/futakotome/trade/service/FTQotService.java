@@ -1502,6 +1502,49 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncAnalystConsensus(AnalystConsensusWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetResearchAnalystConsensus.C2S c2S = QotGetResearchAnalystConsensus.C2S.newBuilder()
+                .setSecurity(sec)
+                .build();
+        QotGetResearchAnalystConsensus.Request request = QotGetResearchAnalystConsensus.Request.newBuilder()
+                .setC2S(c2S)
+                .build();
+        int seqNo = qot.getResearchAnalystConsensus(request);
+        LOGGER.info("市场{},code={}查询分析师评级概述.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetResearchAnalystConsensus(FTAPI_Conn client, int nSerialNo, QotGetResearchAnalystConsensus.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询分析师评级概述失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询分析师评级概述失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询分析师评级概述", ftGrpcReturnResult);
+                AnalystConsensusContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), AnalystConsensusContent.class);
+                eventPublisher.publishEvent(new AnalystConsensusUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询分析师评级概述解析结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询分析师评级概述解析结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询分析师评级概述有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncFinancialRevenueBreakDown(FinancialReWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setMarket(req.getMarket())
@@ -1529,7 +1572,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     public void onReply_GetFinancialsRevenueBreakdown(FTAPI_Conn client, int nSerialNo, QotGetFinancialsRevenueBreakdown.Response rsp) {
         if (rsp.getRetType() != 0) {
             String notify = "查询主营构成失败:" + rsp.getRetMsg();
-            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询板块信息失败,code:" + rsp.getRetType()));
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询主营构成失败,code:" + rsp.getRetType()));
             sendNotifyMessage(notify);
         } else {
             try {

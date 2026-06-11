@@ -86,9 +86,12 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + STOCKS_IN_PLATE_URI, message);
     }
 
-
     public void sendFinancialRevenueBreakDown(FinancialReWsMessage message) {
         this.template.convertAndSend(BROKER_PREFIX + FINANCIAL_REVENUE_BREAKDOWN, message);
+    }
+
+    public void sendAnalystConsensus(AnalystConsensusWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + ANALYST_CONSENSUS, message);
     }
 
     //ma

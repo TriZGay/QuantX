@@ -35,6 +35,7 @@ public class QuantxWsController {
     public static final String GET_IPO_URI = "/ipo";
     public static final String STOCKS_IN_PLATE_URI = "/stocks_in_plate";
     public static final String FINANCIAL_REVENUE_BREAKDOWN = "/fin_reve_bd";
+    public static final String ANALYST_CONSENSUS = "/ana_con";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -189,6 +190,10 @@ public class QuantxWsController {
                 //主营构成
                 FinancialReWsMessage req = (FinancialReWsMessage) messageClz;
                 ftQotService.syncFinancialRevenueBreakDown(req);
+            } else if (messageClz.getType().equals(MessageType.ANALYST_CONSENSUS)) {
+                //分析师评级概述
+                AnalystConsensusWsMessage req = (AnalystConsensusWsMessage) messageClz;
+                ftQotService.syncAnalystConsensus(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

@@ -32,6 +32,7 @@ public enum MessageType {
     IPO,
     STOCK_IN_PLATE_BY_MARKET,
     FINANCIAL_REVENUE_BREAKDOWN,
+    ANALYST_CONSENSUS,
 
     RT_BASIC_QUOTE,
     RT_KL,
