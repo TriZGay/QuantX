@@ -90,6 +90,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + FINANCIAL_REVENUE_BREAKDOWN, message);
     }
 
+    public void sendFinancialEarningMove(FinancialEarningMoveWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + FINANCIAL_EARNING_MOVE, message);
+    }
+
     public void sendAnalystConsensus(AnalystConsensusWsMessage message) {
         this.template.convertAndSend(BROKER_PREFIX + ANALYST_CONSENSUS, message);
     }

@@ -1502,6 +1502,52 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncFinancialEarningMove(FinancialEarningMoveWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetFinancialsEarningsPriceMove.C2S.Builder c2sBuilder = QotGetFinancialsEarningsPriceMove.C2S.newBuilder()
+                .setSecurity(sec);
+        if (Objects.nonNull(req.getPeriodCount())) {
+            c2sBuilder.setPeriodCount(req.getPeriodCount());
+        }
+        QotGetFinancialsEarningsPriceMove.Request request = QotGetFinancialsEarningsPriceMove.Request.newBuilder()
+                .setC2S(c2sBuilder.build())
+                .build();
+        int seqNo = qot.getFinancialsEarningsPriceMove(request);
+        LOGGER.info("市场{},code={}查询财报日前后价格涨跌幅表现.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetFinancialsEarningsPriceMove(FTAPI_Conn client, int nSerialNo, QotGetFinancialsEarningsPriceMove.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询财报日前后价格涨跌幅表现失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询财报日前后价格涨跌幅表现失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询财报日前后价格涨跌幅表现", ftGrpcReturnResult);
+                List<FinancialEarningMoveContent> contents = GSON.fromJson(ftGrpcReturnResult.getS2c().get("detailList").getAsJsonArray(), new TypeToken<List<FinancialEarningMoveContent>>() {
+                }.getType());
+                eventPublisher.publishEvent(new FinancialEarningMoveUpdateEvent(contents));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询财报日前后价格涨跌幅表现结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询财报日前后价格涨跌幅表现结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询财报日前后价格涨跌幅表现有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncAnalystConsensus(AnalystConsensusWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())
