@@ -2,7 +2,6 @@ package io.futakotome.trade.controller.ws;
 
 import io.futakotome.common.message.RTEmaMessage;
 import io.futakotome.common.message.RTMaMessage;
-import io.futakotome.trade.dto.message.FinancialRevenueBreakDownContent;
 import io.futakotome.trade.dto.ws.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -92,6 +91,10 @@ public class QuantxFutuWsService {
 
     public void sendFinancialEarningMove(FinancialEarningMoveWsMessage message) {
         this.template.convertAndSend(BROKER_PREFIX + FINANCIAL_EARNING_MOVE, message);
+    }
+
+    public void sendFinancialEarningPriceHistory(FinancialEarningPriceHistoryWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + FINANCIAL_EARNING_PRICE_HISTORY, message);
     }
 
     public void sendAnalystConsensus(AnalystConsensusWsMessage message) {

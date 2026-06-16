@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.toolkit.ReflectionKit;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.futakotome.trade.dto.SnapshotOptionExDto;
-import io.futakotome.trade.dto.SnapshotPlateExDto;
 import io.futakotome.trade.mapper.pg.SnapshotOptionExDtoMapper;
 import io.futakotome.trade.service.SnapshotOptionExDtoService;
 import org.apache.ibatis.binding.MapperMethod;

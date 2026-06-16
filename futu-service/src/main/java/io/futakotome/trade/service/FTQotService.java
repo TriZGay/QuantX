@@ -1502,6 +1502,50 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncFinancialEarningPriceHistory(FinancialEarningPriceHistoryWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetFinancialsEarningsPriceHistory.C2S c2S = QotGetFinancialsEarningsPriceHistory.C2S.newBuilder()
+                .setSecurity(sec)
+                .build();
+        QotGetFinancialsEarningsPriceHistory.Request request = QotGetFinancialsEarningsPriceHistory.Request.newBuilder()
+                .setC2S(c2S)
+                .build();
+        int seqNo = qot.getFinancialsEarningsPriceHistory(request);
+        LOGGER.info("市场{},code={}查询财报日前后股价历史.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetFinancialsEarningsPriceHistory(FTAPI_Conn client, int nSerialNo, QotGetFinancialsEarningsPriceHistory.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询财报日前后股价历史失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询财报日前后股价历史失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询财报日前后股价历史", ftGrpcReturnResult);
+                List<FinancialEarningPriceHistoryContent> contents = GSON.fromJson(ftGrpcReturnResult.getS2c().get("detailList").getAsJsonArray(), new TypeToken<List<FinancialEarningPriceHistoryContent>>() {
+                }.getType());
+                eventPublisher.publishEvent(new FinancialEarningPriceHistoryUpdateEvent(contents));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询财报日前后股价历史结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询财报日前后股价历史结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询财报日前后股价历史有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncFinancialEarningMove(FinancialEarningMoveWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())

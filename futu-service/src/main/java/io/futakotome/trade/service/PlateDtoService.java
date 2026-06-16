@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import io.futakotome.trade.controller.vo.ListPlateRequest;
 import io.futakotome.trade.controller.vo.ListPlateResponse;
 import io.futakotome.trade.dto.PlateDto;
-import io.futakotome.trade.dto.StockDto;
 
 import java.util.List;
 

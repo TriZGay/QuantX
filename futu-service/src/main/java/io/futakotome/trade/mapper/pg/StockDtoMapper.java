@@ -1,9 +1,6 @@
 package io.futakotome.trade.mapper.pg;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
-import io.futakotome.trade.dto.PlateDto;
 import io.futakotome.trade.dto.StockDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

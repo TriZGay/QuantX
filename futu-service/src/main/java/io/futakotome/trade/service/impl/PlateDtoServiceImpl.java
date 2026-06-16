@@ -8,17 +8,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.futakotome.trade.controller.vo.ListPlateRequest;
 import io.futakotome.trade.controller.vo.ListPlateResponse;
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
-import io.futakotome.trade.controller.ws.QuantxWsController;
 import io.futakotome.trade.domain.code.MarketType;
 import io.futakotome.trade.domain.code.PlateSetType;
 import io.futakotome.trade.dto.PlateDto;
-import io.futakotome.trade.dto.PlateStockDto;
 import io.futakotome.trade.dto.StockDto;
 import io.futakotome.trade.event.PlateSetUpdateEvent;
 import io.futakotome.trade.mapper.pg.PlateDtoMapper;
-import io.futakotome.trade.mapper.pg.PlateStockDtoMapper;
 import io.futakotome.trade.service.PlateDtoService;
-import io.futakotome.trade.service.PlateStockDtoService;
 import io.futakotome.trade.service.StockDtoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +22,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 

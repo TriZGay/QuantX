@@ -1,7 +1,6 @@
 package io.futakotome.trade.event;
 
 import io.futakotome.trade.dto.PlateDto;
-import io.futakotome.trade.dto.StockDto;
 import io.futakotome.trade.dto.message.StockContent;
 
 import java.util.List;

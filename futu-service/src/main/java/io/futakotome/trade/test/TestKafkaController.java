@@ -1,11 +1,8 @@
 package io.futakotome.trade.test;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import io.futakotome.trade.domain.code.KLType;
-import io.futakotome.trade.dto.KLineMin1ArcDto;
 import io.futakotome.trade.dto.KLineMin1RawDto;
 import io.futakotome.trade.dto.message.KLMessageContent;
-import io.futakotome.trade.service.KLineMin1ArcService;
 import io.futakotome.trade.service.KLineMin1RawService;
 import io.futakotome.trade.service.KafkaService;
 import io.futakotome.trade.service.MailService;

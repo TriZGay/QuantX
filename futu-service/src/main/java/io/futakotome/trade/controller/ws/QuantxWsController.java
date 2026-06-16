@@ -36,6 +36,7 @@ public class QuantxWsController {
     public static final String STOCKS_IN_PLATE_URI = "/stocks_in_plate";
     public static final String FINANCIAL_EARNING_MOVE = "/fin_earning_mov";
     public static final String FINANCIAL_REVENUE_BREAKDOWN = "/fin_reve_bd";
+    public static final String FINANCIAL_EARNING_PRICE_HISTORY = "/fin_earning_ph";
     public static final String ANALYST_CONSENSUS = "/ana_con";
     //ma
     public static final String MA5_URI = "/ma5";
@@ -199,6 +200,10 @@ public class QuantxWsController {
                 //财报日前后价格涨跌幅表现
                 FinancialEarningMoveWsMessage req = (FinancialEarningMoveWsMessage) messageClz;
                 ftQotService.syncFinancialEarningMove(req);
+            } else if (messageClz.getType().equals(MessageType.FINANCIAL_EARNING_PRICE_HISTORY)) {
+                //获取财报日前后股价历史
+                FinancialEarningPriceHistoryWsMessage req = (FinancialEarningPriceHistoryWsMessage) messageClz;
+                ftQotService.syncFinancialEarningPriceHistory(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

@@ -3,7 +3,6 @@ package io.futakotome.trade.service;
 import io.futakotome.common.MessageCommon;
 import io.futakotome.common.message.RTKLMessage;
 import io.futakotome.trade.domain.code.KLType;
-import io.futakotome.trade.dto.KLineMin1RawDto;
 import io.futakotome.trade.dto.message.KLMessageContent;
 import io.futakotome.trade.event.KLineUpdateEvent;
 import org.slf4j.Logger;
