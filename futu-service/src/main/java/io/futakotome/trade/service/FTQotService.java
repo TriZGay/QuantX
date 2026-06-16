@@ -1502,6 +1502,49 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncMorningStarReport(MorningstarReportWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetResearchMorningstarReport.C2S c2S = QotGetResearchMorningstarReport.C2S.newBuilder()
+                .setSecurity(sec)
+                .build();
+        QotGetResearchMorningstarReport.Request request = QotGetResearchMorningstarReport.Request.newBuilder()
+                .setC2S(c2S)
+                .build();
+        int seqNo = qot.getResearchMorningstarReport(request);
+        LOGGER.info("市场{},code={}查询晨星研究报告.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetResearchMorningstarReport(FTAPI_Conn client, int nSerialNo, QotGetResearchMorningstarReport.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询晨星研究报告失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询晨星研究报告失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询晨星研究报告", ftGrpcReturnResult);
+                MorningstarReportContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), MorningstarReportContent.class);
+                eventPublisher.publishEvent(new MorningstarReportUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询晨星研究报告结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询晨星研究报告结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询晨星研究报告有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncFinancialEarningPriceHistory(FinancialEarningPriceHistoryWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())

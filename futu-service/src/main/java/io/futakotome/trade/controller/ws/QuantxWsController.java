@@ -38,6 +38,7 @@ public class QuantxWsController {
     public static final String FINANCIAL_REVENUE_BREAKDOWN = "/fin_reve_bd";
     public static final String FINANCIAL_EARNING_PRICE_HISTORY = "/fin_earning_ph";
     public static final String ANALYST_CONSENSUS = "/ana_con";
+    public static final String MORNINGSTAR_REPORT = "/morningstar_report";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -204,6 +205,10 @@ public class QuantxWsController {
                 //获取财报日前后股价历史
                 FinancialEarningPriceHistoryWsMessage req = (FinancialEarningPriceHistoryWsMessage) messageClz;
                 ftQotService.syncFinancialEarningPriceHistory(req);
+            } else if (messageClz.getType().equals(MessageType.RESEARCH_MORNINGSTAR_REPORT)) {
+                //获取晨星研究报告
+                MorningstarReportWsMessage req = (MorningstarReportWsMessage) messageClz;
+                ftQotService.syncMorningStarReport(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

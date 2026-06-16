@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+/**
+ * 财务报表等
+ */
 @Service
 public class FinancialService {
     private final QuantxFutuWsService wsService;
