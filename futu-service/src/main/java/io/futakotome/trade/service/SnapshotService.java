@@ -1,14 +1,14 @@
-package io.futakotome.trade.domain;
+package io.futakotome.trade.service;
 
 import io.futakotome.trade.controller.vo.*;
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
+import io.futakotome.trade.domain.Snapshot;
 import io.futakotome.trade.domain.code.MarketType;
 import io.futakotome.trade.domain.code.StockStatus;
 import io.futakotome.trade.domain.code.StockType;
 import io.futakotome.trade.dto.*;
 import io.futakotome.trade.dto.message.SnapshotContent;
 import io.futakotome.trade.event.SnapshotUpdateEvent;
-import io.futakotome.trade.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;

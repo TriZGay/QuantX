@@ -1,7 +1,7 @@
 package io.futakotome.trade.controller;
 
 import io.futakotome.trade.controller.vo.*;
-import io.futakotome.trade.domain.SnapshotService;
+import io.futakotome.trade.service.SnapshotService;
 import io.futakotome.trade.domain.code.*;
 import io.futakotome.trade.service.PlateDtoService;
 import io.futakotome.trade.service.StockDtoService;

@@ -1502,6 +1502,58 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncValuationDetail(ValuationDetailWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetValuationDetail.C2S.Builder c2sBuilder = QotGetValuationDetail.C2S.newBuilder()
+                .setSecurity(sec);
+        if (Objects.nonNull(req.getValuationType())) {
+            c2sBuilder.setValuationType(
+                    QotCommon.ValuationType.forNumber(req.getValuationType())
+            );
+        }
+        if (Objects.nonNull(req.getIntervalType())) {
+            c2sBuilder.setIntervalType(
+                    QotCommon.ValuationIntervalType.forNumber(req.getIntervalType())
+            );
+        }
+        QotGetValuationDetail.Request request = QotGetValuationDetail.Request.newBuilder()
+                .setC2S(c2sBuilder.build())
+                .build();
+        int seqNo = qot.getValuationDetail(request);
+        LOGGER.info("市场{},code={}查询个股/指数估值详情.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetValuationDetail(FTAPI_Conn client, int nSerialNo, QotGetValuationDetail.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询个股/指数估值详情失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询个股/指数估值详情失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询个股/指数估值详情", ftGrpcReturnResult);
+                ValuationDetailContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), ValuationDetailContent.class);
+                eventPublisher.publishEvent(new ValuationDetailUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询个股/指数估值详情结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询个股/指数估值详情结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询个股/指数估值详情有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncFinancialStatements(FinancialStatementWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())
