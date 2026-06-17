@@ -1502,6 +1502,76 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncValuationPlateStockList(ValuationPlateStockListWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetValuationPlateStockList.C2S.Builder c2sBuilder = QotGetValuationPlateStockList.C2S.newBuilder()
+                .setSecurity(sec);
+        if (Objects.nonNull(req.getValuationType())) {
+            c2sBuilder.setValuationType(
+                    QotCommon.ValuationType.forNumber(req.getValuationType())
+            );
+        }
+        if (Objects.nonNull(req.getNextKey())) {
+            c2sBuilder.setNextKey(req.getNextKey());
+        }
+        if (Objects.nonNull(req.getNum())) {
+            c2sBuilder.setNum(req.getNum());
+        }
+        if (Objects.nonNull(req.getSortType())) {
+            c2sBuilder.setSortType(
+                    QotCommon.SortType.forNumber(req.getSortType())
+            );
+        }
+        if (Objects.nonNull(req.getSortId())) {
+            c2sBuilder.setSortId(
+                    QotCommon.SortField.forNumber(req.getSortId())
+            );
+        }
+        if (Objects.nonNull(req.getFilterMarket()) && Objects.nonNull(req.getFilterCode())) {
+            QotCommon.Security filterSec = QotCommon.Security.newBuilder()
+                    .setCode(req.getFilterCode())
+                    .setMarket(req.getFilterMarket())
+                    .build();
+            c2sBuilder.setFilterSecurity(filterSec);
+        }
+        QotGetValuationPlateStockList.Request request = QotGetValuationPlateStockList.Request.newBuilder()
+                .setC2S(c2sBuilder.build())
+                .build();
+        int seqNo = qot.getValuationPlateStockList(request);
+        LOGGER.info("市场{},code={}查询板块/指数成分股估值列表.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetValuationPlateStockList(FTAPI_Conn client, int nSerialNo, QotGetValuationPlateStockList.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询板块/指数成分股估值列表失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询板块/指数成分股估值列表失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询板块/指数成分股估值列表", ftGrpcReturnResult);
+                ValuationPlateStockListContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), ValuationPlateStockListContent.class);
+                eventPublisher.publishEvent(new ValuationPlateStockListUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询板块/指数成分股估值列表结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询板块/指数成分股估值列表结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询板块/指数成分股估值列表有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncValuationDetail(ValuationDetailWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())
