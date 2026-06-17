@@ -4,9 +4,11 @@ import io.futakotome.trade.controller.ws.QuantxFutuWsService;
 import io.futakotome.trade.dto.ws.FinancialEarningMoveWsMessage;
 import io.futakotome.trade.dto.ws.FinancialEarningPriceHistoryWsMessage;
 import io.futakotome.trade.dto.ws.FinancialReWsMessage;
+import io.futakotome.trade.dto.ws.FinancialStatementWsMessage;
 import io.futakotome.trade.event.FinancialEarningMoveUpdateEvent;
 import io.futakotome.trade.event.FinancialEarningPriceHistoryUpdateEvent;
 import io.futakotome.trade.event.FinancialRevenueBreakDownUpdateEvent;
+import io.futakotome.trade.event.FinancialStatementsUpdateEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,15 @@ public class FinancialService {
 
     public FinancialService(QuantxFutuWsService wsService) {
         this.wsService = wsService;
+    }
+
+    @EventListener
+    public void onFinancialStatementsUpdate(FinancialStatementsUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            FinancialStatementWsMessage message = new FinancialStatementWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendFinancialStatements(message);
+        }
     }
 
     @EventListener

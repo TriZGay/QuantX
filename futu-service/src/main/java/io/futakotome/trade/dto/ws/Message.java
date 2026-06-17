@@ -40,6 +40,7 @@ import io.futakotome.trade.dto.message.ModifyOrderWsMessage;
         @JsonSubTypes.Type(value = AnalystConsensusWsMessage.class, name = "ANALYST_CONSENSUS"),
         @JsonSubTypes.Type(value = MorningstarReportWsMessage.class, name = "RESEARCH_MORNINGSTAR_REPORT"),
         @JsonSubTypes.Type(value = ResearchRatingSummaryWsMessage.class, name = "RESEARCH_RATING_SUMMARY"),
+        @JsonSubTypes.Type(value = FinancialStatementWsMessage.class, name = "FINANCIAL_STATEMENTS"),
 
         @JsonSubTypes.Type(value = RealTimeBaseQuoteMessage.class, name = "RT_BASIC_QUOTE"),
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),

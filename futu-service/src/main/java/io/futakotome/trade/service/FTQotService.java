@@ -1502,6 +1502,63 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncFinancialStatements(FinancialStatementWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetFinancialsStatements.C2S.Builder c2sBuilder = QotGetFinancialsStatements.C2S.newBuilder()
+                .setSecurity(sec);
+        if (Objects.nonNull(req.getStatementType())) {
+            c2sBuilder.setStatementType(QotCommon.FinancialStatementsType.forNumber(req.getStatementType()));
+        }
+        if (Objects.nonNull(req.getFinancialType())) {
+            c2sBuilder.setFinancialType(QotCommon.F10Type.forNumber(req.getFinancialType()));
+        }
+        if (Objects.nonNull(req.getCurrencyCode())) {
+            c2sBuilder.setCurrencyCode(req.getCurrencyCode());
+        }
+        if (Objects.nonNull(req.getNextKey())) {
+            c2sBuilder.setNextKey(req.getNextKey());
+        }
+        if (Objects.nonNull(req.getNum())) {
+            c2sBuilder.setNum(req.getNum());
+        }
+        QotGetFinancialsStatements.Request request = QotGetFinancialsStatements.Request.newBuilder()
+                .setC2S(c2sBuilder.build())
+                .build();
+        int seqNo = qot.getFinancialsStatements(request);
+        LOGGER.info("市场{},code={}查询财务报表.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetFinancialsStatements(FTAPI_Conn client, int nSerialNo, QotGetFinancialsStatements.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询财务报表失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询财务报表失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询财务报表", ftGrpcReturnResult);
+                FinancialStatementsContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), FinancialStatementsContent.class);
+                eventPublisher.publishEvent(new FinancialStatementsUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询财务报表结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询财务报表结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询财务报表有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncResearchRatingSummary(ResearchRatingSummaryWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())
@@ -1574,7 +1631,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
-    public void onReply_GetResearchMorningstarReport(FTAPI_Conn client, int nSerialNo, QotGetResearchMorningstarReport.Response rsp) {
+    public void onReply_GetResearchMorningstarReport(FTAPI_Conn client,
+                                                     int nSerialNo, QotGetResearchMorningstarReport.Response rsp) {
         if (rsp.getRetType() != 0) {
             String notify = "查询晨星研究报告失败:" + rsp.getRetMsg();
             LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询晨星研究报告失败,code:" + rsp.getRetType()));
@@ -1617,7 +1675,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
-    public void onReply_GetFinancialsEarningsPriceHistory(FTAPI_Conn client, int nSerialNo, QotGetFinancialsEarningsPriceHistory.Response rsp) {
+    public void onReply_GetFinancialsEarningsPriceHistory(FTAPI_Conn client,
+                                                          int nSerialNo, QotGetFinancialsEarningsPriceHistory.Response rsp) {
         if (rsp.getRetType() != 0) {
             String notify = "查询财报日前后股价历史失败:" + rsp.getRetMsg();
             LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询财报日前后股价历史失败,code:" + rsp.getRetType()));
@@ -1663,7 +1722,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
-    public void onReply_GetFinancialsEarningsPriceMove(FTAPI_Conn client, int nSerialNo, QotGetFinancialsEarningsPriceMove.Response rsp) {
+    public void onReply_GetFinancialsEarningsPriceMove(FTAPI_Conn client,
+                                                       int nSerialNo, QotGetFinancialsEarningsPriceMove.Response rsp) {
         if (rsp.getRetType() != 0) {
             String notify = "查询财报日前后价格涨跌幅表现失败:" + rsp.getRetMsg();
             LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询财报日前后价格涨跌幅表现失败,code:" + rsp.getRetType()));
@@ -1707,7 +1767,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
-    public void onReply_GetResearchAnalystConsensus(FTAPI_Conn client, int nSerialNo, QotGetResearchAnalystConsensus.Response rsp) {
+    public void onReply_GetResearchAnalystConsensus(FTAPI_Conn client, int nSerialNo, QotGetResearchAnalystConsensus.
+            Response rsp) {
         if (rsp.getRetType() != 0) {
             String notify = "查询分析师评级概述失败:" + rsp.getRetMsg();
             LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询分析师评级概述失败,code:" + rsp.getRetType()));
@@ -1758,7 +1819,8 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
     }
 
     @Override
-    public void onReply_GetFinancialsRevenueBreakdown(FTAPI_Conn client, int nSerialNo, QotGetFinancialsRevenueBreakdown.Response rsp) {
+    public void onReply_GetFinancialsRevenueBreakdown(FTAPI_Conn client,
+                                                      int nSerialNo, QotGetFinancialsRevenueBreakdown.Response rsp) {
         if (rsp.getRetType() != 0) {
             String notify = "查询主营构成失败:" + rsp.getRetMsg();
             LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询主营构成失败,code:" + rsp.getRetType()));
