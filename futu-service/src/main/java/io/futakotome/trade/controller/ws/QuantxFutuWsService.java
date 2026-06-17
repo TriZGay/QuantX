@@ -105,6 +105,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + MORNINGSTAR_REPORT, message);
     }
 
+    public void sendResearchRatingSummary(ResearchRatingSummaryWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + RATING_SUMMARY, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);
