@@ -1502,6 +1502,49 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncCorporateActionsDividend(CorporateActionsDividendsWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetCorporateActionsDividends.C2S c2s = QotGetCorporateActionsDividends.C2S.newBuilder()
+                .setSecurity(sec)
+                .build();
+        QotGetCorporateActionsDividends.Request request = QotGetCorporateActionsDividends.Request.newBuilder()
+                .setC2S(c2s).build();
+        int seqNo = qot.getCorporateActionsDividends(request);
+        LOGGER.info("市场{},code={}查询分红派息.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetCorporateActionsDividends(FTAPI_Conn client, int nSerialNo, QotGetCorporateActionsDividends.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询分红派息失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询分红派息失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询分红派息", ftGrpcReturnResult);
+                List<CorporateActionsDividendContent> contents = GSON.fromJson(ftGrpcReturnResult.getS2c().get("dividendList").getAsJsonArray(), new TypeToken<List<CorporateActionsDividendContent>>() {
+                }.getType());
+                eventPublisher.publishEvent(new CorporateActionsDividendUpdateEvent(contents));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询分红派息结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询分红派息结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询分红派息有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncValuationPlateStockList(ValuationPlateStockListWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())

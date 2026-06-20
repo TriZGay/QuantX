@@ -43,6 +43,7 @@ public class QuantxWsController {
     public static final String RATING_SUMMARY = "/rating_summary";
     public static final String VALUATION_DETAIL = "/valuation_detail";
     public static final String VALUATION_P_S_LIST = "/valuation_p_s_list";
+    public static final String CO_ACTIONS_DIVIDEND = "/co_act_dividend";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -229,6 +230,10 @@ public class QuantxWsController {
                 //获取板块/指数成分股估值列表
                 ValuationPlateStockListWsMessage req = (ValuationPlateStockListWsMessage) messageClz;
                 ftQotService.syncValuationPlateStockList(req);
+            } else if (messageClz.getType().equals(MessageType.CO_ACTIONS_DIVIDEND)) {
+                //分红派息
+                CorporateActionsDividendsWsMessage req = (CorporateActionsDividendsWsMessage) messageClz;
+                ftQotService.syncCorporateActionsDividend(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

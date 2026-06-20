@@ -40,6 +40,7 @@ public enum MessageType {
     RESEARCH_MORNINGSTAR_REPORT,
     VALUATION_DETAIL,
     VALUATION_P_S_LIST, //板块/指数成分股估值列表
+    CO_ACTIONS_DIVIDEND,
 
     RT_BASIC_QUOTE,
     RT_KL,

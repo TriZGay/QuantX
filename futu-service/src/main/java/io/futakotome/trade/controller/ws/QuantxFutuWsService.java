@@ -121,6 +121,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + VALUATION_P_S_LIST, message);
     }
 
+    public void sendCorporateActionsDividend(CorporateActionsDividendsWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + CO_ACTIONS_DIVIDEND, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);
