@@ -47,6 +47,7 @@ import io.futakotome.trade.dto.message.ModifyOrderWsMessage;
         @JsonSubTypes.Type(value = CorporateActionsBuybackWsMessage.class, name = "CO_ACTIONS_BUYBACK"),
         @JsonSubTypes.Type(value = CorporateActionsStockSplitsWsMessage.class, name = "CO_ACTIONS_STOCK_SPLITS"),
         @JsonSubTypes.Type(value = ShareholderOvrWsMessage.class, name = "SHAREHOLDER_OVR"),
+        @JsonSubTypes.Type(value = ShareholderHoldingChangeWsMessage.class, name = "SHAREHOLDER_HOLDING_CHANGE"),
 
         @JsonSubTypes.Type(value = RealTimeBaseQuoteMessage.class, name = "RT_BASIC_QUOTE"),
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),
@@ -54,6 +55,7 @@ import io.futakotome.trade.dto.message.ModifyOrderWsMessage;
         @JsonSubTypes.Type(value = TimeShareMessage.class, name = "RT_TIME_SHARE"),
         @JsonSubTypes.Type(value = BrokerMessage.class, name = "RT_BROKERS")
 })
+
 public interface Message {
     MessageType getType();
 }

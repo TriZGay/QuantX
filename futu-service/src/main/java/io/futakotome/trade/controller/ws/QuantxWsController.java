@@ -249,6 +249,10 @@ public class QuantxWsController {
                 //持股统计
                 ShareholderOvrWsMessage req = (ShareholderOvrWsMessage) messageClz;
                 ftQotService.syncShareholderOvr(req);
+            } else if (messageClz.getType().equals(MessageType.SHAREHOLDER_HOLDING_CHANGE)) {
+                //持股变动
+                ShareholderHoldingChangeWsMessage req = (ShareholderHoldingChangeWsMessage) messageClz;
+                ftQotService.syncShareholderHoldingChange(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
