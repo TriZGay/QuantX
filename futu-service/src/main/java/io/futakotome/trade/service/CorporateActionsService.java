@@ -1,7 +1,9 @@
 package io.futakotome.trade.service;
 
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
+import io.futakotome.trade.dto.ws.CorporateActionsBuybackWsMessage;
 import io.futakotome.trade.dto.ws.CorporateActionsDividendsWsMessage;
+import io.futakotome.trade.event.CorporateActionsBuybackUpdateEvent;
 import io.futakotome.trade.event.CorporateActionsDividendUpdateEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,15 @@ public class CorporateActionsService {
 
     public CorporateActionsService(QuantxFutuWsService wsService) {
         this.wsService = wsService;
+    }
+
+    @EventListener
+    public void onBuybackUpdate(CorporateActionsBuybackUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            CorporateActionsBuybackWsMessage message = new CorporateActionsBuybackWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendCorporateActionsBuyback(message);
+        }
     }
 
     @EventListener

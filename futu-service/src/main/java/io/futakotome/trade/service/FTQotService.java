@@ -1502,6 +1502,53 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncCorporateActionsBuyback(CorporateActionsBuybackWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetCorporateActionsBuybacks.C2S.Builder c2sBuilder = QotGetCorporateActionsBuybacks.C2S.newBuilder()
+                .setSecurity(sec);
+        if (Objects.nonNull(req.getNextKey())) {
+            c2sBuilder.setNextKey(req.getNextKey());
+        }
+        if (Objects.nonNull(req.getNum())) {
+            c2sBuilder.setNum(req.getNum());
+        }
+        QotGetCorporateActionsBuybacks.Request request = QotGetCorporateActionsBuybacks.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getCorporateActionsBuybacks(request);
+        LOGGER.info("市场{},code={}查询回购.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetCorporateActionsBuybacks(FTAPI_Conn client, int nSerialNo, QotGetCorporateActionsBuybacks.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询回购失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询回购失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询回购", ftGrpcReturnResult);
+                CorporateActionsBuybackContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), CorporateActionsBuybackContent.class);
+                eventPublisher.publishEvent(new CorporateActionsBuybackUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询回购结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询回购结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询回购有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncCorporateActionsDividend(CorporateActionsDividendsWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())
