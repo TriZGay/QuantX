@@ -42,6 +42,7 @@ public enum MessageType {
     VALUATION_P_S_LIST, //板块/指数成分股估值列表
     CO_ACTIONS_DIVIDEND,
     CO_ACTIONS_BUYBACK,
+    CO_ACTIONS_STOCK_SPLITS,
 
     RT_BASIC_QUOTE,
     RT_KL,
