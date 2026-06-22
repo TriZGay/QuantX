@@ -43,6 +43,7 @@ public enum MessageType {
     CO_ACTIONS_DIVIDEND,
     CO_ACTIONS_BUYBACK,
     CO_ACTIONS_STOCK_SPLITS,
+    SHAREHOLDER_OVR,
 
     RT_BASIC_QUOTE,
     RT_KL,

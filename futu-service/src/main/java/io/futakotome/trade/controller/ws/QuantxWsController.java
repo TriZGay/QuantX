@@ -46,6 +46,7 @@ public class QuantxWsController {
     public static final String CO_ACTIONS_DIVIDEND = "/co_act_dividend";
     public static final String CO_ACTIONS_BUYBACK = "/co_act_buyback";
     public static final String CO_ACTIONS_STOCK_SPLITS = "/co_act_ss";
+    public static final String SHAREHOLDER_OVR = "/shr_ovr";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -244,6 +245,10 @@ public class QuantxWsController {
                 //拆合股
                 CorporateActionsStockSplitsWsMessage req = (CorporateActionsStockSplitsWsMessage) messageClz;
                 ftQotService.syncCorporateActionsStockSplits(req);
+            } else if (messageClz.getType().equals(MessageType.SHAREHOLDER_OVR)) {
+                //持股统计
+                ShareholderOvrWsMessage req = (ShareholderOvrWsMessage) messageClz;
+                ftQotService.syncShareholderOvr(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

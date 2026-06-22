@@ -133,6 +133,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + CO_ACTIONS_STOCK_SPLITS, message);
     }
 
+    public void sendShareholderOvr(ShareholderOvrWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + SHAREHOLDER_OVR, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);
