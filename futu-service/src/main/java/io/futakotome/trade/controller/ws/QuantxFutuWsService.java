@@ -137,6 +137,14 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + SHAREHOLDER_OVR, message);
     }
 
+    public void sendShareholderHoldingChange(ShareholderHoldingChangeWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + SHAREHOLDER_HOLDING_CHANGE, message);
+    }
+
+    public void sendShareholderHolderDetail(ShareholderHolderDetailWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + SHAREHOLDER_HOLDER_DETAIL, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);

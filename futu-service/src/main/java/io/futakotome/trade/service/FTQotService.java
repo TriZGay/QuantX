@@ -1502,6 +1502,68 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncShareholderHolderDetail(ShareholderHolderDetailWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetShareholdersHolderDetail.C2S.Builder c2sBuilder = QotGetShareholdersHolderDetail.C2S.newBuilder()
+                .setSecurity(sec);
+        if (Objects.nonNull(req.getRequestType())) {
+            c2sBuilder.setRequestType(QotCommon.HolderDetailType.forNumber(req.getRequestType()));
+        }
+        if (Objects.nonNull(req.getNextKey())) {
+            c2sBuilder.setNextKey(req.getNextKey());
+        }
+        if (Objects.nonNull(req.getNum())) {
+            c2sBuilder.setNum(req.getNum());
+        }
+        if (Objects.nonNull(req.getSortColumn())) {
+            c2sBuilder.setSortColumn(QotCommon.SortField.forNumber(req.getSortColumn()));
+        }
+        if (Objects.nonNull(req.getSortType())) {
+            c2sBuilder.setSortType(QotCommon.SortType.forNumber(req.getSortType()));
+        }
+        if (Objects.nonNull(req.getPeriodId())) {
+            c2sBuilder.setPeriodId(req.getPeriodId());
+        }
+        if (Objects.nonNull(req.getHolderId())) {
+            c2sBuilder.setHolderId(req.getHolderId());
+        }
+        QotGetShareholdersHolderDetail.Request request = QotGetShareholdersHolderDetail.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getShareholdersHolderDetail(request);
+        LOGGER.info("市场{},code={}查询持股明细.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetShareholdersHolderDetail(FTAPI_Conn client, int nSerialNo, QotGetShareholdersHolderDetail.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询持股明细失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询持股明细失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询持股明细", ftGrpcReturnResult);
+                ShareholderHolderDetailContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), ShareholderHolderDetailContent.class);
+                eventPublisher.publishEvent(new ShareholderHolderDetailUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询持股明细结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询持股明细结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询持股明细有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncShareholderHoldingChange(ShareholderHoldingChangeWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())

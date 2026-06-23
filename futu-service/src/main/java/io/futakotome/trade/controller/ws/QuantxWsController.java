@@ -47,6 +47,8 @@ public class QuantxWsController {
     public static final String CO_ACTIONS_BUYBACK = "/co_act_buyback";
     public static final String CO_ACTIONS_STOCK_SPLITS = "/co_act_ss";
     public static final String SHAREHOLDER_OVR = "/shr_ovr";
+    public static final String SHAREHOLDER_HOLDING_CHANGE = "/shr_hc";
+    public static final String SHAREHOLDER_HOLDER_DETAIL = "/shr_hd";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -253,6 +255,10 @@ public class QuantxWsController {
                 //持股变动
                 ShareholderHoldingChangeWsMessage req = (ShareholderHoldingChangeWsMessage) messageClz;
                 ftQotService.syncShareholderHoldingChange(req);
+            } else if (messageClz.getType().equals(MessageType.SHAREHOLDER_HOLDER_DETAIL)) {
+                //持股明细
+                ShareholderHolderDetailWsMessage req = (ShareholderHolderDetailWsMessage) messageClz;
+                ftQotService.syncShareholderHolderDetail(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
