@@ -50,6 +50,7 @@ public class QuantxWsController {
     public static final String SHAREHOLDER_HOLDING_CHANGE = "/shr_hc";
     public static final String SHAREHOLDER_HOLDER_DETAIL = "/shr_hd";
     public static final String SHAREHOLDER_INSTITUTIONAL = "/shr_ist";
+    public static final String INSIDER_HOLDER_LIST = "/insider_holder_list";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -264,6 +265,10 @@ public class QuantxWsController {
                 //机构持股
                 ShareholderInstitutionalWsMessage req = (ShareholderInstitutionalWsMessage) messageClz;
                 ftQotService.syncShareholderInstitutional(req);
+            } else if (messageClz.getType().equals(MessageType.INSIDER_HOLDER_LIST)) {
+                //内部人员持股
+                InsiderHolderListWsMessage req = (InsiderHolderListWsMessage) messageClz;
+                ftQotService.syncInsiderHolderList(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
