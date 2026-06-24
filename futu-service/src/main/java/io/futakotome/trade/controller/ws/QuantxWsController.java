@@ -56,6 +56,7 @@ public class QuantxWsController {
     public static final String COMPANY_EXECUTIVES = "/company_executives";
     public static final String COMPANY_EXECUTIVE_BACKGROUND = "/company_executive_background";
     public static final String COMPANY_OP_EFFICIENCY = "/company_op_efficiency";
+    public static final String TOP_TEN_BROKERS_BUY_SELL = "/top_ten_brokers_buy_sell";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -294,6 +295,10 @@ public class QuantxWsController {
                 //经营效率
                 CompanyOpEfficiencyWsMessage req = (CompanyOpEfficiencyWsMessage) messageClz;
                 ftQotService.syncCompanyOperateEfficiency(req);
+            } else if (messageClz.getType().equals(MessageType.TOP_TEN_BROKERS)) {
+                //十大经纪商买卖数据
+                TopTenBrokersWsMessage req = (TopTenBrokersWsMessage) messageClz;
+                ftQotService.syncTopTenBrokersBuySell(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

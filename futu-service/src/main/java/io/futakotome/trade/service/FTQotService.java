@@ -1502,6 +1502,50 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncTopTenBrokersBuySell(TopTenBrokersWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetTopTenBuySellBrokers.C2S.Builder c2sBuilder = QotGetTopTenBuySellBrokers.C2S.newBuilder()
+                .setSecurity(sec);
+        if (Objects.nonNull(req.getDaysBefore())) {
+            c2sBuilder.setDaysBefore(req.getDaysBefore());
+        }
+        QotGetTopTenBuySellBrokers.Request request = QotGetTopTenBuySellBrokers.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getTopTenBuySellBrokers(request);
+        LOGGER.info("市场{},code={}查询十大经纪商买卖数据.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetTopTenBuySellBrokers(FTAPI_Conn client, int nSerialNo, QotGetTopTenBuySellBrokers.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询十大经纪商买卖数据失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询十大经纪商买卖数据失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询十大经纪商买卖数据", ftGrpcReturnResult);
+                TopTenBrokersContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), TopTenBrokersContent.class);
+                eventPublisher.publishEvent(new TopTenBrokersUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询十大经纪商买卖数据结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询十大经纪商买卖数据结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询十大经纪商买卖数据有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncCompanyOperateEfficiency(CompanyOpEfficiencyWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())

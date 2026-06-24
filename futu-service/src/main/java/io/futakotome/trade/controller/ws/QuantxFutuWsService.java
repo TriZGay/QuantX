@@ -173,6 +173,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + COMPANY_OP_EFFICIENCY, message);
     }
 
+    public void sendTopTenBrokersBuySell(TopTenBrokersWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + TOP_TEN_BROKERS_BUY_SELL, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);
