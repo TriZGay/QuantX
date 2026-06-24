@@ -1,7 +1,9 @@
 package io.futakotome.trade.service;
 
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
+import io.futakotome.trade.dto.ws.DailyShortVolumeWsMessage;
 import io.futakotome.trade.dto.ws.TopTenBrokersWsMessage;
+import io.futakotome.trade.event.DailyShortVolumeUpdateEvent;
 import io.futakotome.trade.event.TopTenBrokersUpdateEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,15 @@ public class BrokersService {
 
     public BrokersService(QuantxFutuWsService wsService) {
         this.wsService = wsService;
+    }
+
+    @EventListener
+    public void onDailyShotVolumeUpdate(DailyShortVolumeUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            DailyShortVolumeWsMessage message = new DailyShortVolumeWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendDailyShotVolume(message);
+        }
     }
 
     @EventListener
