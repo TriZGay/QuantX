@@ -52,6 +52,7 @@ public class QuantxWsController {
     public static final String SHAREHOLDER_INSTITUTIONAL = "/shr_ist";
     public static final String INSIDER_HOLDER_LIST = "/insider_holder_list";
     public static final String INSIDER_TRADE_LIST = "/insider_trade_list";
+    public static final String COMPANY_PROFILE = "/company_profile";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -274,6 +275,10 @@ public class QuantxWsController {
                 //内部人员交易
                 InsiderTradeListWsMessage req = (InsiderTradeListWsMessage) messageClz;
                 ftQotService.syncInsiderTradeList(req);
+            } else if (messageClz.getType().equals(MessageType.COMPANY_PROFILE)) {
+                //公司概况
+                CompanyProfileWsMessage req = (CompanyProfileWsMessage) messageClz;
+                ftQotService.syncCompanyProfile(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

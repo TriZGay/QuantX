@@ -49,6 +49,7 @@ public enum MessageType {
     SHAREHOLDER_INSTITUTIONAL,
     INSIDER_HOLDER_LIST,
     INSIDER_TRADE_LIST,
+    COMPANY_PROFILE,
 
     RT_BASIC_QUOTE,
     RT_KL,
@@ -63,4 +64,4 @@ public enum MessageType {
     public String toString() {
         return this.name();
     }
-    }
+}
