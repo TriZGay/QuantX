@@ -55,6 +55,7 @@ public class QuantxWsController {
     public static final String COMPANY_PROFILE = "/company_profile";
     public static final String COMPANY_EXECUTIVES = "/company_executives";
     public static final String COMPANY_EXECUTIVE_BACKGROUND = "/company_executive_background";
+    public static final String COMPANY_OP_EFFICIENCY = "/company_op_efficiency";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -289,6 +290,10 @@ public class QuantxWsController {
                 //高管背景
                 CompanyExecutiveBackgroungWsMessage req = (CompanyExecutiveBackgroungWsMessage) messageClz;
                 ftQotService.syncCompanyExecutiveBackground(req);
+            } else if (messageClz.getType().equals(MessageType.COMPANY_OP_EFFICIENCY)) {
+                //经营效率
+                CompanyOpEfficiencyWsMessage req = (CompanyOpEfficiencyWsMessage) messageClz;
+                ftQotService.syncCompanyOperateEfficiency(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

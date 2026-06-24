@@ -3,9 +3,11 @@ package io.futakotome.trade.service;
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
 import io.futakotome.trade.dto.ws.CompanyExecutiveBackgroungWsMessage;
 import io.futakotome.trade.dto.ws.CompanyExecutivesWsMessage;
+import io.futakotome.trade.dto.ws.CompanyOpEfficiencyWsMessage;
 import io.futakotome.trade.dto.ws.CompanyProfileWsMessage;
 import io.futakotome.trade.event.CompanyExecutiveBackgroundUpdateEvent;
 import io.futakotome.trade.event.CompanyExecutivesUpdateEvent;
+import io.futakotome.trade.event.CompanyOpUpdateEvent;
 import io.futakotome.trade.event.CompanyProfileUpdateEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,15 @@ public class CompanyService {
 
     public CompanyService(QuantxFutuWsService wsService) {
         this.wsService = wsService;
+    }
+
+    @EventListener
+    public void onOpEfficiencyUpdate(CompanyOpUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            CompanyOpEfficiencyWsMessage message = new CompanyOpEfficiencyWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendCompanyOpEfficiency(message);
+        }
     }
 
     @EventListener

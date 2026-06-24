@@ -1502,6 +1502,59 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncCompanyOperateEfficiency(CompanyOpEfficiencyWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetCompanyOperationalEfficiency.C2S.Builder c2sBuilder = QotGetCompanyOperationalEfficiency.C2S.newBuilder()
+                .setSecurity(sec);
+        if (Objects.nonNull(req.getNextKey())) {
+            c2sBuilder.setNextKey(req.getNextKey());
+        }
+        if (Objects.nonNull(req.getNum())) {
+            c2sBuilder.setNum(req.getNum());
+        }
+        if (Objects.nonNull(req.getCurrencyCode())) {
+            c2sBuilder.setCurrencyCode(req.getCurrencyCode());
+        }
+        if (Objects.nonNull(req.getFinancialType())) {
+            c2sBuilder.setFinancialType(QotCommon.F10Type.forNumber(req.getFinancialType()));
+        }
+        QotGetCompanyOperationalEfficiency.Request request = QotGetCompanyOperationalEfficiency.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getCompanyOperationalEfficiency(request);
+        LOGGER.info("市场{},code={}查询公司经营效率.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetCompanyOperationalEfficiency(FTAPI_Conn client, int nSerialNo, QotGetCompanyOperationalEfficiency.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询公司经营效率失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询公司经营效率失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询公司经营效率", ftGrpcReturnResult);
+                CompanyOpEfficiencyContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), CompanyOpEfficiencyContent.class);
+                eventPublisher.publishEvent(new CompanyOpUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询公司经营效率结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询公司经营效率结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询公司经营效率有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncCompanyExecutiveBackground(CompanyExecutiveBackgroungWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())
