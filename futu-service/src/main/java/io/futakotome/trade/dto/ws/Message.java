@@ -53,6 +53,7 @@ import io.futakotome.trade.dto.message.ModifyOrderWsMessage;
         @JsonSubTypes.Type(value = InsiderHolderListWsMessage.class, name = "INSIDER_HOLDER_LIST"),
         @JsonSubTypes.Type(value = InsiderTradeListWsMessage.class, name = "INSIDER_TRADE_LIST"),
         @JsonSubTypes.Type(value = CompanyProfileWsMessage.class, name = "COMPANY_PROFILE"),
+        @JsonSubTypes.Type(value = CompanyExecutivesWsMessage.class, name = "COMPANY_EXECUTIVES"),
 
         @JsonSubTypes.Type(value = RealTimeBaseQuoteMessage.class, name = "RT_BASIC_QUOTE"),
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),

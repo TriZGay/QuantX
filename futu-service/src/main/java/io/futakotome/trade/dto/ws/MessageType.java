@@ -50,6 +50,7 @@ public enum MessageType {
     INSIDER_HOLDER_LIST,
     INSIDER_TRADE_LIST,
     COMPANY_PROFILE,
+    COMPANY_EXECUTIVES,
 
     RT_BASIC_QUOTE,
     RT_KL,
