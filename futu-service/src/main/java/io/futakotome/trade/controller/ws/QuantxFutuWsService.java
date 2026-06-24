@@ -153,6 +153,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + INSIDER_HOLDER_LIST, message);
     }
 
+    public void sendInsiderTradeList(InsiderTradeListWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + INSIDER_TRADE_LIST, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);
@@ -182,4 +186,5 @@ public class QuantxFutuWsService {
     public void sendRtEma5(RTEmaMessage emaMessage) {
         this.template.convertAndSend(BROKER_PREFIX + EMA5_URI, emaMessage);
     }
+
 }
