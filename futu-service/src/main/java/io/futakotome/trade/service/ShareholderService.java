@@ -3,9 +3,11 @@ package io.futakotome.trade.service;
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
 import io.futakotome.trade.dto.ws.ShareholderHolderDetailWsMessage;
 import io.futakotome.trade.dto.ws.ShareholderHoldingChangeWsMessage;
+import io.futakotome.trade.dto.ws.ShareholderInstitutionalWsMessage;
 import io.futakotome.trade.dto.ws.ShareholderOvrWsMessage;
 import io.futakotome.trade.event.ShareholderHolderDetailUpdateEvent;
 import io.futakotome.trade.event.ShareholderHoldingChangeUpdateEvent;
+import io.futakotome.trade.event.ShareholderInstitutionalUpdateEvent;
 import io.futakotome.trade.event.ShareholderOvrUpdateEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,15 @@ public class ShareholderService {
 
     public ShareholderService(QuantxFutuWsService wsService) {
         this.wsService = wsService;
+    }
+
+    @EventListener
+    public void onInstitutionalUpdate(ShareholderInstitutionalUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            ShareholderInstitutionalWsMessage message = new ShareholderInstitutionalWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendShareholderInstitutional(message);
+        }
     }
 
     @EventListener

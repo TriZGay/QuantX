@@ -1502,6 +1502,53 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncShareholderInstitutional(ShareholderInstitutionalWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetShareholdersInstitutional.C2S.Builder c2sBuilder = QotGetShareholdersInstitutional.C2S.newBuilder()
+                .setSecurity(sec);
+        if (Objects.nonNull(req.getNextKey())) {
+            c2sBuilder.setNextKey(req.getNextKey());
+        }
+        if (Objects.nonNull(req.getNum())) {
+            c2sBuilder.setNum(req.getNum());
+        }
+        QotGetShareholdersInstitutional.Request request = QotGetShareholdersInstitutional.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getShareholdersInstitutional(request);
+        LOGGER.info("市场{},code={}查询机构持股.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetShareholdersInstitutional(FTAPI_Conn client, int nSerialNo, QotGetShareholdersInstitutional.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询机构持股失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询机构持股失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询机构持股", ftGrpcReturnResult);
+                ShareholderInstitutionalContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), ShareholderInstitutionalContent.class);
+                eventPublisher.publishEvent(new ShareholderInstitutionalUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询机构持股结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询机构持股结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询机构持股有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncShareholderHolderDetail(ShareholderHolderDetailWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())
