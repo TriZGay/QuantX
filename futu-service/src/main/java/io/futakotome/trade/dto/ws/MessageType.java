@@ -55,6 +55,7 @@ public enum MessageType {
     COMPANY_OP_EFFICIENCY,
     TOP_TEN_BROKERS,
     DAILY_SHORT_VOLUME,
+    SHORT_INTEREST,
 
     RT_BASIC_QUOTE,
     RT_KL,
@@ -69,4 +70,4 @@ public enum MessageType {
     public String toString() {
         return this.name();
     }
-    }
+}

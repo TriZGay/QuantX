@@ -1502,6 +1502,53 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncShortInterest(ShortInterestWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetShortInterest.C2S.Builder c2sBuilder = QotGetShortInterest.C2S.newBuilder()
+                .setSecurity(sec);
+        if (Objects.nonNull(req.getNextKey())) {
+            c2sBuilder.setNextKey(req.getNextKey());
+        }
+        if (Objects.nonNull(req.getNum())) {
+            c2sBuilder.setNum(req.getNum());
+        }
+        QotGetShortInterest.Request request = QotGetShortInterest.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getShortInterest(request);
+        LOGGER.info("市场{},code={}查询空头持仓.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetShortInterest(FTAPI_Conn client, int nSerialNo, QotGetShortInterest.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询空头持仓失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询空头持仓失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询空头持仓", ftGrpcReturnResult);
+                ShortInterestContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), ShortInterestContent.class);
+                eventPublisher.publishEvent(new ShortInterestUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询空头持仓结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询空头持仓结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询空头持仓有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncDailyShortVolume(DailyShortVolumeWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())
@@ -1510,8 +1557,10 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         QotGetDailyShortVolume.C2S.Builder c2sBuilder = QotGetDailyShortVolume.C2S.newBuilder()
                 .setSecurity(sec);
         if (Objects.nonNull(req.getNextKey())) {
+            c2sBuilder.setNextKey(req.getNextKey());
         }
         if (Objects.nonNull(req.getNum())) {
+            c2sBuilder.setNum(req.getNum());
         }
         QotGetDailyShortVolume.Request request = QotGetDailyShortVolume.Request.newBuilder()
                 .setC2S(c2sBuilder.build()).build();

@@ -58,6 +58,7 @@ public class QuantxWsController {
     public static final String COMPANY_OP_EFFICIENCY = "/company_op_efficiency";
     public static final String TOP_TEN_BROKERS_BUY_SELL = "/top_ten_brokers_buy_sell";
     public static final String DAILY_SHORT_VOLUME = "/daily_short_volume";
+    public static final String SHORT_INTEREST = "/short_interest";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -304,6 +305,10 @@ public class QuantxWsController {
                 //每日卖空成交
                 DailyShortVolumeWsMessage req = (DailyShortVolumeWsMessage) messageClz;
                 ftQotService.syncDailyShortVolume(req);
+            } else if (messageClz.getType().equals(MessageType.SHORT_INTEREST)) {
+                //空头持仓
+                ShortInterestWsMessage req = (ShortInterestWsMessage) messageClz;
+                ftQotService.syncShortInterest(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
