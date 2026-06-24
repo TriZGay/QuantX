@@ -1502,6 +1502,50 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncCompanyExecutiveBackground(CompanyExecutiveBackgroungWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setCode(req.getCode())
+                .setMarket(req.getMarket())
+                .build();
+        QotGetCompanyExecutiveBackground.C2S.Builder c2sBuilder = QotGetCompanyExecutiveBackground.C2S.newBuilder()
+                .setSecurity(sec);
+        if (Objects.nonNull(req.getLeaderName())) {
+            c2sBuilder.setLeaderName(req.getLeaderName());
+        }
+        QotGetCompanyExecutiveBackground.Request request = QotGetCompanyExecutiveBackground.Request
+                .newBuilder().setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getCompanyExecutiveBackground(request);
+        LOGGER.info("市场{},code={}查询公司高管背景.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetCompanyExecutiveBackground(FTAPI_Conn client, int nSerialNo, QotGetCompanyExecutiveBackground.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询公司高管背景失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询公司高管背景失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询公司高管背景", ftGrpcReturnResult);
+                CompanyExecutiveBackgroundContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), CompanyExecutiveBackgroundContent.class);
+                eventPublisher.publishEvent(new CompanyExecutiveBackgroundUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询公司高管背景结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询公司高管背景结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询公司高管背景有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncCompanyExecutives(CompanyExecutivesWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setCode(req.getCode())

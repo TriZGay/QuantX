@@ -1,8 +1,10 @@
 package io.futakotome.trade.service;
 
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
+import io.futakotome.trade.dto.ws.CompanyExecutiveBackgroungWsMessage;
 import io.futakotome.trade.dto.ws.CompanyExecutivesWsMessage;
 import io.futakotome.trade.dto.ws.CompanyProfileWsMessage;
+import io.futakotome.trade.event.CompanyExecutiveBackgroundUpdateEvent;
 import io.futakotome.trade.event.CompanyExecutivesUpdateEvent;
 import io.futakotome.trade.event.CompanyProfileUpdateEvent;
 import org.springframework.context.event.EventListener;
@@ -16,6 +18,15 @@ public class CompanyService {
 
     public CompanyService(QuantxFutuWsService wsService) {
         this.wsService = wsService;
+    }
+
+    @EventListener
+    public void onExecutiveBackgroundUpdate(CompanyExecutiveBackgroundUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            CompanyExecutiveBackgroungWsMessage message = new CompanyExecutiveBackgroungWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendCompanyExecutiveBackground(message);
+        }
     }
 
     @EventListener
