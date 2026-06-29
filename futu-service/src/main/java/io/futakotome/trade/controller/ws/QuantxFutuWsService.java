@@ -194,6 +194,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + INSTITUTION_PROFILE, message);
     }
 
+    public void sendInstitutionDistribution(InstitutionDistributionWsMessage message){
+        this.template.convertAndSend(BROKER_PREFIX + INSTITUTION_DISTRIBUTION, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);

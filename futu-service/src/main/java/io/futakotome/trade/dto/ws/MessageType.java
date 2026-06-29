@@ -58,6 +58,7 @@ public enum MessageType {
     SHORT_INTEREST,
     INSTITUTION_LIST,
     INSTITUTION_PROFILE,
+    INSTITUTION_DISTR,
 
     RT_BASIC_QUOTE,
     RT_KL,

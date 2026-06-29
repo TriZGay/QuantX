@@ -1502,6 +1502,44 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncInstitutionDistribution(InstitutionDistributionWsMessage req) {
+        QotGetInstitutionDistribution.C2S c2s = QotGetInstitutionDistribution.C2S.newBuilder()
+                .setMarket(req.getMarket())
+                .setInstitutionId(req.getInstitutionId())
+                .build();
+        QotGetInstitutionDistribution.Request request = QotGetInstitutionDistribution.Request.newBuilder().setC2S(c2s).build();
+        int seqNo = qot.getInstitutionDistribution(request);
+        LOGGER.info("市场{},机构ID={},查询机构持仓行业分布.seq={}", MarketType.getName(req.getMarket()), req.getInstitutionId(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetInstitutionDistribution(FTAPI_Conn client, int nSerialNo, QotGetInstitutionDistribution.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询机构持仓行业分布失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询机构持仓行业分布失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询机构持仓行业分布", ftGrpcReturnResult);
+                InstitutionDistributionContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), InstitutionDistributionContent.class);
+                eventPublisher.publishEvent(new InstitutionDistributionUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询机构持仓行业分布结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询机构持仓行业分布结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询机构持仓行业分布有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncInstitutionProfile(InstitutionProfileWsMessage req) {
         QotGetInstitutionProfile.C2S c2s = QotGetInstitutionProfile.C2S.newBuilder()
                 .setMarket(req.getMarket())

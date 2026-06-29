@@ -1,8 +1,10 @@
 package io.futakotome.trade.service;
 
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
+import io.futakotome.trade.dto.ws.InstitutionDistributionWsMessage;
 import io.futakotome.trade.dto.ws.InstitutionListWsMessage;
 import io.futakotome.trade.dto.ws.InstitutionProfileWsMessage;
+import io.futakotome.trade.event.InstitutionDistributionUpdateEvent;
 import io.futakotome.trade.event.InstitutionListUpdateEvent;
 import io.futakotome.trade.event.InstitutionProfileUpdateEvent;
 import org.springframework.context.event.EventListener;
@@ -16,6 +18,15 @@ public class InstitutionService {
 
     public InstitutionService(QuantxFutuWsService wsService) {
         this.wsService = wsService;
+    }
+
+    @EventListener
+    public void onInstitutionDistributionUpdate(InstitutionDistributionUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            InstitutionDistributionWsMessage message = new InstitutionDistributionWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendInstitutionDistribution(message);
+        }
     }
 
     @EventListener
