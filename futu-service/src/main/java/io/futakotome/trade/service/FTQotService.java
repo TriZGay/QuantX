@@ -1502,6 +1502,63 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncInstitutionHoldingList(InstitutionHoldingListWsMessage req) {
+        QotGetInstitutionHoldingList.C2S.Builder c2sBuilder = QotGetInstitutionHoldingList.C2S.newBuilder()
+                .setMarket(req.getMarket())
+                .setInstitutionId(req.getInstitutionId());
+        if (Objects.nonNull(req.getChangeType())) {
+            c2sBuilder.setChangeType(req.getChangeType());
+        }
+        if (Objects.nonNull(req.getSortField())) {
+            c2sBuilder.setSortField(req.getSortField());
+        }
+        if (Objects.nonNull(req.getSortDir())) {
+            c2sBuilder.setSortDir(req.getSortDir());
+        }
+        if (Objects.nonNull(req.getCount())) {
+            c2sBuilder.setCount(req.getCount());
+        }
+        if (Objects.nonNull(req.getPage())) {
+            c2sBuilder.setPage(req.getPage());
+        }
+        if (Objects.nonNull(req.getKeyword())) {
+            c2sBuilder.setKeyword(req.getKeyword());
+        }
+        QotGetInstitutionHoldingList.Request request = QotGetInstitutionHoldingList.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getInstitutionHoldingList(request);
+        LOGGER.info("市场{},机构ID={},查询机构持股列表.seq={}", MarketType.getName(req.getMarket()), req.getInstitutionId(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetInstitutionHoldingList(FTAPI_Conn client, int nSerialNo, QotGetInstitutionHoldingList.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询机构持股列表失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询机构持股列表失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询机构持股列表", ftGrpcReturnResult);
+                InstitutionHoldingListContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), InstitutionHoldingListContent.class);
+                eventPublisher.publishEvent(new InstitutionHoldingListUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询机构持股列表结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询机构持股列表结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询机构持股列表有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
+
     public void syncInstitutionHoldingChange(InstitutionHoldingChangeWsMessage req) {
         QotGetInstitutionHoldingChange.C2S.Builder c2sBuilder = QotGetInstitutionHoldingChange.C2S.newBuilder()
                 .setMarket(req.getMarket())

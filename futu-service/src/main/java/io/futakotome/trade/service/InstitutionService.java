@@ -1,14 +1,8 @@
 package io.futakotome.trade.service;
 
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
-import io.futakotome.trade.dto.ws.InstitutionDistributionWsMessage;
-import io.futakotome.trade.dto.ws.InstitutionHoldingChangeWsMessage;
-import io.futakotome.trade.dto.ws.InstitutionListWsMessage;
-import io.futakotome.trade.dto.ws.InstitutionProfileWsMessage;
-import io.futakotome.trade.event.InstitutionDistributionUpdateEvent;
-import io.futakotome.trade.event.InstitutionHoldingChangeUpdateEvent;
-import io.futakotome.trade.event.InstitutionListUpdateEvent;
-import io.futakotome.trade.event.InstitutionProfileUpdateEvent;
+import io.futakotome.trade.dto.ws.*;
+import io.futakotome.trade.event.*;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +14,15 @@ public class InstitutionService {
 
     public InstitutionService(QuantxFutuWsService wsService) {
         this.wsService = wsService;
+    }
+
+    @EventListener
+    public void onInstitutionHoldingListUpdate(InstitutionHoldingListUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            InstitutionHoldingListWsMessage message = new InstitutionHoldingListWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendInstitutionHoldingList(message);
+        }
     }
 
     @EventListener
