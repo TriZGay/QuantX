@@ -60,6 +60,7 @@ public class QuantxWsController {
     public static final String DAILY_SHORT_VOLUME = "/daily_short_volume";
     public static final String SHORT_INTEREST = "/short_interest";
     public static final String INSTITUTION_LIST = "/institution_list";
+    public static final String INSTITUTION_PROFILE = "/institution_profile";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -314,6 +315,10 @@ public class QuantxWsController {
                 //机构列表
                 InstitutionListWsMessage req = (InstitutionListWsMessage) messageClz;
                 ftQotService.syncInstitutionList(req);
+            } else if (messageClz.getType().equals(MessageType.INSTITUTION_PROFILE)) {
+                //机构概况
+                InstitutionProfileWsMessage req = (InstitutionProfileWsMessage) messageClz;
+                ftQotService.syncInstitutionProfile(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

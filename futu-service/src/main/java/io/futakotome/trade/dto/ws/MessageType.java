@@ -57,7 +57,7 @@ public enum MessageType {
     DAILY_SHORT_VOLUME,
     SHORT_INTEREST,
     INSTITUTION_LIST,
-
+    INSTITUTION_PROFILE,
 
     RT_BASIC_QUOTE,
     RT_KL,
