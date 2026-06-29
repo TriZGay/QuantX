@@ -62,6 +62,7 @@ public class QuantxWsController {
     public static final String INSTITUTION_LIST = "/institution_list";
     public static final String INSTITUTION_PROFILE = "/institution_profile";
     public static final String INSTITUTION_DISTRIBUTION = "/institution_distr";
+    public static final String INSTITUTION_HOLDING_CHANGE = "/institution_holding_change";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -324,6 +325,10 @@ public class QuantxWsController {
                 //机构持仓行业分布
                 InstitutionDistributionWsMessage req = (InstitutionDistributionWsMessage) messageClz;
                 ftQotService.syncInstitutionDistribution(req);
+            } else if (messageClz.getType().equals(MessageType.INSTITUTION_HOLDING_CHANGE)) {
+                //机构持仓变动
+                InstitutionHoldingChangeWsMessage req = (InstitutionHoldingChangeWsMessage) messageClz;
+                ftQotService.syncInstitutionHoldingChange(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

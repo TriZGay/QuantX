@@ -194,8 +194,12 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + INSTITUTION_PROFILE, message);
     }
 
-    public void sendInstitutionDistribution(InstitutionDistributionWsMessage message){
+    public void sendInstitutionDistribution(InstitutionDistributionWsMessage message) {
         this.template.convertAndSend(BROKER_PREFIX + INSTITUTION_DISTRIBUTION, message);
+    }
+
+    public void sendInstitutionHoldingChange(InstitutionHoldingChangeWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + INSTITUTION_HOLDING_CHANGE, message);
     }
 
     //ma
