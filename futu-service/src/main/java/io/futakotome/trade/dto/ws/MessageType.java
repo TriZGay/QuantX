@@ -56,6 +56,8 @@ public enum MessageType {
     TOP_TEN_BROKERS,
     DAILY_SHORT_VOLUME,
     SHORT_INTEREST,
+    INSTITUTION_LIST,
+
 
     RT_BASIC_QUOTE,
     RT_KL,
