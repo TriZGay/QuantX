@@ -1502,6 +1502,59 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncIndustrialPlateStock(IndustrialPlateStockWsMessage req) {
+        QotGetIndustrialPlateStock.C2S.Builder c2sBuilder = QotGetIndustrialPlateStock.C2S.newBuilder()
+                .setPlateId(req.getPlateId())
+                .setChainId(req.getChainId());
+        if (Objects.nonNull(req.getMarketList())) {
+            c2sBuilder.addAllMarketList(req.getMarketList());
+        }
+        if (Objects.nonNull(req.getSortField())) {
+            c2sBuilder.setSortField(req.getSortField());
+        }
+        if (Objects.nonNull(req.getAscend())) {
+            c2sBuilder.setAscend(req.getAscend());
+        }
+        if (Objects.nonNull(req.getCount())) {
+            c2sBuilder.setCount(req.getCount());
+        }
+        if (Objects.nonNull(req.getPage())) {
+            c2sBuilder.setPage(req.getPage());
+        }
+        QotGetIndustrialPlateStock.Request request = QotGetIndustrialPlateStock.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getIndustrialPlateStock(request);
+        LOGGER.info("plateId={},chainId={},查询产业板块成分股.seq={}", req.getPlateId(), req.getChainId(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetIndustrialPlateStock(FTAPI_Conn client, int nSerialNo, QotGetIndustrialPlateStock.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询产业板块成分股失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询产业板块成分股失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询产业板块成分股", ftGrpcReturnResult);
+                IndustrialPlateStockContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), IndustrialPlateStockContent.class);
+                eventPublisher.publishEvent(new IndustrialPlateStockUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询产业板块成分股结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询产业板块成分股结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询产业板块成分股有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncIndustrialPlateInfo(IndustrialPlateInfoWsMessage req) {
         QotGetIndustrialPlateInfo.C2S c2s = QotGetIndustrialPlateInfo.C2S.newBuilder()
                 .setPlateId(req.getPlateId())
