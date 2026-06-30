@@ -17,6 +17,15 @@ public class InstitutionService {
     }
 
     @EventListener
+    public void onArkActiveTransactionUpdate(ArkActiveTransactionUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            ArkActiveTransactionWsMessage message = new ArkActiveTransactionWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendArkActiveTransaction(message);
+        }
+    }
+
+    @EventListener
     public void onArkStockDynamicUpdate(ArkStockDynamicUpdateEvent event) {
         if (Objects.nonNull(event.getContent())) {
             ArkStockDynamicWsMessage message = new ArkStockDynamicWsMessage();

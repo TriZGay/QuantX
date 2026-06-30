@@ -1502,6 +1502,60 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncArkActiveTransaction(ArkActiveTransactionWsMessage req) {
+        QotGetArkActiveTransaction.C2S.Builder c2sBuilder = QotGetArkActiveTransaction.C2S.newBuilder();
+        if (Objects.nonNull(req.getHoldingType())) {
+            c2sBuilder.setHoldingType(req.getHoldingType());
+        }
+        if (Objects.nonNull(req.getCycleType())) {
+            c2sBuilder.setCycleType(req.getCycleType());
+        }
+        if (Objects.nonNull(req.getSortField())) {
+            c2sBuilder.setSortField(req.getSortField());
+        }
+        if (Objects.nonNull(req.getSortDir())) {
+            c2sBuilder.setSortDir(req.getSortDir());
+        }
+        if (Objects.nonNull(req.getCount())) {
+            c2sBuilder.setCount(req.getCount());
+        }
+        if (Objects.nonNull(req.getPage())) {
+            c2sBuilder.setPage(req.getPage());
+        }
+        QotGetArkActiveTransaction.Request request = QotGetArkActiveTransaction.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getArkActiveTransaction(request);
+        LOGGER.info("ARK主动交易聚合.seq={}", seqNo);
+    }
+
+    @Override
+    public void onReply_GetArkActiveTransaction(FTAPI_Conn client, int nSerialNo, QotGetArkActiveTransaction.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询ARK主动交易聚合失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询ARK主动交易聚合失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询ARK主动交易聚合", ftGrpcReturnResult);
+                ArkActiveTransactionContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), ArkActiveTransactionContent.class);
+                eventPublisher.publishEvent(new ArkActiveTransactionUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询ARK主动交易聚合结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询ARK主动交易聚合结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询ARK主动交易聚合有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncArkStockDynamic(ArkStockDynamicWsMessage req) {
         QotCommon.Security sec = QotCommon.Security.newBuilder()
                 .setMarket(req.getMarket())
