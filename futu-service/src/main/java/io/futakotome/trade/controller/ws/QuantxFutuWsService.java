@@ -230,6 +230,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + INDUSTRIAL_CHAIN_BY_PLATE, message);
     }
 
+    public void sendIndustrialPlateInfo(IndustrialPlateInfoWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + INDUSTRIAL_PLATE_INFO, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);

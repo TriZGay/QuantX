@@ -70,6 +70,7 @@ import io.futakotome.trade.dto.message.ModifyOrderWsMessage;
         @JsonSubTypes.Type(value = IndustrialChainListWsMessage.class, name = "INDUSTRIAL_CHAIN_LIST"),
         @JsonSubTypes.Type(value = IndustrialChainDetailWsMessage.class, name = "INDUSTRIAL_CHAIN_DETAIL"),
         @JsonSubTypes.Type(value = IndustrialChainByPlateWsMessage.class, name = "INDUSTRIAL_CHAIN_BY_PLATE"),
+        @JsonSubTypes.Type(value = IndustrialPlateInfoWsMessage.class, name = "INDUSTRIAL_PLATE_INFO"),
 
         @JsonSubTypes.Type(value = RealTimeBaseQuoteMessage.class, name = "RT_BASIC_QUOTE"),
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),
