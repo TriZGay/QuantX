@@ -1502,6 +1502,47 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncArkStockDynamic(ArkStockDynamicWsMessage req) {
+        QotCommon.Security sec = QotCommon.Security.newBuilder()
+                .setMarket(req.getMarket())
+                .setCode(req.getCode())
+                .build();
+        QotGetArkStockDynamic.C2S c2s = QotGetArkStockDynamic.C2S.newBuilder()
+                .setSecurity(sec)
+                .build();
+        QotGetArkStockDynamic.Request request = QotGetArkStockDynamic.Request.newBuilder().setC2S(c2s).build();
+        int seqNo = qot.getArkStockDynamic(request);
+        LOGGER.info("市场{},code={},查询ARK个股交易动态.seq={}", MarketType.getName(req.getMarket()), req.getCode(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetArkStockDynamic(FTAPI_Conn client, int nSerialNo, QotGetArkStockDynamic.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询ARK个股交易动态失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询ARK个股交易动态失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询ARK个股交易动态", ftGrpcReturnResult);
+                ArkStockDynamicContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), ArkStockDynamicContent.class);
+                eventPublisher.publishEvent(new ArkStockDynamicUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询ARK个股交易动态结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询ARK个股交易动态结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询ARK个股交易动态有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncArkFundHolding(ArkFundHoldingWsMessage req) {
         QotGetArkFundHolding.C2S.Builder c2sBuilder = QotGetArkFundHolding.C2S.newBuilder();
         if (Objects.nonNull(req.getHoldingType())) {

@@ -210,6 +210,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + ARK_FUND_HOLDING, message);
     }
 
+    public void sendArkStockDynamic(ArkStockDynamicWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + ARK_STOCK_DYNAMIC, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);
