@@ -1,8 +1,10 @@
 package io.futakotome.trade.service;
 
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
+import io.futakotome.trade.dto.ws.IndustrialChainByPlateWsMessage;
 import io.futakotome.trade.dto.ws.IndustrialChainDetailWsMessage;
 import io.futakotome.trade.dto.ws.IndustrialChainListWsMessage;
+import io.futakotome.trade.event.IndustrialChainByPlateUpdateEvent;
 import io.futakotome.trade.event.IndustrialChainDetailUpdateEvent;
 import io.futakotome.trade.event.IndustrialChainListUpdateEvent;
 import org.springframework.context.event.EventListener;
@@ -16,6 +18,15 @@ public class IndustrialService {
 
     public IndustrialService(QuantxFutuWsService wsService) {
         this.wsService = wsService;
+    }
+
+    @EventListener
+    public void onChainByPlateUpdate(IndustrialChainByPlateUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            IndustrialChainByPlateWsMessage message = new IndustrialChainByPlateWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendIndustrialChainByPlate(message);
+        }
     }
 
     @EventListener

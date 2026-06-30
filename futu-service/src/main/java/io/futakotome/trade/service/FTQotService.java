@@ -1502,6 +1502,43 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncIndustrialChainByPlate(IndustrialChainByPlateWsMessage req) {
+        QotGetIndustrialChainByPlate.C2S c2s = QotGetIndustrialChainByPlate.C2S.newBuilder()
+                .setPlateId(req.getPlateId())
+                .build();
+        QotGetIndustrialChainByPlate.Request request = QotGetIndustrialChainByPlate.Request.newBuilder().setC2S(c2s).build();
+        int seqNo = qot.getIndustrialChainByPlate(request);
+        LOGGER.info("plateId={},查询板块关联产业链.seq={}", req.getPlateId(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetIndustrialChainByPlate(FTAPI_Conn client, int nSerialNo, QotGetIndustrialChainByPlate.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询板块关联产业链失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询板块关联产业链失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询板块关联产业链", ftGrpcReturnResult);
+                IndustrialChainByPlateContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), IndustrialChainByPlateContent.class);
+                eventPublisher.publishEvent(new IndustrialChainByPlateUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询板块关联产业链结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询板块关联产业链结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询板块关联产业链有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncIndustrialChainDetail(IndustrialChainDetailWsMessage req) {
         QotGetIndustrialChainDetail.C2S c2s = QotGetIndustrialChainDetail.C2S.newBuilder()
                 .setChainId(req.getChainId())

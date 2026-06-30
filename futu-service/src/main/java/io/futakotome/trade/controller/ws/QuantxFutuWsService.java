@@ -226,6 +226,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + INDUSTRIAL_CHAIN_DETAIL, message);
     }
 
+    public void sendIndustrialChainByPlate(IndustrialChainByPlateWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + INDUSTRIAL_CHAIN_BY_PLATE, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);
