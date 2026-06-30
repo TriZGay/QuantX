@@ -1502,6 +1502,52 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncIndustrialChainList(IndustrialChainListWsMessage req) {
+        QotGetIndustrialChainList.C2S.Builder c2sBuilder = QotGetIndustrialChainList.C2S.newBuilder()
+                .setMarket(req.getMarket());
+        if (Objects.nonNull(req.getKeyword())) {
+            c2sBuilder.setKeyword(req.getKeyword());
+        }
+        if (Objects.nonNull(req.getCount())) {
+            c2sBuilder.setCount(req.getCount());
+        }
+        if (Objects.nonNull(req.getPage())) {
+            c2sBuilder.setPage(req.getPage());
+        }
+        QotGetIndustrialChainList.Request request = QotGetIndustrialChainList.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getIndustrialChainList(request);
+        LOGGER.info("市场{},查询产业链列表.seq={}", MarketType.getName(req.getMarket()), seqNo);
+    }
+
+    @Override
+    public void onReply_GetIndustrialChainList(FTAPI_Conn client, int nSerialNo, QotGetIndustrialChainList.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询产业链列表失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询产业链列表失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询产业链列表", ftGrpcReturnResult);
+                IndustrialChainListContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), IndustrialChainListContent.class);
+                eventPublisher.publishEvent(new IndustrialChainListUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询产业链列表结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询产业链列表结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询产业链列表有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncArkActiveTransaction(ArkActiveTransactionWsMessage req) {
         QotGetArkActiveTransaction.C2S.Builder c2sBuilder = QotGetArkActiveTransaction.C2S.newBuilder();
         if (Objects.nonNull(req.getHoldingType())) {

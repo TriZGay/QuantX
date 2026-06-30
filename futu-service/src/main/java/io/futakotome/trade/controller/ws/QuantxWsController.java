@@ -67,6 +67,7 @@ public class QuantxWsController {
     public static final String ARK_FUND_HOLDING = "/ark_fund_holding";
     public static final String ARK_STOCK_DYNAMIC = "/ark_stock_fund";
     public static final String ARK_ACTIVE_TRANSACTION = "/ark_active_transaction";
+    public static final String INDUSTRIAL_CHAIN_LIST = "/industrial_chain_list";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -349,6 +350,10 @@ public class QuantxWsController {
                 //ARK主动交易聚合
                 ArkActiveTransactionWsMessage req = (ArkActiveTransactionWsMessage) messageClz;
                 ftQotService.syncArkActiveTransaction(req);
+            } else if (messageClz.getType().equals(MessageType.INDUSTRIAL_CHAIN_LIST)) {
+                //产业链列表
+                IndustrialChainListWsMessage req = (IndustrialChainListWsMessage) messageClz;
+                ftQotService.syncIndustrialChainList(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
