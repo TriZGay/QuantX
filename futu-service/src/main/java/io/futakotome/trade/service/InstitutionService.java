@@ -17,6 +17,15 @@ public class InstitutionService {
     }
 
     @EventListener
+    public void onArkFundHoldingUpdate(ArkFundHoldingUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            ArkFundHoldingWsMessage message = new ArkFundHoldingWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendArkFundHolding(message);
+        }
+    }
+
+    @EventListener
     public void onInstitutionHoldingListUpdate(InstitutionHoldingListUpdateEvent event) {
         if (Objects.nonNull(event.getContent())) {
             InstitutionHoldingListWsMessage message = new InstitutionHoldingListWsMessage();

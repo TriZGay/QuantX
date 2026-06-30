@@ -206,6 +206,9 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + INSTITUTION_HOLDING_LIST, message);
     }
 
+    public void sendArkFundHolding(ArkFundHoldingWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + ARK_FUND_HOLDING, message);
+    }
 
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {

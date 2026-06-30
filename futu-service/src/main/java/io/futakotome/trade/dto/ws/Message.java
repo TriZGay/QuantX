@@ -64,6 +64,7 @@ import io.futakotome.trade.dto.message.ModifyOrderWsMessage;
         @JsonSubTypes.Type(value = InstitutionDistributionWsMessage.class, name = "INSTITUTION_DISTR"),
         @JsonSubTypes.Type(value = InstitutionHoldingChangeWsMessage.class, name = "INSTITUTION_HOLDING_CHANGE"),
         @JsonSubTypes.Type(value = InstitutionHoldingListWsMessage.class, name = "INSTITUTION_HOLDING_LIST"),
+        @JsonSubTypes.Type(value = ArkFundHoldingWsMessage.class, name = "ARK_FUND_HOLDING"),
 
         @JsonSubTypes.Type(value = RealTimeBaseQuoteMessage.class, name = "RT_BASIC_QUOTE"),
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),
