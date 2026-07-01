@@ -72,6 +72,7 @@ public class QuantxWsController {
     public static final String INDUSTRIAL_CHAIN_BY_PLATE = "/industrial_chain_by_plate";
     public static final String INDUSTRIAL_PLATE_INFO = "/industrial_plate_info";
     public static final String INDUSTRIAL_PLATE_STOCK = "/industrial_plate_stock";
+    public static final String HEAT_MAP_DATA = "/heatmap";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -374,6 +375,10 @@ public class QuantxWsController {
                 //产业板块成分股
                 IndustrialPlateStockWsMessage req = (IndustrialPlateStockWsMessage) messageClz;
                 ftQotService.syncIndustrialPlateStock(req);
+            } else if (messageClz.getType().equals(MessageType.HEAT_MAP_DATA)) {
+                //热力图数据
+                HeatMapDataWsMessage req = (HeatMapDataWsMessage) messageClz;
+                ftQotService.syncHeatMapData(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

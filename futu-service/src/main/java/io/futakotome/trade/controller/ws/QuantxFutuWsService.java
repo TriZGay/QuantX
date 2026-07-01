@@ -238,6 +238,9 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + INDUSTRIAL_PLATE_STOCK, message);
     }
 
+    public void sendHeatMapData(HeatMapDataWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + HEAT_MAP_DATA, message);
+    }
 
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
