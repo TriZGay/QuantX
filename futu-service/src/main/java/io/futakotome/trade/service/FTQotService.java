@@ -1502,6 +1502,51 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncRiseFallDistribution(RiseFallDistributionWsMessage req) {
+        QotGetRiseFallDistribution.C2S.Builder c2sBuilder = QotGetRiseFallDistribution.C2S.newBuilder()
+                .setMarket(req.getMarket());
+        if (Objects.nonNull(req.getPlateCode()) && Objects.nonNull(req.getPlateMarket())) {
+            c2sBuilder.setSecurity(
+                    QotCommon.Security.newBuilder()
+                            .setMarket(req.getPlateMarket())
+                            .setCode(req.getPlateCode())
+                            .build()
+            );
+        }
+        QotGetRiseFallDistribution.Request request = QotGetRiseFallDistribution.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getRiseFallDistribution(request);
+        LOGGER.info("市场={},查询涨跌分布.seq={}", MarketType.getName(req.getMarket()), seqNo);
+    }
+
+    @Override
+    public void onReply_GetRiseFallDistribution(FTAPI_Conn client, int nSerialNo, QotGetRiseFallDistribution.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询涨跌分布失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询涨跌分布失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询涨跌分布", ftGrpcReturnResult);
+                RiseFallDistributionContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), RiseFallDistributionContent.class);
+                eventPublisher.publishEvent(new RiseFallDistributionUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询涨跌分布结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询涨跌分布结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询涨跌分布有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncHeatMapData(HeatMapDataWsMessage req) {
         QotGetHeatMapData.C2S.Builder c2sBuilder = QotGetHeatMapData.C2S.newBuilder()
                 .setMarket(req.getMarket());
