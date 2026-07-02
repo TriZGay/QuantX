@@ -1502,6 +1502,63 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncShortSellRank(ShortSellRankWsMessage req) {
+        QotGetShortSellingRank.C2S.Builder c2sBuilder = QotGetShortSellingRank.C2S.newBuilder()
+                .setMarket(req.getMarket());
+        if (Objects.nonNull(req.getSortField())) {
+            c2sBuilder.setSortField(req.getSortField());
+        }
+        if (Objects.nonNull(req.getSortDir())) {
+            c2sBuilder.setSortDir(req.getSortDir());
+        }
+        if (Objects.nonNull(req.getOffset())) {
+            c2sBuilder.setOffset(req.getOffset());
+        }
+        if (Objects.nonNull(req.getCount())) {
+            c2sBuilder.setCount(req.getCount());
+        }
+        if (Objects.nonNull(req.getPlateList())) {
+            c2sBuilder.addAllPlateList(req.getPlateList().stream()
+                    .map(p -> QotCommon.Security.newBuilder()
+                            .setCode(p.getCode())
+                            .setMarket(p.getMarket())
+                            .build())
+                    .collect(Collectors.toList()));
+        }
+        QotGetShortSellingRank.Request request = QotGetShortSellingRank.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getShortSellingRank(request);
+        LOGGER.info("市场={},查询卖空异动榜.seq={}", MarketType.getName(req.getMarket()), seqNo);
+    }
+
+    @Override
+    public void onReply_GetShortSellingRank(FTAPI_Conn client, int nSerialNo, QotGetShortSellingRank.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询卖空异动榜失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询卖空异动榜失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询卖空异动榜", ftGrpcReturnResult);
+                ShortSellRankContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), ShortSellRankContent.class);
+                eventPublisher.publishEvent(new ShortSellRankUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询卖空异动榜结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询卖空异动榜结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询卖空异动榜有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncRiseFallDistribution(RiseFallDistributionWsMessage req) {
         QotGetRiseFallDistribution.C2S.Builder c2sBuilder = QotGetRiseFallDistribution.C2S.newBuilder()
                 .setMarket(req.getMarket());

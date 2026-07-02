@@ -71,6 +71,7 @@ public enum MessageType {
     INDUSTRIAL_PLATE_STOCK,
     HEAT_MAP_DATA,
     RISE_FALL_DISTRIBUTION,
+    SHORT_SELL_RANK,
 
     RT_BASIC_QUOTE,
     RT_KL,

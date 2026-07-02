@@ -74,6 +74,7 @@ public class QuantxWsController {
     public static final String INDUSTRIAL_PLATE_STOCK = "/industrial_plate_stock";
     public static final String HEAT_MAP_DATA = "/heatmap";
     public static final String RISE_FALL_DISTRIBUTION = "/rise_fall_distribution";
+    public static final String SHORT_SELL_RANK = "/short_sell_rank";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -384,6 +385,10 @@ public class QuantxWsController {
                 //涨跌分布
                 RiseFallDistributionWsMessage req = (RiseFallDistributionWsMessage) messageClz;
                 ftQotService.syncRiseFallDistribution(req);
+            } else if (messageClz.getType().equals(MessageType.SHORT_SELL_RANK)) {
+                //卖空异动榜
+                ShortSellRankWsMessage req = (ShortSellRankWsMessage) messageClz;
+                ftQotService.syncShortSellRank(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
