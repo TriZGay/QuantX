@@ -270,6 +270,11 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + MARCO_INDIES_HISTORY, message);
     }
 
+    public void sendDividendRank(DividendRankWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + DIVIDEND_RANK, message);
+    }
+
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);
