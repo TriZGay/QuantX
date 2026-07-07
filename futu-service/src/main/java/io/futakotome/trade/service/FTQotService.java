@@ -1502,6 +1502,64 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncHighDividendSoeRank(HighDividendSoeRankWsMessage req) {
+        QotGetHighDividendSOERank.C2S.Builder c2s = QotGetHighDividendSOERank.C2S.newBuilder();
+        if (Objects.nonNull(req.getCount())) {
+            c2s.setCount(req.getCount());
+        }
+        if (Objects.nonNull(req.getOffset())) {
+            c2s.setOffset(req.getOffset());
+        }
+        if (Objects.nonNull(req.getSortDir())) {
+            c2s.setSortDir(req.getSortDir());
+        }
+        if (Objects.nonNull(req.getSortField())) {
+            c2s.setSortField(req.getSortField());
+        }
+        if (Objects.nonNull(req.getFilterList())) {
+            List<QotGetHighDividendSOERank.Indicator> filterList = req.getFilterList().stream().map(f ->
+                    QotGetHighDividendSOERank.Indicator.newBuilder()
+                            .setIndicatorType(f.getIndicatorType())
+                            .setIndicatorValue(QotOptionCommon.Interval.newBuilder()
+                                    .setFilterMax(QotOptionCommon.Boundary.newBuilder().setValue(f.getMax()).build())
+                                    .setFilterMin(QotOptionCommon.Boundary.newBuilder().setValue(f.getMin()).build())
+                                    .build())
+                            .build()).collect(Collectors.toList());
+            c2s.addAllFilterList(filterList);
+        }
+        QotGetHighDividendSOERank.Request request = QotGetHighDividendSOERank.Request.newBuilder().setC2S(c2s).build();
+        int seqNo = qot.getHighDividendSOERank(request);
+        LOGGER.info("查询破净高股息国央企.seq={}", seqNo);
+    }
+
+    @Override
+    public void onReply_GetHighDividendSOERank(FTAPI_Conn client, int nSerialNo, QotGetHighDividendSOERank.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询破净高股息国央企失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询破净高股息国央企失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询破净高股息国央企", ftGrpcReturnResult);
+                HighDividendSoeRankContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), HighDividendSoeRankContent.class);
+                eventPublisher.publishEvent(new HighDividendSoeRankUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询破净高股息国央企结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询破净高股息国央企结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询破净高股息国央企有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncShortSellRank(ShortSellRankWsMessage req) {
         QotGetShortSellingRank.C2S.Builder c2sBuilder = QotGetShortSellingRank.C2S.newBuilder()
                 .setMarket(req.getMarket());

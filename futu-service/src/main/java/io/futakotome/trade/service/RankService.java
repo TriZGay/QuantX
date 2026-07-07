@@ -1,7 +1,9 @@
 package io.futakotome.trade.service;
 
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
+import io.futakotome.trade.dto.ws.HighDividendSoeRankWsMessage;
 import io.futakotome.trade.dto.ws.ShortSellRankWsMessage;
+import io.futakotome.trade.event.HighDividendSoeRankUpdateEvent;
 import io.futakotome.trade.event.ShortSellRankUpdateEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,15 @@ public class RankService {
 
     public RankService(QuantxFutuWsService wsService) {
         this.wsService = wsService;
+    }
+
+    @EventListener
+    public void onHighDividendSoeRankUpdate(HighDividendSoeRankUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            HighDividendSoeRankWsMessage message = new HighDividendSoeRankWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendHighDividendSoeRank(message);
+        }
     }
 
     @EventListener
