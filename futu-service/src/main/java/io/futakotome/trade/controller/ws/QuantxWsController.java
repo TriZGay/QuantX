@@ -78,6 +78,7 @@ public class QuantxWsController {
     public static final String HIGH_DIVIDEND_SOE_RANK = "/high_dividend_soe_rank";
     public static final String HOT_LIST = "/hot_list";
     public static final String TOP_MOVERS_RANK = "/top_movers_rank";
+    public static final String MARCO_INDIES = "/marco_indies";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -404,6 +405,10 @@ public class QuantxWsController {
                 //领涨领跌榜
                 TopMoversRankWsMessage req = (TopMoversRankWsMessage) messageClz;
                 ftQotService.syncTopMoversRank(req);
+            } else if (messageClz.getType().equals(MessageType.MARCO_INDIES)) {
+                //宏观指标列表
+                MarcoIndiesWsMessage req = (MarcoIndiesWsMessage) messageClz;
+                ftQotService.syncMarcoIndies(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
