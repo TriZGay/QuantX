@@ -1502,6 +1502,63 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncTopMoversRank(TopMoversRankWsMessage req) {
+        QotGetTopMoversRank.C2S.Builder c2sBuilder = QotGetTopMoversRank.C2S.newBuilder()
+                .setMarket(req.getMarket());
+        if (Objects.nonNull(req.getSortDir())) {
+            c2sBuilder.setSortDir(req.getSortDir());
+        }
+        if (Objects.nonNull(req.getOffset())) {
+            c2sBuilder.setOffset(req.getOffset());
+        }
+        if (Objects.nonNull(req.getCount())) {
+            c2sBuilder.setCount(req.getCount());
+        }
+        if (Objects.nonNull(req.getFilterList())) {
+            List<QotGetTopMoversRank.Indicator> filterList = req.getFilterList()
+                    .stream().map(f -> QotGetTopMoversRank.Indicator.newBuilder()
+                            .setIndicatorType(f.getIndicatorType())
+                            .setIndicatorValue(QotOptionCommon.Interval.newBuilder()
+                                    .setFilterMin(QotOptionCommon.Boundary.newBuilder().setValue(f.getMin()).build())
+                                    .setFilterMax(QotOptionCommon.Boundary.newBuilder().setValue(f.getMax()).build())
+                                    .build())
+                            .build()).collect(Collectors.toList());
+            c2sBuilder.addAllFilterList(filterList);
+        }
+        QotGetTopMoversRank.Request request = QotGetTopMoversRank.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getTopMoversRank(request);
+        LOGGER.info("市场={},查询领涨领跌榜.seq={}", MarketType.getName(req.getMarket()), seqNo);
+    }
+
+    @Override
+    public void onReply_GetTopMoversRank(FTAPI_Conn client, int nSerialNo, QotGetTopMoversRank.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询领涨领跌榜失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询领涨领跌榜失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询领涨领跌榜", ftGrpcReturnResult);
+                TopMoversRankContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), TopMoversRankContent.class);
+                eventPublisher.publishEvent(new TopMoversRankUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询领涨领跌榜结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询领涨领跌榜结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询领涨领跌榜有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncHotList(HotListWsMessage req) {
         QotGetHotList.C2S.Builder c2sBuilder = QotGetHotList.C2S.newBuilder()
                 .setMarket(req.getMarket());
@@ -1543,7 +1600,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         } else {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
-                logFTResult("查询热议榜央企", ftGrpcReturnResult);
+                logFTResult("查询热议榜", ftGrpcReturnResult);
                 HotListContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), HotListContent.class);
                 eventPublisher.publishEvent(new HotListUpdateEvent(content));
             } catch (InvalidProtocolBufferException e) {

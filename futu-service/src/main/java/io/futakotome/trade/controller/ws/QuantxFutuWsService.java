@@ -258,6 +258,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + HOT_LIST, message);
     }
 
+    public void sendTopMoversRank(TopMoversRankWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + TOP_MOVERS_RANK, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);

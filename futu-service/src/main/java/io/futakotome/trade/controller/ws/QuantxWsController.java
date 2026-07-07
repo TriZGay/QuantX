@@ -77,6 +77,7 @@ public class QuantxWsController {
     public static final String SHORT_SELL_RANK = "/short_sell_rank";
     public static final String HIGH_DIVIDEND_SOE_RANK = "/high_dividend_soe_rank";
     public static final String HOT_LIST = "/hot_list";
+    public static final String TOP_MOVERS_RANK = "/top_movers_rank";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -399,6 +400,10 @@ public class QuantxWsController {
                 //热议榜
                 HotListWsMessage req = (HotListWsMessage) messageClz;
                 ftQotService.syncHotList(req);
+            } else if (messageClz.getType().equals(MessageType.TOP_MOVERS_RANK)) {
+                //领涨领跌榜
+                TopMoversRankWsMessage req = (TopMoversRankWsMessage) messageClz;
+                ftQotService.syncTopMoversRank(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

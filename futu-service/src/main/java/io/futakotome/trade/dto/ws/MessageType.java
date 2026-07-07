@@ -74,6 +74,7 @@ public enum MessageType {
     SHORT_SELL_RANK,
     HIGH_DIVIDEND_SOE_RANK,
     HOT_RANK,
+    TOP_MOVERS_RANK,
 
     RT_BASIC_QUOTE,
     RT_KL,
