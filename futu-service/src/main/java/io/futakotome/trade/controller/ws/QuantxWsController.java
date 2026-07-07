@@ -76,6 +76,7 @@ public class QuantxWsController {
     public static final String RISE_FALL_DISTRIBUTION = "/rise_fall_distribution";
     public static final String SHORT_SELL_RANK = "/short_sell_rank";
     public static final String HIGH_DIVIDEND_SOE_RANK = "/high_dividend_soe_rank";
+    public static final String HOT_LIST = "/hot_list";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -394,6 +395,10 @@ public class QuantxWsController {
                 //破净高股息国央企
                 HighDividendSoeRankWsMessage req = (HighDividendSoeRankWsMessage) messageClz;
                 ftQotService.syncHighDividendSoeRank(req);
+            } else if (messageClz.getType().equals(MessageType.HOT_RANK)) {
+                //热议榜
+                HotListWsMessage req = (HotListWsMessage) messageClz;
+                ftQotService.syncHotList(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

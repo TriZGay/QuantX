@@ -1502,6 +1502,66 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncHotList(HotListWsMessage req) {
+        QotGetHotList.C2S.Builder c2sBuilder = QotGetHotList.C2S.newBuilder()
+                .setMarket(req.getMarket());
+        if (Objects.nonNull(req.getSortField())) {
+            c2sBuilder.setSortField(req.getSortField());
+        }
+        if (Objects.nonNull(req.getSortDir())) {
+            c2sBuilder.setSortDir(req.getSortDir());
+        }
+        if (Objects.nonNull(req.getOffset())) {
+            c2sBuilder.setOffset(req.getOffset());
+        }
+        if (Objects.nonNull(req.getCount())) {
+            c2sBuilder.setCount(req.getCount());
+        }
+        if (Objects.nonNull(req.getFilterList())) {
+            List<QotGetHotList.Indicator> filterList = req.getFilterList()
+                    .stream().map(f -> QotGetHotList.Indicator.newBuilder()
+                            .setIndicatorType(f.getIndicatorType())
+                            .setIndicatorValue(QotOptionCommon.Interval.newBuilder()
+                                    .setFilterMin(QotOptionCommon.Boundary.newBuilder().setValue(f.getMin()).build())
+                                    .setFilterMax(QotOptionCommon.Boundary.newBuilder().setValue(f.getMax()).build())
+                                    .build())
+                            .build()).collect(Collectors.toList());
+            c2sBuilder.addAllFilterList(filterList);
+        }
+        QotGetHotList.Request request = QotGetHotList.Request.newBuilder()
+                .setC2S(c2sBuilder).build();
+        int seqNo = qot.getHotList(request);
+        LOGGER.info("市场={},查询热议榜.seq={}", MarketType.getName(req.getMarket()), seqNo);
+    }
+
+    @Override
+    public void onReply_GetHotList(FTAPI_Conn client, int nSerialNo, QotGetHotList.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询热议榜失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询热议榜失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询热议榜央企", ftGrpcReturnResult);
+                HotListContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), HotListContent.class);
+                eventPublisher.publishEvent(new HotListUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询热议榜结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询热议榜结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询热议榜有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncHighDividendSoeRank(HighDividendSoeRankWsMessage req) {
         QotGetHighDividendSOERank.C2S.Builder c2s = QotGetHighDividendSOERank.C2S.newBuilder();
         if (Objects.nonNull(req.getCount())) {

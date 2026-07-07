@@ -73,6 +73,7 @@ public enum MessageType {
     RISE_FALL_DISTRIBUTION,
     SHORT_SELL_RANK,
     HIGH_DIVIDEND_SOE_RANK,
+    HOT_RANK,
 
     RT_BASIC_QUOTE,
     RT_KL,

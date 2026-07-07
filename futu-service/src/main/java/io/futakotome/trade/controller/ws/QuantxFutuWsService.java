@@ -250,8 +250,12 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + SHORT_SELL_RANK, message);
     }
 
-    public void sendHighDividendSoeRank(HighDividendSoeRankWsMessage message){
+    public void sendHighDividendSoeRank(HighDividendSoeRankWsMessage message) {
         this.template.convertAndSend(BROKER_PREFIX + HIGH_DIVIDEND_SOE_RANK, message);
+    }
+
+    public void sendHotList(HotListWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + HOT_LIST, message);
     }
 
     //ma
