@@ -76,6 +76,7 @@ public enum MessageType {
     HOT_RANK,
     TOP_MOVERS_RANK,
     MARCO_INDIES,
+    MARCO_INDIES_HISTORY,
 
     RT_BASIC_QUOTE,
     RT_KL,

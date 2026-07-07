@@ -1502,6 +1502,49 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncMarcoIndiesHistory(MarcoIndiesHistoryWsMessage req) {
+        QotGetMacroIndicatorHistory.C2S.Builder c2sBuilder = QotGetMacroIndicatorHistory.C2S.newBuilder()
+                .setIndicatorId(req.getIndicatorId());
+        if (Objects.nonNull(req.getTime())) {
+            c2sBuilder.setTime(req.getTime());
+        }
+        if (Objects.nonNull(req.getMaxCount())) {
+            c2sBuilder.setMaxCount(req.getMaxCount());
+        }
+        QotGetMacroIndicatorHistory.Request request = QotGetMacroIndicatorHistory.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getMacroIndicatorHistory(request);
+        LOGGER.info("宏观指标ID={},查询宏观指标历史数据.seq={}", req.getIndicatorId(), seqNo);
+    }
+
+    @Override
+    public void onReply_GetMacroIndicatorHistory(FTAPI_Conn client, int nSerialNo, QotGetMacroIndicatorHistory.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询宏观指标历史数据失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询宏观指标历史数据失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询宏观指标历史数据", ftGrpcReturnResult);
+                MarcoIndiesHistoryContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), MarcoIndiesHistoryContent.class);
+                eventPublisher.publishEvent(new MarcoIndiesHistoryUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询宏观指标历史数据结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询宏观指标历史数据结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询宏观指标历史数据有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncMarcoIndies(MarcoIndiesWsMessage req) {
         QotGetMacroIndicatorList.C2S c2s = QotGetMacroIndicatorList.C2S.newBuilder()
                 .setRegion(req.getRegion())

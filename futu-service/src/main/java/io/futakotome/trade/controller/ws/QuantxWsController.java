@@ -79,6 +79,7 @@ public class QuantxWsController {
     public static final String HOT_LIST = "/hot_list";
     public static final String TOP_MOVERS_RANK = "/top_movers_rank";
     public static final String MARCO_INDIES = "/marco_indies";
+    public static final String MARCO_INDIES_HISTORY = "/marco_indies_history";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -409,6 +410,10 @@ public class QuantxWsController {
                 //宏观指标列表
                 MarcoIndiesWsMessage req = (MarcoIndiesWsMessage) messageClz;
                 ftQotService.syncMarcoIndies(req);
+            } else if (messageClz.getType().equals(MessageType.MARCO_INDIES_HISTORY)) {
+                //宏观指标历史数据
+                MarcoIndiesHistoryWsMessage req = (MarcoIndiesHistoryWsMessage) messageClz;
+                ftQotService.syncMarcoIndiesHistory(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

@@ -266,6 +266,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + MARCO_INDIES, message);
     }
 
+    public void sendMarcoIndiesHistory(MarcoIndiesHistoryWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + MARCO_INDIES_HISTORY, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);

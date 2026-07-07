@@ -79,6 +79,7 @@ import io.futakotome.trade.dto.message.ModifyOrderWsMessage;
         @JsonSubTypes.Type(value = HotListWsMessage.class, name = "HOT_RANK"),
         @JsonSubTypes.Type(value = TopMoversRankWsMessage.class, name = "TOP_MOVERS_RANK"),
         @JsonSubTypes.Type(value = MarcoIndiesWsMessage.class, name = "MARCO_INDIES"),
+        @JsonSubTypes.Type(value = MarcoIndiesHistoryWsMessage.class, name = "MARCO_INDIES_HISTORY"),
 
         @JsonSubTypes.Type(value = RealTimeBaseQuoteMessage.class, name = "RT_BASIC_QUOTE"),
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),
