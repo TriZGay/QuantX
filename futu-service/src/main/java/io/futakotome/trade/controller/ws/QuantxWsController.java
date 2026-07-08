@@ -81,6 +81,7 @@ public class QuantxWsController {
     public static final String MARCO_INDIES = "/marco_indies";
     public static final String MARCO_INDIES_HISTORY = "/marco_indies_history";
     public static final String DIVIDEND_RANK = "/dividend_rank";
+    public static final String EARNINGS_CALENDAR = "/earnings_calendar";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -419,6 +420,10 @@ public class QuantxWsController {
                 //股息排行
                 DividendRankWsMessage req = (DividendRankWsMessage) messageClz;
                 ftQotService.syncDividendRank(req);
+            } else if (messageClz.getType().equals(MessageType.EARNINGS_CALENDAR)) {
+                //财报日历
+                EarningsCalendarWsMessage req = (EarningsCalendarWsMessage) messageClz;
+                ftQotService.syncEarningsCalendar(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

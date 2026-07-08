@@ -1502,6 +1502,62 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncEarningsCalendar(EarningsCalendarWsMessage req) {
+        QotGetEarningsCalendar.C2S.Builder c2sBuilder = QotGetEarningsCalendar.C2S.newBuilder()
+                .setMarket(req.getMarket());
+        if (Objects.nonNull(req.getSortType())) {
+            c2sBuilder.setSortType(req.getSortType());
+        }
+        if (Objects.nonNull(req.getBeginDate())) {
+            c2sBuilder.setBeginDate(req.getBeginDate());
+        }
+        if (Objects.nonNull(req.getEndDate())) {
+            c2sBuilder.setEndDate(req.getEndDate());
+        }
+        if (Objects.nonNull(req.getFilterList())) {
+            //todo 获取财报日历 筛选条件待完成
+            List<QotGetEarningsCalendar.EarningsCalendarIndicator> filterList = req.getFilterList()
+                    .stream().map(f -> QotGetEarningsCalendar.EarningsCalendarIndicator.newBuilder()
+                            .setIndicatorType(f.getIndicatorType())
+                            .setIndicatorValue(QotOptionCommon.IndicatorValue.newBuilder()
+                                    .build())
+                            .build()).collect(Collectors.toList());
+            c2sBuilder.addAllFilterList(filterList);
+        }
+        QotGetEarningsCalendar.Request request = QotGetEarningsCalendar.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getEarningsCalendar(request);
+        LOGGER.info("市场={},查询财报日历.seq={}", MarketType.getName(req.getMarket()), seqNo);
+    }
+
+    @Override
+    public void onReply_GetEarningsCalendar(FTAPI_Conn client, int nSerialNo, QotGetEarningsCalendar.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询财报日历失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询财报日历失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询财报日历", ftGrpcReturnResult);
+                EarningsCalendarContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), EarningsCalendarContent.class);
+                eventPublisher.publishEvent(new EarningsCalendarUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询财报日历结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询财报日历结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询财报日历有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncDividendRank(DividendRankWsMessage req) {
         QotGetDividendRank.C2S.Builder c2sBuilder = QotGetDividendRank.C2S.newBuilder()
                 .setMarket(req.getMarket())
