@@ -79,6 +79,7 @@ public enum MessageType {
     MARCO_INDIES_HISTORY,
     DIVIDEND_RANK,
     EARNINGS_CALENDAR,
+    DIVIDEND_CALENDAR,
 
     RT_BASIC_QUOTE,
     RT_KL,

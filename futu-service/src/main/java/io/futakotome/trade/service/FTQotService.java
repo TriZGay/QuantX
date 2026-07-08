@@ -1502,6 +1502,50 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncDividendCalendar(DividendCalendarWsMessage req) {
+        QotGetDividendCalendar.C2S.Builder c2sBuilder = QotGetDividendCalendar.C2S.newBuilder()
+                .setDate(req.getDate())
+                .setMarket(req.getMarket());
+        if (Objects.nonNull(req.getDataFrom())) {
+            c2sBuilder.setDataFrom(req.getDataFrom());
+        }
+        if (Objects.nonNull(req.getCount())) {
+            c2sBuilder.setCount(req.getCount());
+        }
+        QotGetDividendCalendar.Request request = QotGetDividendCalendar.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.getDividendCalendar(request);
+        LOGGER.info("市场={},查询派息日历.seq={}", MarketType.getName(req.getMarket()), seqNo);
+    }
+
+    @Override
+    public void onReply_GetDividendCalendar(FTAPI_Conn client, int nSerialNo, QotGetDividendCalendar.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "查询派息日历失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "查询派息日历失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("查询派息日历", ftGrpcReturnResult);
+                DividendCalendarContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), DividendCalendarContent.class);
+                eventPublisher.publishEvent(new DividendCalendarUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "查询派息日历结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "查询派息日历结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "查询派息日历有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncEarningsCalendar(EarningsCalendarWsMessage req) {
         QotGetEarningsCalendar.C2S.Builder c2sBuilder = QotGetEarningsCalendar.C2S.newBuilder()
                 .setMarket(req.getMarket());

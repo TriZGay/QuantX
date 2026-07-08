@@ -278,6 +278,9 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + EARNINGS_CALENDAR, message);
     }
 
+    public void sendDividendCalendar(DividendCalendarWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + DIVIDEND_CALENDAR, message);
+    }
 
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
