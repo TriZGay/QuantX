@@ -83,6 +83,7 @@ import io.futakotome.trade.dto.message.ModifyOrderWsMessage;
         @JsonSubTypes.Type(value = DividendRankWsMessage.class, name = "DIVIDEND_RANK"),
         @JsonSubTypes.Type(value = EarningsCalendarWsMessage.class, name = "EARNINGS_CALENDAR"),
         @JsonSubTypes.Type(value = DividendCalendarWsMessage.class, name = "DIVIDEND_CALENDAR"),
+        @JsonSubTypes.Type(value = EconomicCalendarWsMessage.class, name = "ECONOMIC_CALENDAR"),
 
         @JsonSubTypes.Type(value = RealTimeBaseQuoteMessage.class, name = "RT_BASIC_QUOTE"),
         @JsonSubTypes.Type(value = RealTimeKLMessage.class, name = "RT_KL"),

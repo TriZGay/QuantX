@@ -80,6 +80,7 @@ public enum MessageType {
     DIVIDEND_RANK,
     EARNINGS_CALENDAR,
     DIVIDEND_CALENDAR,
+    ECONOMIC_CALENDAR,
 
     RT_BASIC_QUOTE,
     RT_KL,

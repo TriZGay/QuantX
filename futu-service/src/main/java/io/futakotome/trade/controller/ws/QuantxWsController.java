@@ -83,6 +83,7 @@ public class QuantxWsController {
     public static final String DIVIDEND_RANK = "/dividend_rank";
     public static final String EARNINGS_CALENDAR = "/earnings_calendar";
     public static final String DIVIDEND_CALENDAR = "/dividend_calendar";
+    public static final String ECONOMIC_CALENDAR = "/economic_calendar";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
@@ -429,6 +430,10 @@ public class QuantxWsController {
                 //派息日历
                 DividendCalendarWsMessage req = (DividendCalendarWsMessage) messageClz;
                 ftQotService.syncDividendCalendar(req);
+            } else if (messageClz.getType().equals(MessageType.ECONOMIC_CALENDAR)) {
+                //经济事件日历
+                EconomicCalendarWsMessage req = (EconomicCalendarWsMessage) messageClz;
+                ftQotService.syncEconomicCalendar(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);

@@ -3,8 +3,10 @@ package io.futakotome.trade.service;
 import io.futakotome.trade.controller.ws.QuantxFutuWsService;
 import io.futakotome.trade.dto.ws.DividendCalendarWsMessage;
 import io.futakotome.trade.dto.ws.EarningsCalendarWsMessage;
+import io.futakotome.trade.dto.ws.EconomicCalendarWsMessage;
 import io.futakotome.trade.event.DividendCalendarUpdateEvent;
 import io.futakotome.trade.event.EarningsCalendarUpdateEvent;
+import io.futakotome.trade.event.EconomicCalendarUpdateEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,15 @@ public class CalendarService {
 
     public CalendarService(QuantxFutuWsService wsService) {
         this.wsService = wsService;
+    }
+
+    @EventListener
+    public void onEconomicCalendarUpdate(EconomicCalendarUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            EconomicCalendarWsMessage message = new EconomicCalendarWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendEconomicCalendar(message);
+        }
     }
 
     @EventListener
