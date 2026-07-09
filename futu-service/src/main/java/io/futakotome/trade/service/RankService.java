@@ -17,6 +17,15 @@ public class RankService {
     }
 
     @EventListener
+    public void onEarningsBeatRankUpdate(EarningsBeatRankUpdateEvent event) {
+        if (Objects.nonNull(event.getContent())) {
+            EarningsBeatRankWsMessage message = new EarningsBeatRankWsMessage();
+            message.setContent(event.getContent());
+            wsService.sendEarningsBeatRank(message);
+        }
+    }
+
+    @EventListener
     public void onDividendRankUpdate(DividendRankUpdateEvent event) {
         if (Objects.nonNull(event.getContent())) {
             DividendRankWsMessage message = new DividendRankWsMessage();
