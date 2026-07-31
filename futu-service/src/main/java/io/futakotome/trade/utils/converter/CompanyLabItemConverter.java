@@ -9,9 +9,11 @@ import java.lang.reflect.Type;
 public class CompanyLabItemConverter implements JsonDeserializer<CompanyLabItem> {
     @Override
     public CompanyLabItem deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-        JsonObject j = jsonElement.getAsJsonObject().deepCopy();
-        String fieldTypeStr = CompanyProfileFieldType.getName(j.get("fieldType").getAsInt());
-        j.addProperty("fieldTypeStr", fieldTypeStr);
-        return new Gson().fromJson(j, CompanyLabItem.class);
+        JsonObject j = jsonElement.getAsJsonObject();
+        String fieldType = j.get("fieldType").getAsString();
+        String fieldTypeStr = CompanyProfileFieldType.getName(fieldType);
+        String name = j.get("name").getAsString();
+        String value = j.get("value").getAsString();
+        return new CompanyLabItem(name, value, fieldType, fieldTypeStr);
     }
 }

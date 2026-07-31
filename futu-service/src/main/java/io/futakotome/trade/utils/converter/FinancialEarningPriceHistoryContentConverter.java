@@ -11,7 +11,7 @@ public class FinancialEarningPriceHistoryContentConverter implements JsonDeseria
     @Override
     public FinancialEarningPriceHistoryContent deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
         JsonObject j = jsonElement.getAsJsonObject().deepCopy();
-        String financialTypeStr = FinancialType.getName(j.get("financialType").getAsInt());
+        String financialTypeStr = FinancialType.getName(j.get("financialType").getAsString());
         j.addProperty("financialTypeStr", financialTypeStr);
         String pubTypeStr = EarningsPubTimeType.getName(j.get("pubType").getAsInt());
         j.addProperty("pubTypeStr", pubTypeStr);

@@ -4,16 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum CompanyProfileFieldType {
-    UNKNOWN(-1, "未知"),
-    TEXT(0, "文本"),
-    LINK(1, "链接"),
-    INDEPENDENT(2, "独立标题");
+    UNKNOWN("-1", "未知"),
+    TEXT("CompanyProfileFieldType_SourceText", "文本"),
+    LINK("CompanyProfileFieldType_LinkType", "链接"),
+    INDEPENDENT("CompanyProfileFieldType_IndependentTitle", "独立标题");
 
-    private final Integer code;
+    private final String code;
     private final String name;
-    private static final Map<Integer, String> MAP = new HashMap<>();
+    private static final Map<String, String> MAP = new HashMap<>();
 
-    CompanyProfileFieldType(Integer code, String name) {
+    CompanyProfileFieldType(String code, String name) {
         this.code = code;
         this.name = name;
     }
@@ -24,11 +24,11 @@ public enum CompanyProfileFieldType {
         }
     }
 
-    public static String getName(Integer code) {
+    public static String getName(String code) {
         return MAP.getOrDefault(code, "无此值");
     }
 
-    public Integer getCode() {
+    public String getCode() {
         return code;
     }
 

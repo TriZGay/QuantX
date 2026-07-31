@@ -12,8 +12,8 @@ public class ScreenDateConverter implements JsonDeserializer<ScreenDateContent> 
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         Integer date = jsonObject.get("date").getAsInt();
         String periodText = jsonObject.get("periodText").getAsString();
-        Integer financialType = jsonObject.get("financialType").getAsInt();
+        String financialType = jsonObject.get("financialType").getAsString();
         String finTypeStr = FinancialType.getName(financialType);
-        return new ScreenDateContent(date, periodText, financialType, finTypeStr);
+        return null;
     }
 }

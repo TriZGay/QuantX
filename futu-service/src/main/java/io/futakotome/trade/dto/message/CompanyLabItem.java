@@ -7,8 +7,15 @@ import io.futakotome.trade.utils.converter.CompanyLabItemConverter;
 public class CompanyLabItem {
     private String name; // 标签名
     private String value; // 标签对应信息
-    private Integer fieldType; // 标签类型
+    private String fieldType; // 标签类型
     private String fieldTypeStr;
+
+    public CompanyLabItem(String name, String value, String fieldType, String fieldTypeStr) {
+        this.name = name;
+        this.value = value;
+        this.fieldType = fieldType;
+        this.fieldTypeStr = fieldTypeStr;
+    }
 
     public String getName() {
         return name;
@@ -26,11 +33,11 @@ public class CompanyLabItem {
         this.value = value;
     }
 
-    public Integer getFieldType() {
+    public String getFieldType() {
         return fieldType;
     }
 
-    public void setFieldType(Integer fieldType) {
+    public void setFieldType(String fieldType) {
         this.fieldType = fieldType;
     }
 
