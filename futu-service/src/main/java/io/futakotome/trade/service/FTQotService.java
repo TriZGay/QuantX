@@ -1516,7 +1516,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         QotGetIndicatorList.Request request = QotGetIndicatorList.Request.newBuilder()
                 .setC2S(c2sBuilder.build()).build();
         int seqNo = qot.getIndicatorList(request);
-        LOGGER.info("查询指标列表.searchKey={},seq={}", req.getSearchKey(), seqNo);
+        LOGGER.info("查询指标列表.searchKey={},langType={},searchMode={},seq={}", req.getSearchKey(), req.getLangType(), req.getSearchMode(), seqNo);
     }
 
     @Override

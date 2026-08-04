@@ -85,6 +85,7 @@ public class QuantxWsController {
     public static final String DIVIDEND_CALENDAR = "/dividend_calendar";
     public static final String ECONOMIC_CALENDAR = "/economic_calendar";
     public static final String EARNINGS_BEAT_RANK = "/earnings_beat_rank";
+    public static final String INDICTOR_LIST = "/indictor_list";
     //ma
     public static final String MA5_URI = "/ma5";
     public static final String MA10_URI = "/ma10";
