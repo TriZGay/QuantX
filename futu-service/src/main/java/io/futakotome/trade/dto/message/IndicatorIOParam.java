@@ -1,6 +1,6 @@
 package io.futakotome.trade.dto.message;
 
-public class IndicatorOutputParam {
+public class IndicatorIOParam {
     private Integer index;
     private String name;
     private Integer type;

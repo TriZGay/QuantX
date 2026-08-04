@@ -5,8 +5,8 @@ import java.util.List;
 public class IndicatorInfo {
     private String shortName;
     private String fullName;
-    private List<IndicatorInputParam> inputs;
-    private List<IndicatorOutputParam> outputs;
+    private List<IndicatorIOParam> inputs;
+    private List<IndicatorIOParam> outputs;
     private String script;
 
     public String getShortName() {
@@ -25,19 +25,19 @@ public class IndicatorInfo {
         this.fullName = fullName;
     }
 
-    public List<IndicatorInputParam> getInputs() {
+    public List<IndicatorIOParam> getInputs() {
         return inputs;
     }
 
-    public void setInputs(List<IndicatorInputParam> inputs) {
+    public void setInputs(List<IndicatorIOParam> inputs) {
         this.inputs = inputs;
     }
 
-    public List<IndicatorOutputParam> getOutputs() {
+    public List<IndicatorIOParam> getOutputs() {
         return outputs;
     }
 
-    public void setOutputs(List<IndicatorOutputParam> outputs) {
+    public void setOutputs(List<IndicatorIOParam> outputs) {
         this.outputs = outputs;
     }
 
