@@ -439,6 +439,10 @@ public class QuantxWsController {
                 //盈利超预期排名
                 EarningsBeatRankWsMessage req = (EarningsBeatRankWsMessage) messageClz;
                 ftQotService.syncEarningsBeatRank(req);
+            } else if (messageClz.getType().equals(MessageType.INDICATOR_LIST)) {
+                //获取指标列表
+                IndicatorListWsMessage req = (IndicatorListWsMessage) messageClz;
+                ftQotService.syncIndicatorList(req);
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
