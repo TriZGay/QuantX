@@ -18,6 +18,15 @@ public class KLMessageContent {
     private Double pe;
     private Double changeRate;
     private Double timestamp;
+    private Double hpVolume; //高精度成交量
+
+    public Double getHpVolume() {
+        return hpVolume;
+    }
+
+    public void setHpVolume(Double hpVolume) {
+        this.hpVolume = hpVolume;
+    }
 
     public Integer getMarket() {
         return market;

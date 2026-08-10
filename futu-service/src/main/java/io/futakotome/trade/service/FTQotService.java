@@ -1502,6 +1502,70 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    public void syncIndicatorCalc(IndicatorCalcWsMessage req) {
+        List<QotRequestIndicatorCalc.IndicatorInputItem> inputs = req.getInputs().stream().map(input -> {
+            QotRequestIndicatorCalc.IndicatorInputItem.Builder inputItemBuilder = QotRequestIndicatorCalc.IndicatorInputItem.newBuilder()
+                    .setIndex(input.getIndex());
+            if (Objects.nonNull(input.getValue())) {
+                inputItemBuilder.setValue(input.getValue());
+            }
+            return inputItemBuilder.build();
+        }).collect(Collectors.toList());
+        List<QotCommon.KLine> kLines = req.getData().getkLine().stream().map(k -> QotCommon.KLine.newBuilder()
+                .setHighPrice(k.getHighPrice())
+                .setLowPrice(k.getLowPrice())
+                .setOpenPrice(k.getOpenPrice())
+                .setClosePrice(k.getClosePrice())
+                .build()).collect(Collectors.toList());
+        QotRequestIndicatorCalc.C2S.Builder c2sBuilder = QotRequestIndicatorCalc.C2S.newBuilder()
+                .setShortName(req.getShortName())
+                .setLangType(QotCommon.IndicatorLangType.forNumber(req.getLangType()))
+                .setData(QotRequestIndicatorCalc.IndicatorCalcData.newBuilder()
+                        .setSecurity(QotCommon.Security.newBuilder()
+                                .setMarket(req.getData().getSecurity().getMarket())
+                                .setCode(req.getData().getSecurity().getCode())
+                                .build())
+                        .setKlType(QotCommon.KLType.forNumber(req.getData().getKlType()))
+                        .addAllKLine(kLines)
+                        .build())
+                .addAllInputs(inputs);
+        if (Objects.nonNull(req.getNum())) {
+            c2sBuilder.setNum(req.getNum());
+        }
+        QotRequestIndicatorCalc.Request request = QotRequestIndicatorCalc.Request.newBuilder()
+                .setC2S(c2sBuilder.build()).build();
+        int seqNo = qot.requestIndicatorCalc(request);
+        LOGGER.info("发起指标计算请求.langType={},shortName={},seq={}", req.getLangType(), req.getShortName(), seqNo);
+    }
+
+    @Override
+    public void onReply_RequestIndicatorCalc(FTAPI_Conn client, int nSerialNo, QotRequestIndicatorCalc.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "发起指标计算请求失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("请求序列号:" + nSerialNo + "发起指标计算请求失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("发起指标计算请求", ftGrpcReturnResult);
+                IndicatorCalcResult content = GSON.fromJson(ftGrpcReturnResult.getS2c(), IndicatorCalcResult.class);
+                eventPublisher.publishEvent(new IndicatorCalcUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "发起指标计算请求结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "发起指标计算请求结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "发起指标计算请求有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncIndicatorList(IndicatorListWsMessage req) {
         QotGetIndicatorList.C2S.Builder c2sBuilder = QotGetIndicatorList.C2S.newBuilder();
         if (Objects.nonNull(req.getLangType())) {
