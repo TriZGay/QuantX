@@ -1502,6 +1502,34 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         }
     }
 
+    @Override
+    public void onPush_PushIndicatorCalc(FTAPI_Conn client, QotPushIndicatorCalc.Response rsp) {
+        if (rsp.getRetType() != 0) {
+            String notify = "推送指标计算结果失败:" + rsp.getRetMsg();
+            LOGGER.error(notify, new IllegalArgumentException("推送指标计算结果失败,code:" + rsp.getRetType()));
+            sendNotifyMessage(notify);
+        } else {
+            try {
+                FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
+                logFTResult("推送指标计算结果", ftGrpcReturnResult);
+                IndicatorCalcResult content = GSON.fromJson(ftGrpcReturnResult.getS2c(), IndicatorCalcResult.class);
+                eventPublisher.publishEvent(new IndicatorCalcResultUpdateEvent(content));
+            } catch (InvalidProtocolBufferException e) {
+                String errMsg = "推送指标计算结果失败.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (NullPointerException e) {
+                String errMsg = "推送指标计算结果空指针.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            } catch (Exception e) {
+                String errMsg = "推送指标计算结果有其他错误.";
+                LOGGER.error(errMsg, e);
+                sendNotifyMessage(errMsg);
+            }
+        }
+    }
+
     public void syncIndicatorCalc(IndicatorCalcWsMessage req) {
         List<QotRequestIndicatorCalc.IndicatorInputItem> inputs = req.getInputs().stream().map(input -> {
             QotRequestIndicatorCalc.IndicatorInputItem.Builder inputItemBuilder = QotRequestIndicatorCalc.IndicatorInputItem.newBuilder()
@@ -1548,7 +1576,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
             try {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 logFTResult("发起指标计算请求", ftGrpcReturnResult);
-                IndicatorCalcResult content = GSON.fromJson(ftGrpcReturnResult.getS2c(), IndicatorCalcResult.class);
+                IndicatorCalcReqResult content = GSON.fromJson(ftGrpcReturnResult.getS2c(), IndicatorCalcReqResult.class);
                 eventPublisher.publishEvent(new IndicatorCalcUpdateEvent(content));
             } catch (InvalidProtocolBufferException e) {
                 String errMsg = "发起指标计算请求结果失败.";

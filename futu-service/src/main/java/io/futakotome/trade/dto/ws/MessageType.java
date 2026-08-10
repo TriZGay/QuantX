@@ -84,6 +84,7 @@ public enum MessageType {
     EARNINGS_BEAT_RANK,
     INDICATOR_LIST,
     INDICATOR_CALC,
+    INDICATOR_CALC_RESULT,
 
     RT_BASIC_QUOTE,
     RT_KL,

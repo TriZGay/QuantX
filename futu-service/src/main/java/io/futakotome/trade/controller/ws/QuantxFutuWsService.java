@@ -298,6 +298,10 @@ public class QuantxFutuWsService {
         this.template.convertAndSend(BROKER_PREFIX + INDICTOR_CALC_REQ, message);
     }
 
+    public void sendIndicatorCalcResult(IndicatorCalcResultWsMessage message) {
+        this.template.convertAndSend(BROKER_PREFIX + INDICATOR_CALC_PUSH, message);
+    }
+
     //ma
     public void sendRtMa5(RTMaMessage maMessage) {
         this.template.convertAndSend(BROKER_PREFIX + MA5_URI, maMessage);

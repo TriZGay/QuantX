@@ -1,19 +1,19 @@
 package io.futakotome.trade.event;
 
-import io.futakotome.trade.dto.message.IndicatorCalcResult;
+import io.futakotome.trade.dto.message.IndicatorCalcReqResult;
 
 public class IndicatorCalcUpdateEvent {
-    private IndicatorCalcResult content;
+    private IndicatorCalcReqResult content;
 
-    public IndicatorCalcUpdateEvent(IndicatorCalcResult content) {
+    public IndicatorCalcUpdateEvent(IndicatorCalcReqResult content) {
         this.content = content;
     }
 
-    public IndicatorCalcResult getContent() {
+    public IndicatorCalcReqResult getContent() {
         return content;
     }
 
-    public void setContent(IndicatorCalcResult content) {
+    public void setContent(IndicatorCalcReqResult content) {
         this.content = content;
     }
 }
