@@ -2881,7 +2881,6 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
         QotGetInstitutionList.Request request = QotGetInstitutionList.Request.newBuilder()
                 .setC2S(c2sBuilder.build()).build();
         int seqNo = qot.getInstitutionList(request);
-        CacheManager.put(String.valueOf(seqNo), req.getMarket());
         LOGGER.info("市场{},查询机构列表.seq={}", MarketType.getName(req.getMarket()), seqNo);
     }
 
@@ -2896,8 +2895,7 @@ public class FTQotService implements FTSPI_Conn, FTSPI_Qot, InitializingBean {
                 FTGrpcReturnResult ftGrpcReturnResult = GSON.fromJson(JsonFormat.printer().print(rsp), FTGrpcReturnResult.class);
                 logFTResult("查询机构列表", ftGrpcReturnResult);
                 InstitutionListContent content = GSON.fromJson(ftGrpcReturnResult.getS2c(), InstitutionListContent.class);
-                Integer market = (Integer) CacheManager.get(String.valueOf(nSerialNo));
-                eventPublisher.publishEvent(new InstitutionListUpdateEvent(market, content));
+                eventPublisher.publishEvent(new InstitutionListUpdateEvent(content));
             } catch (InvalidProtocolBufferException e) {
                 String errMsg = "查询机构列表结果失败.";
                 LOGGER.error(errMsg, e);
