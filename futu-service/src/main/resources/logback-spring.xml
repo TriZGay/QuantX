@@ -52,8 +52,9 @@
     </root>
 
     <root level="info">
-<!--        <appender-ref ref="file_info"/>-->
-<!--        <appender-ref ref="file_error"/>-->
-<!--        <appender-ref ref="logstash"/>-->
+        <!--        松开注释会归档到文件和logstash-->
+        <!--        <appender-ref ref="file_info"/>-->
+        <!--        <appender-ref ref="file_error"/>-->
+        <!--        <appender-ref ref="logstash"/>-->
     </root>
 </configuration>
